@@ -56,6 +56,7 @@ Compile Errors
 * array vs. arraylist confusion
 * unbalanced matching pairs
 * not all branches return
+* trying to override private/static
 * missing return statement
 * not all branches initialize
 * variable is statically null
