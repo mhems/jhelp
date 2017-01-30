@@ -10,24 +10,34 @@
   <property name="entry-class" value="JHelp"/>
   <property name="src.dir" location="src"/>
   <property name="build.dir" location="build"/>
+  <property name="lib.dir" location="lib"/>
   <property name="java-src.dir" location="${src.dir}/com/binghamton/jhelp"/>
   <property name="java-build.dir" location="${build.dir}/com/binghamton/jhelp"/>
   <property name="doc.dir" location="doc"/>
   <property name="javadoc.dir" location="${doc.dir}/api"/>
   <property name="target.dir" location="target"/>
 
+  <path id="lib.classpath">
+    <fileset dir="${lib.dir}" includes="*.jar"/>
+  </path>
+
   <path id="compile.classpath">
+    <path refid="lib.classpath"/>
     <pathelement location="${java-build.dir}"/>
   </path>
 
   <target name="antlr">
     <description>Builds recognizer from grammar files.</description>
-    <antlr4 target="">
-      <arg value="-o"/> <arg value="${java-src.dir}"/>
-      <arg value="-package"/> <arg value="${package}"/>
+    <java classname="org.antlr.v4.Tool" fork="true" failonerror="true" dir="${src.dir}">
+      <arg value="-o"/> <arg value="${java-src.dir}/antlr"/>
+      <arg value="-package"/> <arg value="${package}.antlr"/>
       <arg value="-visitor"/>
+      <arg value="-no-listener"/>
       <arg value="Java8.g4"/>
-    </antlr4>
+      <classpath>
+        <path refid="lib.classpath"/>
+      </classpath>
+    </java>
   </target>
 
   <target name="compile">
@@ -53,10 +63,10 @@
   <target name="api" >
     <description>Produce javadoc API documentation.</description>
     <javadoc destdir="${javadoc.dir}"
-             source="1.8" package="true">
-      <fileset dir="${java-src.dir}">
-        <include name="**.java"/>
-      </fileset>
+             source="1.8" package="true"
+             sourcepath="${src.dir}"
+             packagenames="${package}.*">
+      <classpath refid="compile.classpath"/>
     </javadoc>
   </target>
 

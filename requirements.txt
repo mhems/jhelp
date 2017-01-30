@@ -1,6 +1,6 @@
 javac8
 java8
-antlr4
+antlr4.6 (supplied in lib/)
 ant
 javadoc
 jar
