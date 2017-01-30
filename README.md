@@ -1,70 +1,28 @@
-Primary Design Goals
----
-* Extensible
-* Installable
-* Intuitive
+# JHelp
 
-Secondary Design Principles
 ---
-* Configurable
 
+The forgiving, error-detecting Java compiler for Java/programming beginners
 
-Style/Good Practice
 ---
-Those things that will compile but should be mentioned
-* `if (list.isEmpty() == true)` => unnecessary comparison
-* `if (list.size >0 && list != null)` => swap order of conditions
-* `if (str1 == str2)` => Objects should be compared with `equals`
-* `try { throw new Exception(); } catch(Exception e) { }` => do not catch what you throw
-* `throw new Exception();` => include message in exception
-* `throw new NullPointerException` => unnecessary throw
-* `return 5; doMore();` => unreachable statement
-* `throw new Exception(); doMore();` => unreachable statement
-* `i = i; ` => assignment has no effect
-* if (condition) { } else { foo(); }` => invert condition, drop else
-* if (condition) { foo(); } else { }` => drop empty else
-* `a = a + b` => `a += b`
-* prevent shadowing
-* missing access modifier
-* no package
-* use @Override
-* overloading instead of overriding
 
-CLI Usage
----
-Correct program but bad invocation of `javac` or `java`.
-* missing flags/flag arguments
-* malformed arguments
-* no changes since last save
-* not all files have been compiled
+JHelp is a Java 8 recognizer, meaning it strives to accept any valid Java8
+compilation unit while also rejecting invalid input. What sets jhelp apart from
+the far more complete `javac` is its error messages and detection
+categories. While the Java compiler provides decent, detailed error messages,
+they are verbiage sometimes intimidating to novice programmers. JHelp strives to
+provide a more digestable output that breaks down the errors with mor verbose
+explanations of not only what is wrong, but **why** it is wrong. As JHelp's
+output is binary, jhelp will invoke `javac` to actually compile the code if it
+is found to be correct. As is anticipated, if `jhelp` and `javac` disagree,
+`javac` output will be provided to the user as well.
 
-Compile Errors
----
-* Typo forgiveness
-* Undeclared variables
-* Variables not in scope
-* Uninitialized variables
-* Undeclared class
-* Undeclared method
-* missing import
-* type mismatch
-  * method arguments
-  * method return statements
-  * variable declaration vs. initialization
-  * comparsion
-  * arithmetic
-* array vs. arraylist confusion
-* unbalanced matching pairs
-* not all branches return
-* trying to override private/static
-* missing return statement
-* not all branches initialize
-* variable is statically null
-* accessing instance member from static context
-* malformed function declaration
-* malformed class declaration
-* malformed main method
-* code at top level
-* nested functions
-* local variables have modifiers
-* missing `new`
+`jhelp` offers such features as
+* typo detection
+* severe syntax errors typical of beginning (Java) programmers
+  * e.g. missing/mismatched braces, code outside of methods, methods outside of
+  classes
+* detailed explanation of type mismatches
+
+JHelp's parsing is powered by [ANTLR v4](http://www.antlr.org/) and the [Java 8
+antlr grammar](https://github.com/antlr/grammars-v4/tree/master/java8).
