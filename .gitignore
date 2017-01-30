@@ -1,5 +1,7 @@
 *~
 *.class
-*.jar
+target/jhelp.jar
 build
 target
+doc
+sandbox
