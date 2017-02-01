@@ -2,6 +2,8 @@ public class Stuff {
 
 }
 
+/*
+
 class FileLocation {
     final String filename;
     final int line;
@@ -80,6 +82,7 @@ class IfElseNode extends Statement {
 
 class AssertNode extends Statement {
     Expression condition;
+    Expression message;
 }
 
 class SwitchNode extends Statement {
@@ -104,8 +107,9 @@ class DoWhileNode extends Statement {
 }
 
 class ForNode extends Statement {
+    Statement[] initStatements;
     Expression condition;
-    Expression updateExpr;
+    Expression updateStatements;
     Variable[] vars;
     BlockNode body;
 }
@@ -145,7 +149,7 @@ class TryNode extends Statement {
 }
 
 class CatchBlockNode extends Statement {
-    Class[] exceptions;
+    Variable[] exceptions;
     BlockNode body;
 }
 
@@ -155,6 +159,11 @@ class SuperNode extends Expression {
 
 class ThisNode extends Expression {
     Class cls;
+}
+
+class MethodReferenceNode extends Expression {
+    Expression reference;
+    Identifier id;
 }
 
 class ConstructionNode extends Expression {
@@ -248,6 +257,7 @@ class MethodCallNode extends BinaryOperation {
 
 class LambdaExpressionNode extends Expression {
     Variable[] params;
+    Type returnType;
     BlockNode body;
 }
 
@@ -390,3 +400,4 @@ class PrimitiveType extends Type {
 class SymbolTable {
 
 }
+*/
