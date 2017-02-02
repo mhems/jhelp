@@ -7,7 +7,14 @@ import com.binghamton.jhelp.Token;
  */
 public abstract class ASTNode {
     private Token token;
-    private Token endToken; // ???
+
+    /**
+     * Construct a new ASTNode with underlying Token
+     * @param token the token of this ASTNode
+     */
+    public ASTNode(Token token) {
+	this.token = token;
+    }
 
     /**
      * Determines if this object is equivalent to other
@@ -16,8 +23,11 @@ public abstract class ASTNode {
      */
     @Override
     public boolean equals(Object other) {
-        // TODO
-        return true;
+	if (other instanceof ASTNode) {
+	    ASTNode node = (ASTNode)other;
+	    return token.equals(node.token);
+	}
+        return false;
     }
 
     /**
@@ -26,7 +36,6 @@ public abstract class ASTNode {
      */
     @Override
     public int hashCode() {
-        // TODO
-        return 0;
+        return token.hashCode();
     }
 }

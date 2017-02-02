@@ -42,28 +42,4 @@ public class Block extends ASTNode {
     public void addStatement(Statement stmt) {
         statements.add(stmt);
     }
-
-    /**
-     * Determines if this block is equivalent to another
-     * @param other the Object to compare against
-     * @return true iff this block is equivalent to `other`
-     */
-    @Override
-    public boolean equals(Object other) {
-        if (other instanceof Block) {
-            Block b = (Block)other;
-            return statements.equals(b.statements);
-        }
-        return false;
-    }
-
-    /**
-     * Determines the hash code of this block
-     * @return the hash code of this block
-     */
-    @Override
-    public int hashCode() {
-        return statements.hashCode();
-    }
-
 }

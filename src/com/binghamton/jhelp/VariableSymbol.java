@@ -1,8 +1,5 @@
 package com.binghamton.jhelp;
 
-import java.util.Set;
-import java.util.TreeSet;
-
 import com.binghamton.jhelp.ast.Expression;
 
 /**

@@ -4,11 +4,11 @@ package com.binghamton.jhelp;
  * A class representing a lexer token from a File-like object.
  */
 public class Token {
-    final FileBuffer fileBuffer;
-    final int line;
-    final int colStart;
-    final int colStop;
-    final String lexeme;
+    public final FileBuffer fileBuffer;
+    public final int line;
+    public final int colStart;
+    public final int colStop;
+    public final String lexeme;
 
     /**
      * Construct Token object
