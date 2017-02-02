@@ -14,6 +14,7 @@ public class InterfaceSymbol extends Symbol {
 
     /**
      * Constructs a new named interface symbol
+     * @param id the name of the interface
      */
     public InterfaceSymbol(String id) {
         super(id);

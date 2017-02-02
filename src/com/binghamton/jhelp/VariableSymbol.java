@@ -15,6 +15,8 @@ public class VariableSymbol extends Symbol {
 
     /**
      * Constructs a new named, typed variable
+     * @param id the name of the variable
+     * @param type the type of the variable
      */
     public VariableSymbol(String id, Type type) {
         this(id, type, null, null);
@@ -22,6 +24,9 @@ public class VariableSymbol extends Symbol {
 
     /**
      * Constructs a new named, typed, scoped variable
+     * @param id the name of the variable
+     * @param type the type of the variable
+     * @param scope the scope the variable
      */
     public VariableSymbol(String id, Type type, Scope scope) {
         this(id, type, scope, null);
@@ -29,6 +34,10 @@ public class VariableSymbol extends Symbol {
 
     /**
      * Constructs a new named, typed, scoped variable with initial value
+     * @param id the name of the variable
+     * @param type the type of the variable
+     * @param scope the scope the variable
+     * @param value the value the variable
      */
     public VariableSymbol(String id, Type type, Scope scope, Expression value) {
         super(id);

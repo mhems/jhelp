@@ -39,7 +39,7 @@ public class MethodSymbol extends Symbol {
 
     /**
      * Gets the return type of this method
-     * @param the return type of this method
+     * @return the return type of this method
      */
     public Type getReturnType() {
         return returnType;
@@ -47,7 +47,7 @@ public class MethodSymbol extends Symbol {
 
     /**
      * Gets the scope of this method
-     * @param the scope of this method
+     * @return the scope of this method
      */
     public Scope getScope() {
         return scope;

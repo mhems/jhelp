@@ -14,8 +14,8 @@ public class FileBuffer {
 
     /**
      * Bring the contents of the file `filename` into buffer
-     * @paramn filename the name of the file whose contents are to be read
-     * @throws IOExcpetion if any IO exception occurs doing reading
+     * @param filename the name of the file whose contents are to be read
+     * @throws IOException if any IO exception occurs doing reading
      */
     public FileBuffer(String filename) throws IOException {
         this.filename = filename;
