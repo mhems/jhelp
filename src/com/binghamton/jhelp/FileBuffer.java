@@ -62,4 +62,28 @@ public class FileBuffer {
         }
         return tmp;
     }
+
+    /**
+     * Determines if this object is equivalent to other
+     * @param other the other object to compare against
+     * @return true iff this is equivalent to other
+     */
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof FileBuffer) {
+            FileBuffer b = (FileBuffer)other;
+            return filename.equals(b.filename) &&
+                lines.equals(b.lines);
+        }
+        return false;
+    }
+
+    /**
+     * Determines the hash code of this object
+     * @return the hash code of this object
+     */
+    @Override
+    public int hashCode() {
+        return filename.hashCode() ^ lines.hashCode();
+    }
 }
