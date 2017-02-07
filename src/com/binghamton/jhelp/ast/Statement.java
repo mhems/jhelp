@@ -5,4 +5,8 @@ package com.binghamton.jhelp.ast;
  */
 public abstract class Statement extends ASTNode {
 
+    public Statement() {
+        // empty statement i.e. ';'
+    }
+
 }

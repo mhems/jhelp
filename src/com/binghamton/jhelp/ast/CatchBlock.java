@@ -8,6 +8,11 @@ import java.util.ArrayList;
 /**
  * A class representing a Java catch block
  */
-public class CatchBlock extends Block {
-    private List<VariableSymbol> exceptions = new ArrayList<>();
+public class CatchBlock extends Statement {
+    private List<VariableDeclaration> exceptions = new ArrayList<>();
+    private Block body;
+
+    public CatchBlock() {
+
+    }
 }

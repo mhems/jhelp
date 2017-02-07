@@ -9,6 +9,8 @@ import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 import com.binghamton.jhelp.antlr.Java8Lexer;
 import com.binghamton.jhelp.antlr.Java8Parser;
@@ -47,8 +49,15 @@ public class JHelp {
         Lexer lexer = new Java8Lexer(inputStream);
         CommonTokenStream tokenStream = new CommonTokenStream(lexer);
         Java8Parser parser = new Java8Parser(tokenStream);
-        ParserRuleContext root = parser.compilationUnit();
-        System.out.println(root.toStringTree(parser));
+
+        // ParserRuleContext root = parser.compilationUnit();
+        // System.out.println(root.toStringTree(parser));
+        System.out.println("----------------------------------------");
+
+        ParseTree tree = parser.compilationUnit();
+        ParseTreeWalker walker = new ParseTreeWalker();
+        MyListener listener = new MyListener();
+        walker.walk(listener, tree);
     }
 
     private static void process(String filename)

@@ -9,6 +9,5 @@ public enum UnaryOperator {
     INCREMENT,
     PRE_INCREMENT,
     DECREMENT,
-    PRE_DECREMENT,
-    CAST
+    PRE_DECREMENT
 }

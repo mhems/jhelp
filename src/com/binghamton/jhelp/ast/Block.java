@@ -1,14 +1,37 @@
 package com.binghamton.jhelp.ast;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.ArrayList;
 
 /**
  * Class representing a scope-delimiting block,
  * i.e. { ... }
  */
 public class Block extends ASTNode {
-    private List<Statement> statements = new ArrayList<>();
+    private List<Statement> statements;
+
+    /**
+     * Construct an empty block
+     */
+    public Block() {
+        statements = new ArrayList<Statement>();
+    }
+
+    /**
+     * Construct a block comprised of a single statement
+     */
+    public Block(Statement statement) {
+        this();
+        statements.add(statement);
+    }
+
+    /**
+     * Construct a block
+     * @param statements the statements comprising this block
+     */
+    public Block(List<Statement> statements) {
+        this.statements = statements;
+    }
 
     /**
      * Gets the statements within this block
@@ -33,6 +56,14 @@ public class Block extends ASTNode {
      */
     public int size() {
         return statements.size();
+    }
+
+    /**
+     * Determines if this block has no statements
+     * @return true iff this block has no statements
+     */
+    public boolean isEmpty() {
+        return size() == 0;
     }
 
     /**

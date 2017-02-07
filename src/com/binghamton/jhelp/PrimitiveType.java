@@ -10,5 +10,6 @@ public enum PrimitiveType {
     INT,
     LONG,
     FLOAT,
-    DOUBLE
+    DOUBLE,
+    BOOLEAN
 }

@@ -53,6 +53,17 @@ Total lexer+parser time 30844ms.
  */
 grammar Java8;
 
+@header {
+    package com.binghamton.jhelp;
+    import java.util.ArrayList;
+    import java.util.List;
+}
+
+@parser::members {
+
+}
+
+
 /*
  * Productions from §3 (Lexical Structure)
  */
@@ -80,22 +91,22 @@ primitiveType
 	|	annotation* 'boolean'
 	;
 
-numericType
-	:	integralType
-	|	floatingPointType
+numericType returns [PrimitiveType p]
+	:	i = integralType {$p = $i;}
+	|	f = floatingPointType {$p = $f;}
 	;
 
-integralType
-	:	'byte'
-	|	'short'
-	|	'int'
-	|	'long'
-	|	'char'
+integralType returns [PrimitiveType p]
+	:	t = 'byte' {$p = PrimitiveType.BYTE;}
+	|	t = 'short' {$p = PrimitiveType.SHORT;}
+	|	t = 'int' {$p = PrimitiveType.INT;}
+	|	t = 'long' {$p = PrimitiveType.LONG;}
+	|	t = 'char' {$p = PrimitiveType.CHAR;}
 	;
 
-floatingPointType
-	:	'float'
-	|	'double'
+floatingPointType returns [PrimitiveType p]
+	:	'float' {$p = PrimitiveType.FLOAT;}
+	|	'double' {$p = PrimitiveType.DOUBLE;}
 	;
 
 referenceType
@@ -195,33 +206,33 @@ wildcardBounds
  * Productions from §6 (Names)
  */
 
-packageName
-	:	Identifier
-	|	packageName '.' Identifier
+packageName returns [String name]
+	:	id = Identifier { $name = $id.getText(); }
+	|	p = packageName '.' id = Identifier { $name = p + "." + $id.getText(); }
 	;
 
-typeName
-	:	Identifier
-	|	packageOrTypeName '.' Identifier
+typeName returns [String name]
+	:	id = Identifier { $name = $id.getText(); }
+	|	p = packageOrTypeName '.' id = Identifier { $name = p + "." + $id.getText(); }
 	;
 
-packageOrTypeName
-	:	Identifier
-	|	packageOrTypeName '.' Identifier
+packageOrTypeName returns [String name]
+	:	id = Identifier { $name = $id.getText(); }
+	|	p = packageOrTypeName '.' id = Identifier { $name = p + "." + $id.getText(); }
 	;
 
-expressionName
-	:	Identifier
-	|	ambiguousName '.' Identifier
+expressionName returns [String name]
+	:	id = Identifier { $name = $id.getText(); }
+	|	a = ambiguousName '.' id = Identifier { $name = a + "." + $id.getText(); }
 	;
 
-methodName
-	:	Identifier
+methodName returns [String name]
+	:	id = Identifier { $name = $id.getText(); }
 	;
 
-ambiguousName
-	:	Identifier
-	|	ambiguousName '.' Identifier
+ambiguousName returns [String name]
+	:	id = Identifier { $name = $id.getText(); }
+	|	a = ambiguousName '.' id = Identifier { $name = a + "." + $id.getText(); }
 	;
 
 /*
@@ -232,40 +243,49 @@ compilationUnit
 	:	packageDeclaration? importDeclaration* typeDeclaration* EOF
 	;
 
-packageDeclaration
-	:	packageModifier* 'package' Identifier ('.' Identifier)* ';'
+packageDeclaration returns [PackageStatement p]
+    locals [ List<Annotation> mods = new ArrayList<>(),
+             List<String> ids = new ArrayList<>()]
+	:	( m = packageModifier { $mods.add($m); })* 'package'
+        (id = Identifier {$ids.add($id);})
+        ('.' id = Identifier {$ids.add($id);})* ';'
+        { $p = new PackageStatement($ids, $mods)}
 	;
 
-packageModifier
-	:	annotation
+packageModifier returns [AnnotationStatement a]
+	:	an = annotation {$a = $an;}
 	;
 
-importDeclaration
-	:	singleTypeImportDeclaration
-	|	typeImportOnDemandDeclaration
-	|	singleStaticImportDeclaration
-	|	staticImportOnDemandDeclaration
+importDeclaration returns [ImportStatement i]
+	:   d = singleTypeImportDeclaration {$i = $d;}
+	|	d = typeImportOnDemandDeclaration {$i = $d;}
+	|	d = singleStaticImportDeclaration {$i = $d;}
+	|	d = staticImportOnDemandDeclaration {$i = $d;}
 	;
 
-singleTypeImportDeclaration
-	:	'import' typeName ';'
+singleTypeImportDeclaration returns [ImportStatement imp]
+	:	'import' t = typeName ';'
+        { $imp = new ImportStatement($t, false, false); }
 	;
 
-typeImportOnDemandDeclaration
-	:	'import' packageOrTypeName '.' '*' ';'
+typeImportOnDemandDeclaration returns [ImportStatement imp]
+	:	'import' p = packageOrTypeName '.' '*' ';'
+        {$imp = new ImportStatement($p, false, true);}
 	;
 
-singleStaticImportDeclaration
-	:	'import' 'static' typeName '.' Identifier ';'
+singleStaticImportDeclaration returns [ImportStatement imp]
+	:	'import' 'static' t = typeName '.' id = Identifier ';'
+        {$imp = new ImportStatement($t + '.' + $id, true, false);}
 	;
 
-staticImportOnDemandDeclaration
-	:	'import' 'static' typeName '.' '*' ';'
+staticImportOnDemandDeclaration returns [ImportStatement imp]
+	:	'import' 'static' t = typeName '.' '*' ';'
+        {$imp = new ImportStatement($t, true, true);}
 	;
 
-typeDeclaration
-	:	classDeclaration
-	|	interfaceDeclaration
+typeDeclaration returns [TypeDeclaraction t]
+	:	c = classDeclaration {$t = $c;}
+	|	i = interfaceDeclaration {$t = $i;}
 	|	';'
 	;
 
@@ -273,44 +293,56 @@ typeDeclaration
  * Productions from §8 (Classes)
  */
 
-classDeclaration
-	:	normalClassDeclaration
-	|	enumDeclaration
+classDeclaration returns [ClassNode c]
+	:	n = normalClassDeclaration {$c = $n;}
+	|	e = enumDeclaration {$c = $e;}
 	;
 
-normalClassDeclaration
-	:	classModifier* 'class' Identifier typeParameters? superclass? superinterfaces? classBody
+normalClassDeclaration returns [ClassNode c]
+    [locals List<Modifier> mods = new ArrayList<>()]
+	:	(m = classModifier {$mods.add($m);})* 'class' n = Identifier
+        (p = typeParameters)?
+        (sc = superclass)?
+        (si = superinterfaces)?
+        (b = classBody)
+        {$c = new ClassNode($mods, $n, $p, $sc, $si, $b);}
 	;
 
-classModifier
-	:	annotation
-	|	'public'
-	|	'protected'
-	|	'private'
-	|	'abstract'
-	|	'static'
-	|	'final'
-	|	'strictfp'
+classModifier returns [Modifier m]
+	:	a = annotation {$m = $a;}
+	|	'public' {$m = Modifier.PUBLIC;}
+	|	'protected' {$m = Modifier.PROTECTED;}
+	|	'private' {$m = Modifier.PRIVATE;}
+	|	'abstract' {$m = Modifier.ABSTRACT;}
+	|	'static' {$m = Modifier.STATIC;}
+	|	'final' {$m = Modifier.FINAL;}
+	|	'strictfp' {$m = Modifier.STRICT_FP;}
 	;
 
-typeParameters
-	:	'<' typeParameterList '>'
+typeParameters returns [List<String> l]
+	:	'<' t = typeParameterList '>' {$l = $t;}
 	;
 
-typeParameterList
-	:	typeParameter (',' typeParameter)*
+typeParameterList returns [List<String> l]
+    [locals List<String> ls = new ArrayList<>();]
+	:	(t = typeParameter {$ls.add($t);})
+        (',' t = typeParameter {$ls.add($t);})*
+        {$l = $ls;}
 	;
 
-superclass
-	:	'extends' classType
+superclass returns [String s]
+	:	'extends' c = classType {$s = $c;}
 	;
 
-superinterfaces
-	:	'implements' interfaceTypeList
+superinterfaces returns [List<String> l]
+	:	'implements' i = interfaceTypeList {$l = $i;}
 	;
 
-interfaceTypeList
-	:	interfaceType (',' interfaceType)*
+interfaceTypeList returns [List<String> s]
+    [locals List<String> ls = new ArrayList<>();]
+	:	(i = interfaceType {$ls.add($i);})
+        (',' i = interfaceType {$ls.add($i);})*
+        {$s = $ls;}
 	;
 
 classBody
@@ -336,15 +368,15 @@ fieldDeclaration
 	:	fieldModifier* unannType variableDeclaratorList ';'
 	;
 
-fieldModifier
-	:	annotation
-	|	'public'
-	|	'protected'
-	|	'private'
-	|	'static'
-	|	'final'
-	|	'transient'
-	|	'volatile'
+fieldModifier returns [ Modifier m]
+	:	a = annotation {$m = $a;}
+	|	'public' {$m = Modifier.PUBLIC;}
+	|	'protected' {$m = Modifier.PROTECTED;}
+	|	'private' {$m = Modifier.PRIVATE;}
+	|	'static' {$m = Modifier.STATIC;}
+	|	'final' {$m = Modifier.FINAL;}
+	|	'transient' {$m = Modifier.TRANSIENT;}
+	|	'volatile' {$m = Modifier.VOLATILE;}
 	;
 
 variableDeclaratorList
@@ -369,9 +401,9 @@ unannType
 	|	unannReferenceType
 	;
 
-unannPrimitiveType
-	:	numericType
-	|	'boolean'
+unannPrimitiveType returns [PrimitiveType t]
+	:	n = numericType {$t = $n;}
+	|	'boolean' {$t = PrimitiveType.BOOLEAN;}
 	;
 
 unannReferenceType
@@ -414,8 +446,8 @@ unannInterfaceType_lfno_unannClassOrInterfaceType
 	:	unannClassType_lfno_unannClassOrInterfaceType
 	;
 
-unannTypeVariable
-	:	Identifier
+unannTypeVariable returns [String s]
+	:	i = Identifier {$s = $i;}
 	;
 
 unannArrayType
@@ -428,17 +460,17 @@ methodDeclaration
 	:	methodModifier* methodHeader methodBody
 	;
 
-methodModifier
-	:	annotation
-	|	'public'
-	|	'protected'
-	|	'private'
-	|	'abstract'
-	|	'static'
-	|	'final'
-	|	'synchronized'
-	|	'native'
-	|	'strictfp'
+methodModifier returns [Modifier m]
+	:	a = annotation {$m = $a;}
+	|	'public' {$m = $Modifier.PUBLIC;}
+	|	'protected' {$m = $Modifier.PROTECTED;}
+	|	'private' {$m = Modifier.PRIVATE;}
+	|	'abstract' {$m = Modifier.ABSTRACT;}
+	|	'static' {$m = Modifier.STATIC;}
+	|	'final' {$m = Modifier.FINAL;}
+	|	'synchronized' {$m = Modifier.SYNCHRONIZED;}
+	|	'native' {$m = Modifier.NATIVE;}
+	|	'strictfp' {$m = Modifier.STRICT_FP;}
 	;
 
 methodHeader
@@ -446,86 +478,114 @@ methodHeader
 	|	typeParameters annotation* result methodDeclarator throws_?
 	;
 
-result
-	:	unannType
-	|	'void'
+result returns [Type t]
+	:	u = unannType {$t = $u;}
+	|	'void' {$t = Type.VOID;}
 	;
 
-methodDeclarator
-	:	Identifier '(' formalParameterList? ')' dims?
+methodDeclarator returns [MethodDeclaration m]
+	:	n = Identifier '(' p = formalParameterList? ')' d = dims?
+        {$m = new MethodDeclaration($n, $p, $d);}
 	;
 
-formalParameterList
-	:	formalParameters ',' lastFormalParameter
-	|	lastFormalParameter
+formalParameterList returns [List<VariableDeclaration> l]
+    [locals List<VariableDeclaration> ls = new ArrayList<>();]
+	:	(p = formalParameters {$ls.addAll($p);}) ','
+        (p2 = lastFormalParameter {$ls.add($p2);}) {$l = $ls;}
+	|   (l = lastFormalParameter {$ls.add($v);}) {$l = $ls;}
 	;
 
-formalParameters
-	:	formalParameter (',' formalParameter)*
-	|	receiverParameter (',' formalParameter)*
+formalParameters returns [List<VariableDeclaration> l]
+    [locals List<VariableDeclaration> ls = new ArrayList<>();]
+	:	(p = formalParameter {$ls.add($p);})
+        (',' f = formalParameter {$ls.add($f);})* {$l = $ls;}
+	|	(r = receiverParameter {$ls.add($r);})
+        (',' f = formalParameter {$ls.add($f);})* {$l = $ls;}
 	;
 
-formalParameter
-	:	variableModifier* unannType variableDeclaratorId
+formalParameter returns [VariableDeclaration v]
+    [locals List<Modifier> mods = new ArrayList<>();]
+	:	(m = variableModifier {$mods.add($m);})*
+        t = unannType n = variableDeclaratorId
+        {$v = new VariableDeclaration($n, $t, $mods, false);}
 	;
 
-variableModifier
-	:	annotation
-	|	'final'
+variableModifier returns [Modifier m]
+	:	a = annotation {$m = $a;}
+	|	'final' {$m = Modifier.FINAL;}
 	;
 
-lastFormalParameter
-	:	variableModifier* unannType annotation* '...' variableDeclaratorId
-	|	formalParameter
+lastFormalParameter returns [VariableDeclaration v]
+    [locals List<Modifier> mods = new ArrayList<>();]
+	:	(m = variableModifier {$mods.add($m);})*
+        t = unannType
+        (a = annotation {$mods.add($a);})*
+        '...'
+        n = variableDeclaratorId
+        {$v = new VariableDeclaration($n, $t, $mods, true);}
+	|	f = formalParameter {$v = $f;}
 	;
 
-receiverParameter
-	:	annotation* unannType (Identifier '.')? 'this'
+receiverParameter returns [VariableDeclaration v]
+    [locals List<Modifier> mods = new ArrayList<>();]
+	:	(m = annotation {$mods.add($m);})*
+        t = unannType
+        (i = Identifier '.')?
+        'this'
+        {$v = new VariableDeclaration($i + "." + "this", $t, $mods);}
 	;
 
-throws_
-	:	'throws' exceptionTypeList
+throws_ returns [List<Type> l]
+	:	'throws' e = exceptionTypeList {$l = $e;}
 	;
 
-exceptionTypeList
-	:	exceptionType (',' exceptionType)*
+exceptionTypeList returns [List<Type> l]
+    [locals List<Type> ls = new ArrayList<>();]
+	:	(e = exceptionType {$ls.add($e);})
+        (',' e = exceptionType {$ls.add($e);})*
+        {$l = $ls;}
 	;
 
-exceptionType
-	:	classType
-	|	typeVariable
+exceptionType returns [Type t]
+	:	c = classType {$t = $c;}
+	|	v = typeVariable {$t = $v;}
 	;
 
-methodBody
-	:	block
+methodBody returns [Block b]
+	:	body = block {$b = $body;}
 	|	';'
 	;
 
-instanceInitializer
-	:	block
+instanceInitializer returns [Block b]
+	:	body = block {$b = $body;}
 	;
 
-staticInitializer
-	:	'static' block
+staticInitializer returns [Block b]
+	:	'static' body = block {$b = $body;}
 	;
 
-constructorDeclaration
-	:	constructorModifier* constructorDeclarator throws_? constructorBody
+constructorDeclaration returns [MethodDeclaration m]
+    [local List<Modifier> mods = new ArrayList<>();]
+	:	(m = constructorModifier {$mods.add($m);})*
+        p = constructorDeclarator
+        t = throws_?
+        b = constructorBody
+        {$m = new MethodDeclaration();}
 	;
 
-constructorModifier
-	:	annotation
-	|	'public'
-	|	'protected'
-	|	'private'
+constructorModifier returns [Modifier m]
+	:	a = annotation {$m = $a;}
+	|	'public' {$m = Modifier.PUBLIC;}
+	|	'protected' {$m = Modifier.PROTECTED;}
+	|	'private' {$m = Modifier.PRIVATE;}
 	;
 
 constructorDeclarator
 	:	typeParameters? simpleTypeName '(' formalParameterList? ')'
 	;
 
-simpleTypeName
-	:	Identifier
+simpleTypeName returns [String s]
+	:	id = Identifier {$s = $id;}
 	;
 
 constructorBody
@@ -567,7 +627,7 @@ enumBodyDeclarations
  * Productions from §9 (Interfaces)
  */
 
-interfaceDeclaration
+interfaceDeclaration returns [InterfaceDeclaration d]
 	:	normalInterfaceDeclaration
 	|	annotationTypeDeclaration
 	;
@@ -576,18 +636,18 @@ normalInterfaceDeclaration
 	:	interfaceModifier* 'interface' Identifier typeParameters? extendsInterfaces? interfaceBody
 	;
 
-interfaceModifier
-	:	annotation
-	|	'public'
-	|	'protected'
-	|	'private'
-	|	'abstract'
-	|	'static'
-	|	'strictfp'
+interfaceModifier returns [Modifier m]
+	:	a = annotation {$m = $a;}
+	|	'public' {$m = Modifier.PUBLIC;}
+	|	'protected' {$m = Modifier.PROTECTED;}
+	|	'private' {$m = Modifier.PRIVATE;}
+	|	'abstract' {$m = Modifier.ABSTRACT;}
+	|	'static' {$m = Modifier.STATIC;}
+	|	'strictfp' {$m = Modifier.STRICT_FP;}
 	;
 
-extendsInterfaces
-	:	'extends' interfaceTypeList
+extendsInterfaces returns [List<String> l]
+	:	'extends' i = interfaceTypeList {$l = $i;}
 	;
 
 interfaceBody
@@ -602,28 +662,32 @@ interfaceMemberDeclaration
 	|	';'
 	;
 
-constantDeclaration
-	:	constantModifier* unannType variableDeclaratorList ';'
+constantDeclaration returns [VariableDeclaration v]
+    [locals List<Modifier> mods = new ArrayList<>();]
+	:	(m =constantModifier {$mods.add($m);})*
+        t = unannType
+        l = variableDeclaratorList ';'
+        {$v = new VariableDeclaration();}
 	;
 
-constantModifier
-	:	annotation
-	|	'public'
-	|	'static'
-	|	'final'
+constantModifier returns [Modifier m]
+	:	a = annotation {$m = $a;}
+	|	'public' {$m = Modifier.PUBLIC;}
+	|	'static' {$m = Modifier.STATIC;}
+	|	'final' {$m = Modifier.FINAL;}
 	;
 
 interfaceMethodDeclaration
 	:	interfaceMethodModifier* methodHeader methodBody
 	;
 
-interfaceMethodModifier
-	:	annotation
-	|	'public'
-	|	'abstract'
-	|	'default'
-	|	'static'
-	|	'strictfp'
+interfaceMethodModifier returns [Modifier m]
+	:	a = annotation {$m = $a;}
+	|	'public' {$m = Modifier.PUBLIC;}
+	|	'abstract' {$m = Modifier.ABSTRACT;}
+	|	'default' {$m = Modifier.DEFAULT;}
+	|	'static' {$m = Modifier.STATIC;}
+	|	'strictfp' {$m = Modifier.STRICT_FP;}
 	;
 
 annotationTypeDeclaration
@@ -646,10 +710,10 @@ annotationTypeElementDeclaration
 	:	annotationTypeElementModifier* unannType Identifier '(' ')' dims? defaultValue? ';'
 	;
 
-annotationTypeElementModifier
-	:	annotation
-	|	'public'
-	|	'abstract'
+annotationTypeElementModifier returns [Modifier m]
+	:	a = annotation {$m = $a;}
+	|	'public' {$m = Modifier.PUBLIC;}
+	|	'abstract' {$m = Modifier.ABSTRACT;}
 	;
 
 defaultValue
@@ -700,169 +764,198 @@ singleElementAnnotation
  * Productions from §10 (Arrays)
  */
 
-arrayInitializer
-	:	'{' variableInitializerList? ','? '}'
+arrayInitializer returns [ArrayDeclaration d]
+	:	'{' l = variableInitializerList? ','? '}'
+        {$d = new ArrayDeclaration($l);}
 	;
 
-variableInitializerList
-	:	variableInitializer (',' variableInitializer)*
+variableInitializerList returns [List<Expression> l]
+    [locals List<Expression> ls = new ArrayList<>();]
+	:	(i = variableInitializer {$ls.add($i);}
+        (',' v = variableInitializer {$ls.add($v);})*
+        {$l = $ls;}
 	;
 
 /*
  * Productions from §14 (Blocks and Statements)
  */
 
-block
-	:	'{' blockStatements? '}'
+block returns [Block b]
+	:	'{' s = blockStatements? '}' {$b = new  Block($s);}
 	;
 
-blockStatements
-	:	blockStatement blockStatement*
+blockStatements returns [List<Statement> l]
+    [locals List<Statement> ls = new ArrayList<>();]
+	:	(s = blockStatement {$ls.add($s);})
+        (b = blockStatement {$ls.add($b);})*
+        {$l = $ls;}
 	;
 
-blockStatement
-	:	localVariableDeclarationStatement
-	|	classDeclaration
-	|	statement
+blockStatement returns [Statement s]
+	:	d = localVariableDeclarationStatement {$s = $d;}
+	|	c = classDeclaration {$s = $c;}
+	|	st = statement {$s = $st;}
 	;
 
-localVariableDeclarationStatement
-	:	localVariableDeclaration ';'
+localVariableDeclarationStatement returns [VariableDeclaration v]
+	:	d = localVariableDeclaration ';' {$v = $d;}
 	;
 
-localVariableDeclaration
-	:	variableModifier* unannType variableDeclaratorList
+localVariableDeclaration returns [VariableDeclaration v]
+    [locals List<Modifier> mods = new ArrayList<>();)]
+	:	(m = variableModifier {$mods.add($m);})*
+        t = unannType
+        vl = variableDeclaratorList
+        {$v = new VariableDeclaration();}
 	;
 
-statement
-	:	statementWithoutTrailingSubstatement
-	|	labeledStatement
-	|	ifThenStatement
-	|	ifThenElseStatement
-	|	whileStatement
-	|	forStatement
+statement returns [Statement s]
+	:	st = statementWithoutTrailingSubstatement {$s = $st;}
+	|	st = labeledStatement {$s = $st;}
+	|	st = ifThenStatement {$s = $st;}
+	|	st = ifThenElseStatement {$s = $st;}
+	|	st = whileStatement {$s = $st;}
+	|	st = forStatement {$s = $st;}
 	;
 
-statementNoShortIf
-	:	statementWithoutTrailingSubstatement
-	|	labeledStatementNoShortIf
-	|	ifThenElseStatementNoShortIf
-	|	whileStatementNoShortIf
-	|	forStatementNoShortIf
+statementNoShortIf returns [Statement s]
+	:	st = statementWithoutTrailingSubstatement {$s = $st;}
+	|	st = labeledStatementNoShortIf {$s = $st;}
+	|	st = ifThenElseStatementNoShortIf {$s = $st;}
+	|	st = whileStatementNoShortIf {$s = $st;}
+	|	st = forStatementNoShortIf {$s = $st;}
 	;
 
-statementWithoutTrailingSubstatement
-	:	block
-	|	emptyStatement
-	|	expressionStatement
-	|	assertStatement
-	|	switchStatement
-	|	doStatement
-	|	breakStatement
-	|	continueStatement
-	|	returnStatement
-	|	synchronizedStatement
-	|	throwStatement
-	|	tryStatement
+statementWithoutTrailingSubstatement returns [Statement s]
+	:	st = block {$s = $st;}
+	|	st = emptyStatement {$s = $st;}
+	|	st = expressionStatement {$s = $st;}
+	|	st = assertStatement {$s = $st;}
+	|	st = switchStatement {$s = $st;}
+	|	st = doStatement {$s = $st;}
+	|	st = breakStatement {$s = $st;}
+	|	st = continueStatement {$s = $st;}
+	|	st = returnStatement {$s = $st;}
+	|	st = synchronizedStatement {$s = $st;}
+	|	st = throwStatement {$s = $st;}
+	|	st = tryStatement {$s = $st;}
 	;
 
-emptyStatement
-	:	';'
+emptyStatement returns [Statement s]
+	:	';' {$s = new Statement();}
 	;
 
-labeledStatement
-	:	Identifier ':' statement
+labeledStatement returns [LabelStatement ls]
+	:	id = Identifier ':' s = statement {$ls = new LabelStatement($id, $s);}
 	;
 
-labeledStatementNoShortIf
-	:	Identifier ':' statementNoShortIf
+labeledStatementNoShortIf returns [LabelStatement ls]
+	:	id = Identifier ':' s = statementNoShortIf {$ls = new LabelStatement($id, $s);}
 	;
 
-expressionStatement
-	:	statementExpression ';'
+expressionStatement returns [Expression e]
+	:	s = statementExpression ';' {$e = $s;}
 	;
 
-statementExpression
-	:	assignment
-	|	preIncrementExpression
-	|	preDecrementExpression
-	|	postIncrementExpression
-	|	postDecrementExpression
-	|	methodInvocation
-	|	classInstanceCreationExpression
+statementExpression returns [Expression e]
+	:	s = assignment {$e = $s;}
+	|	s = preIncrementExpression {$e = $s;}
+	|	s = preDecrementExpression {$e = $s;}
+	|	s = postIncrementExpression {$e = $s;}
+	|	s = postDecrementExpression {$e = $s;}
+	|	s = methodInvocation {$e = $s;}
+	|	s = classInstanceCreationExpression {$e = $s;}
 	;
 
-ifThenStatement
-	:	'if' '(' expression ')' statement
+ifThenStatement returns [IfElseStatement st]
+	:	'if' '(' e = expression ')' s = statement {$st = new IfElseStatement($e, $s);}
 	;
 
-ifThenElseStatement
-	:	'if' '(' expression ')' statementNoShortIf 'else' statement
+ifThenElseStatement returns [IfElseStatement st]
+	:	'if' '(' e = expression ')' t = statementNoShortIf 'else' el = statement
+        {$st = new IfElseStatement($e, $t, $el);}
 	;
 
-ifThenElseStatementNoShortIf
-	:	'if' '(' expression ')' statementNoShortIf 'else' statementNoShortIf
+ifThenElseStatementNoShortIf returns [IfElseStatement st]
+	:	'if' '(' e = expression ')' t = statementNoShortIf
+        'else' el = statementNoShortIf
+        {$st = new IfElseStatement($e, $t, $el);}
 	;
 
-assertStatement
-	:	'assert' expression ';'
-	|	'assert' expression ':' expression ';'
+assertStatement returns [AssertStatement st]
+	:	'assert' e = expression ';' {$st = new AssertStatement($e);}
+	|	'assert' e = expression ':' msg = expression ';'
+        {$st = new AssertStatement($e, $msg);}
 	;
 
-switchStatement
-	:	'switch' '(' expression ')' switchBlock
+switchStatement returns [SwitchStatement st]
+	:	'switch' '(' e = expression ')' b = switchBlock
+        {$st = new SwitchStatement($e, $b);}
 	;
 
-switchBlock
-	:	'{' switchBlockStatementGroup* switchLabel* '}'
+switchBlock returns [List<CaseBlock> ls]
+    [locals List<CaseBlock> blocks = new ArrayList<>();]
+	:	'{' (m = switchBlockStatementGroup {$blocks.add($m);})*
+            (l = switchLabel {$blocks.add($l);})* '}'
+        {$ls = $blocks;}
 	;
 
-switchBlockStatementGroup
-	:	switchLabels blockStatements
+switchBlockStatementGroup returns [CaseBlock b]
+	:	l = switchLabels b = blockStatements {$b = new CaseBlock($l, $b);}
 	;
 
-switchLabels
-	:	switchLabel switchLabel*
+switchLabels returns [List<Expression> ls]
+    [locals List<Expression> lbls = new ArrayList<>();]
+	:	(s = switchLabel {$lbls.add($s);})
+        (l = switchLabel {$lbls.add($l);})*
+        {$ls = $lbls;}
 	;
 
-switchLabel
-	:	'case' constantExpression ':'
-	|	'case' enumConstantName ':'
-	|	'default' ':'
+switchLabel returns [Expression e]
+	:	'case' c = constantExpression ':' {$e = $c;}
+	|	'case' en = enumConstantName ':' {$e = $en;}
+	|	'default' ':' {$e = DEFAULT;}
 	;
 
-enumConstantName
-	:	Identifier
+enumConstantName returns [String s]
+	:	id = Identifier {$s = $id;}
 	;
 
-whileStatement
-	:	'while' '(' expression ')' statement
+whileStatement returns [WhileStatement st]
+	:	'while' '(' c = expression ')' s = statement
+        {$st = new WhileStatement($c, $s);}
 	;
 
-whileStatementNoShortIf
-	:	'while' '(' expression ')' statementNoShortIf
+whileStatementNoShortIf returns [WhileStatement st]
+	:	'while' '(' c = expression ')' s = statementNoShortIf
+        {$st = new WhileStatement($c, $s);}
 	;
 
-doStatement
-	:	'do' statement 'while' '(' expression ')' ';'
+doStatement returns [WhileStatement st]
+	:	'do' s = statement 'while' '(' c = expression ')' ';'
+        {$st = new WhileStatement($c, $s);}
 	;
 
-forStatement
-	:	basicForStatement
-	|	enhancedForStatement
+forStatement returns [Statement st]
+	:	b = basicForStatement {$st = $b;}
+	|	e = enhancedForStatement {$st = $e;}
 	;
 
-forStatementNoShortIf
-	:	basicForStatementNoShortIf
-	|	enhancedForStatementNoShortIf
+forStatementNoShortIf returns [Statement st]
+	:	b = basicForStatementNoShortIf {$st = $e;}
+	|	e = enhancedForStatementNoShortIf {$st = $b;}
 	;
 
-basicForStatement
-	:	'for' '(' forInit? ';' expression? ';' forUpdate? ')' statement
+basicForStatement returns [ForStatement st]
+	:	'for' '(' i = forInit? ';' e = expression? ';' u = forUpdate? ')'
+        s = statement
+        {$st = new ForStatement($i, $e, $u, $s);}
 	;
 
-basicForStatementNoShortIf
-	:	'for' '(' forInit? ';' expression? ';' forUpdate? ')' statementNoShortIf
+basicForStatementNoShortIf returns [ForStatement st]
+	:	'for' '(' i = forInit? ';' e = expression? ';' u = forUpdate? ')'
+        s = statementNoShortIf
+        {$st = new ForStatement($i, $e, $u, $s);}
 	;
 
 forInit
@@ -874,78 +967,118 @@ forUpdate
 	:	statementExpressionList
 	;
 
-statementExpressionList
-	:	statementExpression (',' statementExpression)*
+statementExpressionList returns [List<Expression> ls]
+    [locals List<Expression> ups = new ArrayList<>();]
+	:	(s = statementExpression {$ups.add($s);})
+        (',' e = statementExpression {$ups.add($e);})*
+        { $ls = $ups;}
 	;
 
-enhancedForStatement
-	:	'for' '(' variableModifier* unannType variableDeclaratorId ':' expression ')' statement
+enhancedForStatement returns [ForEachStatement st]
+    [locals List<Modifier> mods = new ArrayList<>(),
+            VariableDeclaration v;]
+	:	'for' '(' (m = variableModifier {$mods.add($m)})*
+                   t = unannType
+                   n = variableDeclaratorId ':'
+                   e = expression ')'
+                   s = statement
+        {$v = new VariableDeclaration($n, $t, $mods);
+         $st = new ForEachStatement($v, $e, $s);}
 	;
 
-enhancedForStatementNoShortIf
-	:	'for' '(' variableModifier* unannType variableDeclaratorId ':' expression ')' statementNoShortIf
+enhancedForStatementNoShortIf returns [ForEachStatement st]
+    [locals List<Modifier> mods = new ArrayList<>(),
+            VariableDeclaration v;]
+	:	'for' '(' (m = variableModifier {$mods.add($m);})*
+                   t = unannType
+                   n = variableDeclaratorId ':'
+                   e = expression ')'
+                   s = statementNoShortIf
+        {$v = new VariableDeclaration($n, $t, $mods);
+         $st = new ForEachStatement($v, $e, $s);}
 	;
 
-breakStatement
-	:	'break' Identifier? ';'
+breakStatement returns [BreakStatement st]
+	:	'break' id = Identifier? ';' {$st = new BreakStatement($id);}
 	;
 
-continueStatement
-	:	'continue' Identifier? ';'
+continueStatement returns [ContinueStatement st]
+	:	'continue' id = Identifier? ';' {$st = new ContinueStatement($id);}
 	;
 
-returnStatement
-	:	'return' expression? ';'
+returnStatement returns [ReturnStatement st]
+	:	'return' e = expression? ';' {$st = new ReturnStatement($e);}
 	;
 
-throwStatement
-	:	'throw' expression ';'
+throwStatement returns [ThrowStatement st]
+	:	'throw' e = expression ';' {$st = new ThrowStatement($e);}
 	;
 
-synchronizedStatement
-	:	'synchronized' '(' expression ')' block
+synchronizedStatement returns [SynchronizedStatement st]
+	:	'synchronized' '(' e = expression ')' b = block
+        {$st = new SynchronizedStatement($e, $b);}
 	;
 
-tryStatement
-	:	'try' block catches
-	|	'try' block catches? finally_
-	|	tryWithResourcesStatement
+tryStatement return [TryCatchStatement st]
+	:	'try' t = block cs = catches {$st = new TryCatchStatement($t, $cs);}
+	|	'try' t = block cs = catches? f = finally_
+        {$st = new TryCatchStatement($t, $cs, $f);}
+	|	t = tryWithResourcesStatement {$st = $t;}
 	;
 
-catches
-	:	catchClause catchClause*
+catches return [List<CatchBlock> l]
+    [locals List<CatchBlock> ls = new ArrayList<>();]
+	:	f = catchClause {$ls.add($f);} (c = catchClause {$ls.add($c);})*
+        {$l = $ls;}
 	;
 
-catchClause
-	:	'catch' '(' catchFormalParameter ')' block
+catchClause return [CatchBlock b]
+	:	'catch' '(' p = catchFormalParameter ')' body = block
+        {$b = new CatchBlock($p, $body);}
 	;
 
-catchFormalParameter
-	:	variableModifier* catchType variableDeclaratorId
+catchFormalParameter return [VariableDeclaration d]
+    [locals List<Modifier> mods = new ArrayList<>();]
+	:	(m = variableModifier {$mods.add($m);})*
+        t = catchType
+        n = variableDeclaratorId
+        {$d = new VariableDeclaration($n, $t, $mods);}
 	;
 
-catchType
-	:	unannClassType ('|' classType)*
+catchType return [List<Type> l]
+    [locals List<Type> types = new ArrayList<>();]
+	:	(u = unannClassType {$types.add($u);})
+        ('|' c = classType {$types.add($c);})*
+        {$l = $types;}
 	;
 
-finally_
-	:	'finally' block
+finally_ return [Block b]
+	:	'finally' body = block {$b = $body;}
 	;
 
-tryWithResourcesStatement
-	:	'try' resourceSpecification block catches? finally_?
+tryWithResourcesStatement return [TryCatchStatement st]
+	:	'try' r = resourceSpecification b = block c = catches? f = finally_?
+        {$st = new TryCatchStatement($r, $b, $c, $f);}
 	;
 
-resourceSpecification
-	:	'(' resourceList ';'? ')'
+resourceSpecification return [List<Statement> lst]
+	:	'(' l = resourceList ';'? ')' {$lst = $l;}
 	;
 
-resourceList
-	:	resource (';' resource)*
+resourceList return [List<Statement> lst]
+    [locals List<VariableDeclartion> vars = new ArrayList<>();]
+	:	r = resource {$vars.add($r);}
+        (';' re = resource {$vars.add($re);})*
+        {$lst = $vars;}
 	;
 
-resource
-	:	variableModifier* unannType variableDeclaratorId '=' expression
+resource return [VariableDeclaration d]
+    [locals List<Modifier> mods = new ArrayList<>();]
+	:	(m = variableModifier {$mods.add($m);})*
+        t = unannType
+        n = variableDeclaratorId '='
+        e = expression
+    {$d = new VariableDeclaration($n, $t, $mods, $e);}
 	;
 
 /*
@@ -960,102 +1093,117 @@ primary
 		)*
 	;
 
-primaryNoNewArray
-	:	literal
-	|	typeName ('[' ']')* '.' 'class'
+primaryNoNewArray returns [Expression e]
+	:	p = literal {$e = $p;}
+	|	p = typeName ('[' ']')* '.' 'class'
 	|	'void' '.' 'class'
 	|	'this'
-	|	typeName '.' 'this'
-	|	'(' expression ')'
-	|	classInstanceCreationExpression
-	|	fieldAccess
-	|	arrayAccess
-	|	methodInvocation
-	|	methodReference
+	|	p = typeName '.' 'this'
+	|	'(' p = expression ')' {$e = $p;}
+	|	p = classInstanceCreationExpression {$e = $p;}
+	|	p = fieldAccess {$e = $p;}
+	|	p = arrayAccess {$e = $p;}
+	|	p = methodInvocation {$e = $p;}
+	|	p = methodReference {$e = $p;}
 	;
 
 primaryNoNewArray_lf_arrayAccess
 	:
 	;
 
-primaryNoNewArray_lfno_arrayAccess
-	:	literal
+primaryNoNewArray_lfno_arrayAccess returns [Expression e]
+	:	p = literal {$e = $p;}
 	|	typeName ('[' ']')* '.' 'class'
 	|	'void' '.' 'class'
 	|	'this'
 	|	typeName '.' 'this'
-	|	'(' expression ')'
-	|	classInstanceCreationExpression
-	|	fieldAccess
-	|	methodInvocation
-	|	methodReference
+	|	'(' p = expression ')' {$e = $p;}
+	|	p = classInstanceCreationExpression {$e = $p;}
+	|	p = fieldAccess {$e = $p;}
+	|	p = methodInvocation {$e = $p;}
+	|	p = methodReference {$e = $p;}
 	;
 
-primaryNoNewArray_lf_primary
-	:	classInstanceCreationExpression_lf_primary
-	|	fieldAccess_lf_primary
-	|	arrayAccess_lf_primary
-	|	methodInvocation_lf_primary
-	|	methodReference_lf_primary
+primaryNoNewArray_lf_primary returns [Expression e]
+	:	p = classInstanceCreationExpression_lf_primary {$e = $p;}
+	|	p = fieldAccess_lf_primary {$e = $p;}
+	|	p = arrayAccess_lf_primary {$e = $p;}
+	|	p = methodInvocation_lf_primary {$e = $p;}
+	|	p = methodReference_lf_primary {$e = $p;}
 	;
 
 primaryNoNewArray_lf_primary_lf_arrayAccess_lf_primary
 	:
 	;
 
-primaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primary
-	:	classInstanceCreationExpression_lf_primary
-	|	fieldAccess_lf_primary
-	|	methodInvocation_lf_primary
-	|	methodReference_lf_primary
+primaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primary returns [Expression e]
+	:	p = classInstanceCreationExpression_lf_primary {$e = $p;}
+	|	p = fieldAccess_lf_primary {$e = $p;}
+	|	p = methodInvocation_lf_primary {$e = $p;}
+	|	p = methodReference_lf_primary {$e = $p;}
 	;
 
-primaryNoNewArray_lfno_primary
-	:	literal
+primaryNoNewArray_lfno_primary returns [Expression e]
+	:	p = literal {$e = $p;}
 	|	typeName ('[' ']')* '.' 'class'
 	|	unannPrimitiveType ('[' ']')* '.' 'class'
 	|	'void' '.' 'class'
 	|	'this'
 	|	typeName '.' 'this'
-	|	'(' expression ')'
-	|	classInstanceCreationExpression_lfno_primary
-	|	fieldAccess_lfno_primary
-	|	arrayAccess_lfno_primary
-	|	methodInvocation_lfno_primary
-	|	methodReference_lfno_primary
+	|	'(' p = expression ')' {$e = $p;}
+	|	p = classInstanceCreationExpression_lfno_primary {$e = $p;}
+	|	p = fieldAccess_lfno_primary {$e = $p;}
+	|	p = arrayAccess_lfno_primary {$e = $p;}
+	|	p = methodInvocation_lfno_primary {$e = $p;}
+	|	p = methodReference_lfno_primary {$e = $p;}
 	;
 
 primaryNoNewArray_lfno_primary_lf_arrayAccess_lfno_primary
 	:
 	;
 
-primaryNoNewArray_lfno_primary_lfno_arrayAccess_lfno_primary
-	:	literal
+primaryNoNewArray_lfno_primary_lfno_arrayAccess_lfno_primary returns [Expression e]
+	:	p = literal {$e = $p;}
 	|	typeName ('[' ']')* '.' 'class'
 	|	unannPrimitiveType ('[' ']')* '.' 'class'
 	|	'void' '.' 'class'
 	|	'this'
 	|	typeName '.' 'this'
-	|	'(' expression ')'
-	|	classInstanceCreationExpression_lfno_primary
-	|	fieldAccess_lfno_primary
-	|	methodInvocation_lfno_primary
-	|	methodReference_lfno_primary
+	|	'(' p = expression ')' {$e = $p;}
+	|	p = classInstanceCreationExpression_lfno_primary {$e = $p;}
+	|	p = fieldAccess_lfno_primary {$e = $p;}
+	|	p = methodInvocation_lfno_primary {$e = $p;}
+	|	p = methodReference_lfno_primary {$e = $p;}
 	;
 
-classInstanceCreationExpression
-	:	'new' typeArguments? annotation* Identifier ('.' annotation* Identifier)* typeArgumentsOrDiamond? '(' argumentList? ')' classBody?
-	|	expressionName '.' 'new' typeArguments? annotation* Identifier typeArgumentsOrDiamond? '(' argumentList? ')' classBody?
-	|	primary '.' 'new' typeArguments? annotation* Identifier typeArgumentsOrDiamond? '(' argumentList? ')' classBody?
+classInstanceCreationExpression returns [ConstructionExpression e]
+	:	'new' t = typeArguments? a = annotation* id = Identifier
+        ('.' a2 = annotation* id2 = Identifier)* targs = typeArgumentsOrDiamond?
+        '(' l = argumentList? ')' b = classBody?
+	|	name = expressionName '.' 'new' t = typeArguments? a = annotation*
+        id = Identifier targs = typeArgumentsOrDiamond?
+        '(' l = argumentList? ')' b = classBody?
+	|	p = primary '.' 'new' t = typeArguments? a = annotation* id = Identifier
+        targs = typeArgumentsOrDiamond?
+        '(' l = argumentList? ')' b = classBody?
 	;
 
-classInstanceCreationExpression_lf_primary
-	:	'.' 'new' typeArguments? annotation* Identifier typeArgumentsOrDiamond? '(' argumentList? ')' classBody?
+classInstanceCreationExpression_lf_primary returns [ConstructionExpression e]
+	:	'.' 'new' t = typeArguments? a = annotation* id = Identifier
+        targs = typeArgumentsOrDiamond?
+        '(' l = argumentList? ')'
+        b = classBody?
 	;
 
-classInstanceCreationExpression_lfno_primary
-	:	'new' typeArguments? annotation* Identifier ('.' annotation* Identifier)* typeArgumentsOrDiamond? '(' argumentList? ')' classBody?
-	|	expressionName '.' 'new' typeArguments? annotation* Identifier typeArgumentsOrDiamond? '(' argumentList? ')' classBody?
+classInstanceCreationExpression_lfno_primary returns [ConstructionExpression e]
+	:	'new' t = typeArguments? a = annotation* id = Identifier
+        ('.' a2 = annotation* id2 = Identifier)*
+        targs = typeArgumentsOrDiamond?
+        '(' l = argumentList? ')' b = classBody?
+	|	name = expressionName '.' 'new' t = typeArguments? a = annotation*
+        id =Identifier
+        targs = typeArgumentsOrDiamond?
+        '(' l = argumentList? ')' b = classBody?
 	;
 
 typeArgumentsOrDiamond
@@ -1063,90 +1211,132 @@ typeArgumentsOrDiamond
 	|	'<' '>'
 	;
 
-fieldAccess
-	:	primary '.' Identifier
-	|	'super' '.' Identifier
+fieldAccess returns [AccessExpression e]
+	:	p = primary '.' id = Identifier
+        {$e = new AccessExpression($p, $id);}
+	|	'super' '.' id = Identifier
+        {$e = new AccessExpression(Expression.SuperExpression, $id);}
+	|	t = typeName '.' 'super' '.' id = Identifier
+	;
+
+fieldAccess_lf_primary returns [AccessExpression e]
+	:	'.' id = Identifier {$e = new AccessExpression(null, $id);}
+	;
+
+fieldAccess_lfno_primary returns [AccessExpression e]
+	:	'super' '.' id = Identifier
+        {$e = new AccessExpression(Expression.SuperExpression, $id);}
 	|	typeName '.' 'super' '.' Identifier
 	;
 
-fieldAccess_lf_primary
-	:	'.' Identifier
-	;
-
-fieldAccess_lfno_primary
-	:	'super' '.' Identifier
-	|	typeName '.' 'super' '.' Identifier
-	;
-
-arrayAccess
-	:	(	expressionName '[' expression ']'
-		|	primaryNoNewArray_lfno_arrayAccess '[' expression ']'
+arrayAccess returns [ArrayAccessExpression e]
+	:	(	(n = expressionName '[' i = expression ']'
+                {$e = new ArrayAccessExpression($n, $i);})
+		|	(p = primaryNoNewArray_lfno_arrayAccess '[' i = expression ']'
+                {$e = new ArrayAccessExpression($p, $i);})
 		)
-		(	primaryNoNewArray_lf_arrayAccess '[' expression ']'
+		(	p = primaryNoNewArray_lf_arrayAccess '[' i = expression ']'
 		)*
 	;
 
-arrayAccess_lf_primary
-	:	(	primaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primary '[' expression ']'
+arrayAccess_lf_primary returns [ArrayAccessExpression e]
+	:	(	(p = primaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primary
+           '[' i = expression ']' {$e = new ArrayAccessExpression($p, $i);})
 		)
 		(	primaryNoNewArray_lf_primary_lf_arrayAccess_lf_primary '[' expression ']'
 		)*
 	;
 
-arrayAccess_lfno_primary
-	:	(	expressionName '[' expression ']'
-		|	primaryNoNewArray_lfno_primary_lfno_arrayAccess_lfno_primary '[' expression ']'
+arrayAccess_lfno_primary returns [ArrayAccessExpression e]
+	:	(	(name = expressionName '[' i = expression ']'
+                {$e = new ArrayAccessExpression($name, $i);})
+		|	(p = primaryNoNewArray_lfno_primary_lfno_arrayAccess_lfno_primary
+                '[' i = expression ']'
+                {$e = new ArrayAccessExpression($p, $i);})
 		)
 		(	primaryNoNewArray_lfno_primary_lf_arrayAccess_lfno_primary '[' expression ']'
 		)*
 	;
 
-methodInvocation
-	:	methodName '(' argumentList? ')'
-	|	typeName '.' typeArguments? Identifier '(' argumentList? ')'
-	|	expressionName '.' typeArguments? Identifier '(' argumentList? ')'
-	|	primary '.' typeArguments? Identifier '(' argumentList? ')'
-	|	'super' '.' typeArguments? Identifier '(' argumentList? ')'
-	|	typeName '.' 'super' '.' typeArguments? Identifier '(' argumentList? ')'
+methodInvocation returns [CallExpression e]
+	:	n = methodName '(' a = argumentList? ')'
+        {$e = new CallExpression($n, $a);}
+	|	n = typeName '.' t = typeArguments? id = Identifier '(' a = argumentList? ')'
+        {$e = new CallExpression($id, $a);}
+	|	n = expressionName '.' t = typeArguments? id = Identifier '(' a = argumentList? ')'
+        {$e = new CallExpression($id, $a);}
+	|	p = primary '.' t = typeArguments?
+        id = Identifier '(' a = argumentList? ')'
+        {$e = new CallExpression($p, $a);}
+	|	'super' '.' t = typeArguments? id = Identifier '(' a = argumentList? ')'
+        {$e = new CallExpression($id, $a);}
+	|	n = typeName '.' 'super' '.' t = typeArguments?
+        id = Identifier '(' a = argumentList? ')'
+        {$e = new CallExpression($id, $a);}
 	;
 
-methodInvocation_lf_primary
-	:	'.' typeArguments? Identifier '(' argumentList? ')'
+methodInvocation_lf_primary returns [CallExpression e]
+	:	'.' t = typeArguments? id = Identifier '(' a = argumentList? ')'
+        {$e = new CallExpression($id, $a);}
 	;
 
-methodInvocation_lfno_primary
-	:	methodName '(' argumentList? ')'
-	|	typeName '.' typeArguments? Identifier '(' argumentList? ')'
-	|	expressionName '.' typeArguments? Identifier '(' argumentList? ')'
-	|	'super' '.' typeArguments? Identifier '(' argumentList? ')'
-	|	typeName '.' 'super' '.' typeArguments? Identifier '(' argumentList? ')'
+methodInvocation_lfno_primary returns [CallExpression e]
+	:	n = methodName '(' a = argumentList? ')'
+        {$e = new CallExpression($n, $a);}
+	|	n = typeName '.' t = typeArguments?
+        id = Identifier '(' a = argumentList? ')'
+        {$e = new CallExpression($id, $a);}
+	|	n = expressionName '.' t = typeArguments?
+        id = Identifier '(' a = argumentList? ')'
+        {$e = new CallExpression($id, $a);}
+	|	'super' '.' t = typeArguments? id = Identifier '(' a = argumentList? ')'
+        {$e = new CallExpression($id, $a);}
+	|	n = typeName '.' 'super' '.' t = typeArguments?
+        id = Identifier '(' a = argumentList? ')'
+        {$e = new CallExpression($id, $a);}
 	;
 
-argumentList
-	:	expression (',' expression)*
+argumentList returns [List<Expression> l]
+    [locals List<Expression> ls = new ArrayList<>();]
+	:	(e = expression {$ls.add($e);})
+        (',' ex = expression {$ls.add($ex);})* {$l = $ls;}
 	;
 
-methodReference
-	:	expressionName '::' typeArguments? Identifier
-	|	referenceType '::' typeArguments? Identifier
-	|	primary '::' typeArguments? Identifier
-	|	'super' '::' typeArguments? Identifier
-	|	typeName '.' 'super' '::' typeArguments? Identifier
-	|	classType '::' typeArguments? 'new'
-	|	arrayType '::' 'new'
+methodReference returns [MethodReferenceExpression e]
+	:	n = expressionName '::' t = typeArguments? id = Identifier
+        {$e = new MethodReferenceExpression($n, $id);}
+	|	r = referenceType '::' t = typeArguments? id = Identifier
+        {$e = new MethodReferenceExpression($r, $id);}
+	|	p = primary '::' t = typeArguments? id = Identifier
+        {$e = new MethodReferenceExpression($p, $id);}
+	|	'super' '::' t = typeArguments? id = Identifier
+        {$e = new MethodReferenceExpression(Expression.SuperExpression, $id);}
+	|	n = typeName '.' 'super' '::' t = typeArguments? id = Identifier
+        {$e = new MethodReferenceExpression(Expression.SuperExpression, $id);}
+	|	c = classType '::' t = typeArguments? 'new'
+        {$e = new MethodReferenceExpression($c);}
+	|	a = arrayType '::' 'new'
+        {$e = new MethodReferenceExpression($a);}
 	;
 
-methodReference_lf_primary
-	:	'::' typeArguments? Identifier
+methodReference_lf_primary returns [MethodReferenceExpression e]
+	:	'::' t = typeArguments? id = Identifier
+        {$e = new MethodReferenceExpression($id);}
 	;
 
-methodReference_lfno_primary
-	:	expressionName '::' typeArguments? Identifier
-	|	referenceType '::' typeArguments? Identifier
-	|	'super' '::' typeArguments? Identifier
-	|	typeName '.' 'super' '::' typeArguments? Identifier
-	|	classType '::' typeArguments? 'new'
-	|	arrayType '::' 'new'
+methodReference_lfno_primary returns [MethodReferenceExpression e]
+	:	n = expressionName '::' t = typeArguments? id = Identifier
+        {$e = new MethodReferenceExpression($n, $id);}
+	|	r = referenceType '::' t = typeArguments? id = Identifier
+        {$e = new MethodReferenceExpression($r, $id);}
+	|	'super' '::' t = typeArguments? id = Identifier
+        {$e = new MethodReferenceExpression(Expression.SuperExpression, $id);}
+	|	n = typeName '.' 'super' '::' t = typeArguments? id = Identifier
+        {$e = new MethodReferenceExpression($n, $id);}
+	|	c = classType '::' t = typeArguments? 'new'
+        {$e = new MethodReferenceExpression($c);}
+	|	a = arrayType '::' 'new'
+        {$e = new MethodReferenceExpression($a);}
 	;
 
 arrayCreationExpression
@@ -1164,181 +1354,220 @@ dimExpr
 	:	annotation* '[' expression ']'
 	;
 
-constantExpression
-	:	expression
+constantExpression returns [Expression e]
+	:	ex = expression {$e = $ex;}
 	;
 
-expression
-	:	lambdaExpression
-	|	assignmentExpression
+expression returns [Expression e]
+	:	l = lambdaExpression {$e = $l;}
+	|	a = assignmentExpression {$e = $a;}
 	;
 
-lambdaExpression
-	:	lambdaParameters '->' lambdaBody
+lambdaExpression returns [LambdaExpression e]
+	:	p = lambdaParameters '->' b = lambdaBody
+        {$e = new LambdaExpression($p, $b);}
 	;
 
-lambdaParameters
-	:	Identifier
-	|	'(' formalParameterList? ')'
-	|	'(' inferredFormalParameterList ')'
+lambdaParameters returns [List<VariableDeclaration> l]
+    [locals List<VariableDeclaration> vars = new ArrayList<>();]
+	:	id = Identifier {$vars.add(new VariableDeclaration($id)); $l = $vars;}
+	|	'(' p = formalParameterList? ')' {$l = $p;}
+	|	'(' i = inferredFormalParameterList ')' {$l = $i;}
 	;
 
-inferredFormalParameterList
-	:	Identifier (',' Identifier)*
+inferredFormalParameterList returns [List<VariableDeclaration> l]
+    [locals List<VariableDeclaration> vars = new ArrayList<>();]
+	:	(id = Identifier {$vars.add(new VariableDeclaration($id));})
+        (',' i = Identifier {$vars.add(new VariableDeclaration($i));})*
+        {$l = $vars;}
 	;
 
-lambdaBody
-	:	expression
-	|	block
+lambdaBody returns [Block b]
+	:	e = expression {$b = new Block($e);}
+	|	body = block {$b = $body;}
 	;
 
-assignmentExpression
-	:	conditionalExpression
-	|	assignment
+assignmentExpression returns [AssignmentExpression e]
+	:	c = conditionalExpression {$e = $c;}
+	|	a = assignment {$e = $a;}
 	;
 
-assignment
-	:	leftHandSide assignmentOperator expression
+assignment returns [AssignmentExpression e]
+	:	l = leftHandSide op = assignmentOperator r = expression
+        {e = new AssignmentExpression($l, $op, $r);}
 	;
 
-leftHandSide
-	:	expressionName
-	|	fieldAccess
-	|	arrayAccess
+leftHandSide returns [Expression e]
+	:	n = expressionName {$e = $n;}
+	|	a = fieldAccess {$e = $a;}
+	|	a = arrayAccess {$e = $a;}
 	;
 
-assignmentOperator
-	:	'='
-	|	'*='
-	|	'/='
-	|	'%='
-	|	'+='
-	|	'-='
-	|	'<<='
-	|	'>>='
-	|	'>>>='
-	|	'&='
-	|	'^='
-	|	'|='
+assignmentOperator returns [AssignmentOperator op]
+	:	'=' {$op = AssignmentOperator.EQUALS}
+	|	'*=' {$op = AssignmentOperator.MULTIPLICATION}
+	|	'/=' {$op = AssignmentOperator.DIVISION}
+	|	'%=' {$op = AssignmentOperator.MODULUS}
+	|	'+=' {$op = AssignmentOperator.ADDITION}
+	|	'-=' {$op = AssignmentOperator.SUBTRACTION}
+	|	'<<=' {$op = AssignmentOperator.LEFT_SHIFT}
+	|	'>>=' {$op = AssignmentOperator.RIGHT_SHIFT}
+	|	'>>>=' {$op = AssignmentOperator.RIGHT_LOGICAL_SHIFT}
+	|	'&=' {$op = AssignmentOperator.BITWISE_AND}
+	|	'^=' {$op = AssignmentOperator.BITWISE_XOR}
+	|	'|=' {$op = AssignmentOperator.BITWISE_OR}
 	;
 
-conditionalExpression
-	:	conditionalOrExpression
-	|	conditionalOrExpression '?' expression ':' conditionalExpression
+conditionalExpression returns [Expression e]
+	:	c = conditionalOrExpression {$e = $c;}
+	|	c = conditionalOrExpression '?' i = expression ':' el = conditionalExpression
+        {$e = new TernaryExpression($c, $i, $el);}
 	;
 
-conditionalOrExpression
-	:	conditionalAndExpression
-	|	conditionalOrExpression '||' conditionalAndExpression
+conditionalOrExpression returns [BinaryExpression e]
+	:	c = conditionalAndExpression {$e = $c;}
+	|	c1 = conditionalOrExpression '||' c2 = conditionalAndExpression
+        {$e = new BinaryExpression($c1, BinaryOperator.OR, $c2);}
 	;
 
-conditionalAndExpression
-	:	inclusiveOrExpression
-	|	conditionalAndExpression '&&' inclusiveOrExpression
+conditionalAndExpression returns [BinaryExpression e]
+	:	i = inclusiveOrExpression {$e = $i;}
+	|	l = conditionalAndExpression '&&' r = inclusiveOrExpression
+        {$e = new BinaryExpression($l, BinaryOperator.AND, $r);}
 	;
 
-inclusiveOrExpression
-	:	exclusiveOrExpression
-	|	inclusiveOrExpression '|' exclusiveOrExpression
+inclusiveOrExpression returns [BinaryExpression e]
+	:	ex = exclusiveOrExpression {$e = $ex;}
+	|	l = inclusiveOrExpression '|' r = exclusiveOrExpression
+        {$e = new BinaryExpression($l, BinaryOperator.BITWISE_OR, $r);}
 	;
 
-exclusiveOrExpression
-	:	andExpression
-	|	exclusiveOrExpression '^' andExpression
+exclusiveOrExpression returns [BinaryExpression e]
+	:	ex = andExpression {$e = $ex;}
+	|	l = exclusiveOrExpression '^' r = andExpression
+        {$e = new BinaryExpression($l, BinaryOperator.BITWISE_XOR, $r);}
 	;
 
-andExpression
-	:	equalityExpression
-	|	andExpression '&' equalityExpression
+andExpression returns [BinaryExpression e]
+	:	ex = equalityExpression {$e = $ex;}
+	|	l = andExpression '&' r = equalityExpression
+        {$e = new BinaryExpression($l, BinaryOperator.BITWISE_AND, $r);}
 	;
 
-equalityExpression
-	:	relationalExpression
-	|	equalityExpression '==' relationalExpression
-	|	equalityExpression '!=' relationalExpression
+equalityExpression returns [BinaryExpression e]
+	:	ex = relationalExpression {$e = $ex;}
+	|	l = equalityExpression '==' r = relationalExpression
+        {$e = new BinaryExpression($l, BinaryOperator.EQUALITY, $r);}
+	|	l = equalityExpression '!=' r = relationalExpression
+        {$e = new BinaryExpression($l, BinaryOperator.INEQUALITY, $r);}
 	;
 
-relationalExpression
-	:	shiftExpression
-	|	relationalExpression '<' shiftExpression
-	|	relationalExpression '>' shiftExpression
-	|	relationalExpression '<=' shiftExpression
-	|	relationalExpression '>=' shiftExpression
-	|	relationalExpression 'instanceof' referenceType
+relationalExpression returns [BinaryExpression e]
+	:	ex = shiftExpression {$e = $ex;}
+	|	l = relationalExpression '<' r = shiftExpression
+        {$e = new BinaryExpression($l, BinaryOperator.LESS_THAN, $r);}
+	|	l = relationalExpression '>' r = shiftExpression
+        {$e = new BinaryExpression($l, BinaryOperator.GREATER_THAN, $r);}
+	|	l = relationalExpression '<=' r = shiftExpression
+        {$e = new BinaryExpression($l, BinaryOperator.LESS_THAN_OR_EQUAL, $r);}
+	|	l = relationalExpression '>=' r = shiftExpression
+        {$e = new BinaryExpression($l, BinaryOperator.GREATER_THAN_OR_EQUAL, $r);}
+	|	l = relationalExpression 'instanceof' r = referenceType
+        {$e = new BinaryExpression($l, BinaryOperator.INSTANCE_OF, $r);}
 	;
 
-shiftExpression
-	:	additiveExpression
-	|	shiftExpression '<' '<' additiveExpression
-	|	shiftExpression '>' '>' additiveExpression
-	|	shiftExpression '>' '>' '>' additiveExpression
+shiftExpression returns [BinaryExpression e]
+	:	ex = additiveExpression {$e = $ex;}
+	|	l = shiftExpression '<' '<' r = additiveExpression
+        {$e = new BinaryExpression($l, BinaryOperator.LEFT_SHIFT, $r);}
+	|	l = shiftExpression '>' '>' r = additiveExpression
+        {$e = new BinaryExpression($l, BinaryOperator.RIGHT_SHIFT, $r);}
+	|	l = shiftExpression '>' '>' '>' r = additiveExpression
+        {$e = new BinaryExpression($l, BinaryOperator.RIGHT_LOGICAL_SHIFT, $r);}
 	;
 
-additiveExpression
-	:	multiplicativeExpression
-	|	additiveExpression '+' multiplicativeExpression
-	|	additiveExpression '-' multiplicativeExpression
+additiveExpression returns [BinaryExpression e]
+	:	ex = multiplicativeExpression {$e = $ex;}
+        {$e = new BinaryExpression($l, , $r);}
+	|	l = additiveExpression '+' r = multiplicativeExpression
+        {$e = new BinaryExpression($l, BinaryOperator.ADDITION, $r);}
+	|	l = additiveExpression '-' r = multiplicativeExpression
+        {$e = new BinaryExpression($l, BinaryOperator.SUBTRACTION, $r);}
 	;
 
-multiplicativeExpression
-	:	unaryExpression
-	|	multiplicativeExpression '*' unaryExpression
-	|	multiplicativeExpression '/' unaryExpression
-	|	multiplicativeExpression '%' unaryExpression
+multiplicativeExpression returns [Expression e]
+	:	ex = unaryExpression {$e = $ex;}
+	|	l = multiplicativeExpression '*' r = unaryExpression
+        {$e = new BinaryExpression($l, BinaryOperator.MULTIPLACATION, $r);}
+	|	l = multiplicativeExpression '/' r = unaryExpression
+        {$e = new BinaryExpression($l, BinaryOperator.DIVISION, $r);}
+	|	l - multiplicativeExpression '%' r = unaryExpression
+        {$e = new BinaryExpression($l, BinaryOperator.MODULUS, $r);}
 	;
 
-unaryExpression
-	:	preIncrementExpression
-	|	preDecrementExpression
-	|	'+' unaryExpression
-	|	'-' unaryExpression
-	|	unaryExpressionNotPlusMinus
+unaryExpression returns [UnaryExpression e]
+	:	ex = preIncrementExpression {$e = $ex;}
+	|	ex = preDecrementExpression {$e = $ex;}
+	|	'+' ex = unaryExpression {$e = $ex;}
+	|	'-' ex = unaryExpression
+        {$e = new UnaryExpression($ex, UnaryOperator.NEGATION);}
+	|	ex = unaryExpressionNotPlusMinus {$e = $ex;}
 	;
 
-preIncrementExpression
-	:	'++' unaryExpression
+preIncrementExpression returns [UnaryExpression e]
+	:	'++' ex = unaryExpression
+        {$e = new UnaryExpression($ex, UnaryOperator.PRE_INCREMENT);}
 	;
 
-preDecrementExpression
-	:	'--' unaryExpression
+preDecrementExpression returns [UnaryExpression e]
+	:	'--' ex = unaryExpression
+        {$e = new UnaryExpression($ex, UnaryOperator.PRE_DECREMENT);}
 	;
 
-unaryExpressionNotPlusMinus
-	:	postfixExpression
-	|	'~' unaryExpression
-	|	'!' unaryExpression
-	|	castExpression
+unaryExpressionNotPlusMinus returns [Expression e]
+	:	ex = postfixExpression {$e = $ex;}
+	|	'~' ex = unaryExpression
+        {$e = new UnaryExpression($ex, UnaryOperator.BITWISE_NEGATION);}
+	|	'!' ex = unaryExpression
+        {$e = new UnaryExpression($ex, UnaryOperator.NEGATIION);}
+	|	ex = castExpression {$e = $ex;}
 	;
 
-postfixExpression
-	:	(	primary
-		|	expressionName
+postfixExpression returns [UnaryExpression e]
+	:	(	p = primary
+		|	n = expressionName
 		)
-		(	postIncrementExpression_lf_postfixExpression
-		|	postDecrementExpression_lf_postfixExpression
+		(	op1 = postIncrementExpression_lf_postfixExpression
+		|	op2 = postDecrementExpression_lf_postfixExpression
 		)*
 	;
 
-postIncrementExpression
-	:	postfixExpression '++'
+postIncrementExpression returns [UnaryExpression e]
+	:	ex = postfixExpression '++'
+        {$e = new UnaryExpression($ex, UnaryOperator.INCREMENT);}
 	;
 
-postIncrementExpression_lf_postfixExpression
-	:	'++'
+postIncrementExpression_lf_postfixExpression returns [UnaryOperator op]
+	:	'++' {$op = UnaryOperator.INCREMENT;}
 	;
 
-postDecrementExpression
-	:	postfixExpression '--'
+postDecrementExpression returns [UnaryExpression e]
+	:	ex = postfixExpression '--'
+        {$e = new UnaryExpression($ex, UnaryOperator.DECREMENT);}
 	;
 
-postDecrementExpression_lf_postfixExpression
-	:	'--'
+postDecrementExpression_lf_postfixExpression returns [UnaryOperator op]
+	:	'--' {$op = UnaryOperator.DECREMENT;}
 	;
 
-castExpression
-	:	'(' primitiveType ')' unaryExpression
-	|	'(' referenceType additionalBound* ')' unaryExpressionNotPlusMinus
-	|	'(' referenceType additionalBound* ')' lambdaExpression
+castExpression returns [CastExpression e]
+	:	'(' t = primitiveType ')' ex = unaryExpression
+        {$e = new CastExpression($ex, $t);}
+	|	'(' t = referenceType b = additionalBound* ')'
+        ex = unaryExpressionNotPlusMinus
+        {$e = new CastExpression($ex, $t);}
+	|	'(' t = referenceType b = additionalBound* ')' ex = lambdaExpression
+        {$e = new CastExpression($ex, $t);}
 	;
 
 // LEXER
@@ -1398,11 +1627,15 @@ WHILE : 'while';
 
 // §3.10.1 Integer Literals
 
-IntegerLiteral
-	:	DecimalIntegerLiteral
-	|	HexIntegerLiteral
-	|	OctalIntegerLiteral
-	|	BinaryIntegerLiteral
+IntegerLiteral returns [LiteralExpression e]
+	:	l = DecimalIntegerLiteral
+        {$e = new LiteralExpression($l, PrimitiveType.INT);}
+	|	l = HexIntegerLiteral
+        {$e = new LiteralExpression($l, PrimitiveType.INT);}
+	|	l = OctalIntegerLiteral
+        {$e = new LiteralExpression($l, PrimitiveType.INT);}
+	|	l = BinaryIntegerLiteral
+        {$e = new LiteralExpression($l, PrimitiveType.INT);}
 	;
 
 fragment
@@ -1548,9 +1781,11 @@ BinaryDigitOrUnderscore
 
 // §3.10.2 Floating-Point Literals
 
-FloatingPointLiteral
-	:	DecimalFloatingPointLiteral
-	|	HexadecimalFloatingPointLiteral
+FloatingPointLiteral returns [LiteralExpression e]
+	:	l = DecimalFloatingPointLiteral
+         {$e = new LiteralExpression($l, PrimitiveType.DOUBLE);}
+	|	l = HexadecimalFloatingPointLiteral
+         {$e = new LiteralExpression($l, PrimitiveType.DOUBLE);}
 	;
 
 fragment
@@ -1609,16 +1844,18 @@ BinaryExponentIndicator
 
 // §3.10.3 Boolean Literals
 
-BooleanLiteral
-	:	'true'
-	|	'false'
+BooleanLiteral returns [LiteralExpression e]
+	:	'true' {$e = new LiteralExpression("true", PrimitiveType.BOOLEAN);}
+	|	'false' {$e = new LiteralExpression("false", PrimitiveType.BOOLEAN);}
 	;
 
 // §3.10.4 Character Literals
 
-CharacterLiteral
-	:	'\'' SingleCharacter '\''
-	|	'\'' EscapeSequence '\''
+CharacterLiteral returns [LiteralExpression e]
+	:	'\'' c = SingleCharacter '\''
+        {$e = new LiteralExpression($c, PrimitiveType.CHAR);}
+	|	'\'' s = EscapeSequence '\''
+        {$e = new LiteralExpression($s, PrimitiveType.CHAR);}
 	;
 
 fragment
@@ -1628,8 +1865,9 @@ SingleCharacter
 
 // §3.10.5 String Literals
 
-StringLiteral
-	:	'"' StringCharacters? '"'
+StringLiteral returns [LiteralExpression e]
+	:	'"' c = StringCharacters? '"'
+        {$e = new LiteralExpression($c, STRING);}
 	;
 
 fragment
@@ -1672,8 +1910,8 @@ UnicodeEscape
 
 // §3.10.7 The Null Literal
 
-NullLiteral
-	:	'null'
+NullLiteral returns [LiteralExpression e]
+	:	'null' {$e = LiteralExpression.NULL;}
 	;
 
 // §3.11 Separators
@@ -1730,8 +1968,11 @@ URSHIFT_ASSIGN : '>>>=';
 
 // §3.8 Identifiers (must appear after all keywords in the grammar)
 
-Identifier
-	:	JavaLetter JavaLetterOrDigit*
+Identifier returns [String s]
+    [locals StringBuilder b = new StringBuilder();]
+	:	(l = JavaLetter {$b.append($l);})
+        (d =JavaLetterOrDigit {$b.append($d);})*
+        {$s = $b.toString();}
 	;
 
 fragment

@@ -12,9 +12,9 @@ public abstract class ASTNode {
      * Construct a new ASTNode with underlying Token
      * @param token the token of this ASTNode
      */
-    public ASTNode(Token token) {
-	this.token = token;
-    }
+    // public ASTNode(Token token) {
+    //     this.token = token;
+    // }
 
     /**
      * Determines if this object is equivalent to other
