@@ -54,13 +54,8 @@ Total lexer+parser time 30844ms.
 grammar Java8;
 
 @header {
-    package com.binghamton.jhelp;
     import java.util.ArrayList;
     import java.util.List;
-}
-
-@parser::members {
-
 }
 
 
@@ -173,11 +168,13 @@ dims
 	;
 
 typeParameter
-	:	typeParameterModifier* Identifier typeBound?
+    locals [List<Modifier> mods = new ArrayList<>();]
+	:	(m = typeParameterModifier {$mods.add($m);})*
+        id = Identifier b = typeBound?
 	;
 
-typeParameterModifier
-	:	annotation
+typeParameterModifier returns [Modifier m]
+	:	a = annotation {$m = $a;}
 	;
 
 typeBound
@@ -222,17 +219,20 @@ packageName returns [String name]
 
 typeName returns [String name]
 	:	id = Identifier { $name = $id.getText(); }
-	|	p = packageOrTypeName '.' id = Identifier { $name = p + "." + $id.getText(); }
+	|	p = packageOrTypeName '.' id = Identifier
+        { $name = p + "." + $id.getText(); }
 	;
 
 packageOrTypeName returns [String name]
 	:	id = Identifier { $name = $id.getText(); }
-	|	p = packageOrTypeName '.' id = Identifier { $name = p + "." + $id.getText(); }
+	|	p = packageOrTypeName '.' id = Identifier
+        { $name = p + "." + $id.getText(); }
 	;
 
 expressionName returns [String name]
 	:	id = Identifier { $name = $id.getText(); }
-	|	a = ambiguousName '.' id = Identifier { $name = a + "." + $id.getText(); }
+	|	a = ambiguousName '.' id = Identifier
+        { $name = a + "." + $id.getText(); }
 	;
 
 methodName returns [String name]
@@ -241,7 +241,8 @@ methodName returns [String name]
 
 ambiguousName returns [String name]
 	:	id = Identifier { $name = $id.getText(); }
-	|	a = ambiguousName '.' id = Identifier { $name = a + "." + $id.getText(); }
+	|	a = ambiguousName '.' id = Identifier
+        { $name = a + "." + $id.getText(); }
 	;
 
 /*
@@ -308,19 +309,19 @@ typeDeclaration returns [TypeDeclaraction t]
  * Productions from §8 (Classes)
  */
 
-classDeclaration returns [ClassNode c]
-	:	n = normalClassDeclaration {$c = $n;}
-	|	e = enumDeclaration {$c = $e;}
+classDeclaration returns [ClassDeclaration d]
+	:	n = normalClassDeclaration {$d = $n;}
+	|	e = enumDeclaration {$d = $e;}
 	;
 
-normalClassDeclaration returns [ClassNode c]
+normalClassDeclaration returns [ClassDeclaration d]
     locals [List<Modifier> mods = new ArrayList<>();]
 	:	(m = classModifier {$mods.add($m);})* 'class' n = Identifier
         (p = typeParameters)?
         (sc = superclass)?
         (si = superinterfaces)?
         (b = classBody)
-        {$c = new ClassNode($mods, $n.getText(), $p, $sc, $si, $b);}
+        {$d = new ClassDeclaration($mods, $n.getText(), $p, $sc, $si, $b);}
 	;
 
 classModifier returns [Modifier m]
@@ -360,27 +361,31 @@ interfaceTypeList returns [List<String> s]
         {$s = $ls;}
 	;
 
-classBody
-	:	'{' classBodyDeclaration* '}'
+classBody [ClassDeclaration d]
+	:	'{' (classBodyDeclaration[d])* '}'
 	;
 
-classBodyDeclaration
-	:	classMemberDeclaration
-	|	instanceInitializer
-	|	staticInitializer
-	|	constructorDeclaration
+classBodyDeclaration [ClassDeclaration d]
+	:	classMemberDeclaration[d]
+	|	i = instanceInitializer {$d.addInstanceInitializer($i);}
+	|	s = staticInitializer {$d.addStaticInitializer($s);}
+	|	ct = constructorDeclaration {$d.addMethod($ct);}
 	;
 
-classMemberDeclaration
-	:	fieldDeclaration
-	|	methodDeclaration
-	|	classDeclaration
-	|	interfaceDeclaration
+classMemberDeclaration [ClassDeclaration d]
+	:	f = fieldDeclaration {$d.addField($f);}
+	|	m = methodDeclaration {$d.addMethod($d);}
+	|	c = classDeclaration {$d.addInnerClass($c);}
+	|	i = interfaceDeclaration {$d.addInnerInterface($i);}
 	|	';'
 	;
 
-fieldDeclaration
-	:	fieldModifier* unannType variableDeclaratorList ';'
+fieldDeclaration returns [VariableDeclaration d]
+    locals [List<Modifier> mods = new ArrayList<>();]
+	:	(m = fieldModifier {$mods.add($m);})*
+        t = unannType
+        l = variableDeclaratorList ';'
+        {$d = new VariableDeclaration($l, $t, $mods);}
 	;
 
 fieldModifier returns [Modifier m]
@@ -394,26 +399,30 @@ fieldModifier returns [Modifier m]
 	|	'volatile' {$m = Modifier.VOLATILE;}
 	;
 
-variableDeclaratorList
-	:	variableDeclarator (',' variableDeclarator)*
+variableDeclaratorList returns [List<Pair<String, Expression>> l]
+    locals [List<Pair<String, Expression>> ls = new ArrayList<>();]
+	:	(d1 = variableDeclarator {$ls.add($d1);})
+        (',' d = variableDeclarator {$ls.add($d);})*
+        {$l = $ls;}
 	;
 
-variableDeclarator
-	:	variableDeclaratorId ('=' variableInitializer)?
+variableDeclarator returns [Pair<String, Expression> p]
+	:	id = variableDeclaratorId ('=' in = variableInitializer)?
+        {$p = new Pair($id.text, $in);}
 	;
 
 variableDeclaratorId
 	:	Identifier dims?
 	;
 
-variableInitializer
-	:	expression
-	|	arrayInitializer
+variableInitializer returns [Expression e]
+	:	ex = expression {$e = $ex;}
+	|	a = arrayInitializer {$e = $a;}
 	;
 
-unannType
-	:	unannPrimitiveType
-	|	unannReferenceType
+unannType returns [Type t]
+	:	p = unannPrimitiveType {$t = $p;}
+	|	r = unannReferenceType {$t = $r;}
 	;
 
 unannPrimitiveType returns [PrimitiveType t]
@@ -421,58 +430,65 @@ unannPrimitiveType returns [PrimitiveType t]
 	|	'boolean' {$t = PrimitiveType.BOOLEAN;}
 	;
 
-unannReferenceType
-	:	unannClassOrInterfaceType
-	|	unannTypeVariable
-	|	unannArrayType
+unannReferenceType returns [Type t]
+	:	c = unannClassOrInterfaceType {$t = $c;}
+	|	v = unannTypeVariable {$t = $v;}
+	|	a = unannArrayType {$t = $a;}
 	;
 
-unannClassOrInterfaceType
-	:	(	unannClassType_lfno_unannClassOrInterfaceType
-		|	unannInterfaceType_lfno_unannClassOrInterfaceType
+unannClassOrInterfaceType returns [Type t]
+	:	(	cno = unannClassType_lfno_unannClassOrInterfaceType
+		|	ino = unannInterfaceType_lfno_unannClassOrInterfaceType
 		)
-		(	unannClassType_lf_unannClassOrInterfaceType
-		|	unannInterfaceType_lf_unannClassOrInterfaceType
+		(	c = unannClassType_lf_unannClassOrInterfaceType
+		|	i = unannInterfaceType_lf_unannClassOrInterfaceType
 		)*
 	;
 
-unannClassType
-	:	Identifier typeArguments?
-	|	unannClassOrInterfaceType '.' annotation* Identifier typeArguments?
+unannClassType returns [Type t]
+	:	id = Identifier ta = typeArguments?
+	|	ci = unannClassOrInterfaceType '.' annotation*
+        id2 = Identifier ta2 = typeArguments?
 	;
 
-unannClassType_lf_unannClassOrInterfaceType
+unannClassType_lf_unannClassOrInterfaceType returns [Type t]
 	:	'.' annotation* Identifier typeArguments?
 	;
 
-unannClassType_lfno_unannClassOrInterfaceType
+unannClassType_lfno_unannClassOrInterfaceType returns [Type t]
 	:	Identifier typeArguments?
 	;
 
-unannInterfaceType
-	:	unannClassType
+unannInterfaceType returns [Type t]
+	:	c = unannClassType {$t = $c;}
 	;
 
-unannInterfaceType_lf_unannClassOrInterfaceType
-	:	unannClassType_lf_unannClassOrInterfaceType
+unannInterfaceType_lf_unannClassOrInterfaceType returns [Type t]
+	:	ci = unannClassType_lf_unannClassOrInterfaceType {$t = $ci;}
 	;
 
-unannInterfaceType_lfno_unannClassOrInterfaceType
-	:	unannClassType_lfno_unannClassOrInterfaceType
+unannInterfaceType_lfno_unannClassOrInterfaceType returns [Type t]
+	:	ci = unannClassType_lfno_unannClassOrInterfaceType {$t = $ci;}
 	;
 
 unannTypeVariable returns [String s]
 	:	i = Identifier {$s = $i.getText();}
 	;
 
-unannArrayType
+unannArrayType returns [Type t]
 	:	unannPrimitiveType dims
 	|	unannClassOrInterfaceType dims
 	|	unannTypeVariable dims
 	;
 
-methodDeclaration
-	:	methodModifier* methodHeader methodBody
+methodDeclaration returns [MethodDeclaration d]
+    locals [List<Modifier> mods = new ArrayList<>(),
+            MethodDeclaration md]
+	:	(m = methodModifier {$mods.add($m);})*
+        {$md = new MethodDeclaration($mods);}
+        h = methodHeader[d]
+        b = methodBody {$md.setBody($b);}
+        {$d = $md;}
 	;
 
 methodModifier returns [Modifier m]
@@ -488,9 +504,20 @@ methodModifier returns [Modifier m]
 	|	'strictfp' {$m = Modifier.STRICT_FP;}
 	;
 
-methodHeader
-	:	result methodDeclarator throws_?
-	|	typeParameters annotation* result methodDeclarator throws_?
+methodHeader [MethodDeclaration m]
+	:	rt = result methodDeclarator[m] th = throws_?
+        {
+            $m.setReturnType($rt);
+            $m.setExceptions($th);
+        }
+	|	tp = typeParameters a = annotation* rt = result
+        methodDeclarator[m] th = throws_?
+        {
+            $m.setTypeParams($tp);
+            $m.setAnnotations($a)
+            $m.setReturnType($rt);
+            $m.setExceptions($th);
+        }
 	;
 
 result returns [Type t]
@@ -498,9 +525,15 @@ result returns [Type t]
 	|	'void' {$t = Type.VOID;}
 	;
 
-methodDeclarator returns [MethodDeclaration m]
-	:	n = Identifier '(' p = formalParameterList? ')' d = dims?
-        {$m = new MethodDeclaration($n.getText(), $p, $d);}
+methodDeclarator [MethodDeclaration m]
+	:	n = Identifier
+        '(' p = formalParameterList? ')'
+        d = dims?
+        {
+            $m.setName($n);
+            $m.setParameters($p);
+        }
+
 	;
 
 formalParameterList returns [List<VariableDeclaration> l]
@@ -584,10 +617,14 @@ staticInitializer returns [Block b]
 constructorDeclaration returns [MethodDeclaration d]
     locals [List<Modifier> mods = new ArrayList<>();]
 	:	(m = constructorModifier {$mods.add($m);})*
-        p = constructorDeclarator
+        {$d = new MethodDeclaration();}
+        constructorDeclarator[d]
         t = throws_?
         b = constructorBody
-        {$d = new MethodDeclaration();}
+        {
+            $d.setExceptions($t);
+            $d.setBody($b);
+        }
 	;
 
 constructorModifier returns [Modifier m]
@@ -597,26 +634,33 @@ constructorModifier returns [Modifier m]
 	|	'private' {$m = Modifier.PRIVATE;}
 	;
 
-constructorDeclarator
-	:	typeParameters? simpleTypeName '(' formalParameterList? ')'
+constructorDeclarator [MethodDeclaration d]
+	:	t = typeParameters? n = simpleTypeName '(' l = formalParameterList? ')'
+        {
+            $d.addTypeParams($t);
+            $d.setName($n);
+            $d.setParameters($l);
+        }
 	;
 
 simpleTypeName returns [String s]
 	:	id = Identifier {$s = $id.getText();}
 	;
 
-constructorBody
-	:	'{' explicitConstructorInvocation? blockStatements? '}'
+constructorBody returns [Block b]
+	:	'{' s = explicitConstructorInvocation? st = blockStatements? '}'
+        {$b = new Block(st);
+         $b.addStatement(0, $s);}
 	;
 
-explicitConstructorInvocation
+explicitConstructorInvocation returns [Statement s]
 	:	typeArguments? 'this' '(' argumentList? ')' ';'
 	|	typeArguments? 'super' '(' argumentList? ')' ';'
 	|	expressionName '.' typeArguments? 'super' '(' argumentList? ')' ';'
 	|	primary '.' typeArguments? 'super' '(' argumentList? ')' ';'
 	;
 
-enumDeclaration
+enumDeclaration returns [EnumDeclaration d]
 	:	classModifier* 'enum' Identifier superinterfaces? enumBody
 	;
 
@@ -632,8 +676,8 @@ enumConstant
 	:	enumConstantModifier* Identifier ('(' argumentList? ')')? classBody?
 	;
 
-enumConstantModifier
-	:	annotation
+enumConstantModifier returns [Modifier m]
+	:	a = annotation {$m = $a;}
 	;
 
 enumBodyDeclarations
@@ -645,12 +689,17 @@ enumBodyDeclarations
  */
 
 interfaceDeclaration returns [InterfaceDeclaration d]
-	:	normalInterfaceDeclaration
-	|	annotationTypeDeclaration
+	:	n = normalInterfaceDeclaration {$d = $n;}
+	|	a = annotationTypeDeclaration {$d = $a;}
 	;
 
-normalInterfaceDeclaration
-	:	interfaceModifier* 'interface' Identifier typeParameters? extendsInterfaces? interfaceBody
+normalInterfaceDeclaration returns [InterfaceDeclaration d]
+    locals [List<Modifier> mods = new ArrayList<>();]
+	:	(m = interfaceModifier {$mods.add($m);})*
+        'interface' id = Identifier
+        t = typeParameters? e = extendsInterfaces?
+        {$d = new InterfaceDeclaration($id, $e, $mods);}
+        interfaceBody[d]
 	;
 
 interfaceModifier returns [Modifier m]
@@ -667,15 +716,15 @@ extendsInterfaces returns [List<String> l]
 	:	'extends' i = interfaceTypeList {$l = $i;}
 	;
 
-interfaceBody
-	:	'{' interfaceMemberDeclaration* '}'
+interfaceBody [InterfaceDeclaration d]
+	:	'{' (interfaceMemberDeclaration[d])* '}'
 	;
 
-interfaceMemberDeclaration
-	:	constantDeclaration
-	|	interfaceMethodDeclaration
-	|	classDeclaration
-	|	interfaceDeclaration
+interfaceMemberDeclaration [InterfaceDeclaration d]
+	:	c = constantDeclaration {$d.addConstant($c);}
+	|	im = interfaceMethodDeclaration {$d.addMethod($im);}
+	|	cl = classDeclaration {$d.addInnerClass($cl);}
+	|	id = interfaceDeclaration {$d.addInnerInterface($id);}
 	|	';'
 	;
 
@@ -694,8 +743,11 @@ constantModifier returns [Modifier m]
 	|	'final' {$m = Modifier.FINAL;}
 	;
 
-interfaceMethodDeclaration
-	:	interfaceMethodModifier* methodHeader methodBody
+interfaceMethodDeclaration returns [MethodDeclaration d]
+    locals [List<Modifier> mods = new ArrayList<>();]
+	:	(m = interfaceMethodModifier {$mods.add($m);})*
+        h = methodHeader b = methodBody
+        {$d = new MethodDeclaration();}
 	;
 
 interfaceMethodModifier returns [Modifier m]
@@ -708,7 +760,9 @@ interfaceMethodModifier returns [Modifier m]
 	;
 
 annotationTypeDeclaration
-	:	interfaceModifier* '@' 'interface' Identifier annotationTypeBody
+    locals [List<Modifier> mods = new ArrayList<>();]
+    :	(m = interfaceModifier {$mods.add($m);})*
+		'@' 'interface' id = Identifier b = annotationTypeBody
 	;
 
 annotationTypeBody
@@ -724,7 +778,11 @@ annotationTypeMemberDeclaration
 	;
 
 annotationTypeElementDeclaration
-	:	annotationTypeElementModifier* unannType Identifier '(' ')' dims? defaultValue? ';'
+    locals [List<Modifier> mods = new ArrayList<>();]
+	:	(m = annotationTypeElementModifier {$mods.add($m);})*
+        t = unannType id = Identifier '(' ')'
+        ds = dims?
+        dv = defaultValue? ';'
 	;
 
 annotationTypeElementModifier returns [Modifier m]
@@ -733,8 +791,8 @@ annotationTypeElementModifier returns [Modifier m]
 	|	'abstract' {$m = Modifier.ABSTRACT;}
 	;
 
-defaultValue
-	:	'default' elementValue
+defaultValue returns [Expression e]
+	:	'default' v = elementValue {$e = $v;}
 	;
 
 annotation returns [AnnotationStatement s]
@@ -766,12 +824,16 @@ elementValue returns [Expression e]
 	|	a = annotation {$e = $a;}
 	;
 
-elementValueArrayInitializer
-	:	'{' elementValueList? ','? '}'
+elementValueArrayInitializer returns [ArrayDeclaration d]
+	:	'{' l = elementValueList? ','? '}'
+        {$d = new ArrayDeclaration($l);}
 	;
 
-elementValueList
-	:	elementValue (',' elementValue)*
+elementValueList returns [List<Expression> l]
+    locals [List<Expression> ls = new ArrayList<>();]
+	:	(v1 = elementValue {$ls.add($v1);})
+        (',' v = elementValue {$ls.add($v);})*
+        {$l = $ls;}
 	;
 
 markerAnnotation returns [AnnotationStatement s]
@@ -893,7 +955,8 @@ statementExpression returns [Expression e]
 	;
 
 ifThenStatement returns [IfElseStatement st]
-	:	'if' '(' e = expression ')' s = statement {$st = new IfElseStatement($e, $s);}
+	:	'if' '(' e = expression ')' s = statement
+        {$st = new IfElseStatement($e, $s);}
 	;
 
 ifThenElseStatement returns [IfElseStatement st]
@@ -983,13 +1046,15 @@ basicForStatementNoShortIf returns [ForStatement st]
         {$st = new ForStatement($i, $e, $u, $s);}
 	;
 
-forInit
-	:	statementExpressionList
-	|	localVariableDeclaration
+forInit returns [List<Expression> l]
+	:	ls = statementExpressionList {$l = $ls;}
+	|	d = localVariableDeclaration
+        {$l = new ArrayList<Expression>();
+         $l.add($d);}
 	;
 
-forUpdate
-	:	statementExpressionList
+forUpdate returns [List<Expression> l]
+	:	ls = statementExpressionList {$l = $ls;}
 	;
 
 statementExpressionList returns [List<Expression> ls]
@@ -1028,7 +1093,8 @@ breakStatement returns [BreakStatement st]
 	;
 
 continueStatement returns [ContinueStatement st]
-	:	'continue' id = Identifier? ';' {$st = new ContinueStatement($id.getText());}
+	:	'continue' id = Identifier? ';'
+        {$st = new ContinueStatement($id.getText());}
 	;
 
 returnStatement returns [ReturnStatement st]
@@ -1110,11 +1176,11 @@ resource returns [VariableDeclaration d]
  * Productions from §15 (Expressions)
  */
 
-primary
-	:	(	primaryNoNewArray_lfno_primary
-		|	arrayCreationExpression
+primary returns [Expression e]
+	:	(	pno = primaryNoNewArray_lfno_primary
+		|	a = arrayCreationExpression
 		)
-		(	primaryNoNewArray_lf_primary
+		(	p = primaryNoNewArray_lf_primary
 		)*
 	;
 
@@ -1260,7 +1326,8 @@ arrayAccess returns [ArrayAccessExpression e]
 		|	(pno = primaryNoNewArray_lfno_arrayAccess '[' i = expression ']'
                 {$e = new ArrayAccessExpression($pno, $i);})
 		)
-		(	p = primaryNoNewArray_lf_arrayAccess '[' i = expression ']'
+            // always empty?
+		(	primaryNoNewArray_lf_arrayAccess '[' i = expression ']'
 		)*
 	;
 
@@ -1268,7 +1335,8 @@ arrayAccess_lf_primary returns [ArrayAccessExpression e]
 	:	(	(pno = primaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primary
            '[' i = expression ']' {$e = new ArrayAccessExpression($p, $i);})
 		)
-		(	p = primaryNoNewArray_lf_primary_lf_arrayAccess_lf_primary
+            // always empty?
+		(	primaryNoNewArray_lf_primary_lf_arrayAccess_lf_primary
             '[' i2 = expression ']'
 		)*
 	;
@@ -1280,7 +1348,8 @@ arrayAccess_lfno_primary returns [ArrayAccessExpression e]
                 '[' i = expression ']'
                 {$e = new ArrayAccessExpression($p, $i);})
 		)
-		(	p = primaryNoNewArray_lfno_primary_lf_arrayAccess_lfno_primary
+            // always empty?
+		(	primaryNoNewArray_lfno_primary_lf_arrayAccess_lfno_primary
         '[' i2 = expression ']'
 		)*
 	;
@@ -1371,7 +1440,7 @@ methodReference_lfno_primary returns [MethodReferenceExpression e]
         {$e = new MethodReferenceExpression($a);}
 	;
 
-arrayCreationExpression
+arrayCreationExpression returns [Expression e]
 	:	'new' primitiveType dimExprs dims?
 	|	'new' classOrInterfaceType dimExprs dims?
 	|	'new' primitiveType dims arrayInitializer
@@ -1382,8 +1451,10 @@ dimExprs
 	:	dimExpr dimExpr*
 	;
 
-dimExpr
-	:	annotation* '[' expression ']'
+dimExpr returns [Expression e]
+    locals [List<Modifier> mods = new ArrayList<>();]
+	:	(a = annotation {$mods.add($a);})*
+        '[' ex = expression ']'
 	;
 
 constantExpression returns [Expression e]
@@ -1455,7 +1526,8 @@ assignmentOperator returns [AssignmentOperator op]
 
 conditionalExpression returns [Expression e]
 	:	c = conditionalOrExpression {$e = $c;}
-	|	c = conditionalOrExpression '?' i = expression ':' el = conditionalExpression
+	|	c = conditionalOrExpression '?'
+        i = expression ':' el = conditionalExpression
         {$e = new TernaryExpression($c, $i, $el);}
 	;
 
