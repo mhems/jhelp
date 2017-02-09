@@ -20,10 +20,12 @@ public class IfElseStatement extends Statement {
     /**
      * Construct a new if/else statement
      * @param condition the condition being examined
-     * @param thenBody the block to execute iff condition evalutes to true
-     * @param elseBody the block to execute iff condition evalutes to false
+     * @param thenBody the block to execute if condition evalutes to true
+     * @param elseBody the block to execute if condition evalutes to false
      */
-    public IfElseStatement(Expression condition, Block thenBody, Block elseBody) {
+    public IfElseStatement(Expression condition
+			   Block thenBody,
+			   Block elseBody) {
         this.condition = condition;
         this.thenBody = thenBody;
         this.elseBody = elseBody;

@@ -33,7 +33,10 @@ public class TestFileBuffer {
     }
 
     private static void test(int line, int before, int after) {
-        System.out.println("Line " + line + " w/ " + before + " before, " + after + " after: " +
-                           Arrays.toString(fb.getLines(line, before, after)));
+        System.out.println("Line " + line + " w/ " + before +
+			   " before, " + after + " after: " +
+                           Arrays.toString(fb.getLines(line,
+						       before,
+						       after)));
     }
 }

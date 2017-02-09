@@ -1,3 +1,7 @@
 #!/usr/bin/env bash
 
-java -cp target/jhelp.jar:lib/antlr-4.6-complete.jar com.binghamton.jhelp.JHelp "$@"
+CP='target/jhelp.jar:lib/antlr-4.6-complete.jar'
+PKG='com.binghamton.jhelp'
+MAIN='JHelp'
+
+java -cp "$CP" "${PKG}.${MAIN}" "$@"

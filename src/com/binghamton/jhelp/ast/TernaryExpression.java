@@ -11,10 +11,10 @@ public class TernaryExpression extends Expression {
     /**
      * Construct a new ternary expression
      * @param condition the conditional to evaluate
-     * @param ifExpr the expression whose value is to be returned iff condition
-     * evaluates to true
-     * @param elseExpr the expression whose value is to be returned iff condition
-     * evaluates to false
+     * @param ifExpr the expression whose value is to be returned if
+     * condition evaluates to true
+     * @param elseExpr the expression whose value is to be returned if
+     * condition evaluates to false
      */
     public TernaryExpression(Expression condition,
                              Expression ifExpr,
