@@ -56,8 +56,9 @@ grammar Java8;
 @header {
     import java.util.ArrayList;
     import java.util.List;
-}
 
+    import com.binghamton.ast.*;
+}
 
 /*
  * Productions from §3 (Lexical Structure)
@@ -75,7 +76,7 @@ literal returns [LiteralExpression e]
 	|	s = StringLiteral
         {$e = new LiteralExpression($s.getText(), String);}
 	|	n = NullLiteral
-        {$e = new LiteralExpression("null", PrimitiveType.INT);}
+        {$e = LiteralExpression.NULL;}
 	;
 
 /*
@@ -320,8 +321,8 @@ normalClassDeclaration returns [ClassDeclaration d]
         (p = typeParameters)?
         (sc = superclass)?
         (si = superinterfaces)?
-        (b = classBody)
-        {$d = new ClassDeclaration($mods, $n.getText(), $p, $sc, $si, $b);}
+        {$d = new ClassDeclaration($n.getText(), $mods, $si, $p, $sc);}
+        classBody[d]
 	;
 
 classModifier returns [Modifier m]
@@ -361,18 +362,18 @@ interfaceTypeList returns [List<String> s]
         {$s = $ls;}
 	;
 
-classBody [ClassDeclaration d]
+classBody [ConcreteBodyDeclaration d]
 	:	'{' (classBodyDeclaration[d])* '}'
 	;
 
-classBodyDeclaration [ClassDeclaration d]
+classBodyDeclaration [ConcreteBodyDeclaration d]
 	:	classMemberDeclaration[d]
 	|	i = instanceInitializer {$d.addInstanceInitializer($i);}
 	|	s = staticInitializer {$d.addStaticInitializer($s);}
 	|	ct = constructorDeclaration {$d.addMethod($ct);}
 	;
 
-classMemberDeclaration [ClassDeclaration d]
+classMemberDeclaration [ConcreteBodyDeclaration d]
 	:	f = fieldDeclaration {$d.addField($f);}
 	|	m = methodDeclaration {$d.addMethod($d);}
 	|	c = classDeclaration {$d.addInnerClass($c);}
@@ -557,7 +558,7 @@ formalParameter returns [VariableDeclaration v]
     locals [List<Modifier> mods = new ArrayList<>();]
 	:	(m = variableModifier {$mods.add($m);})*
         t = unannType n = variableDeclaratorId
-        {$v = new VariableDeclaration($n, $t, $mods, false);}
+        {$v = new VariableDeclaration($n, $t, $mods);}
 	;
 
 variableModifier returns [Modifier m]
@@ -582,7 +583,12 @@ receiverParameter returns [VariableDeclaration v]
         t = unannType
         (i = Identifier '.')?
         'this'
-        {$v = new VariableDeclaration($i.getText() + "." + "this", $t, $mods);}
+        {
+            $v = new VariableDeclaration(
+                $i.text.equals("") ? "this" : $i.getText() + "." + "this",
+                $t,
+                $mods)
+        }
 	;
 
 throws_ returns [List<Type> l]
@@ -617,7 +623,7 @@ staticInitializer returns [Block b]
 constructorDeclaration returns [MethodDeclaration d]
     locals [List<Modifier> mods = new ArrayList<>();]
 	:	(m = constructorModifier {$mods.add($m);})*
-        {$d = new MethodDeclaration();}
+        {$d = new MethodDeclaration($mods);}
         constructorDeclarator[d]
         t = throws_?
         b = constructorBody
@@ -661,27 +667,35 @@ explicitConstructorInvocation returns [Statement s]
 	;
 
 enumDeclaration returns [EnumDeclaration d]
-	:	classModifier* 'enum' Identifier superinterfaces? enumBody
+    locals [List<Modifier> mods = new ArrayList<>();]
+	:	(m = classModifier {$mods.add($m);})*
+        'enum' id = Identifier il = superinterfaces?
+        {$d = new EnumDeclaration($id.getText(), $il, $mods);}
+        enumBody[d]
 	;
 
-enumBody
-	:	'{' enumConstantList? ','? enumBodyDeclarations? '}'
+enumBody [EnumDeclaration d]
+	:	'{' (enumConstantList[d])? ','? (enumBodyDeclarations[d])? '}'
 	;
 
-enumConstantList
-	:	enumConstant (',' enumConstant)*
+enumConstantList [EnumDeclaration d]
+	:	enumConstant[d] (',' enumConstant[d])*
 	;
 
-enumConstant
-	:	enumConstantModifier* Identifier ('(' argumentList? ')')? classBody?
+enumConstant [EnumDeclaration d]
+    locals [List<Modifier> mods = new ArrayList<>();]
+	:	(enumConstantModifier {$mods.add($m);})*
+        id = Identifier ('(' a = argumentList? ')')?
+        {$d.addConstant(new EnumConstant($id.getText(), $mods, $a));}
+        (classBody[d])?
 	;
 
 enumConstantModifier returns [Modifier m]
 	:	a = annotation {$m = $a;}
 	;
 
-enumBodyDeclarations
-	:	';' classBodyDeclaration*
+enumBodyDeclarations [EnumDeclaration d]
+	:	';' (classBodyDeclaration[d])*
 	;
 
 /*
@@ -698,7 +712,7 @@ normalInterfaceDeclaration returns [InterfaceDeclaration d]
 	:	(m = interfaceModifier {$mods.add($m);})*
         'interface' id = Identifier
         t = typeParameters? e = extendsInterfaces?
-        {$d = new InterfaceDeclaration($id, $e, $mods);}
+        {$d = new InterfaceDeclaration($id.getText(), $mods, $e);}
         interfaceBody[d]
 	;
 
@@ -721,7 +735,7 @@ interfaceBody [InterfaceDeclaration d]
 	;
 
 interfaceMemberDeclaration [InterfaceDeclaration d]
-	:	c = constantDeclaration {$d.addConstant($c);}
+	:	c = constantDeclaration {$d.addField($c);}
 	|	im = interfaceMethodDeclaration {$d.addMethod($im);}
 	|	cl = classDeclaration {$d.addInnerClass($cl);}
 	|	id = interfaceDeclaration {$d.addInnerInterface($id);}
@@ -733,7 +747,7 @@ constantDeclaration returns [VariableDeclaration v]
 	:	(m =constantModifier {$mods.add($m);})*
         t = unannType
         l = variableDeclaratorList ';'
-        {$v = new VariableDeclaration();}
+        {$v = new VariableDeclaration($l, $t, $mods);}
 	;
 
 constantModifier returns [Modifier m]
@@ -746,8 +760,9 @@ constantModifier returns [Modifier m]
 interfaceMethodDeclaration returns [MethodDeclaration d]
     locals [List<Modifier> mods = new ArrayList<>();]
 	:	(m = interfaceMethodModifier {$mods.add($m);})*
-        h = methodHeader b = methodBody
-        {$d = new MethodDeclaration();}
+        {$d = new MethodDeclaration($mods);}
+        (methodHeader[d])
+        (b = methodBody {$d.setBody($b);})
 	;
 
 interfaceMethodModifier returns [Modifier m]
@@ -806,16 +821,16 @@ normalAnnotation returns [AnnotationStatement s]
         {$s = new AnnotationStatement($t, $l);}
 	;
 
-elementValuePairList returns [List<NameValuePair> l]
-    locals [List<NameValuePair> pairs = new ArrayList<>();]
+elementValuePairList returns [List<Pair<String, Expression>> l]
+    locals [List<Pair<String, Expression>> pairs = new ArrayList<>();]
 	:	(p1 = elementValuePair) {$pairs.add($p1);}
         (',' p = elementValuePair {$pairs.add($p);})*
         {$l = $pairs;}
 	;
 
-elementValuePair returns [NameValuePair p]
+elementValuePair returns [Pair<String,Expression> p]
 	:	id = Identifier '=' v = elementValue
-        {$p = new NameValuePair($id.getText(), $v);}
+        {$p = new Pair($id.getText(), $v);}
 	;
 
 elementValue returns [Expression e]
