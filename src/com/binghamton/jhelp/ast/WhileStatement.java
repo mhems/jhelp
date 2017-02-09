@@ -6,6 +6,7 @@ package com.binghamton.jhelp.ast;
 public class WhileStatement extends Statement {
     private Expression condition;
     private Block body;
+    private boolean isDo;
 
     /**
      * Construct a new while statement
@@ -13,8 +14,19 @@ public class WhileStatement extends Statement {
      * @param body the code to conditionally execute
      */
     public WhileStatement(Expression condition, Block body) {
+        this(condition, body, false);
+    }
+
+    /**
+     * Construct a new while statement
+     * @param condition the condition whose truth dictates iteration
+     * @param body the code to conditionally execute
+     * @param isDo true iff this while statement is a do-while statement
+     */
+    public WhileStatement(Expression condition, Block body, boolean isDo) {
         this.condition = condition;
         this.body = body;
+        this.isDo = isDo;
     }
 
     /**
@@ -31,5 +43,13 @@ public class WhileStatement extends Statement {
      */
     public Block getBody() {
         return body;
+    }
+
+    /**
+     * Determines if this while statement is a do-while statement
+     * @return true iff this while statement is a do-while statement
+     */
+    public boolean isDoWhile() {
+        return isDo;
     }
 }

@@ -73,4 +73,13 @@ public class Block extends ASTNode {
     public void addStatement(Statement stmt) {
         statements.add(stmt);
     }
+
+    /**
+     * Adds a Statement to this block at the specified index
+     * @param index the index to insert the statement at
+     * @param stmt the Statement to add to this block
+     */
+    public void addStatement(int index, Statement stmt) {
+        statements.add(index, stmt);
+    }
 }

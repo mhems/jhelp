@@ -1,7 +1,7 @@
 package com.binghamton.jhelp.ast;
 
 /**
- * Enum representing valid unary operators
+ * Enum representing valid binary operators
  */
 public enum BinaryOperator {
     ADDITION,

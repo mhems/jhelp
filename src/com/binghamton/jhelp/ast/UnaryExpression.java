@@ -7,6 +7,16 @@ public class UnaryExpression extends Expression {
     private Expression expr;
     private UnaryOperator op;
 
+
+    /**
+     * Construct a new unary expression
+     * @param identifier the name of the variable being operated on
+     * @param op the operation being performed upon expression
+     */
+    public UnaryExpression(String identifier, UnaryOperator op) {
+        this(new IdentifierExpression(identifier), op);
+    }
+
     /**
      * Construct a new unary expression
      * @param expr the sole expression
