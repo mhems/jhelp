@@ -40,7 +40,6 @@ public class Modifiers {
 	VARIABLE_MODIFIERS = fromModifierArray(new Modifier[]{
 						   Modifier.FINAL});
 
-
 	METHOD_MODIFIERS = fromModifierArray(new Modifier[]{
 						 Modifier.PUBLIC,
 						 Modifier.PROTECTED,

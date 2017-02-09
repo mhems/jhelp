@@ -1,11 +1,73 @@
 package com.binghamton.jhelp;
 
 /**
- * Base class representing a Java type
+ * Abstract base class representing a Java type
  */
-public class Type {
+public abstact class Type {
 
-    public static final Type VOID;
+    // TODO should this be a singleton subclass?
+    public static final Type VOID = new Type("void");
+
+    private Annotations annotations;
+    private String name;
+
+    /**
+     * Construct a named type
+     * @param name the name of this type
+     */
+    public Type(String name) {
+	this(name, new Annotations);
+    }
+
+    /**
+     * Construct a named, annotated type
+     * @param name the name of this type
+     * @param annotations the annotations of this type
+     */
+    public Type(String name, Annotations annotations) {
+	this.name = name;
+	this.annotations = annotations;
+    }
+
+    /**
+     * Gets this type's name
+     * @return this type's name
+     */
+    public String getName() {
+	return name;
+    }
+
+    /**
+     * Gets this type's annotations
+     * @return this type's annotations
+     */
+    public Annotations getAnnotations() {
+	return annotations;
+    }
+
+    /**
+     * Determines if this type and `other` are type-equivalent
+     * @param other the other Type to inspect
+     * @return true  if this type and `other` are type-equivalent
+     * @       false otherwise
+     */
+    public abstract boolean matches(Type other);
+
+    /**
+     * Determines if this type is a sub-type of `other`
+     * @param other the other Type to inspect
+     * @return true  if this type is a sub-type of `other`
+     * @       false otherwise
+     */
+    public abstract boolean isSubtype(Type other);
+
+    /**
+     * Determines if this type is a sub-type of `other`
+     * @param other the other Type to inspect
+     * @return true  if this type is a sub-type of `other`
+     * @       false otherwise
+     */
+    public abstract boolean isSupertype(Type other);
 
     /**
      * Determines if this object is equivalent to other
