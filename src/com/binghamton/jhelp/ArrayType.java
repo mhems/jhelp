@@ -12,8 +12,8 @@ public class ArrayType extends Type {
      * @param rank the dimensions of the array type
      */
     public ArrayType(String name, int rank) {
-	super(name);
-	this.rank = rank;
+        super(name);
+        this.rank = rank;
     }
 
     /**
@@ -23,7 +23,7 @@ public class ArrayType extends Type {
      * @param rank the dimensions of the array type
      */
     public ArrayType(String name, Annotations annotations, int rank) {
-	super(name, annotations);
-	this.rank = rank;
+        super(name, annotations);
+        this.rank = rank;
     }
 }

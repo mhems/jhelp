@@ -4,10 +4,6 @@ package com.binghamton.jhelp;
  * Abstract base class representing a Java type
  */
 public abstact class Type {
-
-    // TODO should this be a singleton subclass?
-    public static final Type VOID = new Type("void");
-
     private Annotations annotations;
     private String name;
 
@@ -16,7 +12,7 @@ public abstact class Type {
      * @param name the name of this type
      */
     public Type(String name) {
-	this(name, new Annotations);
+        this(name, new Annotations);
     }
 
     /**
@@ -25,8 +21,8 @@ public abstact class Type {
      * @param annotations the annotations of this type
      */
     public Type(String name, Annotations annotations) {
-	this.name = name;
-	this.annotations = annotations;
+        this.name = name;
+        this.annotations = annotations;
     }
 
     /**
@@ -34,7 +30,7 @@ public abstact class Type {
      * @return this type's name
      */
     public String getName() {
-	return name;
+        return name;
     }
 
     /**
@@ -42,7 +38,7 @@ public abstact class Type {
      * @return this type's annotations
      */
     public Annotations getAnnotations() {
-	return annotations;
+        return annotations;
     }
 
     /**
