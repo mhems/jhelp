@@ -42,6 +42,15 @@ public abstact class Type {
     }
 
     /**
+     * Augments the type into a new array type
+     * @param dimensions the dimensions of the array type
+     * @return a new array type with same base type and `dimensions`
+     */
+    public ArrayType augment(int dimensions) {
+        return new ArrayType(this, dimensions);
+    }
+
+    /**
      * Determines if this type and `other` are type-equivalent
      * @param other the other Type to inspect
      * @return true  if this type and `other` are type-equivalent

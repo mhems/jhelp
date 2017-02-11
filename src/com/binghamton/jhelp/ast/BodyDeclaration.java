@@ -8,7 +8,7 @@ import java.util.ArrayList;
  * This includes interfaces, classes, and enums.
  */
 public abstract class BodyDeclaration extends Declaration {
-    private List<String> implementees;
+    private List<ClassInterfaceType> implementees;
     private List<VariableDeclaration> fields = new ArrayList<>();
     private List<MethodDeclaration> methods = new ArrayList<>();
     private List<ClassDeclaration> innerClasses = new ArrayList<>();
@@ -22,7 +22,7 @@ public abstract class BodyDeclaration extends Declaration {
      */
     public BodyDeclaration(String name,
                            List<Modifier> modifiers,
-                           List<String> implementees) {
+                           List<ClassInterfaceType> implementees) {
         super(name, modifiers);
         this.implentees = implementees;
     }
@@ -31,7 +31,7 @@ public abstract class BodyDeclaration extends Declaration {
      * Gets the implemented interfaces of this declaration
      * @return the implemented interfaces of this declaration
      */
-    public List<String> getSuperInterfaces() {
+    public List<ClassInterfaceType> getSuperInterfaces() {
         return implementees;
     }
 

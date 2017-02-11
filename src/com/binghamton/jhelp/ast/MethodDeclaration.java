@@ -10,6 +10,7 @@ public class MethodDeclaration extends Declaration {
     private List<VariableDeclaration> params;
     private Dimension dim;
     private List<Type> exceptions;
+    private List<TypeParameter> typeParams;
     private Block body;
 
     /**
@@ -69,6 +70,30 @@ public class MethodDeclaration extends Declaration {
     }
 
     /**
+     * Gets the type parameters of this method
+     * @return the type parameters of this method
+     */
+    public List<TypeParameter> getTypeParameters() {
+        return typeParams;
+    }
+
+    /**
+     * Sets the type parameters of this method
+     * @param typeParams the new type parameters of this method
+     */
+    public void setTypeParameters(List<TypeParameter> typeParams) {
+        this.typeParams = typeParams;
+    }
+
+    /**
+     * Determines if this method has type parameters
+     * @return true iff this method has type parameters
+     */
+    public boolean hasTypeParameters() {
+        return typeParams != null && typeParams.size() > 0;
+    }
+
+    /**
      * Sets this method's body
      * @param body this method's body
      */
@@ -83,4 +108,6 @@ public class MethodDeclaration extends Declaration {
     public Block getBody() {
         return body;
     }
+
+
 }

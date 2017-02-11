@@ -19,7 +19,7 @@ public abstract class ConcreteBodyDeclaration extends BodyDeclaration {
      */
     public ConcreteBodyDeclaration(String name,
                                    List<Modifier> modifiers,
-                                   List<String> implementees) {
+                                   List<ClassInterfaceType> implementees) {
         super(name, modifiers, implementees);
     }
 

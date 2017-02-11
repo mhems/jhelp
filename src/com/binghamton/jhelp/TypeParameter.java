@@ -15,7 +15,7 @@ public class TypeParameter {
      * @param name the name of the type parameter
      */
     public TypeParameter(String name) {
-        type = new TypeVariable(name);
+        this(name, null);
     }
 
     /**
@@ -24,7 +24,20 @@ public class TypeParameter {
      * @param annotations the annotations of the type parameter
      */
     public TypeParameter(String name, Annotations annotations) {
+        this(name, annotations, null);
+    }
+
+    /**
+     * Construct a named, annotated type parameter
+     * @param name the name of the type parameter
+     * @param annotations the annotations of the type parameter
+     * @param supertypes the super types (bounds) of the type parameter
+     */
+    public TypeParameter(String name,
+                         Annotations annotations,
+                         List<ReferenceType> superTypes) {
         type = new TypeVariable(name, annotations);
+        this.superTypes = superTypes;
     }
 
     /**

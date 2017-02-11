@@ -7,7 +7,6 @@ public class MethodType extends Type {
     private List<TypeParameter> typeParams;
     private Type returnType;
     private List<Type> paramTypes;
-    private List<ClassInterfaceType> throwTypes; // TODO needed?
 
     /**
      * Construct a simple method type
@@ -45,7 +44,7 @@ public class MethodType extends Type {
      * @return true iff this method returns a non-void type
      */
     public boolean returns() {
-        return !returnType.equals(VoidType);
+        return returnType != null;
     }
 
     /**

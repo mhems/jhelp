@@ -114,13 +114,14 @@ floatingPointType returns [PrimitiveType p]
 	|	'double' {$p = PrimitiveType.DOUBLE;}
 	;
 
-referenceType returns [Type t]
+referenceType returns [ReferenceType t]
 	:	c = classOrInterfaceType {$t = $c;}
 	|	v = typeVariable {$t = $v;}
 	|	a = arrayType {$t = $a;}
 	;
 
-classOrInterfaceType returns [Type t]
+// TODO
+classOrInterfaceType returns [ClassInterfaceType t]
 	:	(	cno = classType_lfno_classOrInterfaceType
 		|	ino = interfaceType_lfno_classOrInterfaceType
 		)
@@ -129,84 +130,117 @@ classOrInterfaceType returns [Type t]
 		)*
 	;
 
-classType returns [Type t]
-	:	annotation* Identifier typeArguments?
-	|	classOrInterfaceType '.' annotation* Identifier typeArguments?
+classType returns [ClassInterfaceType t]
+    locals [List<Annotation> anns = new ArrayList<>();]
+	:	(a = annotation {$anns.add($a);})*
+        id = Identifier
+        targs = typeArguments?
+        {$t = new ClassInterfaceType($id.getText(), $anns, $targs);}
+	|	st = classOrInterfaceType '.'
+        (a = annotation {$anns.add($a);})*
+        id Identifier
+        targs = typeArguments?
+        {$t = new ClassInterfaceType($id.getText(), $anns, $targs, $st);}
 	;
 
-classType_lf_classOrInterfaceType returns [Type t]
-	:	'.' annotation* Identifier typeArguments?
+classType_lf_classOrInterfaceType returns [ClassInterfaceType t]
+    locals [List<Annotation> ans = new ArrayList<>();]
+	:	'.' (a = annotation {$ans.add($a);})*
+        id = Identifier targs = typeArguments?
+        {$t = new ClassInterfaceType($id.getText(), $ans, $targs);}
 	;
 
-classType_lfno_classOrInterfaceType returns [Type t]
-	:	annotation* Identifier typeArguments?
+classType_lfno_classOrInterfaceType returns [ClassInterfaceType t]
+    locals [List<Annotation> ans = new ArrayList<>();]
+	:	(a = annotation {$ans.add($a);})*
+        id = Identifier targs = typeArguments?
+        {$t = new ClassInterfaceType($id.getText(), $ans, $targs);}
 	;
 
-interfaceType returns [Type t]
-	:	classType
+interfaceType returns [ClassInterfaceType t]
+	:	c = classType {$t = $c;}
 	;
 
-interfaceType_lf_classOrInterfaceType returns [Type t]
-	:	classType_lf_classOrInterfaceType
+interfaceType_lf_classOrInterfaceType returns [ClassInterfaceType t]
+	:	c = classType_lf_classOrInterfaceType {$t = $c;}
 	;
 
-interfaceType_lfno_classOrInterfaceType returns [Type t]
-	:	classType_lfno_classOrInterfaceType
+interfaceType_lfno_classOrInterfaceType returns [ClassInterfaceType t]
+	:	c = classType_lfno_classOrInterfaceType {$t = $c;}
 	;
 
-typeVariable returns [Type t]
-	:	annotation* Identifier
+typeVariable returns [TypeVariable t]
+    locals [List<Annotation> ans = new ArrayList<>();]
+	:	(a = annotation {$ans.add($a);})* id = Identifier
+        {$t = new TypeVariable($id.getText(), $ans);}
 	;
 
-arrayType returns [Type t]
-	:	primitiveType dims
-	|	classOrInterfaceType dims
-	|	typeVariable dims
+arrayType returns [ArrayType t]
+	:	p = primitiveType d = dims
+        {$t = new ArrayType($p, $d);}
+	|	c = classOrInterfaceType d = dims
+        {$t = new ArrayType($c, $d);}
+	|	v = typeVariable d = dims
+        {$t = new ArrayType($v, $d);}
 	;
 
-dims
-	:	annotation* '[' ']' (annotation* '[' ']')*
+dims returns [int n]
+	:	annotation* '[' ']' {$n = 1;}
+        (annotation* '[' ']' {++$n;})*
 	;
 
-typeParameter
+typeParameter returns [TypeParameter p]
     locals [List<Modifier> mods = new ArrayList<>();]
 	:	(m = typeParameterModifier {$mods.add($m);})*
         id = Identifier b = typeBound?
+        {$p = new TypeParameter($id.getText(), $mods, $b);}
 	;
 
 typeParameterModifier returns [Modifier m]
 	:	a = annotation {$m = $a;}
 	;
 
-typeBound
-	:	'extends' typeVariable
-	|	'extends' classOrInterfaceType additionalBound*
+typeBound returns [List<ReferenceType> l]
+    locals [List<ReferenceType> ls = new ArrayList<>();]
+	:	'extends' v = typeVariable {$ls.add($v); $l = $ls;}
+	|	'extends' c = classOrInterfaceType {$ls.add($c)}
+        (a = additionalBound {$ls.add($a);})*
+        {$l = $ls;}
 	;
 
-additionalBound
-	:	'&' interfaceType
+additionalBound returns [ClassInterfaceType t]
+	:	'&' i = interfaceType {$t = $i;}
 	;
 
-typeArguments
-	:	'<' typeArgumentList '>'
+typeArguments returns [List<TypeArgument> l]
+	:	'<' ls = typeArgumentList '>' {$l = $ls;}
 	;
 
-typeArgumentList
-	:	typeArgument (',' typeArgument)*
+typeArgumentList returns [List<TypeArgument> l]
+   locals [List<TypeArgument> ls = new ArrayList<>();]
+	:	a1 = typeArgument {$ls.add($a1);}
+        (',' a = typeArgument {$ls.add($a);})*
+        {$l = $ls;}
 	;
 
-typeArgument
-	:	referenceType
-	|	wildcard
+typeArgument returns [TypeArgument t]
+	:	r = referenceType {$t = $r;}
+	|	w = wildcard {$t = $w;}
 	;
 
-wildcard
-	:	annotation* '?' wildcardBounds?
+wildcard returns [TypeArgument t]
+    locals [List<Annotation> ans = new ArrayList<>();]
+	:	(a = annotation {$ans.add($a);})* '?'
+        {$t = new TypeArgument($ans);}
+        (wildcardBounds[t])?
 	;
 
-wildcardBounds
-	:	'extends' referenceType
-	|	'super' referenceType
+// TODO true vs. false correct?
+wildcardBounds [TypeArgument t]
+	:	'extends' r = referenceType
+        {$t.setBoundType($r); $t.setIsUpperBounded(true);}
+	|	'super' r = referenceType
+        {$t.setBoundType($r); $t.setIsUpperBounded(false);}
 	;
 
 /*
@@ -300,9 +334,9 @@ staticImportOnDemandDeclaration returns [ImportStatement imp]
         {$imp = new ImportStatement($t, true, true);}
 	;
 
-typeDeclaration returns [TypeDeclaraction t]
-	:	c = classDeclaration {$t = $c;}
-	|	i = interfaceDeclaration {$t = $i;}
+typeDeclaration returns [BodyDeclaraction d]
+	:	c = classDeclaration {$d = $c;}
+	|	i = interfaceDeclaration {$d = $i;}
 	|	';'
 	;
 
@@ -336,30 +370,30 @@ classModifier returns [Modifier m]
 	|	'strictfp' {$m = Modifier.STRICT_FP;}
 	;
 
-typeParameters returns [List<String> l]
+typeParameters returns [List<TypeParameter> l]
 	:	'<' t = typeParameterList '>' {$l = $t;}
 	;
 
-typeParameterList returns [List<String> l]
-    locals [List<String> ls = new ArrayList<>();]
-	:	(t = typeParameter {$ls.add($t);})
+typeParameterList returns [List<TypeParameter> l]
+    locals [List<TypeParameter> ls = new ArrayList<>();]
+	:	(t1 = typeParameter {$ls.add($t1);})
         (',' t = typeParameter {$ls.add($t);})*
         {$l = $ls;}
 	;
 
-superclass returns [String s]
-	:	'extends' c = classType {$s = $c;}
+superclass returns [ClassInterfaceType t]
+	:	'extends' c = classType {$t = $c;}
 	;
 
-superinterfaces returns [List<String> l]
+superinterfaces returns [List<ClassInterfaceType> l]
 	:	'implements' i = interfaceTypeList {$l = $i;}
 	;
 
-interfaceTypeList returns [List<String> s]
-    locals [List<String> ls = new ArrayList<>();]
-	:	(i = interfaceType {$ls.add($i);})
+interfaceTypeList returns [List<ClassInterfaceType> l]
+    locals [List<ClassInterfaceType> ls = new ArrayList<>();]
+	:	(i1 = interfaceType {$ls.add($i1);})
         (',' i = interfaceType {$ls.add($i);})*
-        {$s = $ls;}
+        {$l = $ls;}
 	;
 
 classBody [ConcreteBodyDeclaration d]
@@ -409,11 +443,11 @@ variableDeclaratorList returns [List<Pair<String, Expression>> l]
 
 variableDeclarator returns [Pair<String, Expression> p]
 	:	id = variableDeclaratorId ('=' in = variableInitializer)?
-        {$p = new Pair($id.text, $in);}
+        {$p = new Pair($id.text, $in);} // TODO add dims
 	;
 
-variableDeclaratorId
-	:	Identifier dims?
+variableDeclaratorId returns [Pair<String, Integer> p]
+	:	id = Identifier d = dims? {$p = new Pair($id.getText(), $d);}
 	;
 
 variableInitializer returns [Expression e]
@@ -431,13 +465,13 @@ unannPrimitiveType returns [PrimitiveType t]
 	|	'boolean' {$t = PrimitiveType.BOOLEAN;}
 	;
 
-unannReferenceType returns [Type t]
+unannReferenceType returns [ReferenceType t]
 	:	c = unannClassOrInterfaceType {$t = $c;}
 	|	v = unannTypeVariable {$t = $v;}
 	|	a = unannArrayType {$t = $a;}
 	;
 
-unannClassOrInterfaceType returns [Type t]
+unannClassOrInterfaceType returns [ReferenceType t]
 	:	(	cno = unannClassType_lfno_unannClassOrInterfaceType
 		|	ino = unannInterfaceType_lfno_unannClassOrInterfaceType
 		)
@@ -446,40 +480,47 @@ unannClassOrInterfaceType returns [Type t]
 		)*
 	;
 
-unannClassType returns [Type t]
+unannClassType returns [ClassInterfaceType t]
+    locals [List<Annotation> ans = new ArrayList<>();]
 	:	id = Identifier ta = typeArguments?
-	|	ci = unannClassOrInterfaceType '.' annotation*
+        {$t = new ClassInterfaceType($id.getText(), $ta);}
+	|	ci = unannClassOrInterfaceType '.' (a = annotation {$ans.add($a);})*
         id2 = Identifier ta2 = typeArguments?
+        {$t = new ClassInterfaceType($id2.getText(), $ans, $ta, $ci);}
 	;
 
-unannClassType_lf_unannClassOrInterfaceType returns [Type t]
-	:	'.' annotation* Identifier typeArguments?
+unannClassType_lf_unannClassOrInterfaceType returns [ClassInterfaceType t]
+    locals [List<Annotation> ans = new ArrayList<>();]
+	:	'.' (a = annotation {$ans.add($a);})*
+        id = Identifier ta = typeArguments?
+        {$t = new ClassInterfaceType($id.getText(), $ans, $ta);}
 	;
 
-unannClassType_lfno_unannClassOrInterfaceType returns [Type t]
-	:	Identifier typeArguments?
+unannClassType_lfno_unannClassOrInterfaceType returns [ClassInterfaceType t]
+	:	id = Identifier ta = typeArguments?
+        {$t = new ClassInterfaceType($id.getText(), $ta);}
 	;
 
-unannInterfaceType returns [Type t]
+unannInterfaceType returns [ClassInterfaceType t]
 	:	c = unannClassType {$t = $c;}
 	;
 
-unannInterfaceType_lf_unannClassOrInterfaceType returns [Type t]
+unannInterfaceType_lf_unannClassOrInterfaceType returns [ClassInterfaceType t]
 	:	ci = unannClassType_lf_unannClassOrInterfaceType {$t = $ci;}
 	;
 
-unannInterfaceType_lfno_unannClassOrInterfaceType returns [Type t]
+unannInterfaceType_lfno_unannClassOrInterfaceType returns [ClassInterfaceType t]
 	:	ci = unannClassType_lfno_unannClassOrInterfaceType {$t = $ci;}
 	;
 
-unannTypeVariable returns [String s]
-	:	i = Identifier {$s = $i.getText();}
+unannTypeVariable returns [TypeVariable t]
+	:	i = Identifier {$t = new TypeVariable($i.getText());}
 	;
 
-unannArrayType returns [Type t]
-	:	unannPrimitiveType dims
-	|	unannClassOrInterfaceType dims
-	|	unannTypeVariable dims
+unannArrayType returns [ArrayType t]
+	:	p = unannPrimitiveType d = dims {$t = new ArrayType($p, $d);}
+	|	c = unannClassOrInterfaceType d = dims {$t = new ArrayType($c, $d);}
+	|	v = unannTypeVariable d = dims {$t = new ArrayType($c, $d);}
 	;
 
 methodDeclaration returns [MethodDeclaration d]
@@ -506,16 +547,17 @@ methodModifier returns [Modifier m]
 	;
 
 methodHeader [MethodDeclaration m]
+    locals [List<Annotation> ans = new ArrayList<>();]
 	:	rt = result methodDeclarator[m] th = throws_?
         {
             $m.setReturnType($rt);
             $m.setExceptions($th);
         }
-	|	tp = typeParameters a = annotation* rt = result
-        methodDeclarator[m] th = throws_?
+	|	tp = typeParameters (a = annotation {$ans.add($a);})*
+        rt = result methodDeclarator[m] th = throws_?
         {
-            $m.setTypeParams($tp);
-            $m.setAnnotations($a)
+            $m.setTypeParameters($tp);
+            $m.setAnnotations($ans)
             $m.setReturnType($rt);
             $m.setExceptions($th);
         }
@@ -523,7 +565,7 @@ methodHeader [MethodDeclaration m]
 
 result returns [Type t]
 	:	u = unannType {$t = $u;}
-	|	'void' {$t = Type.VOID;}
+	|	'void' {$t = null;}
 	;
 
 methodDeclarator [MethodDeclaration m]
@@ -533,6 +575,9 @@ methodDeclarator [MethodDeclaration m]
         {
             $m.setName($n);
             $m.setParameters($p);
+            if ($d > 0) {
+                $m.setReturnType($m.getReturnType().augment($d));
+            }
         }
 
 	;
@@ -602,7 +647,7 @@ exceptionTypeList returns [List<Type> l]
         {$l = $ls;}
 	;
 
-exceptionType returns [Type t]
+exceptionType returns [ReferenceType t]
 	:	c = classType {$t = $c;}
 	|	v = typeVariable {$t = $v;}
 	;
@@ -620,6 +665,7 @@ staticInitializer returns [Block b]
 	:	'static' body = block {$b = $body;}
 	;
 
+// TODO separate
 constructorDeclaration returns [MethodDeclaration d]
     locals [List<Modifier> mods = new ArrayList<>();]
 	:	(m = constructorModifier {$mods.add($m);})*
@@ -640,6 +686,7 @@ constructorModifier returns [Modifier m]
 	|	'private' {$m = Modifier.PRIVATE;}
 	;
 
+// TODO
 constructorDeclarator [MethodDeclaration d]
 	:	t = typeParameters? n = simpleTypeName '(' l = formalParameterList? ')'
         {
@@ -659,6 +706,7 @@ constructorBody returns [Block b]
          $b.addStatement(0, $s);}
 	;
 
+// TODO
 explicitConstructorInvocation returns [Statement s]
 	:	typeArguments? 'this' '(' argumentList? ')' ';'
 	|	typeArguments? 'super' '(' argumentList? ')' ';'
@@ -712,7 +760,7 @@ normalInterfaceDeclaration returns [InterfaceDeclaration d]
 	:	(m = interfaceModifier {$mods.add($m);})*
         'interface' id = Identifier
         t = typeParameters? e = extendsInterfaces?
-        {$d = new InterfaceDeclaration($id.getText(), $mods, $e);}
+        {$d = new InterfaceDeclaration($id.getText(), $mods, $e, $t);}
         interfaceBody[d]
 	;
 
@@ -726,7 +774,7 @@ interfaceModifier returns [Modifier m]
 	|	'strictfp' {$m = Modifier.STRICT_FP;}
 	;
 
-extendsInterfaces returns [List<String> l]
+extendsInterfaces returns [List<ClassInterfaceType> l]
 	:	'extends' i = interfaceTypeList {$l = $i;}
 	;
 
@@ -774,16 +822,19 @@ interfaceMethodModifier returns [Modifier m]
 	|	'strictfp' {$m = Modifier.STRICT_FP;}
 	;
 
+// TODO
 annotationTypeDeclaration
     locals [List<Modifier> mods = new ArrayList<>();]
     :	(m = interfaceModifier {$mods.add($m);})*
 		'@' 'interface' id = Identifier b = annotationTypeBody
 	;
 
+// TODO
 annotationTypeBody
 	:	'{' annotationTypeMemberDeclaration* '}'
 	;
 
+// TODO
 annotationTypeMemberDeclaration
 	:	annotationTypeElementDeclaration
 	|	constantDeclaration
@@ -792,6 +843,7 @@ annotationTypeMemberDeclaration
 	|	';'
 	;
 
+// TODO
 annotationTypeElementDeclaration
     locals [List<Modifier> mods = new ArrayList<>();]
 	:	(m = annotationTypeElementModifier {$mods.add($m);})*
@@ -800,6 +852,7 @@ annotationTypeElementDeclaration
         dv = defaultValue? ';'
 	;
 
+// TODO
 annotationTypeElementModifier returns [Modifier m]
 	:	a = annotation {$m = $a;}
 	|	'public' {$m = Modifier.PUBLIC;}
@@ -810,12 +863,14 @@ defaultValue returns [Expression e]
 	:	'default' v = elementValue {$e = $v;}
 	;
 
+// TODO
 annotation returns [AnnotationStatement s]
 	:	n = normalAnnotation {$s = $n;}
 	|	m = markerAnnotation {$s = $m;}
 	|	e = singleElementAnnotation {$s = $e;}
 	;
 
+// TODO
 normalAnnotation returns [AnnotationStatement s]
 	:	'@' t = typeName '(' l = elementValuePairList? ')'
         {$s = new AnnotationStatement($t, $l);}
@@ -839,6 +894,7 @@ elementValue returns [Expression e]
 	|	a = annotation {$e = $a;}
 	;
 
+// TODO
 elementValueArrayInitializer returns [ArrayDeclaration d]
 	:	'{' l = elementValueList? ','? '}'
         {$d = new ArrayDeclaration($l);}
@@ -851,10 +907,12 @@ elementValueList returns [List<Expression> l]
         {$l = $ls;}
 	;
 
+// TODO
 markerAnnotation returns [AnnotationStatement s]
 	:	'@' t = typeName {$s = new AnnotationStatement($t);}
 	;
 
+// TODO
 singleElementAnnotation returns [AnnotationStatement s]
 	:	'@' t = typeName '(' v = elementValue ')'
         {$s = new AnnotationStatement($t, $v);}
@@ -864,6 +922,7 @@ singleElementAnnotation returns [AnnotationStatement s]
  * Productions from §10 (Arrays)
  */
 
+// TODO
 arrayInitializer returns [ArrayDeclaration d]
 	:	'{' l = variableInitializerList? ','? '}'
         {$d = new ArrayDeclaration($l);}
@@ -1103,13 +1162,14 @@ enhancedForStatementNoShortIf returns [ForEachStatement st]
          $st = new ForEachStatement($v, $e, $s);}
 	;
 
-breakStatement returns [BreakStatement st]
-	:	'break' id = Identifier? ';' {$st = new BreakStatement($id.getText());}
+breakStatement returns [JumpStatement st]
+	:	'break' id = Identifier? ';'
+        {$st = new JumpStatement(true, $id.getText());}
 	;
 
-continueStatement returns [ContinueStatement st]
+continueStatement returns [JumpStatement st]
 	:	'continue' id = Identifier? ';'
-        {$st = new ContinueStatement($id.getText());}
+        {$st = new JumpStatement(false, $id.getText());}
 	;
 
 returnStatement returns [ReturnStatement st]
@@ -1151,8 +1211,8 @@ catchFormalParameter returns [VariableDeclaration d]
         {$d = new VariableDeclaration($n, $t, $mods);}
 	;
 
-catchType returns [List<Type> l]
-    locals [List<Type> types = new ArrayList<>();]
+catchType returns [List<ClassInterfaceType> l]
+    locals [List<ClassInterfaceType> types = new ArrayList<>();]
 	:	(u = unannClassType {$types.add($u);})
         ('|' c = classType {$types.add($c);})*
         {$l = $types;}
@@ -1199,6 +1259,7 @@ primary returns [Expression e]
 		)*
 	;
 
+// TODO
 primaryNoNewArray returns [Expression e]
 	:	a1 = literal {$e = $a1;}
 	|	a2 = typeName ('[' ']')* '.' 'class'
@@ -1213,10 +1274,12 @@ primaryNoNewArray returns [Expression e]
 	|	a11 = methodReference {$e = $a11;}
 	;
 
+// TODO
 primaryNoNewArray_lf_arrayAccess
 	:
 	;
 
+// TODO
 primaryNoNewArray_lfno_arrayAccess returns [Expression e]
 	:	a1 = literal {$e = $a1;}
 	|	a2 = typeName ('[' ']')* '.' 'class'
@@ -1238,6 +1301,7 @@ primaryNoNewArray_lf_primary returns [Expression e]
 	|	a5 = methodReference_lf_primary {$e = $a5;}
 	;
 
+// TODO
 primaryNoNewArray_lf_primary_lf_arrayAccess_lf_primary
 	:
 	;
@@ -1249,6 +1313,7 @@ primaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primary returns [Expression e]
 	|	a4 = methodReference_lf_primary {$e = $a4;}
 	;
 
+// TODO
 primaryNoNewArray_lfno_primary returns [Expression e]
 	:	a1 = literal {$e = $a1;}
 	|	a2 = typeName ('[' ']')* '.' 'class'
@@ -1264,10 +1329,12 @@ primaryNoNewArray_lfno_primary returns [Expression e]
 	|	a11 = methodReference_lfno_primary {$e = $a11;}
 	;
 
+// TODO
 primaryNoNewArray_lfno_primary_lf_arrayAccess_lfno_primary
 	:
 	;
 
+// TODO
 primaryNoNewArray_lfno_primary_lfno_arrayAccess_lfno_primary returns [Expression e]
 	:	a1 = literal {$e = $a1;}
 	|	a2 = typeName ('[' ']')* '.' 'class'
@@ -1282,6 +1349,7 @@ primaryNoNewArray_lfno_primary_lfno_arrayAccess_lfno_primary returns [Expression
 	|	a10 = methodReference_lfno_primary {$e = $a10;}
 	;
 
+// TODO
 classInstanceCreationExpression returns [ConstructionExpression e]
 	:	'new' t = typeArguments? a = annotation* id = Identifier
         ('.' a2 = annotation* id2 = Identifier)* targs = typeArgumentsOrDiamond?
@@ -1294,6 +1362,7 @@ classInstanceCreationExpression returns [ConstructionExpression e]
         '(' l = argumentList? ')' b = classBody?
 	;
 
+// TODO
 classInstanceCreationExpression_lf_primary returns [ConstructionExpression e]
 	:	'.' 'new' t = typeArguments? a = annotation* id = Identifier
         targs = typeArgumentsOrDiamond?
@@ -1301,6 +1370,7 @@ classInstanceCreationExpression_lf_primary returns [ConstructionExpression e]
         b = classBody?
 	;
 
+// TODO
 classInstanceCreationExpression_lfno_primary returns [ConstructionExpression e]
 	:	'new' t = typeArguments? a = annotation* id = Identifier
         ('.' a2 = annotation* id2 = Identifier)*
@@ -1312,6 +1382,7 @@ classInstanceCreationExpression_lfno_primary returns [ConstructionExpression e]
         '(' l = argumentList? ')' b = classBody?
 	;
 
+// TODO
 typeArgumentsOrDiamond
 	:	typeArguments
 	|	'<' '>'
@@ -1329,12 +1400,14 @@ fieldAccess_lf_primary returns [AccessExpression e]
 	:	'.' id = Identifier {$e = new AccessExpression(null, $id.getText());}
 	;
 
+// TODO
 fieldAccess_lfno_primary returns [AccessExpression e]
 	:	'super' '.' id = Identifier
         {$e = new AccessExpression(Expression.SuperExpression, $id);}
 	|	typeName '.' 'super' '.' Identifier
 	;
 
+// TODO
 arrayAccess returns [ArrayAccessExpression e]
 	:	(	(n = expressionName '[' i = expression ']'
                 {$e = new ArrayAccessExpression($n, $i);})
@@ -1346,6 +1419,7 @@ arrayAccess returns [ArrayAccessExpression e]
 		)*
 	;
 
+// TODO
 arrayAccess_lf_primary returns [ArrayAccessExpression e]
 	:	(	(pno = primaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primary
            '[' i = expression ']' {$e = new ArrayAccessExpression($p, $i);})
@@ -1356,6 +1430,7 @@ arrayAccess_lf_primary returns [ArrayAccessExpression e]
 		)*
 	;
 
+// TODO
 arrayAccess_lfno_primary returns [ArrayAccessExpression e]
 	:	(	(name = expressionName '[' i = expression ']'
                 {$e = new ArrayAccessExpression($name, $i);})
@@ -1369,6 +1444,7 @@ arrayAccess_lfno_primary returns [ArrayAccessExpression e]
 		)*
 	;
 
+// TODO
 methodInvocation returns [CallExpression e]
 	:	mn = methodName '(' a = argumentList? ')'
         {$e = new CallExpression($mn, $a);}
@@ -1388,11 +1464,13 @@ methodInvocation returns [CallExpression e]
         {$e = new CallExpression($id.getText(), $a);}
 	;
 
+// TODO
 methodInvocation_lf_primary returns [CallExpression e]
 	:	'.' t = typeArguments? id = Identifier '(' a = argumentList? ')'
         {$e = new CallExpression($id.getText(), $a);}
 	;
 
+// TODO
 methodInvocation_lfno_primary returns [CallExpression e]
 	:	mn = methodName '(' a = argumentList? ')'
         {$e = new CallExpression($mn, $a);}
@@ -1415,6 +1493,7 @@ argumentList returns [List<Expression> l]
         (',' ex = expression {$ls.add($ex);})* {$l = $ls;}
 	;
 
+// TODO
 methodReference returns [MethodReferenceExpression e]
 	:	en = expressionName '::' t = typeArguments? id = Identifier
         {$e = new MethodReferenceExpression($en, $id.getText());}
@@ -1434,11 +1513,13 @@ methodReference returns [MethodReferenceExpression e]
         {$e = new MethodReferenceExpression($a);}
 	;
 
+// TODO
 methodReference_lf_primary returns [MethodReferenceExpression e]
 	:	'::' t = typeArguments? id = Identifier
         {$e = new MethodReferenceExpression($id.getText());}
 	;
 
+// TODO
 methodReference_lfno_primary returns [MethodReferenceExpression e]
 	:	en = expressionName '::' t = typeArguments? id = Identifier
         {$e = new MethodReferenceExpression($en, $id.getText());}
@@ -1455,6 +1536,7 @@ methodReference_lfno_primary returns [MethodReferenceExpression e]
         {$e = new MethodReferenceExpression($a);}
 	;
 
+// TODO
 arrayCreationExpression returns [Expression e]
 	:	'new' primitiveType dimExprs dims?
 	|	'new' classOrInterfaceType dimExprs dims?
@@ -1462,10 +1544,12 @@ arrayCreationExpression returns [Expression e]
 	|	'new' classOrInterfaceType dims arrayInitializer
 	;
 
+// TODO
 dimExprs
 	:	dimExpr dimExpr*
 	;
 
+// TODO
 dimExpr returns [Expression e]
     locals [List<Modifier> mods = new ArrayList<>();]
 	:	(a = annotation {$mods.add($a);})*
@@ -1646,6 +1730,7 @@ preDecrementExpression returns [UnaryExpression e]
         {$e = new UnaryExpression($ex, UnaryOperator.PRE_DECREMENT);}
 	;
 
+// TODO
 unaryExpressionNotPlusMinus returns [Expression e]
 	:	pf = postfixExpression {$e = $pf;}
 	|	'~' ex = unaryExpression
@@ -1655,6 +1740,7 @@ unaryExpressionNotPlusMinus returns [Expression e]
 	|	cex = castExpression {$e = $cex;}
 	;
 
+// TODO
 postfixExpression returns [UnaryExpression e]
 	:	(	p = primary
 		|	n = expressionName
@@ -1682,6 +1768,7 @@ postDecrementExpression_lf_postfixExpression returns [UnaryOperator op]
 	:	'--' {$op = UnaryOperator.DECREMENT;}
 	;
 
+// TODO
 castExpression returns [CastExpression e]
 	:	'(' pt = primitiveType ')' uex = unaryExpression
         {$e = new CastExpression($uex, $pt);}

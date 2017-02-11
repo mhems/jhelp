@@ -85,6 +85,14 @@ public class TypeArgument {
     }
 
     /**
+     * Sets the bounding type of this wildcard argument
+     * @param type the bounding type of this wildcard argument
+     */
+    public void setBoundType(ReferenceType type) {
+        this.type = type;
+    }
+
+    /**
      * Determines if the bound is an upper bound
      * @return true iff the argument is a wilcard and the bound is an upper bound
      * @throws RuntimeException if this is not a wildcarded argument
@@ -94,5 +102,14 @@ public class TypeArgument {
             throw new RuntimeException(); // TODO
         }
         return isUpperBound;
+    }
+
+    /**
+     * Sets if this bound is an upper or lower bound
+     * @param isUpperBound true if upper bound,
+     *                     false if lower bound
+     */
+    public void setIsUpperBounded(boolean isUpperBound) {
+        this.isUpperBound = isUpperBound;
     }
 }

@@ -4,6 +4,7 @@ package com.binghamton.jhelp;
  * Class representing an array type
  */
 public class ArrayType extends Type {
+    private Type type;
     private int rank;
 
     /**
@@ -11,19 +12,24 @@ public class ArrayType extends Type {
      * @param name the name of the array type
      * @param rank the dimensions of the array type
      */
-    public ArrayType(String name, int rank) {
-        super(name);
+    public ArrayType(Type type, int rank) {
+        this.type = type;
         this.rank = rank;
     }
 
     /**
-     * Construct a named, annotated array type
-     * @param name the name of the array type
-     * @param annotations the annotations of the array type
-     * @param rank the dimensions of the array type
+     * Gets the base type of this array
+     * @return the base type of this array
      */
-    public ArrayType(String name, Annotations annotations, int rank) {
-        super(name, annotations);
-        this.rank = rank;
+    public Type getType() {
+        return type;
+    }
+
+    /**
+     * Gets the dimensions of this array
+     * @return the dimensions of this array
+     */
+    public int getDimensions() {
+        return rank;
     }
 }
