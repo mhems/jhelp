@@ -1,15 +1,22 @@
-package com.binghamton.jhelp.ast;
+package com.binghamton.jhelp;
+
+import java.util.List;
 
 /**
  * A class representing a Java type argument
  */
 public class TypeArgument {
-    public static final TypeArgument DIAMOND = new TypeArgument(null);
+    public static final TypeArgument DIAMOND = new TypeArgument();
 
     private ReferenceType type;
     private Annotations annotations;
     private boolean isWildcard = false;
     private boolean isUpperBound;
+
+    /**
+     * Construct an empty (diamond) type argument
+     */
+    public TypeArgument() { }
 
     /**
      * Construct a type argument of a reference type
@@ -23,9 +30,9 @@ public class TypeArgument {
      * Construct a wildcard type argument
      * @param annotations the annotations of this type argument
      */
-    public TypeArgument(Annotations annotations) {
+    public TypeArgument(List<Annotation> annotations) {
         this.isWildcard = true;
-        this.annotations = annotations;
+        this.annotations = new Annotations(annotations);
     }
 
     /**
@@ -36,11 +43,11 @@ public class TypeArgument {
      */
     public TypeArgument(ReferenceType type,
                         boolean isUpperBound,
-                        Annotations annotations) {
+                        List<Annotation> annotations) {
         this.type = type;
         this.isWildcard = true;
         this.isUpperBound = isUpperBound;
-        this.annotations = annotations;
+        this.annotations = new Annotations(annotations);
     }
 
     /**
@@ -61,7 +68,7 @@ public class TypeArgument {
      */
     public Annotations getAnnotations() {
         if (!isWildcard) {
-            return type.getAnnotations;
+            return type.getAnnotations();
         }
         return annotations;
     }
@@ -70,8 +77,16 @@ public class TypeArgument {
      * Determines if this argument is a wildcard
      * @return true iff this argument is a wildcard
      */
-    public boolean isWildCard() {
+    public boolean isWildcard() {
         return isWildcard;
+    }
+
+    /**
+     * Determines if this argument is empty (i.e. the diamond operator)
+     * @return true iff this argument is empty
+     */
+    public boolean isDiamond() {
+        return type == null;
     }
 
     /**

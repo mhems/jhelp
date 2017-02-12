@@ -41,6 +41,6 @@ public class ImportStatement extends Statement {
      * @return true iff this import is on-demand
      */
     public boolean isDemand() {
-        return isDemand;
+        return onDemand;
     }
 }

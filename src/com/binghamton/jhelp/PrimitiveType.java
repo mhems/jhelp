@@ -25,13 +25,14 @@ public class PrimitiveType extends Type {
         BOOLEAN
     }
 
-    private Primitive type;
+    private Primitive primitive;
 
     /**
      * Construct a new primitive type
      * @param primitive the type of the primitive
      */
     private PrimitiveType(Primitive primitive) {
+        super(primitive.name());
         this.primitive = primitive;
     }
 }

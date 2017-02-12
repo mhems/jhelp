@@ -1,5 +1,10 @@
 package com.binghamton.jhelp.ast;
 
+import java.util.List;
+
+import com.binghamton.jhelp.Type;
+import com.binghamton.jhelp.ReferenceType;
+
 /**
  * A class representing a Java cast expression
  */

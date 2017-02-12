@@ -25,7 +25,7 @@ public class TryCatchBlock extends Statement {
      * Construct a try/catch/finally block
      * @param tryBody the code to try to execute
      * @param catches the list of catch statement to execute on exception
-     * @param finally the block to always execute at end
+     * @param finallyBody the block to always execute at end
      */
     public TryCatchBlock(Block tryBody,
                          List<CatchBlock> catches,
@@ -39,7 +39,7 @@ public class TryCatchBlock extends Statement {
      * @param resources the list of resources within the try block
      * @param tryBody the code to try to execute
      * @param catches the list of catch statement to execute on exception
-     * @param finally the block to always execute at end
+     * @param finallyBody the block to always execute at end
      */
     public TryCatchBlock(List<VariableDeclaration> resources,
                          Block tryBody,

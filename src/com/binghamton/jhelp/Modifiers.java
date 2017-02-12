@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.Set;
 
 /**
  * A class abstracting a set of Java modifiers
@@ -19,62 +20,62 @@ public class Modifiers {
     public static final Modifiers INTERFACE_METHOD_MODIFIERS;
 
     static {
-	CLASS_MODIFIERS = fromModifierArray(new Modifier[]{
-						Modifier.PUBLIC,
-						Modifier.PROTECTED,
-						Modifier.PRIVATE,
-						Modifier.ABSTRACT,
-						Modifier.STATIC,
-						Modifier.FINAL,
-						Modifier.STRICT_FP});
+        CLASS_MODIFIERS = fromModifierArray(new Modifier[]{
+                Modifier.PUBLIC,
+                Modifier.PROTECTED,
+                Modifier.PRIVATE,
+                Modifier.ABSTRACT,
+                Modifier.STATIC,
+                Modifier.FINAL,
+                Modifier.STRICT_FP});
 
-	FIELD_MODIFIERS = fromModifierArray(new Modifier[]{
-						Modifier.PUBLIC,
-						Modifier.PROTECTED,
-						Modifier.PRIVATE,
-						Modifier.STATIC,
-						Modifier.FINAL,
-						Modifier.TRANSIENT,
-						Modifier.VOLATILE});
+        FIELD_MODIFIERS = fromModifierArray(new Modifier[]{
+                Modifier.PUBLIC,
+                Modifier.PROTECTED,
+                Modifier.PRIVATE,
+                Modifier.STATIC,
+                Modifier.FINAL,
+                Modifier.TRANSIENT,
+                Modifier.VOLATILE});
 
-	VARIABLE_MODIFIERS = fromModifierArray(new Modifier[]{
-						   Modifier.FINAL});
+        VARIABLE_MODIFIERS = fromModifierArray(new Modifier[]{
+                Modifier.FINAL});
 
-	METHOD_MODIFIERS = fromModifierArray(new Modifier[]{
-						 Modifier.PUBLIC,
-						 Modifier.PROTECTED,
-						 Modifier.PRIVATE,
-						 Modifier.ABSTRACT,
-						 Modifier.STATIC,
-						 Modifier.SYNCHRONIZED,
-						 Modifier.NATIVE,
-						 Modifier.STRICT_FP,
-						 Modifier.FINAL});
+        METHOD_MODIFIERS = fromModifierArray(new Modifier[]{
+                Modifier.PUBLIC,
+                Modifier.PROTECTED,
+                Modifier.PRIVATE,
+                Modifier.ABSTRACT,
+                Modifier.STATIC,
+                Modifier.SYNCHRONIZED,
+                Modifier.NATIVE,
+                Modifier.STRICT_FP,
+                Modifier.FINAL});
 
-	CONSTRUCTOR_MODIFIERS = fromModifierArray(new Modifier[]{
-						      Modifier.PUBLIC,
-						      Modifier.PROTECTED,
-						      Modifier.PRIVATE});
+        CONSTRUCTOR_MODIFIERS = fromModifierArray(new Modifier[]{
+                Modifier.PUBLIC,
+                Modifier.PROTECTED,
+                Modifier.PRIVATE});
 
-	INTERFACE_MODIFIERS = fromModifierArray(new Modifier[]{
-						    Modifier.PUBLIC,
-						    Modifier.PROTECTED,
-						    Modifier.PRIVATE,
-						    Modifier.ABSTRACT,
-						    Modifier.STATIC,
-						    Modifier.STRICT_FP});
+        INTERFACE_MODIFIERS = fromModifierArray(new Modifier[]{
+                Modifier.PUBLIC,
+                Modifier.PROTECTED,
+                Modifier.PRIVATE,
+                Modifier.ABSTRACT,
+                Modifier.STATIC,
+                Modifier.STRICT_FP});
 
-	INTERFACE_CONSTANT_MODIFIERS = fromModifierArray(new Modifier[]{
-							     Modifier.PUBLIC,
-							     Modifier.STATIC,
-							     Modifier.FINAL});
+        INTERFACE_CONSTANT_MODIFIERS = fromModifierArray(new Modifier[]{
+                Modifier.PUBLIC,
+                Modifier.STATIC,
+                Modifier.FINAL});
 
-	INTERFACE_METHOD_MODIFIERS = fromModifierArray(new Modifier[]{
-							   Modifier.PUBLIC,
-							   Modifier.ABSTRACT,
-							   Modifier.DEFAULT,
-							   Modifier.STATIC,
-							   Modifier.STRICT_FP});
+        INTERFACE_METHOD_MODIFIERS = fromModifierArray(new Modifier[]{
+                Modifier.PUBLIC,
+                Modifier.ABSTRACT,
+                Modifier.DEFAULT,
+                Modifier.STATIC,
+                Modifier.STRICT_FP});
     }
 
     private EnumSet<Modifier> modifiers;
@@ -83,7 +84,7 @@ public class Modifiers {
      * Construct an empty set of modifiers
      */
     public Modifiers() {
-	this.modifiers = EnumSet.noneOf(Modifier.class);
+        this.modifiers = EnumSet.noneOf(Modifier.class);
     }
 
     /**
@@ -91,10 +92,10 @@ public class Modifiers {
      * @param modifiers the collection of modifiers to initialize with
      */
     public Modifiers(Collection<Modifier> modifiers) {
-	this.modifiers = EnumSet.noneOf(Modifier.class);
-	for (Modifier modifier : modifiers) {
-	    addOrPanic(modifier);
-	}
+        this.modifiers = EnumSet.noneOf(Modifier.class);
+        for (Modifier modifier : modifiers) {
+            addOrPanic(modifier);
+        }
     }
 
     /**
@@ -111,7 +112,7 @@ public class Modifiers {
      * @return true iff the modifier was successfully added
      */
     public boolean add(Modifier m) {
-	return modifiers.add(m);
+        return modifiers.add(m);
     }
 
     /**
@@ -121,9 +122,9 @@ public class Modifiers {
      * @throws Error if `m` is already contained in modifiers
      */
     public void addOrPanic(Modifier m) {
-	if (!add(m)) {
-	    throw new RepeatModifierException(m);
-	}
+        if (!add(m)) {
+            // throw new RepeatModifierException(m); // TODO
+        }
     }
 
     /**
@@ -237,6 +238,6 @@ public class Modifiers {
      * @return a new Modifiers object with the elements in `modifiers`
      */
     private static Modifiers fromModifierArray(Modifier[] modifiers) {
-	return new Modifiers(new ArrayList<Modifier>(Arrays.asList(modifiers)));
+        return new Modifiers(new ArrayList<Modifier>(Arrays.asList(modifiers)));
     }
 }

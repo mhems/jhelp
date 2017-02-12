@@ -1,9 +1,14 @@
 package com.binghamton.jhelp.ast;
 
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import com.binghamton.jhelp.Modifier;
+import com.binghamton.jhelp.MyPair;
+import com.binghamton.jhelp.Type;
 
 /**
  * A class representing a Java variable declaration
@@ -22,6 +27,15 @@ public class VariableDeclaration extends Declaration {
     }
 
     /**
+     * Construct a new named, modified variable declaration
+     * @param name the name of the variable being declared
+     * @param modifiers any modifiers on the variable being declared
+     */
+    public VariableDeclaration(String name, List<Modifier> modifiers) {
+        this(name, null, modifiers, null, false);
+    }
+
+    /**
      * Construct a new typed variable declaration
      * @param name the name of the variable being declared
      * @param type the type of the variable being declared
@@ -32,7 +46,7 @@ public class VariableDeclaration extends Declaration {
                                Type type,
                                List<Modifier> modifiers,
                                boolean isEllipsis) {
-        this(name, type, modifiers, null. isEllipsis);
+        this(name, type, modifiers, null, isEllipsis);
     }
 
     /**
@@ -53,6 +67,7 @@ public class VariableDeclaration extends Declaration {
      * @param type the type of the variable being declared
      * @param modifiers any modifiers on the variable being declared
      * @param initializer the expression yielding the variable's inital value
+     * @param isEllipsis true iff this variable is variadic
      */
     public VariableDeclaration(String name,
                                Type type,
@@ -67,17 +82,32 @@ public class VariableDeclaration extends Declaration {
     }
 
     /**
+     * Construct a new typed variable declaration of a name-initializer pair
+     * @param pair a name-initializer pair
+     * @param type the type of the variable being declared
+     * @param modifiers any modifiers on the variable being declared
+     */
+    public VariableDeclaration(MyPair<String, Expression> pair,
+                               Type type,
+                               List<Modifier> modifiers) {
+        super(null, modifiers);
+        this.pairs.put(pair.first, pair.second);
+        this.type = type;
+        this.isEllipsis = false;
+    }
+
+    /**
      * Construct a new typed variable declaration of multiple name-initializer
      * pairs
      * @param pairs a list of name-initializer pairs
      * @param type the type of the variable being declared
      * @param modifiers any modifiers on the variable being declared
      */
-    public VariableDeclaration(List<Pair<String, Expression>> pairs,
+    public VariableDeclaration(List<MyPair<String, Expression>> pairs,
                                Type type,
                                List<Modifier> modifiers) {
         super(null, modifiers);
-        for (Pair pair : pairs) {
+        for (MyPair<String, Expression> pair : pairs) {
             this.pairs.put(pair.first, pair.second);
         }
         this.type = type;
@@ -104,8 +134,8 @@ public class VariableDeclaration extends Declaration {
      * Gets the names of this variable declaration
      * @return the names of this variable declaration
      */
-    public List<String> getNames() {
-        return pairs.keys();
+    public Set<String> getNames() {
+        return pairs.keySet();
     }
 
     /**
@@ -119,7 +149,7 @@ public class VariableDeclaration extends Declaration {
 
     /**
      * Gets the initial value of the variable, if any
-     * @name the name of the variable
+     * @param name the name of the variable
      * @return the initial value of the variable, if any
      */
     public Expression getInitializer(String name) {
@@ -128,7 +158,7 @@ public class VariableDeclaration extends Declaration {
 
     /**
      * Determines if this variable has an initial value
-     * @name the name of the variable
+     * @param name the name of the variable
      * @return true iff this variable has an initial value
      */
     public boolean isInitialized(String name) {

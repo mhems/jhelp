@@ -3,17 +3,16 @@ package com.binghamton.jhelp;
 /**
  * Class representing an array type
  */
-public class ArrayType extends Type {
-    private Type type;
+public class ArrayType extends ReferenceType {
     private int rank;
 
     /**
      * Construct a named array type
-     * @param name the name of the array type
+     * @param type the type of the array elements
      * @param rank the dimensions of the array type
      */
     public ArrayType(Type type, int rank) {
-        this.type = type;
+        super(type.name, type.annotations.getAnnotations());
         this.rank = rank;
     }
 
@@ -24,15 +23,7 @@ public class ArrayType extends Type {
      */
     @Override
     public ArrayType augment(int dimensions) {
-        return new ArrayType(type, rank + dimensions);
-    }
-
-    /**
-     * Gets the base type of this array
-     * @return the base type of this array
-     */
-    public Type getType() {
-        return type;
+        return new ArrayType(this, rank + dimensions);
     }
 
     /**

@@ -1,5 +1,7 @@
 package com.binghamton.jhelp;
 
+import java.util.List;
+
 /**
  * A class representing the type of a Java method
  */
@@ -14,7 +16,7 @@ public class MethodType extends Type {
      * @param paramTypes the types of the parameters of this method
      */
     public MethodType(Type returnType, List<Type> paramTypes) {
-        this(returnType, paramTypes, null, null, 0);
+        this(returnType, paramTypes, null);
     }
 
     /**
@@ -26,6 +28,7 @@ public class MethodType extends Type {
     public MethodType(Type returnType,
                       List<Type> paramTypes,
                       List<TypeParameter> typeParams) {
+        super(null);
         this.returnType = returnType;
         this.paramTypes = paramTypes;
         this.typeParams = typeParams;
@@ -67,7 +70,7 @@ public class MethodType extends Type {
      * Gets the type parameters of this method
      * @return the type parameters of this method, if any
      */
-    public List<TypeParamter> getTypeParameters() {
+    public List<TypeParameter> getTypeParameters() {
         return typeParams;
     }
 

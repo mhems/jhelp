@@ -37,7 +37,7 @@ public class SwitchStatement extends Statement {
 
     /**
      * Gets a particular block of this switch statement
-     * @param the 0-indexed index of the block to retrieve
+     * @param index the 0-indexed index of the block to retrieve
      * @return the block at index `index`
      */
     public CaseBlock getCase(int index) {

@@ -1,5 +1,7 @@
 package com.binghamton.jhelp;
 
+import java.util.List;
+
 /**
  * An abstract class representing reference types.
  * Reference types include:
@@ -15,7 +17,7 @@ public abstract class ReferenceType extends Type {
      * @param name the name of this type
      */
     public ReferenceType(String name) {
-        super(name, new Annotations());
+        super(name, null);
     }
 
     /**
@@ -23,7 +25,7 @@ public abstract class ReferenceType extends Type {
      * @param name the name of this type
      * @param annotations the annotations of this type
      */
-    public ReferenceType(String name, Annotations annotations) {
+    public ReferenceType(String name, List<Annotation> annotations) {
         super(name, annotations);
     }
 }

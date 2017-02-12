@@ -1,5 +1,7 @@
 package com.binghamton.jhelp.ast;
 
+import com.binghamton.jhelp.Type;
+
 /**
  * A class representing a Java literal
  */

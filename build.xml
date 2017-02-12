@@ -47,6 +47,7 @@
       <src path="${java-src.dir}"/>
       <classpath refid="compile.classpath"/>
       <compilerarg value="-Xlint:all"/>
+      <compilerarg value="-Xdiags:verbose"/>
     </javac>
   </target>
 
@@ -71,12 +72,13 @@
   </target>
 
   <target name="clean">
-    <description>Removes build files.</description>
+    <description>Removes build and antlr-generated files.</description>
     <delete file="${target.dir}/${project}.jar"/>
     <delete>
-      <fileset dir="${java-build.dir}">
-        <include name="*.class"/>
-      </fileset>
+      <fileset dir="${java-build.dir}" includes="**/*.class"/>
+    </delete>
+    <delete>
+      <fileset dir="${java-src.dir}/antlr"/>
     </delete>
   </target>
 

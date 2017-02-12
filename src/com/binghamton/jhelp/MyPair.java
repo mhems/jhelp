@@ -3,7 +3,7 @@ package com.binghamton.jhelp;
 /**
  * Utility class representing immutable generic pair
  */
-public class Pair<A, B> {
+public class MyPair<A, B> {
     public final A first;
     public final B second;
 
@@ -12,7 +12,7 @@ public class Pair<A, B> {
      * @param a the first element of the tuple
      * @param b the second element of the tuple
      */
-    public Pair(A a, B b) {
+    public MyPair(A a, B b) {
         first = a;
         second = b;
     }
@@ -33,8 +33,8 @@ public class Pair<A, B> {
      */
     @Override
     public boolean equals(Object other) {
-        if (other instanceof Pair) {
-            Pair p = (Pair)other;
+        if (other instanceof MyPair<?, ?>) {
+            MyPair<?, ?> p = (MyPair<?, ?>)other;
             return first.equals(p.first) && second.equals(p.second);
         }
         return false;

@@ -2,6 +2,9 @@ package com.binghamton.jhelp.ast;
 
 import java.util.List;
 
+import com.binghamton.jhelp.Annotation;
+import com.binghamton.jhelp.TypeArgument;
+
 /**
  * A class representing an instantion (constructor call) with possible anonymous
  * inner class.
@@ -74,6 +77,6 @@ public class InstantiationExpression extends CallExpression {
      * @return this instantiation's anonymous class, if any
      */
     public ConcreteBodyDeclaration getAnonymousClass() {
-        return classbody;
+        return classBody;
     }
 }

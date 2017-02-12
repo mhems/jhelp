@@ -1,4 +1,4 @@
-package com.binghamton.jhelp.ast;
+package com.binghamton.jhelp;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -23,7 +23,7 @@ public class TypeParameter {
      * @param name the name of the type parameter
      * @param annotations the annotations of the type parameter
      */
-    public TypeParameter(String name, Annotations annotations) {
+    public TypeParameter(String name, List<Annotation> annotations) {
         this(name, annotations, null);
     }
 
@@ -31,10 +31,10 @@ public class TypeParameter {
      * Construct a named, annotated type parameter
      * @param name the name of the type parameter
      * @param annotations the annotations of the type parameter
-     * @param supertypes the super types (bounds) of the type parameter
+     * @param superTypes the super types (bounds) of the type parameter
      */
     public TypeParameter(String name,
-                         Annotations annotations,
+                         List<Annotation> annotations,
                          List<ReferenceType> superTypes) {
         type = new TypeVariable(name, annotations);
         this.superTypes = superTypes;

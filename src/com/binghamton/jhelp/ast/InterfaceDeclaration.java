@@ -2,6 +2,10 @@ package com.binghamton.jhelp.ast;
 
 import java.util.List;
 
+import com.binghamton.jhelp.ClassInterfaceType;
+import com.binghamton.jhelp.Modifier;
+import com.binghamton.jhelp.TypeParameter;
+
 /**
  * A class representing the declaration of a Java interface
  */

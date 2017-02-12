@@ -1,18 +1,18 @@
 package com.binghamton.jhelp.ast;
 
-import com.binghamton.jhelp.Token;
+import com.binghamton.jhelp.FileToken;
 
 /**
  * Base class representing a node in the AST
  */
 public abstract class ASTNode {
-    private Token token;
+    private FileToken token;
 
     /**
-     * Construct a new ASTNode with underlying Token
-     * @param token the token of this ASTNode
+     * Construct a new ASTNode with underlying FileToken
+     * @param token the FileToken of this ASTNode
      */
-    // public ASTNode(Token token) {
+    // public ASTNode(FileToken token) {
     //     this.token = token;
     // }
 

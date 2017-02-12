@@ -3,14 +3,16 @@ package com.binghamton.jhelp.ast;
 import java.util.List;
 import java.util.ArrayList;
 
+import com.binghamton.jhelp.ClassInterfaceType;
+import com.binghamton.jhelp.Modifier;
+
 /**
  * An abstract class representing a concrete body declaration.
  * This includes classes and enums.
  */
 public abstract class ConcreteBodyDeclaration extends BodyDeclaration {
-    private List<Block> instanceInitializers = new ArrayList<>();
-    private List<Block> staticInitializers = new ArrayList<>();
-
+    protected List<Block> instanceInitializers = new ArrayList<>();
+    protected List<Block> staticInitializers = new ArrayList<>();
 
     /**
      * Construct an anonymous declaration

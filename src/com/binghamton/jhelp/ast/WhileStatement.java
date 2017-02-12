@@ -3,9 +3,8 @@ package com.binghamton.jhelp.ast;
 /**
  * A class representing a Java (do) while statement
  */
-public class WhileStatement extends Statement {
+public class WhileStatement extends Block {
     private Expression condition;
-    private Block body;
     private boolean isDo;
 
     /**
@@ -24,8 +23,8 @@ public class WhileStatement extends Statement {
      * @param isDo true iff this while statement is a do-while statement
      */
     public WhileStatement(Expression condition, Block body, boolean isDo) {
+        super(body);
         this.condition = condition;
-        this.body = body;
         this.isDo = isDo;
     }
 
@@ -35,14 +34,6 @@ public class WhileStatement extends Statement {
      */
     public Expression getCondition() {
         return condition;
-    }
-
-    /**
-     * Gets the code this statement conditionally executes
-     * @return the code this statement conditionally executes
-     */
-    public Block getBody() {
-        return body;
     }
 
     /**

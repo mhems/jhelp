@@ -3,7 +3,7 @@ package com.binghamton.jhelp;
 /**
  * A class representing a lexer token from a File-like object.
  */
-public class Token {
+public class FileToken {
     public final FileBuffer fileBuffer;
     public final int line;
     public final int colStart;
@@ -11,13 +11,13 @@ public class Token {
     public final String lexeme;
 
     /**
-     * Construct Token object
-     * @param lexeme the contents of this Token
-     * @param fileBuffer the FileBuffer where this Token originated from
-     * @param line the 1-indexed line number this Token originated from
-     * @param col the 0-indexed column number this Token starts on
+     * Construct FileToken object
+     * @param lexeme the contents of this FileToken
+     * @param fileBuffer the FileBuffer where this FileToken originated from
+     * @param line the 1-indexed line number this FileToken originated from
+     * @param col the 0-indexed column number this FileToken starts on
      */
-    public Token(String lexeme, FileBuffer fileBuffer, int line, int col) {
+    public FileToken(String lexeme, FileBuffer fileBuffer, int line, int col) {
         this.lexeme = lexeme;
         this.fileBuffer = fileBuffer;
         this.line = line;
@@ -26,7 +26,7 @@ public class Token {
     }
 
     /**
-     * Return the length of this Token's lexeme
+     * Return the length of this token's lexeme
      * @return the length of the lexeme
      */
     public int length() {
@@ -34,18 +34,18 @@ public class Token {
     }
 
     /**
-     * Retrieves the line this Token comes from
-     * @return a one-element array containing this Token's line
+     * Retrieves the line this token comes from
+     * @return a one-element array containing this token's line
      */
     public String[] getLines() {
         return fileBuffer.getLines(line);
     }
 
     /**
-     * Retrieves the line of this Token with `width` lines in both
+     * retrieves the line of this token with `width` lines in both
      * directions
      * @param width the number of lines to include in either direction
-     * @return an array containing this Token's line and at most (2*`width`)
+     * @return an array containing this token's line and at most (2*`width`)
      * lines of context
      */
     public String[] getLines(int width) {
@@ -53,10 +53,10 @@ public class Token {
     }
 
     /**
-     * Retrieves the line of this Token with specified contextual lines
+     * Retrieves the line of this token with specified contextual lines
      * @param before the number of trailing lines to include
      * @param after the number of preceding lines to include
-     * @return an array containing this Token's line and at most
+     * @return an array containing this token's line and at most
      */
     public String[] getLines(int before, int after) {
         return fileBuffer.getLines(line, before, after);
@@ -69,8 +69,8 @@ public class Token {
      */
     @Override
     public boolean equals(Object other) {
-        if (other instanceof Token) {
-            Token t = (Token)other;
+        if (other instanceof FileToken) {
+            FileToken t = (FileToken)other;
             return fileBuffer.equals(t.fileBuffer) &&
                 line == t.line &&
                 colStart == t.colStart &&

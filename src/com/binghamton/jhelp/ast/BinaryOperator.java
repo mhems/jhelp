@@ -6,7 +6,7 @@ package com.binghamton.jhelp.ast;
 public enum BinaryOperator {
     ADDITION,
     SUBTRACTION,
-    MULTIPLACATION,
+    MULTIPLICATION,
     DIVISION,
     MODULUS,
     LEFT_SHIFT,

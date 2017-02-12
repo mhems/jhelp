@@ -2,11 +2,13 @@ package com.binghamton.jhelp.ast;
 
 import java.util.List;
 
+import com.binghamton.jhelp.Annotation;
+
 /**
  * A class representing a Java package statement
  */
 public class PackageStatement extends ASTNode {
-    private List<AnnotationStatement> annotations;
+    private List<Annotation> annotations;
     private List<String> ids;
 
     /**
@@ -14,8 +16,7 @@ public class PackageStatement extends ASTNode {
      * @param ids a list of package identifiers
      * @param annotations list of package annotations, if any
      */
-    public PackageStatement(List<String> ids,
-                            List<AnnotationStatement> annotations) {
+    public PackageStatement(List<String> ids, List<Annotation> annotations) {
         this.ids = ids;
         this.annotations = annotations;
     }
@@ -24,7 +25,7 @@ public class PackageStatement extends ASTNode {
      * Gets the annotations, if any, of this package declaration
      * @return the annotations, if any, of this package declaration
      */
-    public List<AnnotationStatement> getAnnotations() {
+    public List<Annotation> getAnnotations() {
         return annotations;
     }
 

@@ -2,7 +2,9 @@ package com.binghamton.jhelp.ast;
 
 import java.util.List;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
+
+import com.binghamton.jhelp.Modifier;
 
 /**
  * A class representing a Java annotation type declaration
@@ -24,7 +26,7 @@ public class AnnotationDeclaration extends Declaration {
      * @return true iff this annotation has any member declarations
      */
     public boolean hasDeclarations() {
-        return numDeclarations > 0;
+        return numDeclarations() > 0;
     }
 
     /**

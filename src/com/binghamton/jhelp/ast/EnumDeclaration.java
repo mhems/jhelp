@@ -3,6 +3,9 @@ package com.binghamton.jhelp.ast;
 import java.util.List;
 import java.util.ArrayList;
 
+import com.binghamton.jhelp.ClassInterfaceType;
+import com.binghamton.jhelp.Modifier;
+
 /**
  * A class representing enum declarations
  */
@@ -18,7 +21,7 @@ public class EnumDeclaration extends ConcreteBodyDeclaration {
      */
     public EnumDeclaration(String name,
                            List<Modifier> modifiers,
-                           List<String> implementees) {
+                           List<ClassInterfaceType> implementees) {
         super(name, modifiers, implementees);
     }
 

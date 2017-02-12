@@ -2,6 +2,10 @@ package com.binghamton.jhelp.ast;
 
 import java.util.List;
 
+import com.binghamton.jhelp.ClassInterfaceType;
+import com.binghamton.jhelp.Modifier;
+import com.binghamton.jhelp.TypeParameter;
+
 /**
  * A class representing a Java class declaration
  */
@@ -27,7 +31,7 @@ public class ClassDeclaration extends ConcreteBodyDeclaration {
     public ClassDeclaration(String name,
                             List<Modifier> modifiers,
                             List<ClassInterfaceType> superInterfaces,
-                            List<String> typeParams,
+                            List<TypeParameter> typeParams,
                             ClassInterfaceType superClass) {
         super(name, modifiers, superInterfaces);
         this.typeParams = typeParams;

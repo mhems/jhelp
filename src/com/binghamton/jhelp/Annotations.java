@@ -15,7 +15,7 @@ public class Annotations extends Modifiers {
      * Construct an empty list of annotations
      */
     public Annotations() {
-        annotations = new ArrayList<Annotations>();
+        annotations = new ArrayList<Annotation>();
     }
 
     /**
@@ -48,6 +48,29 @@ public class Annotations extends Modifiers {
      *         false if no annotations are present
      */
     public boolean annotated() {
-        return numAnnotations() > 0;
+        return annotations != null && numAnnotations() > 0;
+    }
+
+    /**
+     * Determines if this object is equivalent to other
+     * @param other the other object to compare against
+     * @return true iff this is equivalent to other
+     */
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof Annotations) {
+            Annotations ans = (Annotations)other;
+            return annotations.equals(ans.annotations);
+        }
+        return false;
+    }
+
+    /**
+     * Determines the hash code of this object
+     * @return the hash code of this object
+     */
+    @Override
+    public int hashCode() {
+        return annotations.hashCode();
     }
 }

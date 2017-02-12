@@ -1,5 +1,7 @@
 package com.binghamton.jhelp;
 
+import java.util.List;
+
 /**
  * A class representing a Java type variable
  */
@@ -10,7 +12,7 @@ public class TypeVariable extends ReferenceType {
      * @param name the name of this type
      */
     public TypeVariable(String name) {
-        super(name, new Annotations());
+        super(name, null);
     }
 
     /**
@@ -18,7 +20,7 @@ public class TypeVariable extends ReferenceType {
      * @param name the name of this type
      * @param annotations the annotations of this type
      */
-    public TypeVariable(String name, Annotations annotations) {
+    public TypeVariable(String name, List<Annotation> annotations) {
         super(name, annotations);
     }
 }

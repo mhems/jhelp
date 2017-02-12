@@ -1,5 +1,9 @@
 package com.binghamton.jhelp.ast;
 
+import java.util.List;
+
+import com.binghamton.jhelp.Annotation;
+
 /**
  * A class representing a Java identifier, as an expression
  */

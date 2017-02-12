@@ -1,11 +1,22 @@
 package com.binghamton.jhelp.ast;
 
+import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * A class representing a Java case block of a Java switch statement
  */
-public class CaseBlock extends ASTNode {
+public class CaseBlock extends Block {
     private List<Expression> labels;
-    private Block body;
+
+    /**
+     * Construct a new, empty case block with one label
+     * @param label the label for this case block
+     */
+    public CaseBlock(Expression label) {
+        this(new ArrayList<>(Arrays.asList(label)), null);
+    }
 
     /**
      * Construct a new, empty case block
@@ -21,8 +32,8 @@ public class CaseBlock extends ASTNode {
      * @param body the body of the case block
      */
     public CaseBlock(List<Expression> labels, Block body) {
+        super(body);
         this.labels = labels;
-        this.body = body;
     }
 
     /**
@@ -48,21 +59,5 @@ public class CaseBlock extends ASTNode {
      */
     public int getNumLabels() {
         return labels.size();
-    }
-
-    /**
-     * Gets the body that executes for this case block
-     * @return the body that executes for this case block
-     */
-    public Block getBody() {
-        return body;
-    }
-
-    /**
-     * Determines if the block has a body
-     * @return true iff the block has a body
-     */
-    public boolean hasBody() {
-        return body != null;
     }
 }

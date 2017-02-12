@@ -2,13 +2,16 @@ package com.binghamton.jhelp.ast;
 
 import java.util.List;
 
+import com.binghamton.jhelp.Modifier;
+import com.binghamton.jhelp.Type;
+import com.binghamton.jhelp.TypeParameter;
+
 /**
  * A class representing the declaration of a Java method
  */
 public class MethodDeclaration extends Declaration {
     private Type returnType;
     private List<VariableDeclaration> params;
-    private Dimension dim;
     private List<Type> exceptions;
     private List<TypeParameter> typeParams;
     private Block body;

@@ -1,5 +1,7 @@
 package com.binghamton.jhelp;
 
+import java.util.List;
+
 /**
  * A class representing a Java class or interface type
  */
@@ -16,34 +18,15 @@ public class ClassInterfaceType extends ReferenceType {
     }
 
     /**
-     * Construct a named, annotated class or interface type
-     * @param name the name of the class or interface
-     * @param annotations the annotations of this type
-     */
-    public ClassInterfaceType(String name, Annotations annotations) {
-        this(name, annotations, null, null);
-    }
-
-    /**
      * Construct a named, annotated, parameterized class or interface type
      * @param name the name of the class or interface
      * @param annotations the annotations of this type
      * @param args the type arguments to this type
      */
     public ClassInterfaceType(String name,
-                              Annotations annotations,
+                              List<Annotation> annotations,
                               List<TypeArgument> args) {
         this(name, annotations, args, null);
-    }
-
-    /**
-     * Construct a named, parameterized class or interface type
-     * @param name the name of the class or interface
-     * @param args the type arguments to this type
-     */
-    public ClassInterfaceType(String name,
-                              List<TypeArgument> args) {
-        this(name, null, args, null);
     }
 
     /**
@@ -53,7 +36,10 @@ public class ClassInterfaceType extends ReferenceType {
      */
     public ClassInterfaceType(ClassInterfaceType superType,
                               ClassInterfaceType subType) {
-        this(subType.name, subType.annotations, subType.args, superType);
+        this(subType.name,
+             subType.annotations.getAnnotations(),
+             subType.args,
+             superType);
     }
 
     /**
@@ -64,7 +50,7 @@ public class ClassInterfaceType extends ReferenceType {
      * @param supertype the super type of this type
      */
     public ClassInterfaceType(String name,
-                              Annotations annotations,
+                              List<Annotation> annotations,
                               List<TypeArgument> args,
                               ClassInterfaceType supertype) {
         super(name, annotations);

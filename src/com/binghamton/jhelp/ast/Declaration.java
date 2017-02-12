@@ -1,12 +1,16 @@
 package com.binghamton.jhelp.ast;
 
+import java.util.Collection;
+
+import com.binghamton.jhelp.Modifier;
+import com.binghamton.jhelp.Modifiers;
 
 /**
  * Abstract base class for all Java declarations
  */
-public abstract class Declaration extends ASTNode {
-    private String name;
-    private Modifiers modifiers;
+public abstract class Declaration extends Statement {
+    protected String name;
+    protected Modifiers modifiers;
 
     /**
      * Construct an empty declaration
@@ -19,7 +23,7 @@ public abstract class Declaration extends ASTNode {
      * Construct an unnamed modified declaration
      * @param modifiers the modifiers of this declaration
      */
-    public Declaration(String name, Collection<Modifier> modifiers) {
+    public Declaration(Collection<Modifier> modifiers) {
         this(null, modifiers);
     }
 

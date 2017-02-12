@@ -1,18 +1,20 @@
 package com.binghamton.jhelp;
 
+import java.util.List;
+
 /**
  * Abstract base class representing a Java type
  */
 public abstract class Type {
-    private Annotations annotations;
-    private String name;
+    protected Annotations annotations;
+    protected String name;
 
     /**
      * Construct a named type
      * @param name the name of this type
      */
     public Type(String name) {
-        this(name, new Annotations());
+        this(name, null);
     }
 
     /**
@@ -20,9 +22,9 @@ public abstract class Type {
      * @param name the name of this type
      * @param annotations the annotations of this type
      */
-    public Type(String name, Annotations annotations) {
+    public Type(String name, List<Annotation> annotations) {
         this.name = name;
-        this.annotations = annotations;
+        this.annotations = new Annotations(annotations);
     }
 
     /**
@@ -56,7 +58,7 @@ public abstract class Type {
      * @return true  if this type and `other` are type-equivalent
      * @       false otherwise
      */
-    public abstract boolean matches(Type other);
+    //public abstract boolean matches(Type other);
 
     /**
      * Determines if this type is a sub-type of `other`
@@ -64,7 +66,7 @@ public abstract class Type {
      * @return true  if this type is a sub-type of `other`
      * @       false otherwise
      */
-    public abstract boolean isSubtype(Type other);
+    //public abstract boolean isSubtype(Type other);
 
     /**
      * Determines if this type is a sub-type of `other`
@@ -72,7 +74,7 @@ public abstract class Type {
      * @return true  if this type is a sub-type of `other`
      * @       false otherwise
      */
-    public abstract boolean isSupertype(Type other);
+    //public abstract boolean isSupertype(Type other);
 
     /**
      * Determines if this object is equivalent to other
@@ -81,8 +83,12 @@ public abstract class Type {
      */
     @Override
     public boolean equals(Object other) {
-        // TODO
-        return true;
+        if (other instanceof Type) {
+            Type type = (Type)other;
+            return name.equals(type.name) &&
+                annotations.equals(type.annotations);
+        }
+        return false;
     }
 
     /**
@@ -91,8 +97,6 @@ public abstract class Type {
      */
     @Override
     public int hashCode() {
-        // TODO
-        return 0;
+        return name.hashCode() ^ annotations.hashCode();
     }
-
 }

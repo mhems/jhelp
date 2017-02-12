@@ -1,5 +1,7 @@
 package com.binghamton.jhelp.ast;
 
+import java.util.List;
+
 /**
  * A class representing a Java compilation unit (file)
  */

@@ -12,7 +12,7 @@ public class AssertStatement extends Statement {
      * @param condition the condition being asserted
      */
     public AssertStatement(Expression condition) {
-        this(condition);
+        this(condition, null);
     }
 
     /**
@@ -26,10 +26,26 @@ public class AssertStatement extends Statement {
     }
 
     /**
+     * Gets the condition this statement asserts
+     * @return the condition this statement asserts
+     */
+    public Expression getCondition() {
+        return condition;
+    }
+
+    /**
      * Determine if assert statement includes a message
      * @return true iff assert statement includes a message
      */
     public boolean hasMessage() {
         return message != null;
+    }
+
+    /**
+     * Gets the message this statement produces, if any
+     * @return the message this statement produces, if any
+     */
+    public Expression getMessage() {
+        return message;
     }
 }

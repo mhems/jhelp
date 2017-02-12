@@ -6,10 +6,9 @@ import com.binghamton.jhelp.VariableSymbol;
 /**
  * A class representing a Java for-each statement
  */
-public class ForEachStatement extends Statement {
+public class ForEachStatement extends Block {
     private VariableDeclaration variable;
     private Expression iterable;
-    private Block body;
 
     /**
      * Construct a new for each statement with a one statement body
@@ -32,9 +31,9 @@ public class ForEachStatement extends Statement {
     public ForEachStatement(VariableDeclaration variable,
                             Expression iterable,
                             Block body) {
+        super(body);
         this.variable = variable;
         this.iterable = iterable;
-        this.body = body;
     }
 
     /**
@@ -51,13 +50,5 @@ public class ForEachStatement extends Statement {
      */
     public Expression getIterable() {
         return iterable;
-    }
-
-    /**
-     * Gets the body of the for each statement
-     * @return the body of the for each statement
-     */
-    public Block getBody() {
-        return body;
     }
 }

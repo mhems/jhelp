@@ -2,6 +2,8 @@ package com.binghamton.jhelp.ast;
 
 import java.util.List;
 
+import com.binghamton.jhelp.TypeArgument;
+
 /**
  * A class representing a Java method call, including explicit constructor calls
  */

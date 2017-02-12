@@ -2,6 +2,8 @@ package com.binghamton.jhelp.ast;
 
 import java.util.List;
 
+import com.binghamton.jhelp.Modifier;
+
 /**
  * A class representing a constant in a Java enum
  */

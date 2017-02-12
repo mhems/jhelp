@@ -1,5 +1,8 @@
 package com.binghamton.jhelp.ast;
 
+import java.util.List;
+
+import com.binghamton.jhelp.Type;
 
 /**
  * A class representing the construction of a new array

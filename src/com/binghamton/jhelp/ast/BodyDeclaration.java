@@ -3,17 +3,20 @@ package com.binghamton.jhelp.ast;
 import java.util.List;
 import java.util.ArrayList;
 
+import com.binghamton.jhelp.ClassInterfaceType;
+import com.binghamton.jhelp.Modifier;
+
 /**
  * An abstract class representing a structure declaration.
  * This includes interfaces, classes, and enums.
  */
 public abstract class BodyDeclaration extends Declaration {
-    private List<ClassInterfaceType> implementees;
-    private List<VariableDeclaration> fields = new ArrayList<>();
-    private List<MethodDeclaration> methods = new ArrayList<>();
-    private List<MethodDeclaration> constructors = new ArrayList<>();
-    private List<ClassDeclaration> innerClasses = new ArrayList<>();
-    private List<InterfaceDeclaration> innerInterfaces = new ArrayList<>();
+    protected List<ClassInterfaceType> implementees;
+    protected List<VariableDeclaration> fields = new ArrayList<>();
+    protected List<MethodDeclaration> methods = new ArrayList<>();
+    protected List<MethodDeclaration> ctors = new ArrayList<>();
+    protected List<ConcreteBodyDeclaration> innerBodies = new ArrayList<>();
+    protected List<InterfaceDeclaration> innerInterfaces = new ArrayList<>();
 
     /**
      * Construct an empty body declaration
@@ -32,7 +35,7 @@ public abstract class BodyDeclaration extends Declaration {
                            List<Modifier> modifiers,
                            List<ClassInterfaceType> implementees) {
         super(name, modifiers);
-        this.implentees = implementees;
+        this.implementees = implementees;
     }
 
     /**
@@ -60,11 +63,11 @@ public abstract class BodyDeclaration extends Declaration {
     }
 
     /**
-     * Gets the inner classes of this declaration
-     * @return the inner classes of this declaration
+     * Gets the inner bodies of this declaration
+     * @return the inner bodies of this declaration
      */
-    public List<ClassDeclaration> getInnerClasses() {
-        return innerClasses;
+    public List<ConcreteBodyDeclaration> getInnerBodies() {
+        return innerBodies;
     }
 
     /**
@@ -124,19 +127,19 @@ public abstract class BodyDeclaration extends Declaration {
     }
 
     /**
-     * Adds a inner class declaration to this body
+     * Adds a inner body declaration to this body
      * @param decl the declaration to add
      */
-    public void addInnerClass(ClassDeclaration decl) {
-        innerClasses.add(decl);
+    public void addInnerBody(ConcreteBodyDeclaration decl) {
+        innerBodies.add(decl);
     }
 
     /**
-     * Gets the number of inner classes declared in this body
-     * @return the number of inner classes declared in this body
+     * Gets the number of inner bodies declared in this body
+     * @return the number of inner bodies declared in this body
      */
-    public int numInnerClasses() {
-        return innerClasses.size();
+    public int numInnerBodies() {
+        return innerBodies.size();
     }
 
     /**

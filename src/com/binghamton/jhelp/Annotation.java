@@ -1,29 +1,31 @@
-package com.binghamton.jhelp.ast;
+package com.binghamton.jhelp;
 
 import java.util.Map;
 import java.util.HashMap;
 
+import com.binghamton.jhelp.ast.Expression;
+
 /**
  * A class representing a Java annotation
  */
-public class AnnotationStatement extends Modifier {
+public class Annotation extends Expression {
     private String typename;
     private Map<String, Expression> nameValueMap = new HashMap<>();
 
     /**
-     * Construct a marker or normal annotation statement
+     * Construct a marker or normal annotation
      * @param typename the type name of the annotation
      */
-    public AnnotationStatement(String typename) {
+    public Annotation(String typename) {
         this.typename = typename;
     }
 
     /**
-     * Construct a single element annotation statement
+     * Construct a single element annotation
      * @param typename the type name of the annotation
      * @param value the single element's value
      */
-    public AnnotationStatement(String typename, Expression value) {
+    public Annotation(String typename, Expression value) {
         this.typename = typename;
         nameValueMap.put(typename, value);
     }
@@ -62,10 +64,11 @@ public class AnnotationStatement extends Modifier {
 
     /**
      * Gets the single value of this annotation
+     * @return the single value of this annotation
      */
-    public String getSingleValue() {
+    public Expression getSingleValue() {
         if (isSingleElement()) {
-            return nameValueMap(typename);
+            return nameValueMap.get(typename);
         }
         throw new RuntimeException(); // TODO
     }
@@ -100,5 +103,29 @@ public class AnnotationStatement extends Modifier {
             return nameValueMap.get(name);
         }
         throw new RuntimeException(); // TODO
+    }
+
+    /**
+     * Determines if this object is equivalent to other
+     * @param other the other object to compare against
+     * @return true iff this is equivalent to other
+     */
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof Annotation) {
+            Annotation an = (Annotation)other;
+            return typename.equals(an.typename) &&
+                nameValueMap.equals(an.nameValueMap);
+        }
+        return false;
+    }
+
+    /**
+     * Determines the hash code of this object
+     * @return the hash code of this object
+     */
+    @Override
+    public int hashCode() {
+        return typename.hashCode() ^ nameValueMap.hashCode();
     }
 }

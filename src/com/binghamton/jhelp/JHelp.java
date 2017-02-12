@@ -56,8 +56,8 @@ public class JHelp {
 
         ParseTree tree = parser.compilationUnit();
         ParseTreeWalker walker = new ParseTreeWalker();
-        MyListener listener = new MyListener();
-        walker.walk(listener, tree);
+        // MyListener listener = new MyListener();
+        // walker.walk(listener, tree);
     }
 
     private static void process(String filename)

@@ -3,9 +3,8 @@ package com.binghamton.jhelp.ast;
 /**
  * A class representing a Java synchronized block
  */
-public class SynchronizedBlock extends Statement {
+public class SynchronizedBlock extends Block {
     private Expression lock;
-    private Block body;
 
     /**
      * Construct a new synchronized block
@@ -13,8 +12,8 @@ public class SynchronizedBlock extends Statement {
      * @param body the statements to execute synchronously
      */
     public SynchronizedBlock(Expression lock, Block body) {
+        super(body);
         this.lock = lock;
-        this.body = body;
     }
 
     /**
@@ -23,13 +22,5 @@ public class SynchronizedBlock extends Statement {
      */
     public Expression getLock() {
         return lock;
-    }
-
-    /**
-     * Gets the code to execute synchronously
-     * @return the code to execute synchronously
-     */
-    public Block getBody() {
-        return body;
     }
 }
