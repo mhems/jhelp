@@ -120,13 +120,14 @@ referenceType returns [ReferenceType t]
 	|	a = arrayType {$t = $a;}
 	;
 
-// TODO
 classOrInterfaceType returns [ClassInterfaceType t]
-	:	(	cno = classType_lfno_classOrInterfaceType
-		|	ino = interfaceType_lfno_classOrInterfaceType
+	:	(	cno = classType_lfno_classOrInterfaceType {$t = $cno;}
+		|	ino = interfaceType_lfno_classOrInterfaceType {$t = $ino;}
 		)
 		(	c = classType_lf_classOrInterfaceType
+            {$t = new ClassInterfaceType($t, $c);}
 		|	i = interfaceType_lf_classOrInterfaceType
+            {$t = new ClassInterfaceType($t, $i);}
 		)*
 	;
 
@@ -138,7 +139,7 @@ classType returns [ClassInterfaceType t]
         {$t = new ClassInterfaceType($id.getText(), $anns, $targs);}
 	|	st = classOrInterfaceType '.'
         (a = annotation {$anns.add($a);})*
-        id Identifier
+        id = Identifier
         targs = typeArguments?
         {$t = new ClassInterfaceType($id.getText(), $anns, $targs, $st);}
 	;
@@ -235,7 +236,6 @@ wildcard returns [TypeArgument t]
         (wildcardBounds[t])?
 	;
 
-// TODO true vs. false correct?
 wildcardBounds [TypeArgument t]
 	:	'extends' r = referenceType
         {$t.setBoundType($r); $t.setIsUpperBounded(true);}
@@ -404,7 +404,7 @@ classBodyDeclaration [ConcreteBodyDeclaration d]
 	:	classMemberDeclaration[d]
 	|	i = instanceInitializer {$d.addInstanceInitializer($i);}
 	|	s = staticInitializer {$d.addStaticInitializer($s);}
-	|	ct = constructorDeclaration {$d.addMethod($ct);}
+	|	ct = constructorDeclaration {$d.addConstructor($ct);}
 	;
 
 classMemberDeclaration [ConcreteBodyDeclaration d]
@@ -443,7 +443,7 @@ variableDeclaratorList returns [List<Pair<String, Expression>> l]
 
 variableDeclarator returns [Pair<String, Expression> p]
 	:	id = variableDeclaratorId ('=' in = variableInitializer)?
-        {$p = new Pair($id.text, $in);} // TODO add dims
+        {$p = new Pair($id.first + "[" + $id.second + "]", $in);}
 	;
 
 variableDeclaratorId returns [Pair<String, Integer> p]
@@ -665,7 +665,6 @@ staticInitializer returns [Block b]
 	:	'static' body = block {$b = $body;}
 	;
 
-// TODO separate
 constructorDeclaration returns [MethodDeclaration d]
     locals [List<Modifier> mods = new ArrayList<>();]
 	:	(m = constructorModifier {$mods.add($m);})*
@@ -686,7 +685,6 @@ constructorModifier returns [Modifier m]
 	|	'private' {$m = Modifier.PRIVATE;}
 	;
 
-// TODO
 constructorDeclarator [MethodDeclaration d]
 	:	t = typeParameters? n = simpleTypeName '(' l = formalParameterList? ')'
         {
@@ -706,12 +704,19 @@ constructorBody returns [Block b]
          $b.addStatement(0, $s);}
 	;
 
-// TODO
-explicitConstructorInvocation returns [Statement s]
-	:	typeArguments? 'this' '(' argumentList? ')' ';'
-	|	typeArguments? 'super' '(' argumentList? ')' ';'
-	|	expressionName '.' typeArguments? 'super' '(' argumentList? ')' ';'
-	|	primary '.' typeArguments? 'super' '(' argumentList? ')' ';'
+explicitConstructorInvocation returns [Expression e]
+    locals [CallExpression call]
+	:	t = typeArguments? 'this' '(' a = argumentList? ')' ';'
+        {$e = new CallExpression(new ThisLiteral(), $a, $t);}
+	|	t = typeArguments? 'super' '(' a = argumentList? ')' ';'
+        {$e = new CallExpression(new SuperLiteral(), $a, $t);}
+	|	en = expressionName '.' t = typeArguments? 'super'
+        '(' a = argumentList? ')' ';'
+        {$call = new CallExpression(new SuperLiteral(), $a, $t);
+         $e = new AccessExpression($en, $call);}
+	|	p = primary '.' t = typeArguments? 'super' '(' a = argumentList? ')' ';'
+        {$call = new CallExpression(new SuperLiteral(), $a, $t);
+         $e = new AccessExpression($p, $call);}
 	;
 
 enumDeclaration returns [EnumDeclaration d]
@@ -822,37 +827,44 @@ interfaceMethodModifier returns [Modifier m]
 	|	'strictfp' {$m = Modifier.STRICT_FP;}
 	;
 
-// TODO
-annotationTypeDeclaration
+annotationTypeDeclaration returns [AnnotationDeclaration d]
     locals [List<Modifier> mods = new ArrayList<>();]
     :	(m = interfaceModifier {$mods.add($m);})*
-		'@' 'interface' id = Identifier b = annotationTypeBody
+		'@' 'interface' id = Identifier
+        {$d = new AnnotationDeclaration($id.getText(), $mods);}
+        annotationTypeBody[d]
 	;
 
-// TODO
-annotationTypeBody
-	:	'{' annotationTypeMemberDeclaration* '}'
+annotationTypeBody [AnnotationDeclaration d]
+	:	'{' (m = annotationTypeMemberDeclaration {$d.addMember($m);})* '}'
 	;
 
-// TODO
-annotationTypeMemberDeclaration
-	:	annotationTypeElementDeclaration
-	|	constantDeclaration
-	|	classDeclaration
-	|	interfaceDeclaration
+annotationTypeMemberDeclaration returns [Declaration d]
+	:	a = annotationTypeElementDeclaration {$d = $a;}
+	|	co = constantDeclaration {$d = $co;}
+	|	cl = classDeclaration {$d = $cl;}
+	|	i = interfaceDeclaration {$d = $i;}
 	|	';'
 	;
 
-// TODO
-annotationTypeElementDeclaration
+annotationTypeElementDeclaration returns [VariableDeclaration d]
     locals [List<Modifier> mods = new ArrayList<>();]
 	:	(m = annotationTypeElementModifier {$mods.add($m);})*
         t = unannType id = Identifier '(' ')'
         ds = dims?
         dv = defaultValue? ';'
+        {
+            if ($ds > 0) {
+                $d = new VariableDeclaration($id.getText(),
+                                             $t.augment($ds),
+                                             $mods,
+                                             $dv);
+            } else {
+                $d = new VariableDeclaration($id.getText(), $t, $mods, $dv);
+            }
+        }
 	;
 
-// TODO
 annotationTypeElementModifier returns [Modifier m]
 	:	a = annotation {$m = $a;}
 	|	'public' {$m = Modifier.PUBLIC;}
@@ -863,29 +875,26 @@ defaultValue returns [Expression e]
 	:	'default' v = elementValue {$e = $v;}
 	;
 
-// TODO
 annotation returns [AnnotationStatement s]
 	:	n = normalAnnotation {$s = $n;}
 	|	m = markerAnnotation {$s = $m;}
 	|	e = singleElementAnnotation {$s = $e;}
 	;
 
-// TODO
 normalAnnotation returns [AnnotationStatement s]
-	:	'@' t = typeName '(' l = elementValuePairList? ')'
+	:	'@' t = typeName
         {$s = new AnnotationStatement($t, $l);}
+        '(' elementValuePairList[s]? ')'
 	;
 
-elementValuePairList returns [List<Pair<String, Expression>> l]
-    locals [List<Pair<String, Expression>> pairs = new ArrayList<>();]
-	:	(p1 = elementValuePair) {$pairs.add($p1);}
-        (',' p = elementValuePair {$pairs.add($p);})*
-        {$l = $pairs;}
+elementValuePairList [AnnotationStatement s]
+	:	(elementValuePair[s])
+        (',' elementValuePair[s])*
 	;
 
-elementValuePair returns [Pair<String,Expression> p]
+elementValuePair [AnnotationStatement s]
 	:	id = Identifier '=' v = elementValue
-        {$p = new Pair($id.getText(), $v);}
+        {$s.addArgument($id.getText(), $v);}
 	;
 
 elementValue returns [Expression e]
@@ -894,7 +903,6 @@ elementValue returns [Expression e]
 	|	a = annotation {$e = $a;}
 	;
 
-// TODO
 elementValueArrayInitializer returns [ArrayDeclaration d]
 	:	'{' l = elementValueList? ','? '}'
         {$d = new ArrayDeclaration($l);}
@@ -907,12 +915,10 @@ elementValueList returns [List<Expression> l]
         {$l = $ls;}
 	;
 
-// TODO
 markerAnnotation returns [AnnotationStatement s]
 	:	'@' t = typeName {$s = new AnnotationStatement($t);}
 	;
 
-// TODO
 singleElementAnnotation returns [AnnotationStatement s]
 	:	'@' t = typeName '(' v = elementValue ')'
         {$s = new AnnotationStatement($t, $v);}
@@ -922,10 +928,9 @@ singleElementAnnotation returns [AnnotationStatement s]
  * Productions from §10 (Arrays)
  */
 
-// TODO
-arrayInitializer returns [ArrayDeclaration d]
+arrayInitializer returns [ArrayInitializer a]
 	:	'{' l = variableInitializerList? ','? '}'
-        {$d = new ArrayDeclaration($l);}
+        {$a = new ArrayDeclaration($l);}
 	;
 
 variableInitializerList returns [List<Expression> l]
@@ -1252,20 +1257,18 @@ resource returns [VariableDeclaration d]
  */
 
 primary returns [Expression e]
-	:	(	pno = primaryNoNewArray_lfno_primary
-		|	a = arrayCreationExpression
+	:	(	pno = primaryNoNewArray_lfno_primary {$e = $pno;}
+		|	a = arrayCreationExpression {$e = $a;}
 		)
-		(	p = primaryNoNewArray_lf_primary
+		(	p = primaryNoNewArray_lf_primary // check
+            {$e = new AccessExpression($e, $p);}
 		)*
 	;
 
-// TODO
 primaryNoNewArray returns [Expression e]
 	:	a1 = literal {$e = $a1;}
-	|	a2 = typeName ('[' ']')* '.' 'class'
-	|	'void' '.' 'class'
-	|	'this'
-	|	a5 = typeName '.' 'this'
+    |   a2 = primaryNoNewArray_typeAccess {$e = $a2;}
+	|	'this' {$e = new ThisLiteral();}
 	|	'(' p = expression ')' {$e = $p;}
 	|	a7 = classInstanceCreationExpression {$e = $a7;}
 	|	a8 = fieldAccess {$e = $a8;}
@@ -1274,18 +1277,34 @@ primaryNoNewArray returns [Expression e]
 	|	a11 = methodReference {$e = $a11;}
 	;
 
-// TODO
+primaryNoNewArray_typeAccess returns [Expression e]
+    locals [int cnt = 0,
+            Type type]
+	:	a2 = typeName
+        ('[' ']' {++$cnt;})* '.' 'class'
+        {
+            $type = new ClassInterfaceType($a2);
+            if ($cnt > 0) {
+                $type = new ArrayType($type, $cnt);
+            }
+            $e = new AccessExpression(new TypeExpression($type),
+                                      new ClassLiteral());
+        }
+	|	'void' '.' 'class'
+        {$e = new AccessExpression(new VoidLiteral(), new ClassLiteral());}
+	|	a5 = typeName '.' 'this'
+        {$type = new TypeExpression(new ClassInterfaceType($a5));
+         $e = new AccessExpression($type, new ThisLiteral());}
+
 primaryNoNewArray_lf_arrayAccess
 	:
 	;
 
-// TODO
 primaryNoNewArray_lfno_arrayAccess returns [Expression e]
 	:	a1 = literal {$e = $a1;}
-	|	a2 = typeName ('[' ']')* '.' 'class'
-	|	'void' '.' 'class'
-	|	'this'
-	|	a3 = typeName '.' 'this'
+    |   a2 = primaryNoNewArray_typeAccess {$e = $a2;}
+	|	'this' {$e = new ThisLiteral();}
+        {$e = new AccessExpression($a3, new ThisLiteral());}
 	|	'(' p = expression ')' {$e = $p;}
 	|	a5 = classInstanceCreationExpression {$e = $a5;}
 	|   a6 = fieldAccess {$e = $a6;}
@@ -1297,11 +1316,10 @@ primaryNoNewArray_lf_primary returns [Expression e]
 	:	a1 = classInstanceCreationExpression_lf_primary {$e = $a1;}
 	|	a2 = fieldAccess_lf_primary {$e = $a2;}
 	|	a3 = arrayAccess_lf_primary {$e = $a3;}
-	|	a4 = methodInvocation_lf_primary {$e = $a4;}
-	|	a5 = methodReference_lf_primary {$e = $a5;}
+	|	a4 = methodInvocation_lf_primary {$e = $a4;} // TODO
+	|	a5 = methodReference_lf_primary {$e = $a5;} // TODO
 	;
 
-// TODO
 primaryNoNewArray_lf_primary_lf_arrayAccess_lf_primary
 	:
 	;
@@ -1309,18 +1327,26 @@ primaryNoNewArray_lf_primary_lf_arrayAccess_lf_primary
 primaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primary returns [Expression e]
 	:	a1 = classInstanceCreationExpression_lf_primary {$e = $a1;}
 	|	a2 = fieldAccess_lf_primary {$e = $a2;}
-	|	a3 = methodInvocation_lf_primary {$e = $a3;}
-	|	a4 = methodReference_lf_primary {$e = $a4;}
+	|	a3 = methodInvocation_lf_primary {$e = $a3;} // TODO
+	|	a4 = methodReference_lf_primary {$e = $a4;} // TODO
 	;
 
-// TODO
 primaryNoNewArray_lfno_primary returns [Expression e]
+    locals [int cnt = 0,
+            Type type]
 	:	a1 = literal {$e = $a1;}
-	|	a2 = typeName ('[' ']')* '.' 'class'
-	|	a3 = unannPrimitiveType ('[' ']')* '.' 'class'
-	|	'void' '.' 'class'
-	|	'this'
-	|	a6 = typeName '.' 'this'
+    |   a2 = primaryNoNewArray_typeAccess {$e = $a2;}
+	|	a3 = unannPrimitiveType
+        ('[' ']' {++$cnt;})* '.' 'class'
+        {
+            $type = new ClassInterfaceType($a3);
+            if ($cnt > 0) {
+                $type = new ArrayType($type, $cnt);
+            }
+            $e = new AccessExpression(new TypeExpression($type),
+                                      new ClassLiteral());
+        }
+	|	'this' {$e = new ThisLiteral();}
 	|	'(' p = expression ')' {$e = $p;}
 	|	a7 = classInstanceCreationExpression_lfno_primary {$e = $a7;}
 	|	a8 = fieldAccess_lfno_primary {$e = $a8;}
@@ -1329,19 +1355,26 @@ primaryNoNewArray_lfno_primary returns [Expression e]
 	|	a11 = methodReference_lfno_primary {$e = $a11;}
 	;
 
-// TODO
 primaryNoNewArray_lfno_primary_lf_arrayAccess_lfno_primary
 	:
 	;
 
-// TODO
 primaryNoNewArray_lfno_primary_lfno_arrayAccess_lfno_primary returns [Expression e]
+    locals [int cnt = 0,
+            Type type]
 	:	a1 = literal {$e = $a1;}
-	|	a2 = typeName ('[' ']')* '.' 'class'
-	|	a3 = unannPrimitiveType ('[' ']')* '.' 'class'
-	|	'void' '.' 'class'
-	|	'this'
-	|	a6 = typeName '.' 'this'
+    |   a2 = primaryNoNewArray_typeAccess {$e = $a2;}
+	|	a3 = unannPrimitiveType
+        ('[' ']' {++$cnt;})* '.' 'class'
+        {
+            $type = new ClassInterfaceType($a3);
+            if ($cnt > 0) {
+                $type = new ArrayType($type, $cnt);
+            }
+            $e = new AccessExpression(new TypeExpression($type),
+                                      new ClassLiteral());
+        }
+	|	'this' {$e = new ThisLiteral();}
 	|	'(' p = expression ')' {$e = $p;}
 	|	a7 = classInstanceCreationExpression_lfno_primary {$e = $a7;}
 	|	a8 = fieldAccess_lfno_primary {$e = $a8;}
@@ -1349,43 +1382,90 @@ primaryNoNewArray_lfno_primary_lfno_arrayAccess_lfno_primary returns [Expression
 	|	a10 = methodReference_lfno_primary {$e = $a10;}
 	;
 
-// TODO
-classInstanceCreationExpression returns [ConstructionExpression e]
-	:	'new' t = typeArguments? a = annotation* id = Identifier
-        ('.' a2 = annotation* id2 = Identifier)* targs = typeArgumentsOrDiamond?
+classInstanceCreationExpression returns [Expression e]
+    locals [Expression methodExpr,
+            List<Annotation> ans = new ArrayList<>(),
+            List<Annotation> ans2 = new ArrayList<>()]
+	:	'new' t = typeArguments? (a = annotation {$ans.add($a)})*
+        id = Identifier
+        {
+            $methodExpr = new IdentifierExpression($id.getText(), $ans);
+        }
+        ('.' (a2 = annotation {$ans2.add($a2);})* id2 = Identifier
+            {
+                $methodExpr = new AccessExpression($methodExpr,
+                                                   new IdentifierExpression($id2.getText(),
+                                                                            $ans2));
+                $ans2.clear();
+            }
+        )*
+        targs = typeArgumentsOrDiamond?
         '(' l = argumentList? ')' b = classBody?
-	|	name = expressionName '.' 'new' t = typeArguments? a = annotation*
+        {$e = new InstantionExpression($t, $methodExpr, $targs, $l, $b);}
+	|	name = expressionName '.' 'new' t = typeArguments?
+        (a = annotation {$ans.add($a);})*
         id = Identifier targs = typeArgumentsOrDiamond?
         '(' l = argumentList? ')' b = classBody?
-	|	p = primary '.' 'new' t = typeArguments? a = annotation* id = Identifier
-        targs = typeArgumentsOrDiamond?
+        {
+            $e = new InstantiationExpression($t, $ans, $id.getText(),
+                                             $targs, $l, $b);
+            $e = new AccessExpression($name, $e);
+        }
+	|	p = primary '.' 'new' t = typeArguments?
+        (a = annotation {$ans.add($a);})*
+        id = Identifier targs = typeArgumentsOrDiamond?
         '(' l = argumentList? ')' b = classBody?
+        {
+            $e = new InstantiationExpression($t, $ans, $id.getText(),
+                                             $targs, $l, $b);
+            $e = new AccessExpression($p, $e);
+        }
 	;
 
-// TODO
-classInstanceCreationExpression_lf_primary returns [ConstructionExpression e]
-	:	'.' 'new' t = typeArguments? a = annotation* id = Identifier
-        targs = typeArgumentsOrDiamond?
+classInstanceCreationExpression_lf_primary returns [InstantiationExpression e]
+    locals [List<Annotation> ans = new ArrayList<>();]
+	:	'.' 'new' t = typeArguments?
+        (a = annotation {$ans.add($a);})*
+        id = Identifier targs = typeArgumentsOrDiamond?
         '(' l = argumentList? ')'
         b = classBody?
+        {$e = new InstantiationExpression($t, $ans, $id.getText(), $targs, $l, $b);}
 	;
 
-// TODO
-classInstanceCreationExpression_lfno_primary returns [ConstructionExpression e]
-	:	'new' t = typeArguments? a = annotation* id = Identifier
-        ('.' a2 = annotation* id2 = Identifier)*
+classInstanceCreationExpression_lfno_primary returns [InstantiationExpression e]
+    locals [Expression methodExpr,
+            List<Annotation> ans = new ArrayList<>(),
+            List<Annotation> ans2 = new ArrayList<>()]
+	:	'new' t = typeArguments? (a = annotation {$ans.add($a)})*
+        id = Identifier
+        {
+            $methodExpr = new IdentifierExpression($id.getText(), $ans);
+        }
+        ('.' (a2 = annotation {$ans2.add($a2);})* id2 = Identifier
+            {
+                $methodExpr = new AccessExpression($methodExpr,
+                                                   new IdentifierExpression($id2.getText(),
+                                                                            $ans2));
+                $ans2.clear();
+            }
+        )*
         targs = typeArgumentsOrDiamond?
         '(' l = argumentList? ')' b = classBody?
-	|	name = expressionName '.' 'new' t = typeArguments? a = annotation*
-        id =Identifier
-        targs = typeArgumentsOrDiamond?
+        {$e = new InstantiationExpression($t, $methodExpr, $targs, $l, $b);}
+	|	name = expressionName '.' 'new' t = typeArguments?
+        (a = annotation {$ans.add($a);})*
+        id = Identifier targs = typeArgumentsOrDiamond?
         '(' l = argumentList? ')' b = classBody?
-	;
+        {
+            $e = new InstantiationExpression($t, $ans, $id.getText(),
+                                             $targs, $l, $b);
+            $e = new AccessExpression($name, $e);
+        }
+    ;
 
-// TODO
-typeArgumentsOrDiamond
-	:	typeArguments
-	|	'<' '>'
+typeArgumentsOrDiamond returns [List<TypeArgument> l]
+	:	ta = typeArguments {$l = $ta;}
+	|	'<' '>' {$l = new ArrayList<>(); $l.add(TypeArgument.DIAMOND);}
 	;
 
 fieldAccess returns [AccessExpression e]
@@ -1396,95 +1476,109 @@ fieldAccess returns [AccessExpression e]
 	|	t = typeName '.' 'super' '.' id = Identifier
 	;
 
-fieldAccess_lf_primary returns [AccessExpression e]
-	:	'.' id = Identifier {$e = new AccessExpression(null, $id.getText());}
+fieldAccess_lf_primary returns [IdentifierExpression e]
+	:	'.' id = Identifier {$e = new IdentifierExpression($id.getText());}
 	;
 
-// TODO
 fieldAccess_lfno_primary returns [AccessExpression e]
+    locals [AccessExpression acc;]
 	:	'super' '.' id = Identifier
-        {$e = new AccessExpression(Expression.SuperExpression, $id);}
-	|	typeName '.' 'super' '.' Identifier
+        {$e = new AccessExpression(new SuperLiteral(), $id.getText());}
+	|	t = typeName '.' 'super' '.' id = Identifier
+        {
+            $acc = new AccessExpression(new SuperLiteral(), $id.getText());
+            $e = new AccessExpression(new TypeExpression($tn), $acc);
+        }
 	;
 
-// TODO
 arrayAccess returns [ArrayAccessExpression e]
 	:	(	(n = expressionName '[' i = expression ']'
                 {$e = new ArrayAccessExpression($n, $i);})
 		|	(pno = primaryNoNewArray_lfno_arrayAccess '[' i = expression ']'
                 {$e = new ArrayAccessExpression($pno, $i);})
 		)
-            // always empty?
 		(	primaryNoNewArray_lf_arrayAccess '[' i = expression ']'
+                {$e = new ArrayAccessExpression($e, $i);}
 		)*
 	;
 
 // TODO
 arrayAccess_lf_primary returns [ArrayAccessExpression e]
-	:	(	(pno = primaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primary
-           '[' i = expression ']' {$e = new ArrayAccessExpression($p, $i);})
+	:	(	(pno = primaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primary // here
+           '[' i = expression ']' {$e = new ArrayAccessExpression($pno, $i);})
 		)
-            // always empty?
 		(	primaryNoNewArray_lf_primary_lf_arrayAccess_lf_primary
             '[' i2 = expression ']'
+            {$e = new ArrayAccessExpression($e, $i2);}
 		)*
 	;
 
-// TODO
 arrayAccess_lfno_primary returns [ArrayAccessExpression e]
 	:	(	(name = expressionName '[' i = expression ']'
                 {$e = new ArrayAccessExpression($name, $i);})
 		|	(pno = primaryNoNewArray_lfno_primary_lfno_arrayAccess_lfno_primary
                 '[' i = expression ']'
-                {$e = new ArrayAccessExpression($p, $i);})
+                {$e = new ArrayAccessExpression($pno, $i);})
 		)
-            // always empty?
 		(	primaryNoNewArray_lfno_primary_lf_arrayAccess_lfno_primary
-        '[' i2 = expression ']'
+            '[' i2 = expression ']'
+            {$e = new ArrayAccessExpression($e, $i2);}
 		)*
 	;
 
-// TODO
-methodInvocation returns [CallExpression e]
-	:	mn = methodName '(' a = argumentList? ')'
+methodInvocation returns [Expression e]
+    locals [CallExpression call,
+            AccessExpression acc]
+    :	mn = methodName '(' a = argumentList? ')'
         {$e = new CallExpression($mn, $a);}
 	|	tn = typeName '.' t = typeArguments? id = Identifier
         '(' a = argumentList? ')'
-        {$e = new CallExpression($id.getText(), $a);}
+        {$call = new CallExpression($id.getText(), $a, $t);
+         $e = new AccessExpression($tn, $call);}
 	|	en = expressionName '.' t = typeArguments? id = Identifier
         '(' a = argumentList? ')'
-        {$e = new CallExpression($id.getText(), $a);}
+        {$call = new CallExpression($id.getText(), $a, $t);
+         $e = new AccessExpression($en, $call);}
 	|	p = primary '.' t = typeArguments?
         id = Identifier '(' a = argumentList? ')'
-        {$e = new CallExpression($p, $a);}
+        {$call = new CallExpression($id.getText(), $a, $t);
+         $e = new AccessExpression($p, $call);}
 	|	'super' '.' t = typeArguments? id = Identifier '(' a = argumentList? ')'
-        {$e = new CallExpression($id.getText(), $a);}
+        {$call = new CallExpression($id.getText(), $a, $t);
+         $e = new AccessExpression(new SuperLiteral(), $call);}
 	|	tn = typeName '.' 'super' '.' t = typeArguments?
         id = Identifier '(' a = argumentList? ')'
-        {$e = new CallExpression($id.getText(), $a);}
+        {$call = new CallExpression($id.getText(), $a, $t);
+         $acc = new AccessExpression(new SuperLiteral(), $call);
+         $e = new AccessExpression($tn, $acc);}
 	;
 
-// TODO
 methodInvocation_lf_primary returns [CallExpression e]
 	:	'.' t = typeArguments? id = Identifier '(' a = argumentList? ')'
-        {$e = new CallExpression($id.getText(), $a);}
+        {$e = new CallExpression($id.getText(), $a, $t);}
 	;
 
-// TODO
-methodInvocation_lfno_primary returns [CallExpression e]
+methodInvocation_lfno_primary returns [Expression e]
+    locals [CallExpression call,
+            AccessExpression acc]
 	:	mn = methodName '(' a = argumentList? ')'
         {$e = new CallExpression($mn, $a);}
 	|	tn = typeName '.' t = typeArguments?
         id = Identifier '(' a = argumentList? ')'
-        {$e = new CallExpression($id.getText(), $a);}
+        {$call = new CallExpression($id.getText(), $a, $t);
+         $e = new AccessExpression($tn, $call);}
 	|	en = expressionName '.' t = typeArguments?
         id = Identifier '(' a = argumentList? ')'
-        {$e = new CallExpression($id.getText(), $a);}
+        {$call = new CallExpression($id.getText(), $a);
+         $e = new AccessExpression($en, $call);}
 	|	'super' '.' t = typeArguments? id = Identifier '(' a = argumentList? ')'
-        {$e = new CallExpression($id.getText(), $a);}
+        {$call = new CallExpression($id.getText(), $a);
+         $e = new AccessExpression(new SuperLiteral(), $call);}
 	|	tn = typeName '.' 'super' '.' t = typeArguments?
         id = Identifier '(' a = argumentList? ')'
-        {$e = new CallExpression($id.getText(), $a);}
+        {$call = new CallExpression($id.getText(), $a);
+         $acc = new AccessExpression(new SuperLiteral(), $call);
+         $e = new AccessExpression($tn, $acc);}
 	;
 
 argumentList returns [List<Expression> l]
@@ -1493,24 +1587,29 @@ argumentList returns [List<Expression> l]
         (',' ex = expression {$ls.add($ex);})* {$l = $ls;}
 	;
 
-// TODO
-methodReference returns [MethodReferenceExpression e]
+methodReference returns [Expression e]
+    locals [MethodReferenceExpression ref;]
 	:	en = expressionName '::' t = typeArguments? id = Identifier
-        {$e = new MethodReferenceExpression($en, $id.getText());}
+        {$e = new MethodReferenceExpression($en, $id.getText(), $t);}
 	|	r = referenceType '::' t = typeArguments? id = Identifier
-        {$e = new MethodReferenceExpression($r, $id.getText());}
+        {$e = new MethodReferenceExpression($r, $id.getText(), $t);}
 	|	p = primary '::' t = typeArguments? id = Identifier
-        {$e = new MethodReferenceExpression($p, $id.getText());}
+        {$e = new MethodReferenceExpression($p, $id.getText(), $t);}
 	|	'super' '::' t = typeArguments? id = Identifier
-        {$e = new MethodReferenceExpression(Expression.SuperExpression,
-                                            $id.getText());}
+        {$e = new MethodReferenceExpression(new SuperLiteral(),
+                                            $id.getText(),
+                                            $t);}
 	|	tn = typeName '.' 'super' '::' t = typeArguments? id = Identifier
-        {$e = new MethodReferenceExpression(Expression.SuperExpression,
-                                            $id.getText());}
+        {
+            $ref = new MethodReferenceExpression(new SuperLiteral(),
+                                                 $id.getText(),
+                                                 $t);
+            $e = new AccessExpression(new TypeExpression($tn), $ref);
+        }
 	|	c = classType '::' t = typeArguments? 'new'
-        {$e = new MethodReferenceExpression($c);}
+        {$e = new MethodReferenceExpression(new TypeExpression($c), "new", $t);}
 	|	a = arrayType '::' 'new'
-        {$e = new MethodReferenceExpression($a);}
+        {$e = new MethodReferenceExpression(new TypeExpression($a), "new");}
 	;
 
 // TODO
@@ -1519,41 +1618,50 @@ methodReference_lf_primary returns [MethodReferenceExpression e]
         {$e = new MethodReferenceExpression($id.getText());}
 	;
 
-// TODO
 methodReference_lfno_primary returns [MethodReferenceExpression e]
+    locals [MethodReferenceExpression ref;]
 	:	en = expressionName '::' t = typeArguments? id = Identifier
-        {$e = new MethodReferenceExpression($en, $id.getText());}
+        {$e = new MethodReferenceExpression($en, $id.getText(), $t);}
 	|	r = referenceType '::' t = typeArguments? id = Identifier
-        {$e = new MethodReferenceExpression($r, $id.getText());}
+        {$e = new MethodReferenceExpression($r, $id.getText(), $t);}
 	|	'super' '::' t = typeArguments? id = Identifier
-        {$e = new MethodReferenceExpression(Expression.SuperExpression,
-                                            $id.getText());}
+        {$e = new MethodReferenceExpression(new SuperLiteral(),
+                                            $id.getText(),
+                                            $t);}
 	|	tn = typeName '.' 'super' '::' t = typeArguments? id = Identifier
-        {$e = new MethodReferenceExpression($tn, $id.getText());}
+        {
+            $ref = new MethodReferenceExpression(new SuperLiteral(),
+                                                 $id.getText(),
+                                                 $t);
+            $e = new AccessExpression(new TypeExpression($tn), $ref);
+        }
 	|	c = classType '::' t = typeArguments? 'new'
-        {$e = new MethodReferenceExpression($c);}
+        {$e = new MethodReferenceExpression(new TypeExpression($c), "new", $t);}
 	|	a = arrayType '::' 'new'
-        {$e = new MethodReferenceExpression($a);}
+        {$e = new MethodReferenceExpression(new TypeExpression($a), "new");}
 	;
 
-// TODO
-arrayCreationExpression returns [Expression e]
-	:	'new' primitiveType dimExprs dims?
-	|	'new' classOrInterfaceType dimExprs dims?
-	|	'new' primitiveType dims arrayInitializer
-	|	'new' classOrInterfaceType dims arrayInitializer
+arrayCreationExpression returns [ArrayConstruction e]
+	:	'new' p = primitiveType de = dimExprs d = dims?
+        {$e = new ArrayConstruction($p, $de, $d);}
+	|	'new' c = classOrInterfaceType de = dimExprs d = dims?
+        {$e = new ArrayConstruction($c, $de, $d);}
+	|	'new' p = primitiveType d = dims i = arrayInitializer
+        {$e = new ArrayConstruction($p, $d, $i);}
+	|	'new' c = classOrInterfaceType d = dims i = arrayInitializer
+        {$e = new ArrayConstruction($c, $d, $i);}
 	;
 
-// TODO
-dimExprs
-	:	dimExpr dimExpr*
+dimExprs returns [List<DimensionExpression> l]
+	:	d1 = dimExpr {$l = new ArrayList<>(); $l.add($d1);}
+        (d = dimExpr {$l.add($d);})*
 	;
 
-// TODO
-dimExpr returns [Expression e]
-    locals [List<Modifier> mods = new ArrayList<>();]
-	:	(a = annotation {$mods.add($a);})*
+dimExpr returns [DimensionExpression e]
+    locals [List<Annotation> ans = new ArrayList<>();]
+	:	(a = annotation {$ans.add($a);})*
         '[' ex = expression ']'
+        {$e = new DimensionExpression($ans, $ex);}
 	;
 
 constantExpression returns [Expression e]
@@ -1730,23 +1838,23 @@ preDecrementExpression returns [UnaryExpression e]
         {$e = new UnaryExpression($ex, UnaryOperator.PRE_DECREMENT);}
 	;
 
-// TODO
 unaryExpressionNotPlusMinus returns [Expression e]
 	:	pf = postfixExpression {$e = $pf;}
 	|	'~' ex = unaryExpression
         {$e = new UnaryExpression($ex, UnaryOperator.BITWISE_NEGATION);}
 	|	'!' ex = unaryExpression
-        {$e = new UnaryExpression($ex, UnaryOperator.NEGATIION);}
+        {$e = new UnaryExpression($ex, UnaryOperator.NEGATION);}
 	|	cex = castExpression {$e = $cex;}
 	;
 
-// TODO
-postfixExpression returns [UnaryExpression e]
-	:	(	p = primary
-		|	n = expressionName
+postfixExpression returns [Expression e]
+	:	(	p = primary {$e = $p;}
+		|	n = expressionName {$e = new IdentifierExpression($n);}
 		)
 		(	op1 = postIncrementExpression_lf_postfixExpression
+            {$e = new UnaryExpression($e, $op1);}
 		|	op2 = postDecrementExpression_lf_postfixExpression
+            {$e = new UnaryExpression($e, $op2);}
 		)*
 	;
 
@@ -1768,15 +1876,18 @@ postDecrementExpression_lf_postfixExpression returns [UnaryOperator op]
 	:	'--' {$op = UnaryOperator.DECREMENT;}
 	;
 
-// TODO
 castExpression returns [CastExpression e]
+    locals [List<ReferenceType> ls = new ArrayList<>();]
 	:	'(' pt = primitiveType ')' uex = unaryExpression
         {$e = new CastExpression($uex, $pt);}
-	|	'(' rt = referenceType b = additionalBound* ')'
+	|	'(' rt = referenceType {$ls.add($rt);}
+        (b = additionalBound {$ls.add($b);})* ')'
         npm = unaryExpressionNotPlusMinus
-        {$e = new CastExpression($npm, $rt);}
-	|	'(' rt = referenceType b = additionalBound* ')' lam = lambdaExpression
-        {$e = new CastExpression($lam, $rt);}
+        {$e = new CastExpression($npm, $ls);}
+	|	'(' rt = referenceType {$ls.add($rt);}
+        (b = additionalBound {$ls.add($b);})* ')'
+        lam = lambdaExpression
+        {$e = new CastExpression($lam, $ls);}
 	;
 
 // LEXER
