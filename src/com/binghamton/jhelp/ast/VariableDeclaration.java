@@ -59,7 +59,7 @@ public class VariableDeclaration extends Declaration {
                                List<Modifier> modifiers,
                                Expression initializer,
                                boolean isEllipsis) {
-        // name could also have trailing []
+        // name could also have trailing [N] where N is trailing dimension quantity
         super(name, modifiers);
         pairs.put(name, initializer);
         this.type = type;

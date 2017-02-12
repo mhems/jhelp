@@ -11,6 +11,7 @@ public abstract class BodyDeclaration extends Declaration {
     private List<ClassInterfaceType> implementees;
     private List<VariableDeclaration> fields = new ArrayList<>();
     private List<MethodDeclaration> methods = new ArrayList<>();
+    private List<MethodDeclaration> constructors = new ArrayList<>();
     private List<ClassDeclaration> innerClasses = new ArrayList<>();
     private List<InterfaceDeclaration> innerInterfaces = new ArrayList<>();
 
@@ -97,6 +98,22 @@ public abstract class BodyDeclaration extends Declaration {
      */
     public int numMethods() {
         return methods.size();
+    }
+
+    /**
+     * Adds a constructor declaration to this body
+     * @param decl the declaration to add
+     */
+    public void addConstructor(MethodDeclaration decl) {
+        ctors.add(decl);
+    }
+
+    /**
+     * Gets the number of constructors in this body
+     * @return the number of constructors in this body
+     */
+    public int numConstructors() {
+        return ctors.size();
     }
 
     /**

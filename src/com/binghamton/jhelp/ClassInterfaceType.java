@@ -47,6 +47,16 @@ public class ClassInterfaceType extends ReferenceType {
     }
 
     /**
+     * Construct a type from existing types
+     * @param superType the existing superType
+     * @param subType the existing subType
+     */
+    public ClassInterfaceType(ClassInterfaceType superType,
+                              ClassInterfaceType subType) {
+        this(subType.name, subType.annotations, subType.args, superType);
+    }
+
+    /**
      * Construct a complete class or interface type
      * @param name the name of the class or interface
      * @param annotations the annotations of this type

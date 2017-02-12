@@ -18,6 +18,16 @@ public class ArrayType extends Type {
     }
 
     /**
+     * Augments the type into a new array type
+     * @param dimensions the dimensions of the array type
+     * @return a new array type with same base type and `dimensions`
+     */
+    @Override
+    public ArrayType augment(int dimensions) {
+        return new ArrayType(type, rank + dimensions);
+    }
+
+    /**
      * Gets the base type of this array
      * @return the base type of this array
      */

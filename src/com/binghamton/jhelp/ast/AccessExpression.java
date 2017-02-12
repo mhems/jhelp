@@ -18,6 +18,15 @@ public class AccessExpression extends Expression {
 
     /**
      * Construct a new Java symbol access expression
+     * @param identifier the name of the symbol being accessed
+     * @param rhs the right hand side of the access expression
+     */
+    public AccessExpression(String identifier, Expression rhs) {
+        this(new IdentifierExpression(identifier), rhs);
+    }
+
+    /**
+     * Construct a new Java symbol access expression
      * @param lhs the left hand side of the access expression
      * @param rhs the expression of the symbol being accessed
      */

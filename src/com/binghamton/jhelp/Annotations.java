@@ -15,7 +15,7 @@ public class Annotations extends Modifiers {
      * Construct an empty list of annotations
      */
     public Annotations() {
-	annotations = new ArrayList<Annotations>();
+        annotations = new ArrayList<Annotations>();
     }
 
     /**
@@ -23,7 +23,7 @@ public class Annotations extends Modifiers {
      * @param annotations the annotations to construct with
      */
     public Annotations(List<Annotation> annotations) {
-	this.annotations = annotations;
+        this.annotations = annotations;
     }
 
     /**
@@ -31,7 +31,7 @@ public class Annotations extends Modifiers {
      * @return the underlying list of annotations
      */
     public List<Annotation> getAnnotations() {
-	return annotations;
+        return annotations;
     }
 
     /**
@@ -39,7 +39,7 @@ public class Annotations extends Modifiers {
      * @return the number of annotations
      */
     public int numAnnotations() {
-	return annotations.size();
+        return annotations.size();
     }
 
     /**
@@ -48,6 +48,6 @@ public class Annotations extends Modifiers {
      *         false if no annotations are present
      */
     public boolean annotated() {
-	return numAnnotations() > 0;
+        return numAnnotations() > 0;
     }
 }

@@ -4,8 +4,6 @@ package com.binghamton.jhelp.ast;
  * A class representing a Java literal
  */
 public class LiteralExpression extends Expression {
-    public static final LiteralExpression NULL = new LiteralExpression("null", null);
-
     private String value;
     private Type type;
 

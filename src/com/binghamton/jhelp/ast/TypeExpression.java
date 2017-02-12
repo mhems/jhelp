@@ -1,0 +1,24 @@
+package com.binghamton.jhelp.ast;
+
+/**
+ * A class representing a Java type expression
+ */
+public class TypeExpression extends Expression {
+    private Type type;
+
+    /**
+     * Construct a new type expression of given type
+     * @param type the type that comprises this expression
+     */
+    public TypeExpression(Type type) {
+        this.type = type;
+    }
+
+    /**
+     * Gets the type that comprises this expression
+     * @return the type that comprises this expression
+     */
+    public Type getType() {
+        return type;
+    }
+}

@@ -4,6 +4,8 @@ package com.binghamton.jhelp.ast;
  * A class representing a Java type argument
  */
 public class TypeArgument {
+    public static final TypeArgument DIAMOND = new TypeArgument(null);
+
     private ReferenceType type;
     private Annotations annotations;
     private boolean isWildcard = false;

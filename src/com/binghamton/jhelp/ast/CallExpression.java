@@ -3,11 +3,12 @@ package com.binghamton.jhelp.ast;
 import java.util.List;
 
 /**
- * A class representing a Java method call
+ * A class representing a Java method call, including explicit constructor calls
  */
 public class CallExpression extends Expression {
     private Expression methodExpr;
     private List<Expression> args;
+    private List<TypeArgument> typeArgs;
 
     /**
      * Construct a new call expression
@@ -26,6 +27,32 @@ public class CallExpression extends Expression {
     public CallExpression(Expression methodExpr, List<Expression> args) {
         this.methodExpr = methodExpr;
         this.args = args;
+    }
+
+    /**
+     * Construct a new call expression
+     * @param identifier the name of the method being called
+     * @param args the list of arguments to the method call
+     * @param typeArgs the list of type arguments to the method call
+     */
+    public CallExpression(String identifier,
+                          List<Expression> args,
+                          List<TypeArgument> typeArgs) {
+        this(new IdentifierExpression(identifier), args, typeArgs);
+    }
+
+    /**
+     * Construct a new call expression
+     * @param methodExpr the expression yielding the method being called
+     * @param args the list of arguments to the method call
+     * @param typeArgs the list of type arguments to the method call
+     */
+    public CallExpression(Expression methodExpr,
+                          List<Expression> args,
+                          List<TypeArgument> typeArgs) {
+        this.methodExpr = methodExpr;
+        this.args = args;
+        this.typeArgs = typeArgs;
     }
 
     /**
@@ -59,5 +86,32 @@ public class CallExpression extends Expression {
      */
     public int getNumArguments() {
         return args.size();
+    }
+
+    /**
+     * Determines if this call has any type arguments
+     * @return true iff this call has any type arguments
+     */
+    public boolean hasTypeArguments() {
+        return typeArgs != null && typeArgs.size() > 0;
+    }
+
+    /**
+     * Gets the type arguments to this call, if any
+     * @return the type arguments to this call, if any
+     */
+    public List<TypeArgument> getTypeArguments() {
+        return typeArgs;
+    }
+
+    /**
+     * Gets the number of type arguments to this call, if any
+     * @return the number of type arguments to this call, if any
+     */
+    public int numTypeArguments() {
+        if (hasTypeArguments()) {
+            return typeArgs.size();
+        }
+        return 0;
     }
 }
