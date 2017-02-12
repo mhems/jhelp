@@ -9,6 +9,13 @@ public abstract class Declaration extends ASTNode {
     private Modifiers modifiers;
 
     /**
+     * Construct an empty declaration
+     */
+    public Declaration() {
+        super();
+    }
+
+    /**
      * Construct an unnamed modified declaration
      * @param modifiers the modifiers of this declaration
      */
@@ -22,7 +29,7 @@ public abstract class Declaration extends ASTNode {
      * @param modifiers the modifiers of this declaration
      */
     public Declaration(String name, Collection<Modifier> modifiers) {
-        this.name = name
+        this.name = name;
         this.modifiers = new Modifiers(modifiers);
     }
 

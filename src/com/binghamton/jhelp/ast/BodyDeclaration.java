@@ -16,6 +16,13 @@ public abstract class BodyDeclaration extends Declaration {
     private List<InterfaceDeclaration> innerInterfaces = new ArrayList<>();
 
     /**
+     * Construct an empty body declaration
+     */
+    public BodyDeclaration() {
+        super();
+    }
+
+    /**
      * Construct a new declaration of a body
      * @param name the name of this declaration
      * @param modifiers the modifiers of this declaration

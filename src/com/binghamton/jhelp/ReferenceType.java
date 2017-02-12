@@ -15,7 +15,7 @@ public abstract class ReferenceType extends Type {
      * @param name the name of this type
      */
     public ReferenceType(String name) {
-        super(name, new Annotations);
+        super(name, new Annotations());
     }
 
     /**

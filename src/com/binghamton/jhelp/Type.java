@@ -3,7 +3,7 @@ package com.binghamton.jhelp;
 /**
  * Abstract base class representing a Java type
  */
-public abstact class Type {
+public abstract class Type {
     private Annotations annotations;
     private String name;
 
@@ -12,7 +12,7 @@ public abstact class Type {
      * @param name the name of this type
      */
     public Type(String name) {
-        this(name, new Annotations);
+        this(name, new Annotations());
     }
 
     /**

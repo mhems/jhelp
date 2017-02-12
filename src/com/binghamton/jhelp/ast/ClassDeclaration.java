@@ -10,6 +10,13 @@ public class ClassDeclaration extends ConcreteBodyDeclaration {
     private ClassInterfaceType superClass;
 
     /**
+     * Construct an anonymous class declaration
+     */
+    public ClassDeclaration() {
+        super();
+    }
+
+    /**
      * Construct a new ClassDeclaration
      * @param modifiers the class modifiers, if any
      * @param name the name of the class

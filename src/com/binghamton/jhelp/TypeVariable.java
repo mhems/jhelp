@@ -10,7 +10,7 @@ public class TypeVariable extends ReferenceType {
      * @param name the name of this type
      */
     public TypeVariable(String name) {
-        super(name, new Annotations);
+        super(name, new Annotations());
     }
 
     /**

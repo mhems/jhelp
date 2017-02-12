@@ -38,7 +38,7 @@ public class CaseBlock extends ASTNode {
      * @param index the 0-indexed label to retrieve
      * @return the label at index `index`
      */
-    public Expression getLabel(int index;) {
+    public Expression getLabel(int index) {
         return labels.get(index);
     }
 

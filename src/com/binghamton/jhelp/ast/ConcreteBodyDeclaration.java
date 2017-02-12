@@ -11,6 +11,14 @@ public abstract class ConcreteBodyDeclaration extends BodyDeclaration {
     private List<Block> instanceInitializers = new ArrayList<>();
     private List<Block> staticInitializers = new ArrayList<>();
 
+
+    /**
+     * Construct an anonymous declaration
+     */
+    public ConcreteBodyDeclaration() {
+        super();
+    }
+
     /**
      * Construct a new concrete body declaration
      * @param name the name of the declaration

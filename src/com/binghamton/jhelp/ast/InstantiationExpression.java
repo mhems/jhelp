@@ -8,7 +8,7 @@ import java.util.List;
  */
 public class InstantiationExpression extends CallExpression {
     private List<TypeArgument> initialTypeArgs;
-    private ClassDeclaration classBody;
+    private ConcreteBodyDeclaration classBody;
 
     /**
      * Construct an instantiation expression
@@ -17,19 +17,16 @@ public class InstantiationExpression extends CallExpression {
      * @param name the name of the constructor being called
      * @param finalTypeArguments the final type arguments
      * @param arguments the arguments to the constructor call
-     * @param classBody the anonymous class, if any
      */
     public InstantiationExpression(List<TypeArgument> initialTypeArguments,
                                    List<Annotation> annotations,
                                    String name,
                                    List<TypeArgument> finalTypeArguments,
-                                   List<Expression> arguments,
-                                   ClassDeclaration classBody) {
+                                   List<Expression> arguments) {
         this(initialTypeArguments,
              new IdentifierExpression(name, annotations),
              finalTypeArguments,
-             arguments,
-             classBody);
+             arguments);
     }
 
     /**
@@ -38,16 +35,14 @@ public class InstantiationExpression extends CallExpression {
      * @param methodExpr the underlying expression evaluating to the constructor
      * @param finalTypeArguments the final type arguments
      * @param arguments the arguments to the constructor call
-     * @param classBody the anonymous class, if any
      */
     public InstantiationExpression(List<TypeArgument> initialTypeArguments,
                                    Expression methodExpr,
                                    List<TypeArgument> finalTypeArguments,
-                                   List<Expression> arguments,
-                                   ClassDeclaration classBody) {
+                                   List<Expression> arguments) {
         super(methodExpr, arguments, finalTypeArguments);
         this.initialTypeArgs = initialTypeArguments;
-        this.classBody = classBody;
+        this.classBody = new ClassDeclaration();
     }
 
     /**
@@ -71,14 +66,14 @@ public class InstantiationExpression extends CallExpression {
      * @return true iff this instantiation has an anonymous class
      */
     public boolean hasAnonymousClass() {
-        return classBody != null
+        return classBody != null;
     }
 
     /**
      * Gets this instantiation's anonymous class, if any
      * @return this instantiation's anonymous class, if any
      */
-    public ClassDeclaration getAnonymousClass() {
+    public ConcreteBodyDeclaration getAnonymousClass() {
         return classbody;
     }
 }

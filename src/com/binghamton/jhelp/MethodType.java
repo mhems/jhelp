@@ -1,4 +1,4 @@
-package.com.binghamton.jhelp;
+package com.binghamton.jhelp;
 
 /**
  * A class representing the type of a Java method

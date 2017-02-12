@@ -16,8 +16,6 @@ public abstract class ASTNode {
     //     this.token = token;
     // }
 
-    public abstract ASTNode ast();
-
     /**
      * Determines if this object is equivalent to other
      * @param other the other object to compare against

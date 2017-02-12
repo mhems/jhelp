@@ -23,9 +23,9 @@ public class IfElseStatement extends Statement {
      * @param thenBody the block to execute if condition evalutes to true
      * @param elseBody the block to execute if condition evalutes to false
      */
-    public IfElseStatement(Expression condition
-			   Block thenBody,
-			   Block elseBody) {
+    public IfElseStatement(Expression condition,
+                           Block thenBody,
+                           Block elseBody) {
         this.condition = condition;
         this.thenBody = thenBody;
         this.elseBody = elseBody;

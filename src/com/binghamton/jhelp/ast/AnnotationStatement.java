@@ -8,7 +8,7 @@ import java.util.HashMap;
  */
 public class AnnotationStatement extends Modifier {
     private String typename;
-    private Map<String, Expression>> nameValueMap = new HashMap<>();
+    private Map<String, Expression> nameValueMap = new HashMap<>();
 
     /**
      * Construct a marker or normal annotation statement

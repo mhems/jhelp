@@ -56,7 +56,7 @@ public class ForStatement extends Statement {
      * @param index the 0-indexed initializer to retrieve
      * @return the initializer at index `index`
      */
-    public Statement getInitializer(int index;) {
+    public Statement getInitializer(int index) {
         return initializers.get(index);
     }
 
@@ -89,7 +89,7 @@ public class ForStatement extends Statement {
      * @param index the 0-indexed updater to retrieve
      * @return the update at index `index`
      */
-    public Expression getUpdate(int index;) {
+    public Expression getUpdate(int index) {
         return updates.get(index);
     }
 

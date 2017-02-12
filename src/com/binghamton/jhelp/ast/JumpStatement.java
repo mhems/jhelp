@@ -13,7 +13,7 @@ public class JumpStatement extends Statement {
      * @param isBreak true  if this is a break statement
      *                false if this is a continue statement
      */
-    public BreakStatement(boolean isBreak) {
+    public JumpStatement(boolean isBreak) {
         this(isBreak, null);
     }
 
@@ -23,7 +23,7 @@ public class JumpStatement extends Statement {
      * @param isBreak true  if this is a break statement
      *                false if this is a continue statement
      */
-    public BreakStatement(boolean isBreak, String label) {
+    public JumpStatement(boolean isBreak, String label) {
         this.isBreak = isBreak;
         this.label = label;
     }

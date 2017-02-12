@@ -12,7 +12,7 @@ public class SynchronizedBlock extends Statement {
      * @param lock the expression on which to synchronize
      * @param body the statements to execute synchronously
      */
-    public SynchronizedStatement(Expression lock, Block body) {
+    public SynchronizedBlock(Expression lock, Block body) {
         this.lock = lock;
         this.body = body;
     }
