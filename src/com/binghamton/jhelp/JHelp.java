@@ -14,6 +14,7 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 import com.binghamton.jhelp.antlr.Java8Lexer;
 import com.binghamton.jhelp.antlr.Java8Parser;
+import com.binghamton.jhelp.ast.CompilationUnit;
 
 /**
  * JHelp application entry point
@@ -50,14 +51,10 @@ public class JHelp {
         CommonTokenStream tokenStream = new CommonTokenStream(lexer);
         Java8Parser parser = new Java8Parser(tokenStream);
 
-        // ParserRuleContext root = parser.compilationUnit();
-        // System.out.println(root.toStringTree(parser));
-        System.out.println("----------------------------------------");
-
-        ParseTree tree = parser.compilationUnit();
-        ParseTreeWalker walker = new ParseTreeWalker();
-        // MyListener listener = new MyListener();
-        // walker.walk(listener, tree);
+        CompilationUnit cu = parser.compilationUnit().ret;
+        System.out.println(cu.getPackage().getName());
+        System.out.println(cu.getImports().size());
+        System.out.println(cu.getBodyDeclarations().size());
     }
 
     private static void process(String filename)

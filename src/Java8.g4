@@ -101,7 +101,7 @@ type_ returns [Type ret]
 	;
 
 primitiveType returns [PrimitiveType ret]
-    locals [List<Annotation> anns = new ArrayList<>();]
+    locals [List<Annotation> anns = new ArrayList<>()]
 	:	(a = annotation {$anns.add($a.ret);})* n = numericType
         {$ret = new PrimitiveType($n.ret, $anns);}
 	|	(a = annotation {$anns.add($a.ret);})* 'boolean'
@@ -144,31 +144,33 @@ classOrInterfaceType returns [ClassInterfaceType ret]
 	;
 
 classType returns [ClassInterfaceType ret]
-    locals [List<Annotation> anns = new ArrayList<>();]
+    locals [List<Annotation> anns = new ArrayList<>(),
+            List<TypeArgument> ls = null]
 	:	(a = annotation {$anns.add($a.ret);})*
         id = Identifier
-        targs = typeArguments?
-        {$ret = new ClassInterfaceType($id.getText(), $anns, $targs.ret);}
+        (targs = typeArguments {$ls = $targs.ret;})?
+        {$ret = new ClassInterfaceType($id.getText(), $anns, $ls);}
 	|	st = classOrInterfaceType '.'
         (a = annotation {$anns.add($a.ret);})*
         id = Identifier
-        targs = typeArguments?
-        {$ret = new ClassInterfaceType($id.getText(), $anns,
-                                       $targs.ret, $st.ret);}
+        (targs = typeArguments {$ls = $targs.ret;})?
+        {$ret = new ClassInterfaceType($id.getText(), $anns, $ls, $st.ret);}
 	;
 
 classType_lf_classOrInterfaceType returns [ClassInterfaceType ret]
-    locals [List<Annotation> ans = new ArrayList<>();]
+    locals [List<Annotation> ans = new ArrayList<>(),
+            List<TypeArgument> ls = null]
 	:	'.' (a = annotation {$ans.add($a.ret);})*
-        id = Identifier targs = typeArguments?
-        {$ret = new ClassInterfaceType($id.getText(), $ans, $targs.ret);}
+        id = Identifier (targs = typeArguments {$ls = $targs.ret;})?
+        {$ret = new ClassInterfaceType($id.getText(), $ans, $ls);}
 	;
 
 classType_lfno_classOrInterfaceType returns [ClassInterfaceType ret]
-    locals [List<Annotation> ans = new ArrayList<>();]
+    locals [List<Annotation> ans = new ArrayList<>(),
+            List<TypeArgument> ls = null]
 	:	(a = annotation {$ans.add($a.ret);})*
-        id = Identifier targs = typeArguments?
-        {$ret = new ClassInterfaceType($id.getText(), $ans, $targs.ret);}
+        id = Identifier (targs = typeArguments {$ls = $targs.ret;})?
+        {$ret = new ClassInterfaceType($id.getText(), $ans, $ls);}
 	;
 
 interfaceType returns [ClassInterfaceType ret]
@@ -184,7 +186,7 @@ interfaceType_lfno_classOrInterfaceType returns [ClassInterfaceType ret]
 	;
 
 typeVariable returns [TypeVariable ret]
-    locals [List<Annotation> ans = new ArrayList<>();]
+    locals [List<Annotation> ans = new ArrayList<>()]
 	:	(a = annotation {$ans.add($a.ret);})* id = Identifier
         {$ret = new TypeVariable($id.getText(), $ans);}
 	;
@@ -204,10 +206,11 @@ dims returns [int ret]
 	;
 
 typeParameter returns [TypeParameter ret]
-    locals [List<Annotation> ans = new ArrayList<>();]
+    locals [List<Annotation> ans = new ArrayList<>(),
+            List<ReferenceType> ls = null]
 	:	(a = typeParameterModifier {$ans.add($a.ret);})*
-        id = Identifier b = typeBound?
-        {$ret = new TypeParameter($id.getText(), $ans, $b.ret);}
+        id = Identifier (b = typeBound {$ls = $b.ret;})?
+        {$ret = new TypeParameter($id.getText(), $ans, $ls);}
 	;
 
 typeParameterModifier returns [Annotation ret]
@@ -215,7 +218,7 @@ typeParameterModifier returns [Annotation ret]
 	;
 
 typeBound returns [List<ReferenceType> ret]
-    locals [List<ReferenceType> ls = new ArrayList<>();]
+    locals [List<ReferenceType> ls = new ArrayList<>()]
 	:	'extends' v = typeVariable {$ls.add($v.ret); $ret = $ls;}
 	|	'extends' c = classOrInterfaceType {$ls.add($c.ret);}
         (a = additionalBound {$ls.add($a.ret);})*
@@ -231,7 +234,7 @@ typeArguments returns [List<TypeArgument> ret]
 	;
 
 typeArgumentList returns [List<TypeArgument> ret]
-   locals [List<TypeArgument> ls = new ArrayList<>();]
+   locals [List<TypeArgument> ls = new ArrayList<>()]
 	:	a1 = typeArgument {$ls.add($a1.ret);}
         (',' a = typeArgument {$ls.add($a.ret);})*
         {$ret = $ls;}
@@ -243,7 +246,7 @@ typeArgument returns [TypeArgument ret]
 	;
 
 wildcard returns [TypeArgument ret]
-    locals [List<Annotation> ans = new ArrayList<>();]
+    locals [List<Annotation> ans = new ArrayList<>()]
 	:	(a = annotation {$ans.add($a.ret);})* '?'
         {$ret = new TypeArgument($ans);}
         (wildcardBounds[$ret])?
@@ -300,12 +303,13 @@ ambiguousName returns [String ret]
 
 compilationUnit returns [CompilationUnit ret]
     locals [List<ImportStatement> imports = new ArrayList<>(),
-            List<BodyDeclaration> bodies = new ArrayList<>()]
-	:	p = packageDeclaration?
+            List<BodyDeclaration> bodies = new ArrayList<>(),
+            PackageStatement stmt = null]
+	:	(p = packageDeclaration {$stmt = $p.ret;})?
         (i = importDeclaration {$imports.add($i.ret);})*
         (t = typeDeclaration {$bodies.add($t.ret);})*
         EOF
-        {$ret = new CompilationUnit($p.ret, $imports, $bodies);}
+        {$ret = new CompilationUnit($stmt, $imports, $bodies);}
 	;
 
 packageDeclaration returns [PackageStatement ret]
@@ -364,13 +368,15 @@ classDeclaration returns [ConcreteBodyDeclaration ret]
 	;
 
 normalClassDeclaration returns [ClassDeclaration ret]
-    locals [List<Modifier> mods = new ArrayList<>();]
+    locals [List<Modifier> mods = new ArrayList<>(),
+            List<TypeParameter> tpars = null,
+            ClassInterfaceType scls = null,
+            List<ClassInterfaceType> sis = null]
 	:	(m = classModifier {$mods.add($m.ret);})* 'class' n = Identifier
-        (p = typeParameters)?
-        (sc = superclass)?
-        (si = superinterfaces)?
-        {$ret = new ClassDeclaration($n.getText(), $mods, $si.ret,
-                $p.ret, $sc.ret);}
+        (p = typeParameters {$tpars = $p.ret;})?
+        (sc = superclass {$scls = $sc.ret;})?
+        (si = superinterfaces {$sis = $si.ret;})?
+        {$ret = new ClassDeclaration($n.getText(), $mods, $sis, $tpars, $scls);}
         classBody[$ret]
 	;
 
@@ -390,7 +396,7 @@ typeParameters returns [List<TypeParameter> ret]
 	;
 
 typeParameterList returns [List<TypeParameter> ret]
-    locals [List<TypeParameter> ls = new ArrayList<>();]
+    locals [List<TypeParameter> ls = new ArrayList<>()]
 	:	(t1 = typeParameter {$ls.add($t1.ret);})
         (',' t = typeParameter {$ls.add($t.ret);})*
         {$ret = $ls;}
@@ -405,7 +411,7 @@ superinterfaces returns [List<ClassInterfaceType> ret]
 	;
 
 interfaceTypeList returns [List<ClassInterfaceType> ret]
-    locals [List<ClassInterfaceType> ls = new ArrayList<>();]
+    locals [List<ClassInterfaceType> ls = new ArrayList<>()]
 	:	(i1 = interfaceType {$ls.add($i1.ret);})
         (',' i = interfaceType {$ls.add($i.ret);})*
         {$ret = $ls;}
@@ -431,7 +437,7 @@ classMemberDeclaration [ConcreteBodyDeclaration ret]
 	;
 
 fieldDeclaration returns [VariableDeclaration ret]
-    locals [List<Modifier> mods = new ArrayList<>();]
+    locals [List<Modifier> mods = new ArrayList<>()]
 	:	(m = fieldModifier {$mods.add($m.ret);})*
         t = unannType
         l = variableDeclaratorList ';'
@@ -450,19 +456,23 @@ fieldModifier returns [Modifier ret]
 	;
 
 variableDeclaratorList returns [List<MyPair<String, Expression>> ret]
-    locals [List<MyPair<String, Expression>> ls = new ArrayList<>();]
+    locals [List<MyPair<String, Expression>> ls = new ArrayList<>()]
 	:	(d1 = variableDeclarator {$ls.add($d1.ret);})
         (',' d = variableDeclarator {$ls.add($d.ret);})*
         {$ret = $ls;}
 	;
 
 variableDeclarator returns [MyPair<String, Expression> ret]
-	:	id = variableDeclaratorId ('=' in = variableInitializer)?
-        {$ret = new MyPair<>(toName($id.ret), $in.ret);}
+    locals [Expression expr = null]
+	:	id = variableDeclaratorId
+        ('=' in = variableInitializer {$expr = $in.ret;})?
+        {$ret = new MyPair<>(toName($id.ret), $expr);}
 	;
 
 variableDeclaratorId returns [MyPair<String, Integer> ret]
-	:	id = Identifier d = dims? {$ret = new MyPair<>($id.getText(), $d.ret);}
+    locals [int dim = 0]
+	:	id = Identifier (d = dims {$dim = $d.ret;})?
+        {$ret = new MyPair<>($id.getText(), $dim);}
 	;
 
 variableInitializer returns [Expression ret]
@@ -500,25 +510,28 @@ unannClassOrInterfaceType returns [ClassInterfaceType ret]
 	;
 
 unannClassType returns [ClassInterfaceType ret]
-    locals [List<Annotation> ans = new ArrayList<>();]
-	:	id = Identifier ta = typeArguments?
-        {$ret = new ClassInterfaceType($id.getText(), null, $ta.ret);}
+    locals [List<Annotation> ans = new ArrayList<>(),
+            List<TypeArgument> targs = null]
+	:	id = Identifier (ta = typeArguments {$targs = $ta.ret;})?
+        {$ret = new ClassInterfaceType($id.getText(), null, $targs);}
 	|	ci = unannClassOrInterfaceType '.' (a = annotation {$ans.add($a.ret);})*
-        id2 = Identifier ta2 = typeArguments?
+        id2 = Identifier (ta2 = typeArguments {$targs = $ta2.ret;})?
         {$ret = new ClassInterfaceType($id2.getText(), $ans,
-                                       $ta2.ret, $ci.ret);}
+                                       $targs, $ci.ret);}
 	;
 
 unannClassType_lf_unannClassOrInterfaceType returns [ClassInterfaceType ret]
-    locals [List<Annotation> ans = new ArrayList<>();]
+    locals [List<Annotation> ans = new ArrayList<>(),
+            List<TypeArgument> targs = null]
 	:	'.' (a = annotation {$ans.add($a.ret);})*
-        id = Identifier ta = typeArguments?
-        {$ret = new ClassInterfaceType($id.getText(), $ans, $ta.ret);}
+        id = Identifier (ta = typeArguments {$targs = $ta.ret;})?
+        {$ret = new ClassInterfaceType($id.getText(), $ans, $targs);}
 	;
 
 unannClassType_lfno_unannClassOrInterfaceType returns [ClassInterfaceType ret]
-	:	id = Identifier ta = typeArguments?
-        {$ret = new ClassInterfaceType($id.getText(), null, $ta.ret);}
+    locals [List<TypeArgument> targs = null]
+	:	id = Identifier (ta = typeArguments {$targs = $ta.ret;})?
+        {$ret = new ClassInterfaceType($id.getText(), null, $targs);}
 	;
 
 unannInterfaceType returns [ClassInterfaceType ret]
@@ -545,7 +558,7 @@ unannArrayType returns [ArrayType ret]
 	;
 
 methodDeclaration returns [MethodDeclaration ret]
-    locals [List<Modifier> mods = new ArrayList<>();]
+    locals [List<Modifier> mods = new ArrayList<>()]
 	:	(m = methodModifier {$mods.add($m.ret);})*
         {$ret = new MethodDeclaration($mods);}
         methodHeader[$ret]
@@ -566,22 +579,19 @@ methodModifier returns [Modifier ret]
 	;
 
 methodHeader [MethodDeclaration ret]
-    locals [List<Annotation> ans = new ArrayList<>();]
-	:	rt = result methodDeclarator[$ret] th = throws_?
+    locals [List<Annotation> ans = new ArrayList<>()]
+	:	rt = result {$ret.setReturnType($rt.ret);} methodDeclarator[$ret]
+        (th = throws_ {$ret.setExceptions($th.ret);})?
+	|	tp = typeParameters {$ret.setTypeParameters($tp.ret);}
+        (a = annotation {$ans.add($a.ret);})*
         {
-            $ret.setReturnType($rt.ret);
-            $ret.setExceptions($th.ret);
-        }
-	|	tp = typeParameters (a = annotation {$ans.add($a.ret);})*
-        rt = result methodDeclarator[$ret] th = throws_?
-        {
-            $ret.setTypeParameters($tp.ret);
             if ($ans.size() > 0) {
                 $rt.ret.setAnnotations($ans);
             }
-            $ret.setReturnType($rt.ret);
-            $ret.setExceptions($th.ret);
         }
+        rt = result {$ret.setReturnType($rt.ret);}
+        methodDeclarator[$ret]
+        (th = throws_ {$ret.setExceptions($th.ret);})?
 	;
 
 result returns [Type ret]
@@ -590,20 +600,18 @@ result returns [Type ret]
 	;
 
 methodDeclarator [MethodDeclaration ret]
-	:	n = Identifier
-        '(' p = formalParameterList? ')'
-        d = dims?
+	:	n = Identifier {$ret.setName($n.getText());}
+        '(' (p = formalParameterList {$ret.setParameters($p.ret);})? ')'
+        (d = dims
         {
-            $ret.setName($n.getText());
-            $ret.setParameters($p.ret);
             if ($d.ret > 0) {
                 $ret.setReturnType($ret.getReturnType().augment($d.ret));
             }
-        }
+        })?
 	;
 
 formalParameterList returns [List<VariableDeclaration> ret]
-    locals [List<VariableDeclaration> ls = new ArrayList<>();]
+    locals [List<VariableDeclaration> ls = new ArrayList<>()]
 	:	(p = formalParameters {$ls.addAll($p.ret);}) ','
         (p2 = lastFormalParameter {$ls.add($p2.ret);})
         {$ret = $ls;}
@@ -612,7 +620,7 @@ formalParameterList returns [List<VariableDeclaration> ret]
 	;
 
 formalParameters returns [List<VariableDeclaration> ret]
-    locals [List<VariableDeclaration> ls = new ArrayList<>();]
+    locals [List<VariableDeclaration> ls = new ArrayList<>()]
 	:	(p = formalParameter {$ls.add($p.ret);})
         (',' f = formalParameter {$ls.add($f.ret);})* {$ret = $ls;}
 	|	(r = receiverParameter {$ls.add($r.ret);})
@@ -620,7 +628,7 @@ formalParameters returns [List<VariableDeclaration> ret]
 	;
 
 formalParameter returns [VariableDeclaration ret]
-    locals [List<Modifier> mods = new ArrayList<>();]
+    locals [List<Modifier> mods = new ArrayList<>()]
 	:	(m = variableModifier {$mods.add($m.ret);})*
         t = unannType n = variableDeclaratorId
         {$ret = new VariableDeclaration(toName($n.ret), $t.ret, $mods);}
@@ -632,7 +640,7 @@ variableModifier returns [Modifier ret]
 	;
 
 lastFormalParameter returns [VariableDeclaration ret]
-    locals [List<Modifier> mods = new ArrayList<>();]
+    locals [List<Modifier> mods = new ArrayList<>()]
 	:	(m = variableModifier {$mods.add($m.ret);})*
         t = unannType
         (a = annotation {$mods.add($a.ret);})*
@@ -643,17 +651,13 @@ lastFormalParameter returns [VariableDeclaration ret]
 	;
 
 receiverParameter returns [VariableDeclaration ret]
-    locals [List<Modifier> ans = new ArrayList<>();]
+    locals [List<Modifier> ans = new ArrayList<>(),
+            String id = "this"]
 	:	(a = annotation {$ans.add($a.ret);})*
         t = unannType
-        (i = Identifier '.')?
+        (i = Identifier '.' {$id = $i.getText() + "." + $id;})?
         'this'
-        {
-            $ret = new VariableDeclaration(
-                $i.getText().equals("") ? "this" : $i.getText() + "." + "this",
-                $t.ret,
-                $ans);
-        }
+        {$ret = new VariableDeclaration($id, $t.ret, $ans);}
 	;
 
 throws_ returns [List<Type> ret]
@@ -661,7 +665,7 @@ throws_ returns [List<Type> ret]
 	;
 
 exceptionTypeList returns [List<Type> ret]
-    locals [List<Type> ls = new ArrayList<>();]
+    locals [List<Type> ls = new ArrayList<>()]
 	:	(e = exceptionType {$ls.add($e.ret);})
         (',' e = exceptionType {$ls.add($e.ret);})*
         {$ret = $ls;}
@@ -686,16 +690,12 @@ staticInitializer returns [Block ret]
 	;
 
 constructorDeclaration returns [MethodDeclaration ret]
-    locals [List<Modifier> mods = new ArrayList<>();]
+    locals [List<Modifier> mods = new ArrayList<>()]
 	:	(m = constructorModifier {$mods.add($m.ret);})*
         {$ret = new MethodDeclaration($mods);}
         constructorDeclarator[$ret]
-        t = throws_?
-        b = constructorBody
-        {
-            $ret.setExceptions($t.ret);
-            $ret.setBody($b.ret);
-        }
+        (t = throws_ {$ret.setExceptions($t.ret);})?
+        b = constructorBody {$ret.setBody($b.ret);}
 	;
 
 constructorModifier returns [Modifier ret]
@@ -706,12 +706,9 @@ constructorModifier returns [Modifier ret]
 	;
 
 constructorDeclarator [MethodDeclaration ret]
-	:	t = typeParameters? n = simpleTypeName '(' l = formalParameterList? ')'
-        {
-            $ret.setTypeParameters($t.ret);
-            $ret.setName($n.ret);
-            $ret.setParameters($l.ret);
-        }
+	:	(t = typeParameters {$ret.setTypeParameters($t.ret);})?
+        n = simpleTypeName {$ret.setName($n.ret);}
+        '(' (l = formalParameterList {$ret.setParameters($l.ret);})? ')'
 	;
 
 simpleTypeName returns [String ret]
@@ -719,30 +716,36 @@ simpleTypeName returns [String ret]
 	;
 
 constructorBody returns [Block ret]
-	:	'{' s = explicitConstructorInvocation? st = blockStatements? '}'
-        {$ret = new Block($st.ret);
-         $ret.addStatement(0, $s.ret);}
+	:    {$ret = new Block();}
+        '{' (s = explicitConstructorInvocation {$ret.addStatement($s.ret);})?
+            (st = blockStatements {$ret.addStatements($st.ret);})? '}'
 	;
 
 explicitConstructorInvocation returns [Expression ret]
-	:	t = typeArguments? 'this' '(' a = argumentList? ')' ';'
-        {$ret = new CallExpression(new ThisLiteral(), $a.ret, $t.ret);}
-	|	t = typeArguments? 'super' '(' a = argumentList? ')' ';'
-        {$ret = new CallExpression(new SuperLiteral(), $a.ret, $t.ret);}
-	|	en = expressionName '.' t = typeArguments? 'super'
-        '(' a = argumentList? ')' ';'
-        {$ret = new CallExpression(new SuperLiteral(), $a.ret, $t.ret);
+    locals [List<TypeArgument> targs = null,
+            List<Expression> args = null]
+	:	(t = typeArguments {$targs = $t.ret;})? 'this'
+        '(' (a = argumentList {$args = $a.ret;})? ')' ';'
+        {$ret = new CallExpression(new ThisLiteral(), $args, $targs);}
+	|	(t = typeArguments {$targs = $t.ret;})? 'super'
+        '(' (a = argumentList {$args = $a.ret;})? ')' ';'
+        {$ret = new CallExpression(new SuperLiteral(), $args, $targs);}
+	|	en = expressionName '.' (t = typeArguments {$targs = $t.ret;})? 'super'
+        '(' (a = argumentList {$args = $a.ret;})? ')' ';'
+        {$ret = new CallExpression(new SuperLiteral(), $args, $targs);
          $ret = new AccessExpression($en.ret, $ret);}
-	|	p = primary '.' t = typeArguments? 'super' '(' a = argumentList? ')' ';'
-        {$ret = new CallExpression(new SuperLiteral(), $a.ret, $t.ret);
+	|	p = primary '.' (t = typeArguments {$targs = $t.ret;})? 'super'
+        '(' (a = argumentList {$args = $a.ret;})? ')' ';'
+        {$ret = new CallExpression(new SuperLiteral(), $args, $targs);
          $ret = new AccessExpression($p.ret, $ret);}
 	;
 
 enumDeclaration returns [EnumDeclaration ret]
-    locals [List<Modifier> mods = new ArrayList<>();]
+    locals [List<Modifier> mods = new ArrayList<>(),
+            List<ClassInterfaceType> sis = null]
 	:	(m = classModifier {$mods.add($m.ret);})*
-        'enum' id = Identifier il = superinterfaces?
-        {$ret = new EnumDeclaration($id.getText(), $mods, $il.ret);}
+        'enum' id = Identifier (il = superinterfaces {$sis = $il.ret;})?
+        {$ret = new EnumDeclaration($id.getText(), $mods, $sis);}
         enumBody[$ret]
 	;
 
@@ -756,12 +759,15 @@ enumConstantList [EnumDeclaration ret]
 
 enumConstant [EnumDeclaration ret]
     locals [List<Modifier> ans = new ArrayList<>(),
-            EnumConstant cons]
+            EnumConstant cons,
+            List<Expression> args = null]
 	:	(an = enumConstantModifier {$ans.add($an.ret);})*
-        id = Identifier ('(' a = argumentList? ')')?
+        id = Identifier
+        ('(' (a = argumentList {$args = $a.ret;})? ')')?
         {
-            $cons = new EnumConstant($id.getText(), $ans, $a.ret);
-            $ret.addConstant($cons);}
+            $cons = new EnumConstant($id.getText(), $ans, $args);
+            $ret.addConstant($cons);
+        }
         (classBody[$cons])?
 	;
 
@@ -783,11 +789,14 @@ interfaceDeclaration returns [AbstractBodyDeclaration ret]
 	;
 
 normalInterfaceDeclaration returns [InterfaceDeclaration ret]
-    locals [List<Modifier> mods = new ArrayList<>();]
+    locals [List<Modifier> mods = new ArrayList<>(),
+            List<TypeParameter> tpars = null,
+            List<ClassInterfaceType> eis = null]
 	:	(m = interfaceModifier {$mods.add($m.ret);})*
         'interface' id = Identifier
-        t = typeParameters? e = extendsInterfaces?
-        {$ret = new InterfaceDeclaration($id.getText(), $mods, $e.ret, $t.ret);}
+        (t = typeParameters {$tpars = $t.ret;})?
+        (e = extendsInterfaces {$eis = $e.ret;})?
+        {$ret = new InterfaceDeclaration($id.getText(), $mods, $eis, $tpars);}
         interfaceBody[$ret]
 	;
 
@@ -818,7 +827,7 @@ interfaceMemberDeclaration [InterfaceDeclaration ret]
 	;
 
 constantDeclaration returns [VariableDeclaration ret]
-    locals [List<Modifier> mods = new ArrayList<>();]
+    locals [List<Modifier> mods = new ArrayList<>()]
 	:	(m =constantModifier {$mods.add($m.ret);})*
         t = unannType
         l = variableDeclaratorList ';'
@@ -833,7 +842,7 @@ constantModifier returns [Modifier ret]
 	;
 
 interfaceMethodDeclaration returns [MethodDeclaration ret]
-    locals [List<Modifier> mods = new ArrayList<>();]
+    locals [List<Modifier> mods = new ArrayList<>()]
 	:	(m = interfaceMethodModifier {$mods.add($m.ret);})*
         {$ret = new MethodDeclaration($mods);}
         (methodHeader[$ret])
@@ -850,7 +859,7 @@ interfaceMethodModifier returns [Modifier ret]
 	;
 
 annotationTypeDeclaration returns [AnnotationDeclaration ret]
-    locals [List<Modifier> mods = new ArrayList<>();]
+    locals [List<Modifier> mods = new ArrayList<>()]
     :	(m = interfaceModifier {$mods.add($m.ret);})*
 		'@' 'interface' id = Identifier
         {$ret = new AnnotationDeclaration($id.getText(), $mods);}
@@ -870,21 +879,23 @@ annotationTypeMemberDeclaration [AnnotationDeclaration ret]
 	;
 
 annotationTypeElementDeclaration returns [VariableDeclaration ret]
-    locals [List<Modifier> mods = new ArrayList<>();]
+    locals [List<Modifier> mods = new ArrayList<>(),
+            int dim = 0,
+            Expression expr = null]
 	:	(m = annotationTypeElementModifier {$mods.add($m.ret);})*
         t = unannType id = Identifier '(' ')'
-        ds = dims?
-        dv = defaultValue? ';'
+        (ds = dims {$dim = $ds.ret;})?
+        (dv = defaultValue {$expr = $dv.ret;})? ';'
         {
-            if ($ds.ret > 0) {
+            if ($dim > 0) {
                 $ret = new VariableDeclaration($id.getText(),
-                                               $t.ret.augment($ds.ret),
+                                               $t.ret.augment($dim),
                                                $mods,
-                                               $dv.ret,
+                                               $expr,
                                                false);
             } else {
                 $ret = new VariableDeclaration($id.getText(), $t.ret,
-                                               $mods, $dv.ret, false);
+                                               $mods, $expr, false);
             }
         }
 	;
@@ -928,12 +939,13 @@ elementValue returns [Expression ret]
 	;
 
 elementValueArrayInitializer returns [ArrayInitializer ret]
-	:	'{' l = elementValueList? ','? '}'
-        {$ret = new ArrayInitializer($l.ret);}
+    locals [List<Expression> ls = null]
+	:	'{' (l = elementValueList {$ls = $l.ret;})? ','? '}'
+        {$ret = new ArrayInitializer($ls);}
 	;
 
 elementValueList returns [List<Expression> ret]
-    locals [List<Expression> ls = new ArrayList<>();]
+    locals [List<Expression> ls = new ArrayList<>()]
 	:	(v1 = elementValue {$ls.add($v1.ret);})
         (',' v = elementValue {$ls.add($v.ret);})*
         {$ret = $ls;}
@@ -953,12 +965,13 @@ singleElementAnnotation returns [Annotation ret]
  */
 
 arrayInitializer returns [ArrayInitializer ret]
-	:	'{' l = variableInitializerList? ','? '}'
-        {$ret = new ArrayInitializer($l.ret);}
+    locals [List<Expression> ls = null]
+	:	'{' (l = variableInitializerList {$ls = $l.ret;})? ','? '}'
+        {$ret = new ArrayInitializer($ls);}
 	;
 
 variableInitializerList returns [List<Expression> ret]
-    locals [List<Expression> ls = new ArrayList<>();]
+    locals [List<Expression> ls = new ArrayList<>()]
 	:	(i = variableInitializer {$ls.add($i.ret);})
         (',' v = variableInitializer {$ls.add($v.ret);})*
         {$ret = $ls;}
@@ -969,11 +982,12 @@ variableInitializerList returns [List<Expression> ret]
  */
 
 block returns [Block ret]
-	:	'{' s = blockStatements? '}' {$ret = new Block($s.ret);}
+	:    {$ret = new Block();}
+        '{' (s = blockStatements {$ret.addStatements($s.ret);})? '}'
 	;
 
 blockStatements returns [List<Statement> ret]
-    locals [List<Statement> ls = new ArrayList<>();]
+    locals [List<Statement> ls = new ArrayList<>()]
 	:	(s = blockStatement {$ls.add($s.ret);})
         (b = blockStatement {$ls.add($b.ret);})*
         {$ret = $ls;}
@@ -990,7 +1004,7 @@ localVariableDeclarationStatement returns [VariableDeclaration ret]
 	;
 
 localVariableDeclaration returns [VariableDeclaration ret]
-    locals [List<Modifier> mods = new ArrayList<>();]
+    locals [List<Modifier> mods = new ArrayList<>()]
 	:	(m = variableModifier {$mods.add($m.ret);})*
         t = unannType
         vl = variableDeclaratorList
@@ -1089,7 +1103,7 @@ switchStatement returns [SwitchStatement ret]
 	;
 
 switchBlock returns [List<CaseBlock> ret]
-    locals [List<CaseBlock> blocks = new ArrayList<>();]
+    locals [List<CaseBlock> blocks = new ArrayList<>()]
 	:	'{' (m = switchBlockStatementGroup {$blocks.add($m.ret);})*
             (l = switchLabel {$blocks.add(new CaseBlock($l.ret));})* '}'
         {$ret = $blocks;}
@@ -1101,7 +1115,7 @@ switchBlockStatementGroup returns [CaseBlock ret]
 	;
 
 switchLabels returns [List<Expression> ret]
-    locals [List<Expression> lbls = new ArrayList<>();]
+    locals [List<Expression> lbls = new ArrayList<>()]
 	:	(s = switchLabel {$lbls.add($s.ret);})
         (l = switchLabel {$lbls.add($l.ret);})*
         {$ret = $lbls;}
@@ -1144,15 +1158,25 @@ forStatementNoShortIf returns [Statement ret]
 	;
 
 basicForStatement returns [ForStatement ret]
-	:	'for' '(' i = forInit? ';' e = expression? ';' u = forUpdate? ')'
+    locals [List<Statement> forIn,
+            List<Statement> forUp,
+            Expression expr]
+	:	'for' '(' (i = forInit {$forIn = $i.ret;})? ';'
+                  (e = expression {$expr = $e.ret;})? ';'
+                  (u = forUpdate {$forUp = $u.ret;})? ')'
         s = statement
-        {$ret = new ForStatement($i.ret, $e.ret, $u.ret, new Block($s.ret));}
+        {$ret = new ForStatement($forIn, $expr, $forUp, new Block($s.ret));}
 	;
 
 basicForStatementNoShortIf returns [ForStatement ret]
-	:	'for' '(' i = forInit? ';' e = expression? ';' u = forUpdate? ')'
+    locals [List<Statement> forIn,
+            List<Statement> forUp,
+            Expression expr]
+	:	'for' '(' (i = forInit {$forIn = $i.ret;})? ';'
+                  (e = expression {$expr = $e.ret;})? ';'
+                  (u = forUpdate {$forUp = $u.ret;})? ')'
         s = statementNoShortIf
-        {$ret = new ForStatement($i.ret, $e.ret, $u.ret, new Block($s.ret));}
+        {$ret = new ForStatement($forIn, $expr, $forUp, new Block($s.ret));}
 	;
 
 forInit returns [List<Statement> ret]
@@ -1167,7 +1191,7 @@ forUpdate returns [List<Statement> ret]
 	;
 
 statementExpressionList returns [List<Statement> ret]
-    locals [List<Statement> ups = new ArrayList<>();]
+    locals [List<Statement> ups = new ArrayList<>()]
 	:	(s = statementExpression {$ups.add($s.ret);})
         (',' e = statementExpression {$ups.add($e.ret);})*
         { $ret = $ups;}
@@ -1198,17 +1222,21 @@ enhancedForStatementNoShortIf returns [ForEachStatement ret]
 	;
 
 breakStatement returns [JumpStatement ret]
-	:	'break' id = Identifier? ';'
-        {$ret = new JumpStatement(true, $id.getText());}
+    locals [String name = null]
+	:	'break' (id = Identifier {$name = $id.getText();})? ';'
+        {$ret = new JumpStatement(true, $name);}
 	;
 
 continueStatement returns [JumpStatement ret]
-	:	'continue' id = Identifier? ';'
-        {$ret = new JumpStatement(false, $id.getText());}
+    locals [String name = null]
+	:	'continue' (id = Identifier {$name = $id.getText();})? ';'
+        {$ret = new JumpStatement(false, $name);}
 	;
 
 returnStatement returns [ReturnStatement ret]
-	:	'return' e = expression? ';' {$ret = new ReturnStatement($e.ret);}
+    locals [Expression expr = null]
+	:	'return' (e = expression {$expr = $e.ret;})? ';'
+        {$ret = new ReturnStatement($expr);}
 	;
 
 throwStatement returns [ThrowStatement ret]
@@ -1221,15 +1249,16 @@ synchronizedStatement returns [SynchronizedBlock ret]
 	;
 
 tryStatement returns [TryCatchBlock ret]
+    locals [List<CatchBlock> ls = null]
 	:	'try' t = block cs = catches
         {$ret = new TryCatchBlock($t.ret, $cs.ret);}
-	|	'try' t = block cs = catches? f = finally_
-        {$ret = new TryCatchBlock($t.ret, $cs.ret, $f.ret);}
+	|	'try' t = block (cs = catches {$ls = $cs.ret;})? f = finally_
+        {$ret = new TryCatchBlock($t.ret, $ls, $f.ret);}
 	|	r = tryWithResourcesStatement {$ret = $r.ret;}
 	;
 
 catches returns [List<CatchBlock> ret]
-    locals [List<CatchBlock> ls = new ArrayList<>();]
+    locals [List<CatchBlock> ls = new ArrayList<>()]
 	:	f = catchClause {$ls.add($f.ret);} (c = catchClause {$ls.add($c.ret);})*
         {$ret = $ls;}
 	;
@@ -1241,7 +1270,7 @@ catchClause returns [CatchBlock ret]
 	;
 
 catchFormalParameter [CatchBlock ret]
-    locals [List<Modifier> mods = new ArrayList<>();]
+    locals [List<Modifier> mods = new ArrayList<>()]
 	:	(m = variableModifier {$mods.add($m.ret);})*
         catchType[$ret]
         n = variableDeclaratorId
@@ -1258,23 +1287,27 @@ finally_ returns [Block ret]
 	;
 
 tryWithResourcesStatement returns [TryCatchBlock ret]
-	:	'try' r = resourceSpecification b = block c = catches? f = finally_?
-        {$ret = new TryCatchBlock($r.ret, $b.ret, $c.ret, $f.ret);}
+    locals [List<CatchBlock> ls = null,
+            Block fin = null]
+	:	'try' r = resourceSpecification b = block (c = catches {$ls = $c.ret;})?
+        (f = finally_ {$fin = $f.ret;})?
+        {$ret = new TryCatchBlock($r.ret, $b.ret, $ls, $fin);}
 	;
 
 resourceSpecification returns [List<VariableDeclaration> ret]
-	:	'(' l = resourceList ';'? ')' {$ret = $l.ret;}
+	:	{$ret = new ArrayList<>();}
+        '(' (l = resourceList ';' {$ret = $l.ret;})? ')'
 	;
 
 resourceList returns [List<VariableDeclaration> ret]
-    locals [List<VariableDeclaration> vars = new ArrayList<>();]
+    locals [List<VariableDeclaration> vars = new ArrayList<>()]
 	:	r = resource {$vars.add($r.ret);}
         (';' re = resource {$vars.add($re.ret);})*
         {$ret = $vars;}
 	;
 
 resource returns [VariableDeclaration ret]
-    locals [List<Modifier> mods = new ArrayList<>();]
+    locals [List<Modifier> mods = new ArrayList<>()]
 	:	(m = variableModifier {$mods.add($m.ret);})*
         t = unannType
         n = variableDeclaratorId '='
@@ -1433,8 +1466,12 @@ classInstanceCreationExpression returns [Expression ret]
             List<Annotation> ans = new ArrayList<>(),
             List<Annotation> ans2 = new ArrayList<>(),
             ConcreteBodyDeclaration anon,
-            InstantiationExpression inst]
-	:	'new' t = typeArguments? (a = annotation {$ans.add($a.ret);})*
+            InstantiationExpression inst,
+            List<TypeArgument> targs = null,
+            List<TypeArgument> targsd = null,
+            List<Expression> args = null]
+	:	'new' (t = typeArguments {$targs = $t.ret;})?
+        (a = annotation {$ans.add($a.ret);})*
         id = Identifier
         {
             $methodExpr = new IdentifierExpression($id.getText(), $ans);
@@ -1447,33 +1484,33 @@ classInstanceCreationExpression returns [Expression ret]
                 $ans2.clear();
             }
         )*
-        targs = typeArgumentsOrDiamond?
-        '(' l = argumentList? ')'
+        (ta = typeArgumentsOrDiamond {$targsd = $ta.ret;})?
+        '(' (l = argumentList {$args = $l.ret;})? ')'
         {
-            $inst = new InstantiationExpression($t.ret, $methodExpr,
-                                                $targs.ret, $l.ret);
+            $inst = new InstantiationExpression($targs, $methodExpr,
+                                                $targsd, $args);
             $anon = $inst.getAnonymousClass();
             $ret = $inst;
         }
         (classBody[$anon])?
-	|	name = expressionName '.' 'new' t = typeArguments?
+	|	name = expressionName '.' 'new' (t = typeArguments {$targs = $t.ret;})?
         (a = annotation {$ans.add($a.ret);})*
-        id = Identifier targs = typeArgumentsOrDiamond?
-        '(' l = argumentList? ')'
+        id = Identifier (ta = typeArgumentsOrDiamond {$targsd = $ta.ret;})?
+        '(' (l = argumentList {$args = $l.ret;})? ')'
         {
-            $inst = new InstantiationExpression($t.ret, $ans, $id.getText(),
-                                                $targs.ret, $l.ret);
+            $inst = new InstantiationExpression($targs, $ans, $id.getText(),
+                                                $targsd, $args);
             $anon = $inst.getAnonymousClass();
             $ret = new AccessExpression($name.ret, $inst);
         }
         (classBody[$anon])?
-	|	p = primary '.' 'new' t = typeArguments?
+	|	p = primary '.' 'new' (t = typeArguments {$targs = $t.ret;})?
         (a = annotation {$ans.add($a.ret);})*
-        id = Identifier targs = typeArgumentsOrDiamond?
-        '(' l = argumentList? ')'
+        id = Identifier (ta = typeArgumentsOrDiamond {$targsd = $ta.ret;})?
+        '(' (l = argumentList {$args = $l.ret;})? ')'
         {
-            $inst = new InstantiationExpression($t.ret, $ans, $id.getText(),
-                                                $targs.ret, $l.ret);
+            $inst = new InstantiationExpression($targs, $ans, $id.getText(),
+                                                $targsd, $args);
             $anon = $inst.getAnonymousClass();
             $ret = new AccessExpression($p.ret, $inst);
         }
@@ -1483,14 +1520,18 @@ classInstanceCreationExpression returns [Expression ret]
 classInstanceCreationExpression_lf_primary returns [InstantiationExpression ret]
     locals [List<Annotation> ans = new ArrayList<>(),
             ConcreteBodyDeclaration anon,
-            InstantiationExpression inst]
-	:	'.' 'new' t = typeArguments?
+            InstantiationExpression inst,
+            List<TypeArgument> targs = null,
+            List<TypeArgument> targsd = null,
+            List<Expression> args = null]
+	:	'.' 'new' (t = typeArguments {$targs = $t.ret;})?
         (a = annotation {$ans.add($a.ret);})*
-        id = Identifier targs = typeArgumentsOrDiamond?
-        '(' l = argumentList? ')'
+        id = Identifier
+        (ta = typeArgumentsOrDiamond {$targsd = $ta.ret;})?
+        '(' (l = argumentList {$args = $l.ret;})? ')'
         {
-            $inst = new InstantiationExpression($t.ret, $ans, $id.getText(),
-                                                $targs.ret, $l.ret);
+            $inst = new InstantiationExpression($targs, $ans, $id.getText(),
+                                                $targsd, $args);
             $anon = $inst.getAnonymousClass();
             $ret = $inst;
         }
@@ -1502,8 +1543,12 @@ classInstanceCreationExpression_lfno_primary returns [Expression ret]
             List<Annotation> ans = new ArrayList<>(),
             List<Annotation> ans2 = new ArrayList<>(),
             ConcreteBodyDeclaration anon,
-            InstantiationExpression inst]
-	:	'new' t = typeArguments? (a = annotation {$ans.add($a.ret);})*
+            InstantiationExpression inst,
+            List<TypeArgument> targs = null,
+            List<TypeArgument> targsd = null,
+            List<Expression> args = null]
+	:	'new' (t = typeArguments {$targs = $t.ret;})?
+        (a = annotation {$ans.add($a.ret);})*
         id = Identifier
         {
             $methodExpr = new IdentifierExpression($id.getText(), $ans);
@@ -1516,22 +1561,22 @@ classInstanceCreationExpression_lfno_primary returns [Expression ret]
                 $ans2.clear();
             }
         )*
-        targs = typeArgumentsOrDiamond?
-        '(' l = argumentList? ')'
+        (ta = typeArgumentsOrDiamond {$targsd = $ta.ret;})?
+        '(' (l = argumentList {$args = $l.ret;})? ')'
         {
-            $inst = new InstantiationExpression($t.ret, $methodExpr,
-                                                $targs.ret, $l.ret);
+            $inst = new InstantiationExpression($targs, $methodExpr,
+                                                $targsd, $args);
             $anon = $inst.getAnonymousClass();
             $ret = $inst;
         }
         (classBody[$anon])?
-	|	name = expressionName '.' 'new' t = typeArguments?
+	|	name = expressionName '.' 'new' (t = typeArguments {$targs = $t.ret;})?
         (a = annotation {$ans.add($a.ret);})*
-        id = Identifier targs = typeArgumentsOrDiamond?
-        '(' l = argumentList? ')'
+        id = Identifier (ta = typeArgumentsOrDiamond {$targsd = $ta.ret;})?
+        '(' (l = argumentList {$args = $l.ret;})? ')'
         {
-            $inst = new InstantiationExpression($t.ret, $ans, $id.getText(),
-                                                $targs.ret, $l.ret);
+            $inst = new InstantiationExpression($targs, $ans, $id.getText(),
+                                                $targsd, $args);
             $anon = $inst.getAnonymousClass();
             $ret = new AccessExpression($name.ret, $inst);
         }
@@ -1605,130 +1650,150 @@ arrayAccess_lfno_primary returns [ArrayAccessExpression ret]
 	;
 
 methodInvocation returns [Expression ret]
-    :	mn = methodName '(' a = argumentList? ')'
-        {$ret = new CallExpression($mn.ret, $a.ret);}
-	|	tn = typeName '.' t = typeArguments? id = Identifier
-        '(' a = argumentList? ')'
-        {$ret = new CallExpression($id.getText(), $a.ret, $t.ret);
+    locals [List<Expression> args = null,
+            List<TypeArgument> targs = null]
+    :	mn = methodName '(' (a = argumentList {$args = $a.ret;})? ')'
+        {$ret = new CallExpression($mn.ret, $args);}
+	|	tn = typeName '.' (t = typeArguments {$targs = $t.ret;})?
+        id = Identifier '(' (a = argumentList {$args = $a.ret;})? ')'
+        {$ret = new CallExpression($id.getText(), $args, $targs);
          $ret = new AccessExpression($tn.ret, $ret);}
-	|	en = expressionName '.' t = typeArguments? id = Identifier
-        '(' a = argumentList? ')'
-        {$ret = new CallExpression($id.getText(), $a.ret, $t.ret);
+	|	en = expressionName '.' (t = typeArguments {$targs = $t.ret;})?
+        id = Identifier '(' (a = argumentList {$args = $a.ret;})? ')'
+        {$ret = new CallExpression($id.getText(), $args, $targs);
          $ret = new AccessExpression($en.ret, $ret);}
-	|	p = primary '.' t = typeArguments?
-        id = Identifier '(' a = argumentList? ')'
-        {$ret = new CallExpression($id.getText(), $a.ret, $t.ret);
+	|	p = primary '.' (t = typeArguments {$targs = $t.ret;})?
+        id = Identifier '(' (a = argumentList {$args = $a.ret;})? ')'
+        {$ret = new CallExpression($id.getText(), $args, $targs);
          $ret = new AccessExpression($p.ret, $ret);}
-	|	'super' '.' t = typeArguments? id = Identifier '(' a = argumentList? ')'
-        {$ret = new CallExpression($id.getText(), $a.ret, $t.ret);
+	|	'super' '.' (t = typeArguments {$targs = $t.ret;})?
+        id = Identifier '(' (a = argumentList {$args = $a.ret;})? ')'
+        {$ret = new CallExpression($id.getText(), $args, $targs);
          $ret = new AccessExpression(new SuperLiteral(), $ret);}
-	|	tn = typeName '.' 'super' '.' t = typeArguments?
-        id = Identifier '(' a = argumentList? ')'
-        {$ret = new CallExpression($id.getText(), $a.ret, $t.ret);
+	|	tn = typeName '.' 'super' '.' (t = typeArguments {$targs = $t.ret;})?
+        id = Identifier '(' (a = argumentList {$args = $a.ret;})? ')'
+        {$ret = new CallExpression($id.getText(), $args, $targs);
          $ret = new AccessExpression(new SuperLiteral(), $ret);
          $ret = new AccessExpression($tn.ret, $ret);}
 	;
 
 methodInvocation_lf_primary returns [CallExpression ret]
-	:	'.' t = typeArguments? id = Identifier '(' a = argumentList? ')'
-        {$ret = new CallExpression($id.getText(), $a.ret, $t.ret);}
+    locals [List<Expression> args = null,
+            List<TypeArgument> targs = null]
+	:	'.' (t = typeArguments {$targs = $t.ret;})?
+        id = Identifier '(' (a = argumentList {$args = $a.ret;})? ')'
+        {$ret = new CallExpression($id.getText(), $args, $targs);}
 	;
 
 methodInvocation_lfno_primary returns [Expression ret]
-	:	mn = methodName '(' a = argumentList? ')'
-        {$ret = new CallExpression($mn.ret, $a.ret);}
-	|	tn = typeName '.' t = typeArguments?
-        id = Identifier '(' a = argumentList? ')'
-        {$ret = new CallExpression($id.getText(), $a.ret, $t.ret);
+    locals [List<Expression> args = null,
+            List<TypeArgument> targs = null]
+	:	mn = methodName '(' (a = argumentList {$args = $a.ret;})? ')'
+        {$ret = new CallExpression($mn.ret, $args);}
+	|	tn = typeName '.' (t = typeArguments {$targs = $t.ret;})?
+        id = Identifier '(' (a = argumentList {$args = $a.ret;})? ')'
+        {$ret = new CallExpression($id.getText(), $args, $targs);
          $ret = new AccessExpression($tn.ret, $ret);}
-	|	en = expressionName '.' t = typeArguments?
-        id = Identifier '(' a = argumentList? ')'
-        {$ret = new CallExpression($id.getText(), $a.ret);
+	|	en = expressionName '.' (t = typeArguments {$targs = $t.ret;})?
+        id = Identifier '(' (a = argumentList {$args = $a.ret;})? ')'
+        {$ret = new CallExpression($id.getText(), $args, $targs);
          $ret = new AccessExpression($en.ret, $ret);}
-	|	'super' '.' t = typeArguments? id = Identifier '(' a = argumentList? ')'
-        {$ret = new CallExpression($id.getText(), $a.ret);
+	|	'super' '.' (t = typeArguments {$targs = $t.ret;})?
+        id = Identifier '(' (a = argumentList {$args = $a.ret;})? ')'
+        {$ret = new CallExpression($id.getText(), $args, $targs);
          $ret = new AccessExpression(new SuperLiteral(), $ret);}
-	|	tn = typeName '.' 'super' '.' t = typeArguments?
-        id = Identifier '(' a = argumentList? ')'
-        {$ret = new CallExpression($id.getText(), $a.ret);
+	|	tn = typeName '.' 'super' '.' (t = typeArguments {$targs = $t.ret;})?
+        id = Identifier '(' (a = argumentList {$args = $a.ret;})? ')'
+        {$ret = new CallExpression($id.getText(), $args, $targs);
          $ret = new AccessExpression(new SuperLiteral(), $ret);
          $ret = new AccessExpression($tn.ret, $ret);}
 	;
 
 argumentList returns [List<Expression> ret]
-    locals [List<Expression> ls = new ArrayList<>();]
+    locals [List<Expression> ls = new ArrayList<>()]
 	:	(e = expression {$ls.add($e.ret);})
         (',' ex = expression {$ls.add($ex.ret);})* {$ret = $ls;}
 	;
 
 methodReference returns [Expression ret]
-	:	en = expressionName '::' t = typeArguments? id = Identifier
-        {$ret = new MethodReferenceExpression($en.ret, $id.getText(), $t.ret);}
-	|	r = referenceType '::' t = typeArguments? id = Identifier
+    locals [List<TypeArgument> targs = null]
+	:	en = expressionName '::' (t = typeArguments {$targs = $t.ret;})?
+        id = Identifier
+        {$ret = new MethodReferenceExpression($en.ret, $id.getText(), $targs);}
+	|	r = referenceType '::' (t = typeArguments {$targs = $t.ret;})?
+        id = Identifier
         {$ret = new MethodReferenceExpression(new TypeExpression($r.ret),
                                               $id.getText(),
-                                              $t.ret);}
-	|	p = primary '::' t = typeArguments? id = Identifier
-        {$ret = new MethodReferenceExpression($p.ret, $id.getText(), $t.ret);}
-	|	'super' '::' t = typeArguments? id = Identifier
+                                              $targs);}
+	|	p = primary '::' (t = typeArguments {$targs = $t.ret;})? id = Identifier
+        {$ret = new MethodReferenceExpression($p.ret, $id.getText(), $targs);}
+	|	'super' '::' (t = typeArguments {$targs = $t.ret;})? id = Identifier
         {$ret = new MethodReferenceExpression(new SuperLiteral(),
                                               $id.getText(),
-                                              $t.ret);}
-	|	tn = typeName '.' 'super' '::' t = typeArguments? id = Identifier
+                                              $targs);}
+	|	tn = typeName '.' 'super' '::' (t = typeArguments {$targs = $t.ret;})?
+        id = Identifier
         {
             $ret = new MethodReferenceExpression(new SuperLiteral(),
                                                  $id.getText(),
-                                                 $t.ret);
+                                                 $targs);
             $ret = new AccessExpression(new IdentifierExpression($tn.ret),
                                         $ret);
         }
-	|	c = classType '::' t = typeArguments? 'new'
+	|	c = classType '::' (t = typeArguments {$targs = $t.ret;})? 'new'
         {$ret = new MethodReferenceExpression(new TypeExpression($c.ret),
                                               "new",
-                                              $t.ret);}
+                                              $targs);}
 	|	a = arrayType '::' 'new'
         {$ret = new MethodReferenceExpression(new TypeExpression($a.ret),
                                               "new");}
 	;
 
 methodReference_lf_primary returns [MethodReferenceExpression ret]
-	:	'::' t = typeArguments? id = Identifier
-        {$ret = new MethodReferenceExpression($id.getText(), $t.ret);}
+    locals [List<TypeArgument> targs = null]
+	:	'::' (t = typeArguments {$targs = $t.ret;})? id = Identifier
+        {$ret = new MethodReferenceExpression($id.getText(), $targs);}
 	;
 
 methodReference_lfno_primary returns [Expression ret]
-	:	en = expressionName '::' t = typeArguments? id = Identifier
-        {$ret = new MethodReferenceExpression($en.ret, $id.getText(), $t.ret);}
-	|	r = referenceType '::' t = typeArguments? id = Identifier
+    locals [List<TypeArgument> targs = null]
+	:	en = expressionName '::' (t = typeArguments {$targs = $t.ret;})?
+        id = Identifier
+        {$ret = new MethodReferenceExpression($en.ret, $id.getText(), $targs);}
+	|	r = referenceType '::' (t = typeArguments {$targs = $t.ret;})?
+        id = Identifier
         {$ret = new MethodReferenceExpression(new TypeExpression($r.ret),
                                               $id.getText(),
-                                              $t.ret);}
-	|	'super' '::' t = typeArguments? id = Identifier
+                                              $targs);}
+	|	'super' '::' (t = typeArguments {$targs = $t.ret;})? id = Identifier
         {$ret = new MethodReferenceExpression(new SuperLiteral(),
                                               $id.getText(),
-                                              $t.ret);}
-	|	tn = typeName '.' 'super' '::' t = typeArguments? id = Identifier
+                                              $targs);}
+	|	tn = typeName '.' 'super' '::' (t = typeArguments {$targs = $t.ret;})?
+        id = Identifier
         {
             $ret = new MethodReferenceExpression(new SuperLiteral(),
                                                  $id.getText(),
-                                                 $t.ret);
+                                                 $targs);
             $ret = new AccessExpression(new IdentifierExpression($tn.ret),
                                         $ret);
         }
-	|	c = classType '::' t = typeArguments? 'new'
+	|	c = classType '::' (t = typeArguments {$targs = $t.ret;})? 'new'
         {$ret = new MethodReferenceExpression(new TypeExpression($c.ret),
                                               "new",
-                                              $t.ret);}
+                                              $targs);}
 	|	a = arrayType '::' 'new'
         {$ret = new MethodReferenceExpression(new TypeExpression($a.ret),
                                               "new");}
 	;
 
 arrayCreationExpression returns [ArrayConstruction ret]
-	:	'new' p = primitiveType de = dimExprs d = dims?
-        {$ret = new ArrayConstruction($p.ret, $de.ret, $d.ret);}
-	|	'new' c = classOrInterfaceType de = dimExprs d = dims?
-        {$ret = new ArrayConstruction($c.ret, $de.ret, $d.ret);}
+    locals [int dim = 0]
+	:	'new' p = primitiveType de = dimExprs (d = dims {$dim = $d.ret;})?
+        {$ret = new ArrayConstruction($p.ret, $de.ret, $dim);}
+	|	'new' c = classOrInterfaceType de = dimExprs
+        (d = dims {$dim = $d.ret;})?
+        {$ret = new ArrayConstruction($c.ret, $de.ret, $dim);}
 	|	'new' p = primitiveType d = dims i = arrayInitializer
         {$ret = new ArrayConstruction($p.ret, $d.ret, $i.ret);}
 	|	'new' c = classOrInterfaceType d = dims i = arrayInitializer
@@ -1741,7 +1806,7 @@ dimExprs returns [List<DimensionExpression> ret]
 	;
 
 dimExpr returns [DimensionExpression ret]
-    locals [List<Annotation> ans = new ArrayList<>();]
+    locals [List<Annotation> ans = new ArrayList<>()]
 	:	(a = annotation {$ans.add($a.ret);})*
         '[' ex = expression ']'
         {$ret = new DimensionExpression($ans, $ex.ret);}
@@ -1762,16 +1827,17 @@ lambdaExpression returns [LambdaExpression ret]
 	;
 
 lambdaParameters returns [List<VariableDeclaration> ret]
-    locals [List<VariableDeclaration> vars = new ArrayList<>();]
+    locals [List<VariableDeclaration> vars = new ArrayList<>()]
 	:	id = Identifier
         {$vars.add(new VariableDeclaration($id.getText()));
          $ret = $vars;}
-	|	'(' p = formalParameterList? ')' {$ret = $p.ret;}
+	|    {$ret = $vars;}
+        '(' (p = formalParameterList {$ret = $p.ret;})? ')'
 	|	'(' i = inferredFormalParameterList ')' {$ret = $i.ret;}
 	;
 
 inferredFormalParameterList returns [List<VariableDeclaration> ret]
-    locals [List<VariableDeclaration> vars = new ArrayList<>();]
+    locals [List<VariableDeclaration> vars = new ArrayList<>()]
 	:	(id = Identifier {$vars.add(new VariableDeclaration($id.getText()));})
         (',' i = Identifier
             {$vars.add(new VariableDeclaration($i.getText()));})*
@@ -1961,7 +2027,7 @@ postDecrementExpression_lf_postfixExpression returns [UnaryOperator ret]
 	;
 
 castExpression returns [CastExpression ret]
-    locals [List<ReferenceType> ls = new ArrayList<>();]
+    locals [List<ReferenceType> ls = new ArrayList<>()]
 	:	'(' pt = primitiveType ')' uex = unaryExpression
         {$ret = new CastExpression($uex.ret, $pt.ret);}
 	|	'(' rt = referenceType {$ls.add($rt.ret);}
