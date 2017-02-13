@@ -6,9 +6,7 @@ import java.util.ArrayList;
 /**
  * A class abstracting a list of Java annotations
  */
-// TODO is subclassing the right choice here?
-//        for typing, yes; for re-use, no
-public class Annotations extends Modifiers {
+public class Annotations {
     private List<Annotation> annotations;
 
     /**
@@ -35,6 +33,14 @@ public class Annotations extends Modifiers {
     }
 
     /**
+     * Adds an annotation to this collection
+     * @param annotation the annotation to add
+     */
+    public void addAnnotation(Annotation annotation) {
+        annotations.add(annotation);
+    }
+
+    /**
      * Gets the number of annotations
      * @return the number of annotations
      */
@@ -47,8 +53,17 @@ public class Annotations extends Modifiers {
      * @return true  if any annotations are present
      *         false if no annotations are present
      */
-    public boolean annotated() {
-        return annotations != null && numAnnotations() > 0;
+    public boolean hasAnnotations() {
+        return numAnnotations() > 0;
+    }
+
+    /**
+     * Determines if an annotation is a member
+     * @param a the annotation to check for
+     * @return true iff `a` if is among these annotations
+     */
+    public boolean contains(Annotation a) {
+        return annotations.contains(a);
     }
 
     /**

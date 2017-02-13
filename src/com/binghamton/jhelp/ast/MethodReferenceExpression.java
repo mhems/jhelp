@@ -9,28 +9,32 @@ import com.binghamton.jhelp.TypeArgument;
  */
 public class MethodReferenceExpression extends Expression {
     private Expression lhs;
-    private String methodName;
+    private Expression rhs;
     private List<TypeArgument> typeArgs;
 
     /**
-     * Construct a new reference by name
+     * Construct a incomplete reference by method name
      * @param identifier the name of the method being referenced
+     * @param typeArgs the type arguments to this reference
      */
-    public MethodReferenceExpression(String identifier) {
-        this(new IdentifierExpression(identifier), null, null);
+    public MethodReferenceExpression(String identifier,
+                                     List<TypeArgument> typeArgs) {
+        this(null ,new IdentifierExpression(identifier), typeArgs);
     }
 
     /**
-     * Construct a new reference by possessed name
+     * Construct a new reference by name
      * @param identifier the name of the owning symbol
      * @param methodName the name of method being referenced
      */
     public MethodReferenceExpression(String identifier, String methodName) {
-        this(new IdentifierExpression(identifier), methodName, null);
+        this(new IdentifierExpression(identifier),
+             new IdentifierExpression(methodName),
+             null);
     }
 
     /**
-     * Construct a new reference by possessed name
+     * Construct a new parameterized reference by possessed name
      * @param identifier the name of the owning symbol
      * @param methodName the name of method being referenced
      * @param typeArgs the type arguments to this reference
@@ -38,21 +42,22 @@ public class MethodReferenceExpression extends Expression {
     public MethodReferenceExpression(String identifier,
                                      String methodName,
                                      List<TypeArgument> typeArgs) {
-        this(new IdentifierExpression(identifier), methodName, typeArgs);
+        this(new IdentifierExpression(identifier),
+             new IdentifierExpression(methodName),
+             typeArgs);
     }
 
-
     /**
-     * Construct a new reference by possessed name
+     * Construct a new reference
      * @param lhs the left hand side of the method reference
-     * @param methodName the name of method being referenced
+     * @param rhs the right hand side of the method reference
      */
-    public MethodReferenceExpression(Expression lhs, String methodName) {
-        this(lhs, methodName, null);
+    public MethodReferenceExpression(Expression lhs, Expression rhs) {
+        this(lhs, rhs, null);
     }
 
     /**
-     * Construct a new reference by possessed name
+     * Construct a new parameterized reference by method name
      * @param lhs the left hand side of the method reference
      * @param methodName the name of method being referenced
      * @param typeArgs the type arguments to this reference
@@ -60,8 +65,30 @@ public class MethodReferenceExpression extends Expression {
     public MethodReferenceExpression(Expression lhs,
                                      String methodName,
                                      List<TypeArgument> typeArgs) {
+        this(lhs, new IdentifierExpression(methodName), typeArgs);
+    }
+
+    /**
+     * Construct a new reference by method name
+     * @param lhs the left hand side of the method reference
+     * @param methodName the name of method being referenced
+     */
+    public MethodReferenceExpression(Expression lhs,
+                                     String methodName) {
+        this(lhs, new IdentifierExpression(methodName), null);
+    }
+
+    /**
+     * Construct a new parameterized reference
+     * @param lhs the left hand side of the method reference
+     * @param rhs the right hand side of the method reference
+     * @param typeArgs the type arguments to this reference
+     */
+    public MethodReferenceExpression(Expression lhs,
+                                     Expression rhs,
+                                     List<TypeArgument> typeArgs) {
         this.lhs = lhs;
-        this.methodName = methodName;
+        this.rhs = rhs;
         this.typeArgs = typeArgs;
     }
 
@@ -69,16 +96,24 @@ public class MethodReferenceExpression extends Expression {
      * Gets the expression resolving the method referee's owner
      * @return the expression resolving the method referee's owner
      */
-    public Expression getLHSExpression() {
+    public Expression getLHS() {
         return lhs;
     }
 
     /**
-     * Gets the name of the method being referred to
-     * @return the name of the method being referred to
+     * Sets the expression resolving the method referee's owner
+     * @param expr the expression resolving the method referee's owner
      */
-    public String getMethodName() {
-        return methodName;
+    public void setLHS(Expression expr) {
+        this.lhs = expr;
+    }
+
+    /**
+     * Gets the expression resolving the method name
+     * @return the expression resolving the method name
+     */
+    public Expression getRHS() {
+        return rhs;
     }
 
     /**
@@ -95,6 +130,14 @@ public class MethodReferenceExpression extends Expression {
      */
     public List<TypeArgument> getTypeArguments() {
         return typeArgs;
+    }
+
+    /**
+     * Sets the type arguments of this reference
+     * @param typeArgs the type arguments of this reference
+     */
+    public void setTypeArguments(List<TypeArgument> typeArgs) {
+        this.typeArgs = typeArgs;
     }
 
     /**

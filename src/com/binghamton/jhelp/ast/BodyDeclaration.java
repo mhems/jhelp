@@ -8,15 +8,12 @@ import com.binghamton.jhelp.Modifier;
 
 /**
  * An abstract class representing a structure declaration.
- * This includes interfaces, classes, and enums.
+ * This includes interfaces, annotations, classes, and enums.
  */
 public abstract class BodyDeclaration extends Declaration {
-    protected List<ClassInterfaceType> implementees;
     protected List<VariableDeclaration> fields = new ArrayList<>();
-    protected List<MethodDeclaration> methods = new ArrayList<>();
-    protected List<MethodDeclaration> ctors = new ArrayList<>();
     protected List<ConcreteBodyDeclaration> innerBodies = new ArrayList<>();
-    protected List<InterfaceDeclaration> innerInterfaces = new ArrayList<>();
+    protected List<AbstractBodyDeclaration> innerInterfaces = new ArrayList<>();
 
     /**
      * Construct an empty body declaration
@@ -29,21 +26,10 @@ public abstract class BodyDeclaration extends Declaration {
      * Construct a new declaration of a body
      * @param name the name of this declaration
      * @param modifiers the modifiers of this declaration
-     * @param implementees the interfaces this declaration implements
      */
     public BodyDeclaration(String name,
-                           List<Modifier> modifiers,
-                           List<ClassInterfaceType> implementees) {
+                           List<Modifier> modifiers) {
         super(name, modifiers);
-        this.implementees = implementees;
-    }
-
-    /**
-     * Gets the implemented interfaces of this declaration
-     * @return the implemented interfaces of this declaration
-     */
-    public List<ClassInterfaceType> getSuperInterfaces() {
-        return implementees;
     }
 
     /**
@@ -55,14 +41,6 @@ public abstract class BodyDeclaration extends Declaration {
     }
 
     /**
-     * Gets the methods of this declaration
-     * @return the methods of this declaration
-     */
-    public List<MethodDeclaration> getMethods() {
-        return methods;
-    }
-
-    /**
      * Gets the inner bodies of this declaration
      * @return the inner bodies of this declaration
      */
@@ -71,10 +49,10 @@ public abstract class BodyDeclaration extends Declaration {
     }
 
     /**
-     * Gets the methods of this declaration
-     * @return the methods of this declaration
+     * Gets the inner abstract bodies of this declaration
+     * @return the inner abstract bodies of this declaration
      */
-    public List<InterfaceDeclaration> getInnerInterfaces() {
+    public List<AbstractBodyDeclaration> getInnerInterfaces() {
         return innerInterfaces;
     }
 
@@ -95,38 +73,6 @@ public abstract class BodyDeclaration extends Declaration {
     }
 
     /**
-     * Adds a method declaration to this body
-     * @param decl the declaration to add
-     */
-    public void addMethod(MethodDeclaration decl) {
-        methods.add(decl);
-    }
-
-    /**
-     * Gets the number of methods declared in this body
-     * @return the number of methods declared in this body
-     */
-    public int numMethods() {
-        return methods.size();
-    }
-
-    /**
-     * Adds a constructor declaration to this body
-     * @param decl the declaration to add
-     */
-    public void addConstructor(MethodDeclaration decl) {
-        ctors.add(decl);
-    }
-
-    /**
-     * Gets the number of constructors in this body
-     * @return the number of constructors in this body
-     */
-    public int numConstructors() {
-        return ctors.size();
-    }
-
-    /**
      * Adds a inner body declaration to this body
      * @param decl the declaration to add
      */
@@ -143,16 +89,16 @@ public abstract class BodyDeclaration extends Declaration {
     }
 
     /**
-     * Adds a inner interface declaration to this body
+     * Adds a inner abstract body declaration to this body
      * @param decl the declaration to add
      */
-    public void addInnerInterface(InterfaceDeclaration decl) {
+    public void addInnerInterface(AbstractBodyDeclaration decl) {
         innerInterfaces.add(decl);
     }
 
     /**
-     * Gets the number of inner interfaces declared in this body
-     * @return the number of inner interfaces declared in this body
+     * Gets the number of inner abstract bodies declared in this body
+     * @return the number of inner abstract bodies declared in this body
      */
     public int numInnerInterfaces() {
         return innerInterfaces.size();

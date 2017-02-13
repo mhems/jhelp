@@ -1,6 +1,6 @@
 package com.binghamton.jhelp.ast;
 
-import java.util.Collection;
+import java.util.List;
 
 import com.binghamton.jhelp.Modifier;
 import com.binghamton.jhelp.Modifiers;
@@ -23,7 +23,7 @@ public abstract class Declaration extends Statement {
      * Construct an unnamed modified declaration
      * @param modifiers the modifiers of this declaration
      */
-    public Declaration(Collection<Modifier> modifiers) {
+    public Declaration(List<Modifier> modifiers) {
         this(null, modifiers);
     }
 
@@ -32,7 +32,7 @@ public abstract class Declaration extends Statement {
      * @param name the name of the declared entity
      * @param modifiers the modifiers of this declaration
      */
-    public Declaration(String name, Collection<Modifier> modifiers) {
+    public Declaration(String name, List<Modifier> modifiers) {
         this.name = name;
         this.modifiers = new Modifiers(modifiers);
     }

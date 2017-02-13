@@ -11,7 +11,6 @@ import com.binghamton.jhelp.Modifier;
  */
 public class EnumDeclaration extends ConcreteBodyDeclaration {
     private List<EnumConstant> constants = new ArrayList<>();
-    private List<ConcreteBodyDeclaration> bodies = new ArrayList<>();
 
     /**
      * Construct a new enum declaration
@@ -39,21 +38,5 @@ public class EnumDeclaration extends ConcreteBodyDeclaration {
      */
     public void addConstant(EnumConstant c) {
         constants.add(c);
-    }
-
-    /**
-     * Gets the bodies of this declaration
-     * @return the bodies of this declaration
-     */
-    public List<ConcreteBodyDeclaration> getBodies() {
-        return bodies;
-    }
-
-    /**
-     * Add a body declaration to this declaration
-     * @param d the declaration to add to this declaration
-     */
-    public void addBody(ConcreteBodyDeclaration d) {
-        bodies.add(d);
     }
 }

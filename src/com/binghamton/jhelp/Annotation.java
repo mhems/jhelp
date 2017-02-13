@@ -8,8 +8,7 @@ import com.binghamton.jhelp.ast.Expression;
 /**
  * A class representing a Java annotation
  */
-public class Annotation extends Expression {
-    private String typename;
+public class Annotation extends Modifier {
     private Map<String, Expression> nameValueMap = new HashMap<>();
 
     /**
@@ -17,7 +16,7 @@ public class Annotation extends Expression {
      * @param typename the type name of the annotation
      */
     public Annotation(String typename) {
-        this.typename = typename;
+        super(typename);
     }
 
     /**
@@ -26,8 +25,8 @@ public class Annotation extends Expression {
      * @param value the single element's value
      */
     public Annotation(String typename, Expression value) {
-        this.typename = typename;
-        nameValueMap.put(typename, value);
+        super(typename);
+        nameValueMap.put("", value);
     }
 
     /**
@@ -43,7 +42,7 @@ public class Annotation extends Expression {
      * @return true iff this annotation is a single element annotation
      */
     public boolean isSingleElement() {
-        return nameValueMap.size() == 1;
+        return nameValueMap.size() == 1 && nameValueMap.containsKey("");
     }
 
     /**
@@ -55,20 +54,12 @@ public class Annotation extends Expression {
     }
 
     /**
-     * Gets the name of this annotation
-     * @return the name of this annotation
-     */
-    public String getName() {
-        return typename;
-    }
-
-    /**
      * Gets the single value of this annotation
      * @return the single value of this annotation
      */
     public Expression getSingleValue() {
         if (isSingleElement()) {
-            return nameValueMap.get(typename);
+            return nameValueMap.get("");
         }
         throw new RuntimeException(); // TODO
     }
@@ -114,7 +105,7 @@ public class Annotation extends Expression {
     public boolean equals(Object other) {
         if (other instanceof Annotation) {
             Annotation an = (Annotation)other;
-            return typename.equals(an.typename) &&
+            return super.equals(an) &&
                 nameValueMap.equals(an.nameValueMap);
         }
         return false;
@@ -126,6 +117,6 @@ public class Annotation extends Expression {
      */
     @Override
     public int hashCode() {
-        return typename.hashCode() ^ nameValueMap.hashCode();
+        return super.hashCode() ^ nameValueMap.hashCode();
     }
 }

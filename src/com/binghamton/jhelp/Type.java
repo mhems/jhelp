@@ -44,6 +44,14 @@ public abstract class Type {
     }
 
     /**
+     * Sets this type's annotations
+     * @param annotations this type's new annotations
+     */
+    public void setAnnotations(List<Annotation> annotations) {
+        this.annotations = new Annotations(annotations);
+    }
+
+    /**
      * Augments the type into a new array type
      * @param dimensions the dimensions of the array type
      * @return a new array type with same base type and `dimensions`

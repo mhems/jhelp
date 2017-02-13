@@ -1,5 +1,12 @@
 // Generated from Java8.g4 by ANTLR 4.6
 package com.binghamton.jhelp.antlr;
+
+    import java.util.ArrayList;
+    import java.util.List;
+
+    import com.binghamton.jhelp.*;
+    import com.binghamton.jhelp.ast.*;
+
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
 /**
@@ -1078,6 +1085,12 @@ public interface Java8Visitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitPrimaryNoNewArray(Java8Parser.PrimaryNoNewArrayContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link Java8Parser#primaryNoNewArray_typeAccess}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPrimaryNoNewArray_typeAccess(Java8Parser.PrimaryNoNewArray_typeAccessContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link Java8Parser#primaryNoNewArray_lf_arrayAccess}.
 	 * @param ctx the parse tree

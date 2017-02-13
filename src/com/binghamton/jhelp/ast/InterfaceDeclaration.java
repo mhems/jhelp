@@ -1,5 +1,6 @@
 package com.binghamton.jhelp.ast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.binghamton.jhelp.ClassInterfaceType;
@@ -9,7 +10,9 @@ import com.binghamton.jhelp.TypeParameter;
 /**
  * A class representing the declaration of a Java interface
  */
-public class InterfaceDeclaration extends BodyDeclaration {
+public class InterfaceDeclaration extends AbstractBodyDeclaration {
+    private List<ClassInterfaceType> implementees;
+    private List<MethodDeclaration> methods = new ArrayList<>();
     private List<TypeParameter> typeParams;
 
     /**
@@ -21,7 +24,7 @@ public class InterfaceDeclaration extends BodyDeclaration {
     public InterfaceDeclaration(String name,
                                 List<Modifier> modifiers,
                                 List<ClassInterfaceType> implementees) {
-        super(name, modifiers, implementees);
+        this(name, modifiers, implementees, null);
     }
 
     /**
@@ -35,7 +38,8 @@ public class InterfaceDeclaration extends BodyDeclaration {
                                 List<Modifier> modifiers,
                                 List<ClassInterfaceType> implementees,
                                 List<TypeParameter> typeParams) {
-        this(name, modifiers, implementees);
+        super(name, modifiers);
+        this.implementees = implementees;
         this.typeParams = typeParams;
     }
 
@@ -53,5 +57,45 @@ public class InterfaceDeclaration extends BodyDeclaration {
      */
     public boolean hasTypeParameters() {
         return typeParams != null && typeParams.size() > 0;
+    }
+
+    /**
+     * Determines if this declaration implements any interfaces
+     * @return true iff this declaration implements any interfaces
+     */
+    public boolean hasSuperInterfaces() {
+        return implementees != null && implementees.size() > 0;
+    }
+
+    /**
+     * Gets the implemented interfaces of this declaration
+     * @return the implemented interfaces of this declaration
+     */
+    public List<ClassInterfaceType> getSuperInterfaces() {
+        return implementees;
+    }
+
+    /**
+     * Gets the methods of this declaration
+     * @return the methods of this declaration
+     */
+    public List<MethodDeclaration> getMethods() {
+        return methods;
+    }
+
+    /**
+     * Adds a method declaration to this body
+     * @param decl the declaration to add
+     */
+    public void addMethod(MethodDeclaration decl) {
+        methods.add(decl);
+    }
+
+    /**
+     * Gets the number of methods declared in this body
+     * @return the number of methods declared in this body
+     */
+    public int numMethods() {
+        return methods.size();
     }
 }

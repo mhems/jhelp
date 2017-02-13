@@ -2,9 +2,9 @@ package com.binghamton.jhelp;
 
 import java.util.Arrays;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.EnumSet;
+import java.util.List;
 import java.util.Set;
+import java.util.HashSet;
 
 /**
  * A class abstracting a set of Java modifiers
@@ -78,23 +78,27 @@ public class Modifiers {
                 Modifier.STRICT_FP});
     }
 
-    private EnumSet<Modifier> modifiers;
+    private Set<Modifier> modifiers;
+    private Annotations annotations;
 
     /**
      * Construct an empty set of modifiers
      */
     public Modifiers() {
-        this.modifiers = EnumSet.noneOf(Modifier.class);
+        this(null);
     }
 
     /**
-     * Construct a set of modifiers from a collection
-     * @param modifiers the collection of modifiers to initialize with
+     * Construct a collection of modifiers from a list
+     * @param modifiers the list of modifiers to initialize with
      */
-    public Modifiers(Collection<Modifier> modifiers) {
-        this.modifiers = EnumSet.noneOf(Modifier.class);
-        for (Modifier modifier : modifiers) {
-            addOrPanic(modifier);
+    public Modifiers(List<Modifier> modifiers) {
+        this.modifiers = new HashSet<>();
+        annotations = new Annotations();
+        if (modifiers != null) {
+            for (Modifier m : modifiers) {
+                addOrPanic(m);
+            }
         }
     }
 
@@ -107,32 +111,58 @@ public class Modifiers {
     }
 
     /**
-     * Attempts to add a distinct modifier to this set
-     * @param m the modifier to attempt to add
-     * @return true iff the modifier was successfully added
+     * Gets the annotations of these modifiers
+     * @return the annotations of these modifiers
      */
-    public boolean add(Modifier m) {
-        return modifiers.add(m);
+    public List<Annotation> getAnnotations() {
+        return annotations.getAnnotations();
     }
 
     /**
-     * Attempts to add a distinct modifier to this set.
+     * Determines if any modifiers are present
+     * @return true  if any modifiers are present
+     *         false if no modifiers are present
+     */
+    public boolean hasAnnotations() {
+        return modifiers.size() > 0 || annotations.hasAnnotations();
+    }
+
+    /**
+     * Attempts to add a modifier to this set
+     * @param m the modifier to attempt to add
+     * @return true iff the modifier was successfully added
+     */
+    public boolean addModifier(Modifier m) {
+        boolean ret = true;
+        if (m instanceof Annotation) {
+            annotations.addAnnotation((Annotation)m);
+        } else {
+            ret = modifiers.add(m);
+        }
+        return ret;
+    }
+
+    /**
+     * Attempts to add a modifier to this set.
      * If the modifier already exists, an exception is thrown
      * @param m the modifier to attempt to add
      * @throws Error if `m` is already contained in modifiers
      */
     public void addOrPanic(Modifier m) {
-        if (!add(m)) {
+        if (!addModifier(m)) {
             // throw new RepeatModifierException(m); // TODO
         }
     }
 
     /**
-     * Determine if a modifier is in this set of modifiers
+     * Determine if a modifier is in this collection of modifiers
      * @param m the modifier to inquire about
-     * @return true iff the modifier `m` is in this set of modifiers
+     * @return true iff the modifier `m` is in this collection of modifiers
      */
     public boolean contains(Modifier m) {
+        if (m instanceof Annotation) {
+            return annotations.contains((Annotation)m);
+        }
         return modifiers.contains(m);
     }
 
@@ -141,7 +171,7 @@ public class Modifiers {
      * @return true iff these modifiers contain the `private` Java modifier
      */
     public boolean isPrivate() {
-        return contains(Modifier.PRIVATE);
+        return modifiers.contains(Modifier.PRIVATE);
     }
 
     /**
@@ -149,7 +179,7 @@ public class Modifiers {
      * @return true iff these modifiers contain the `protected` Java modifier
      */
     public boolean isProtected() {
-        return contains(Modifier.PROTECTED);
+        return modifiers.contains(Modifier.PROTECTED);
     }
 
     /**
@@ -157,7 +187,7 @@ public class Modifiers {
      * @return true iff these modifiers contain the `public` Java modifier
      */
     public boolean isPublic() {
-        return contains(Modifier.PUBLIC);
+        return modifiers.contains(Modifier.PUBLIC);
     }
 
     /**
@@ -165,7 +195,7 @@ public class Modifiers {
      * @return true iff these modifiers contain the `abstract` Java modifier
      */
     public boolean isAbstract() {
-        return contains(Modifier.ABSTRACT);
+        return modifiers.contains(Modifier.ABSTRACT);
     }
 
     /**
@@ -173,7 +203,7 @@ public class Modifiers {
      * @return true iff these modifiers contain the `default` Java modifier
      */
     public boolean isDefault() {
-        return contains(Modifier.DEFAULT);
+        return modifiers.contains(Modifier.DEFAULT);
     }
 
     /**
@@ -181,7 +211,7 @@ public class Modifiers {
      * @return true iff these modifiers contain the `final` Java modifier
      */
     public boolean isFinal() {
-        return contains(Modifier.FINAL);
+        return modifiers.contains(Modifier.FINAL);
     }
 
     /**
@@ -189,7 +219,7 @@ public class Modifiers {
      * @return true iff these modifiers contain the `native` Java modifier
      */
     public boolean isNative() {
-        return contains(Modifier.NATIVE);
+        return modifiers.contains(Modifier.NATIVE);
     }
 
     /**
@@ -197,7 +227,7 @@ public class Modifiers {
      * @return true iff these modifiers contain the `static` Java modifier
      */
     public boolean isStatic() {
-        return contains(Modifier.STATIC);
+        return modifiers.contains(Modifier.STATIC);
     }
 
     /**
@@ -205,7 +235,7 @@ public class Modifiers {
      * @return true iff these modifiers contain the `strictfp` Java modifier
      */
     public boolean isStrictFp() {
-        return contains(Modifier.STRICT_FP);
+        return modifiers.contains(Modifier.STRICT_FP);
     }
 
     /**
@@ -213,7 +243,7 @@ public class Modifiers {
      * @return true iff these modifiers contain the `synchronized` Java modifier
      */
     public boolean isSynchronized() {
-        return contains(Modifier.SYNCHRONIZED);
+        return modifiers.contains(Modifier.SYNCHRONIZED);
     }
 
     /**
@@ -221,7 +251,7 @@ public class Modifiers {
      * @return true iff these modifiers contain the `transient` Java modifier
      */
     public boolean isTransient() {
-        return contains(Modifier.TRANSIENT);
+        return modifiers.contains(Modifier.TRANSIENT);
     }
 
     /**
@@ -229,7 +259,7 @@ public class Modifiers {
      * @return true iff these modifiers contain the `volatile` Java modifier
      */
     public boolean isVolatile() {
-        return contains(Modifier.VOLATILE);
+        return modifiers.contains(Modifier.VOLATILE);
     }
 
     /**

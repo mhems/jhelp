@@ -3,12 +3,13 @@ package com.binghamton.jhelp.ast;
 import java.util.List;
 
 import com.binghamton.jhelp.Annotation;
+import com.binghamton.jhelp.Annotations;
 
 /**
  * A class representing a Java identifier, as an expression
  */
 public class IdentifierExpression extends Expression {
-    private List<Annotation> annotations;
+    private Annotations annotations;
     private String identifier;
 
     /**
@@ -27,7 +28,7 @@ public class IdentifierExpression extends Expression {
     public IdentifierExpression(String identifier,
                                 List<Annotation> annotations) {
         this.identifier = identifier;
-        this.annotations = annotations;
+        this.annotations = new Annotations(annotations);
     }
 
     /**
@@ -42,15 +43,7 @@ public class IdentifierExpression extends Expression {
      * Gets the annotations of this identifier, if any
      * @return the annotations of this identifier, if any
      */
-    public List<Annotation> getAnnotations() {
+    public Annotations getAnnotations() {
         return annotations;
-    }
-
-    /**
-     * Determines if this identifier is annotated
-     * @return true iff this identifier is annotated
-     */
-    public boolean hasAnnotations() {
-        return annotations != null;
     }
 }

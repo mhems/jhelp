@@ -10,7 +10,7 @@ import java.util.TreeSet;
 public abstract class Symbol {
     private String id;
     private AccessLevel access;
-    private Set<Modifier> modifiers = new TreeSet<>();
+    private Modifiers modifiers;
 
     /**
      * Construct a named Symbol
@@ -50,7 +50,7 @@ public abstract class Symbol {
      * Gets the modifiers of this symbol
      * @return the modifiers of this symbol
      */
-    public Set<Modifier> getModifiers() {
+    public Modifiers getModifiers() {
         return modifiers;
     }
 
@@ -68,7 +68,7 @@ public abstract class Symbol {
      * @return true iff modifier successfully added
      */
     public boolean addModifier(Modifier modifier) {
-        return modifiers.add(modifier);
+        return modifiers.addModifier(modifier);
     }
 
     /**
@@ -76,7 +76,7 @@ public abstract class Symbol {
      * @return the number of modifiers of this symbol
      */
     public int numModifiers() {
-        return modifiers.size();
+        return modifiers.getModifiers().size();
     }
 
     /**

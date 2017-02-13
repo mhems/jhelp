@@ -103,27 +103,27 @@ type_ returns [Type ret]
 primitiveType returns [PrimitiveType ret]
     locals [List<Annotation> anns = new ArrayList<>();]
 	:	(a = annotation {$anns.add($a.ret);})* n = numericType
-        {$ret = $n.ret;}
+        {$ret = new PrimitiveType($n.ret, $anns);}
 	|	(a = annotation {$anns.add($a.ret);})* 'boolean'
-        {$ret = PrimitiveType.BOOLEAN;}
+        {$ret = new PrimitiveType(PrimitiveType.Primitive.BOOLEAN, $anns);}
 	;
 
-numericType returns [PrimitiveType ret]
+numericType returns [PrimitiveType.Primitive ret]
 	:	i = integralType {$ret = $i.ret;}
 	|	f = floatingPointType {$ret = $f.ret;}
 	;
 
-integralType returns [PrimitiveType ret]
-	:	'byte' {$ret = PrimitiveType.BYTE;}
-	|	'short' {$ret = PrimitiveType.SHORT;}
-	|	'int' {$ret = PrimitiveType.INT;}
-	|	'long' {$ret = PrimitiveType.LONG;}
-	|	'char' {$ret = PrimitiveType.CHAR;}
+integralType returns [PrimitiveType.Primitive ret]
+	:	'byte' {$ret = PrimitiveType.Primitive.BYTE;}
+	|	'short' {$ret = PrimitiveType.Primitive.SHORT;}
+	|	'int' {$ret = PrimitiveType.Primitive.INT;}
+	|	'long' {$ret = PrimitiveType.Primitive.LONG;}
+	|	'char' {$ret = PrimitiveType.Primitive.CHAR;}
 	;
 
-floatingPointType returns [PrimitiveType ret]
-	:	'float' {$ret = PrimitiveType.FLOAT;}
-	|	'double' {$ret = PrimitiveType.DOUBLE;}
+floatingPointType returns [PrimitiveType.Primitive ret]
+	:	'float' {$ret = PrimitiveType.Primitive.FLOAT;}
+	|	'double' {$ret = PrimitiveType.Primitive.DOUBLE;}
 	;
 
 referenceType returns [ReferenceType ret]
@@ -204,13 +204,13 @@ dims returns [int ret]
 	;
 
 typeParameter returns [TypeParameter ret]
-    locals [List<Modifier> mods = new ArrayList<>();]
-	:	(m = typeParameterModifier {$mods.add($m.ret);})*
+    locals [List<Annotation> ans = new ArrayList<>();]
+	:	(a = typeParameterModifier {$ans.add($a.ret);})*
         id = Identifier b = typeBound?
-        {$ret = new TypeParameter($id.getText(), $mods, $b.ret);}
+        {$ret = new TypeParameter($id.getText(), $ans, $b.ret);}
 	;
 
-typeParameterModifier returns [Modifier ret]
+typeParameterModifier returns [Annotation ret]
 	:	a = annotation {$ret = $a.ret;}
 	;
 
@@ -476,7 +476,7 @@ unannType returns [Type ret]
 	;
 
 unannPrimitiveType returns [PrimitiveType ret]
-	:	n = numericType {$ret = $n.ret;}
+	:	n = numericType {$ret = new PrimitiveType($n.ret);}
 	|	'boolean' {$ret = PrimitiveType.BOOLEAN;}
 	;
 
@@ -576,7 +576,9 @@ methodHeader [MethodDeclaration ret]
         rt = result methodDeclarator[$ret] th = throws_?
         {
             $ret.setTypeParameters($tp.ret);
-            $ret.setAnnotations($ans);
+            if ($ans.size() > 0) {
+                $rt.ret.setAnnotations($ans);
+            }
             $ret.setReturnType($rt.ret);
             $ret.setExceptions($th.ret);
         }
@@ -584,7 +586,7 @@ methodHeader [MethodDeclaration ret]
 
 result returns [Type ret]
 	:	u = unannType {$ret = $u.ret;}
-	|	'void' {$ret = null;}
+	|	'void' {$ret = PrimitiveType.VOID;}
 	;
 
 methodDeclarator [MethodDeclaration ret]
@@ -641,8 +643,8 @@ lastFormalParameter returns [VariableDeclaration ret]
 	;
 
 receiverParameter returns [VariableDeclaration ret]
-    locals [List<Modifier> mods = new ArrayList<>();]
-	:	(m = annotation {$mods.add($m.ret);})*
+    locals [List<Modifier> ans = new ArrayList<>();]
+	:	(a = annotation {$ans.add($a.ret);})*
         t = unannType
         (i = Identifier '.')?
         'this'
@@ -650,7 +652,7 @@ receiverParameter returns [VariableDeclaration ret]
             $ret = new VariableDeclaration(
                 $i.getText().equals("") ? "this" : $i.getText() + "." + "this",
                 $t.ret,
-                $mods);
+                $ans);
         }
 	;
 
@@ -706,7 +708,7 @@ constructorModifier returns [Modifier ret]
 constructorDeclarator [MethodDeclaration ret]
 	:	t = typeParameters? n = simpleTypeName '(' l = formalParameterList? ')'
         {
-            $ret.addTypeParams($t.ret);
+            $ret.setTypeParameters($t.ret);
             $ret.setName($n.ret);
             $ret.setParameters($l.ret);
         }
@@ -753,11 +755,14 @@ enumConstantList [EnumDeclaration ret]
 	;
 
 enumConstant [EnumDeclaration ret]
-    locals [List<Modifier> mods = new ArrayList<>();]
-	:	(m = enumConstantModifier {$mods.add($m.ret);})*
+    locals [List<Modifier> ans = new ArrayList<>(),
+            EnumConstant cons]
+	:	(an = enumConstantModifier {$ans.add($an.ret);})*
         id = Identifier ('(' a = argumentList? ')')?
-        {$ret.addConstant(new EnumConstant($id.getText(), $mods, $a.ret));}
-        (classBody[$ret])?
+        {
+            $cons = new EnumConstant($id.getText(), $ans, $a.ret);
+            $ret.addConstant($cons);}
+        (classBody[$cons])?
 	;
 
 enumConstantModifier returns [Modifier ret]
@@ -772,7 +777,7 @@ enumBodyDeclarations [EnumDeclaration ret]
  * Productions from §9 (Interfaces)
  */
 
-interfaceDeclaration returns [Declaration ret]
+interfaceDeclaration returns [AbstractBodyDeclaration ret]
 	:	n = normalInterfaceDeclaration {$ret = $n.ret;}
 	|	a = annotationTypeDeclaration {$ret = $a.ret;}
 	;
@@ -853,14 +858,14 @@ annotationTypeDeclaration returns [AnnotationDeclaration ret]
 	;
 
 annotationTypeBody [AnnotationDeclaration ret]
-	:	'{' (m = annotationTypeMemberDeclaration {$ret.addMember($m.ret);})* '}'
+	:	'{' (annotationTypeMemberDeclaration[$ret])* '}'
 	;
 
-annotationTypeMemberDeclaration returns [Declaration ret]
-	:	a = annotationTypeElementDeclaration {$ret = $a.ret;}
-	|	co = constantDeclaration {$ret = $co.ret;}
-	|	cl = classDeclaration {$ret = $cl.ret;}
-	|	i = interfaceDeclaration {$ret = $i.ret;}
+annotationTypeMemberDeclaration [AnnotationDeclaration ret]
+	:	a = annotationTypeElementDeclaration {$ret.addField($a.ret);}
+	|	co = constantDeclaration {$ret.addField($co.ret);}
+	|	cl = classDeclaration {$ret.addInnerBody($cl.ret);}
+	|	i = interfaceDeclaration {$ret.addInnerInterface($i.ret);}
 	|	';'
 	;
 
@@ -1150,19 +1155,19 @@ basicForStatementNoShortIf returns [ForStatement ret]
         {$ret = new ForStatement($i.ret, $e.ret, $u.ret, new Block($s.ret));}
 	;
 
-forInit returns [List<Expression> ret]
+forInit returns [List<Statement> ret]
 	:	ls = statementExpressionList {$ret = $ls.ret;}
 	|	d = localVariableDeclaration
-        {$ret = new ArrayList<Expression>();
+        {$ret = new ArrayList<Statement>();
          $ret.add($d.ret);}
 	;
 
-forUpdate returns [List<Expression> ret]
+forUpdate returns [List<Statement> ret]
 	:	ls = statementExpressionList {$ret = $ls.ret;}
 	;
 
-statementExpressionList returns [List<Expression> ret]
-    locals [List<Expression> ups = new ArrayList<>();]
+statementExpressionList returns [List<Statement> ret]
+    locals [List<Statement> ups = new ArrayList<>();]
 	:	(s = statementExpression {$ups.add($s.ret);})
         (',' e = statementExpression {$ups.add($e.ret);})*
         { $ret = $ups;}
@@ -1289,8 +1294,15 @@ primary returns [Expression ret]
 	:	(	pno = primaryNoNewArray_lfno_primary {$ret = $pno.ret;}
 		|	a = arrayCreationExpression {$ret = $a.ret;}
 		)
-		(	p = primaryNoNewArray_lf_primary // check
-            {$ret = new AccessExpression($ret, $p.ret);}
+		(	p = primaryNoNewArray_lf_primary
+            {
+                if ($p.isAccess) {
+                    $ret = new AccessExpression($ret, $p.ret);
+                } else {
+                    ((MethodReferenceExpression) $p.ret).setLHS($ret);
+                    $ret = $p.ret;
+                }
+            }
 		)*
 	;
 
@@ -1343,23 +1355,26 @@ primaryNoNewArray_lfno_arrayAccess returns [Expression ret]
 	|	a8 = methodReference {$ret = $a8.ret;}
 	;
 
-primaryNoNewArray_lf_primary returns [Expression ret]
-	:	a1 = classInstanceCreationExpression_lf_primary {$ret = $a1.ret;}
-	|	a2 = fieldAccess_lf_primary {$ret = $a2.ret;}
-	|	a3 = arrayAccess_lf_primary {$ret = $a3.ret;}
-	|	a4 = methodInvocation_lf_primary {$ret = $a4.ret;} // TODO
-	|	a5 = methodReference_lf_primary {$ret = $a5.ret;} // TODO
+primaryNoNewArray_lf_primary returns [Expression ret, boolean isAccess]
+	:	a1 = classInstanceCreationExpression_lf_primary {$ret = $a1.ret;
+                                                         $isAccess = true;}
+	|	a2 = fieldAccess_lf_primary {$ret = $a2.ret; $isAccess = true;}
+	|	a3 = arrayAccess_lf_primary {$ret = $a3.ret; $isAccess = $a3.isAccess;}
+	|	a4 = methodInvocation_lf_primary {$ret = $a4.ret; $isAccess = true;}
+	|	a5 = methodReference_lf_primary {$ret = $a5.ret; $isAccess = false;}
 	;
 
 primaryNoNewArray_lf_primary_lf_arrayAccess_lf_primary
 	:
 	;
 
-primaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primary returns [Expression ret]
-	:	a1 = classInstanceCreationExpression_lf_primary {$ret = $a1.ret;}
-	|	a2 = fieldAccess_lf_primary {$ret = $a2.ret;}
-	|	a3 = methodInvocation_lf_primary {$ret = $a3.ret;} // TODO
-	|	a4 = methodReference_lf_primary {$ret = $a4.ret;} // TODO
+primaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primary returns [Expression ret,
+                                                                  boolean isAccess]
+	:	a1 = classInstanceCreationExpression_lf_primary {$ret = $a1.ret;
+                                                         $isAccess = true;}
+	|	a2 = fieldAccess_lf_primary {$ret = $a2.ret; $isAccess = true;}
+	|	a3 = methodInvocation_lf_primary {$ret = $a3.ret; $isAccess = true;}
+	|	a4 = methodReference_lf_primary {$ret = $a4.ret; $isAccess = false;}
 	;
 
 primaryNoNewArray_lfno_primary returns [Expression ret]
@@ -1564,11 +1579,11 @@ arrayAccess returns [ArrayAccessExpression ret]
 		)*
 	;
 
-// TODO
-arrayAccess_lf_primary returns [ArrayAccessExpression ret]
-	:	(	(pno = primaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primary // here
+arrayAccess_lf_primary returns [ArrayAccessExpression ret, boolean isAccess]
+	:	(	(pno = primaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primary
            '[' i = expression ']'
-                {$ret = new ArrayAccessExpression($pno.ret, $i.ret);})
+                {$ret = new ArrayAccessExpression($pno.ret, $i.ret);
+                 $isAccess = $pno.isAccess;})
 		)
 		(	primaryNoNewArray_lf_primary_lf_arrayAccess_lf_primary
             '[' i2 = expression ']'
@@ -1676,10 +1691,9 @@ methodReference returns [Expression ret]
                                               "new");}
 	;
 
-// TODO
 methodReference_lf_primary returns [MethodReferenceExpression ret]
 	:	'::' t = typeArguments? id = Identifier
-        {$ret = new MethodReferenceExpression($id.getText());}
+        {$ret = new MethodReferenceExpression($id.getText(), $t.ret);}
 	;
 
 methodReference_lfno_primary returns [Expression ret]

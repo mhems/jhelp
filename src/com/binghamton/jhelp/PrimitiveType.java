@@ -1,5 +1,7 @@
 package com.binghamton.jhelp;
 
+import java.util.List;
+
 /**
  * Class representing valid Java primitive types
  */
@@ -13,8 +15,9 @@ public class PrimitiveType extends Type {
     public static final PrimitiveType LONG    = new PrimitiveType(Primitive.LONG);
     public static final PrimitiveType FLOAT   = new PrimitiveType(Primitive.FLOAT);
     public static final PrimitiveType DOUBLE  = new PrimitiveType(Primitive.DOUBLE);
+    public static final PrimitiveType VOID    = new PrimitiveType(Primitive.VOID);
 
-    private enum Primitive {
+    public enum Primitive {
         BYTE,
         CHAR,
         SHORT,
@@ -22,7 +25,8 @@ public class PrimitiveType extends Type {
         LONG,
         FLOAT,
         DOUBLE,
-        BOOLEAN
+        BOOLEAN,
+        VOID
     }
 
     private Primitive primitive;
@@ -31,8 +35,18 @@ public class PrimitiveType extends Type {
      * Construct a new primitive type
      * @param primitive the type of the primitive
      */
-    private PrimitiveType(Primitive primitive) {
+    public PrimitiveType(Primitive primitive) {
         super(primitive.name());
+        this.primitive = primitive;
+    }
+
+    /**
+     * Construct an annotated primitive type
+     * @param primitive the type of the primitive
+     * @param annotations the annotations of this type
+     */
+    public PrimitiveType(Primitive primitive, List<Annotation> annotations) {
+        super(primitive.name(), annotations);
         this.primitive = primitive;
     }
 }

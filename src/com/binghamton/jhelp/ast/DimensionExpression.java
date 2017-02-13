@@ -3,12 +3,13 @@ package com.binghamton.jhelp.ast;
 import java.util.List;
 
 import com.binghamton.jhelp.Annotation;
+import com.binghamton.jhelp.Annotations;
 
 /**
  * Class representing a dimension expression
  */
 public class DimensionExpression extends Expression {
-    private List<Annotation> annotations;
+    private Annotations annotations;
     private Expression expr;
 
     /**
@@ -17,7 +18,7 @@ public class DimensionExpression extends Expression {
      * @param expr the comprising expression of this dimension
      */
     public DimensionExpression(List<Annotation> annotations, Expression expr) {
-        this.annotations = annotations;
+        this.annotations = new Annotations(annotations);
         this.expr = expr;
     }
 
@@ -25,7 +26,7 @@ public class DimensionExpression extends Expression {
      * Gets the annotations of this expression
      * @return the annotations of this expression
      */
-    public List<Annotation> getAnnotations() {
+    public Annotations getAnnotations() {
         return annotations;
     }
 

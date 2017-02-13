@@ -1,5 +1,12 @@
 // Generated from Java8.g4 by ANTLR 4.6
 package com.binghamton.jhelp.antlr;
+
+    import java.util.ArrayList;
+    import java.util.List;
+
+    import com.binghamton.jhelp.*;
+    import com.binghamton.jhelp.ast.*;
+
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 
 /**
@@ -1257,6 +1264,13 @@ public class Java8BaseVisitor<T> extends AbstractParseTreeVisitor<T> implements 
 	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
 	@Override public T visitPrimaryNoNewArray(Java8Parser.PrimaryNoNewArrayContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitPrimaryNoNewArray_typeAccess(Java8Parser.PrimaryNoNewArray_typeAccessContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
 	 *

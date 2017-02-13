@@ -11,6 +11,9 @@ import com.binghamton.jhelp.Modifier;
  * This includes classes and enums.
  */
 public abstract class ConcreteBodyDeclaration extends BodyDeclaration {
+    protected List<ClassInterfaceType> implementees;
+    protected List<MethodDeclaration> methods = new ArrayList<>();
+    protected List<MethodDeclaration> ctors = new ArrayList<>();
     protected List<Block> instanceInitializers = new ArrayList<>();
     protected List<Block> staticInitializers = new ArrayList<>();
 
@@ -30,7 +33,72 @@ public abstract class ConcreteBodyDeclaration extends BodyDeclaration {
     public ConcreteBodyDeclaration(String name,
                                    List<Modifier> modifiers,
                                    List<ClassInterfaceType> implementees) {
-        super(name, modifiers, implementees);
+        super(name, modifiers);
+        this.implementees = implementees;
+    }
+
+    /**
+     * Determines if this declaration implements any interfaces
+     * @return true iff this declaration implements any interfaces
+     */
+    public boolean hasSuperInterfaces() {
+        return implementees != null && implementees.size() > 0;
+    }
+
+    /**
+     * Gets the implemented interfaces of this declaration
+     * @return the implemented interfaces of this declaration
+     */
+    public List<ClassInterfaceType> getSuperInterfaces() {
+        return implementees;
+    }
+
+    /**
+     * Gets the methods of this declaration
+     * @return the methods of this declaration
+     */
+    public List<MethodDeclaration> getMethods() {
+        return methods;
+    }
+
+    /**
+     * Adds a method declaration to this body
+     * @param decl the declaration to add
+     */
+    public void addMethod(MethodDeclaration decl) {
+        methods.add(decl);
+    }
+
+    /**
+     * Gets the number of methods declared in this body
+     * @return the number of methods declared in this body
+     */
+    public int numMethods() {
+        return methods.size();
+    }
+
+    /**
+     * Gets the constructors of this declaration
+     * @return the constructors of this declaration
+     */
+    public List<MethodDeclaration> getConstructors() {
+        return ctors;
+    }
+
+    /**
+     * Adds a constructor declaration to this body
+     * @param decl the declaration to add
+     */
+    public void addConstructor(MethodDeclaration decl) {
+        ctors.add(decl);
+    }
+
+    /**
+     * Gets the number of constructors in this body
+     * @return the number of constructors in this body
+     */
+    public int numConstructors() {
+        return ctors.size();
     }
 
     /**

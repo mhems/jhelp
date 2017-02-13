@@ -7,9 +7,9 @@ import java.util.ArrayList;
  * A class representing a Java for statement
  */
 public class ForStatement extends Block {
-    private List<Expression> initializers;
+    private List<Statement> initializers;
     private Expression condition;
-    private List<Expression> updates;
+    private List<Statement> updates;
 
     /**
      * Construct a new for statement with a single statement body
@@ -18,9 +18,9 @@ public class ForStatement extends Block {
      * @param updates the updating statements of the for statement
      * @param statement the single statement of the for statement body
      */
-    public ForStatement(List<Expression> initializers,
+    public ForStatement(List<Statement> initializers,
                         Expression condition,
-                        List<Expression> updates,
+                        List<Statement> updates,
                         Statement statement) {
         this(initializers, condition, updates, new Block(statement));
     }
@@ -32,9 +32,9 @@ public class ForStatement extends Block {
      * @param updates the updating statements of the for statement
      * @param body the body of the for statement
      */
-    public ForStatement(List<Expression> initializers,
+    public ForStatement(List<Statement> initializers,
                         Expression condition,
-                        List<Expression> updates,
+                        List<Statement> updates,
                         Block body) {
         super(body);
         this.initializers = initializers;
@@ -46,7 +46,7 @@ public class ForStatement extends Block {
      * Gets the statements that initialize this statement
      * @return the statements that initialize this statement
      */
-    public List<Expression> getInitializers() {
+    public List<Statement> getInitializers() {
         return initializers;
     }
 
@@ -55,7 +55,7 @@ public class ForStatement extends Block {
      * @param index the 0-indexed initializer to retrieve
      * @return the initializer at index `index`
      */
-    public Expression getInitializer(int index) {
+    public Statement getInitializer(int index) {
         return initializers.get(index);
     }
 
@@ -76,25 +76,25 @@ public class ForStatement extends Block {
     }
 
     /**
-     * Gets the updater expressions that update this statement
-     * @return the updater expressions that update this statement
+     * Gets the updater statements that update this statement
+     * @return the updater statements that update this statement
      */
-    public List<Expression> getUpdaters() {
+    public List<Statement> getUpdaters() {
         return updates;
     }
 
     /**
-     * Gets a particular updater of this statement
+     * Gets a particular updater of this for statement
      * @param index the 0-indexed updater to retrieve
      * @return the update at index `index`
      */
-    public Expression getUpdate(int index) {
+    public Statement getUpdate(int index) {
         return updates.get(index);
     }
 
     /**
-     * Gets the number of updaters of this case statement
-     * @return the number of updaters of this case statement
+     * Gets the number of updaters of this for statement
+     * @return the number of updaters of this for statement
      */
     public int getNumUpdaters() {
         return updates.size();
