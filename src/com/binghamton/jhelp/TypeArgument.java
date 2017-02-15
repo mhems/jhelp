@@ -3,12 +3,12 @@ package com.binghamton.jhelp;
 import java.util.List;
 
 import com.binghamton.jhelp.ast.ASTVisitor;
-import com.binghamton.jhelp.ast.Visitable;
+import com.binghamton.jhelp.ast.ASTNode;
 
 /**
  * A class representing a Java type argument
  */
-public class TypeArgument implements Visitable {
+public class TypeArgument extends ASTNode {
     public static final TypeArgument DIAMOND = new TypeArgument();
 
     private ReferenceType type;
@@ -139,6 +139,7 @@ public class TypeArgument implements Visitable {
      */
     @Override
     public void accept(ASTVisitor v) {
+        super.accept(v);
         v.visit(this);
     }
 }

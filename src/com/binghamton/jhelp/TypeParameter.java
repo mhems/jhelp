@@ -4,12 +4,12 @@ import java.util.List;
 import java.util.ArrayList;
 
 import com.binghamton.jhelp.ast.ASTVisitor;
-import com.binghamton.jhelp.ast.Visitable;
+import com.binghamton.jhelp.ast.ASTNode;
 
 /**
  * A class representing a Java type parameter
  */
-public class TypeParameter implements Visitable {
+public class TypeParameter extends ASTNode {
     private TypeVariable type;
     private List<ReferenceType> superTypes = new ArrayList<>();
 
@@ -89,6 +89,7 @@ public class TypeParameter implements Visitable {
      */
     @Override
     public void accept(ASTVisitor v) {
+        super.accept(v);
         v.visit(this);
     }
 }

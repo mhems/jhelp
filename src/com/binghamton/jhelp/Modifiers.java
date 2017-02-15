@@ -7,12 +7,12 @@ import java.util.Set;
 import java.util.HashSet;
 
 import com.binghamton.jhelp.ast.ASTVisitor;
-import com.binghamton.jhelp.ast.Visitable;
+import com.binghamton.jhelp.ast.ASTNode;
 
 /**
  * A class abstracting a set of Java modifiers
  */
-public class Modifiers implements Visitable {
+public class Modifiers extends ASTNode {
     public static final Modifiers CLASS_MODIFIERS;
     public static final Modifiers FIELD_MODIFIERS;
     public static final Modifiers VARIABLE_MODIFIERS;
@@ -271,6 +271,7 @@ public class Modifiers implements Visitable {
      */
     @Override
     public void accept(ASTVisitor v) {
+        super.accept(v);
         v.visit(this);
     }
 }

@@ -4,12 +4,12 @@ import java.util.List;
 import java.util.ArrayList;
 
 import com.binghamton.jhelp.ast.ASTVisitor;
-import com.binghamton.jhelp.ast.Visitable;
+import com.binghamton.jhelp.ast.ASTNode;
 
 /**
  * A class abstracting a list of Java annotations
  */
-public class Annotations implements Visitable {
+public class Annotations extends ASTNode {
     private List<Annotation> annotations;
 
     /**
@@ -98,6 +98,7 @@ public class Annotations implements Visitable {
      */
     @Override
     public void accept(ASTVisitor v) {
+        super.accept(v);
         v.visit(this);
     }
 }

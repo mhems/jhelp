@@ -2,12 +2,11 @@ package com.binghamton.jhelp;
 
 import com.binghamton.jhelp.ast.ASTVisitor;
 import com.binghamton.jhelp.ast.Expression;
-import com.binghamton.jhelp.ast.Visitable;
 
 /**
  * Class representing Java modifiers and annotations
  */
-public class Modifier extends Expression implements Visitable {
+public class Modifier extends Expression {
     public static final Modifier PRIVATE      = new Modifier("private");
     public static final Modifier PROTECTED    = new Modifier("protected");
     public static final Modifier PUBLIC       = new Modifier("public");
@@ -67,6 +66,7 @@ public class Modifier extends Expression implements Visitable {
      */
     @Override
     public void accept(ASTVisitor v) {
+        super.accept(v);
         v.visit(this);
     }
 }

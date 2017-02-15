@@ -3,12 +3,12 @@ package com.binghamton.jhelp;
 import java.util.List;
 
 import com.binghamton.jhelp.ast.ASTVisitor;
-import com.binghamton.jhelp.ast.Visitable;
+import com.binghamton.jhelp.ast.ASTNode;
 
 /**
  * Abstract base class representing a Java type
  */
-public abstract class Type implements Visitable {
+public abstract class Type extends ASTNode {
     protected Annotations annotations;
     protected String name;
 
@@ -117,6 +117,7 @@ public abstract class Type implements Visitable {
      */
     @Override
     public void accept(ASTVisitor v) {
+        super.accept(v);
         v.visit(this);
     }
 }

@@ -5,12 +5,11 @@ import java.util.HashMap;
 
 import com.binghamton.jhelp.ast.ASTVisitor;
 import com.binghamton.jhelp.ast.Expression;
-import com.binghamton.jhelp.ast.Visitable;
 
 /**
  * A class representing a Java annotation
  */
-public class Annotation extends Modifier implements Visitable {
+public class Annotation extends Modifier {
     private Map<String, Expression> nameValueMap = new HashMap<>();
 
     /**
@@ -128,6 +127,7 @@ public class Annotation extends Modifier implements Visitable {
      */
     @Override
     public void accept(ASTVisitor v) {
+        super.accept(v);
         v.visit(this);
     }
 }
