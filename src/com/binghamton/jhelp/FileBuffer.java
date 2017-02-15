@@ -3,23 +3,42 @@ package com.binghamton.jhelp;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Map;
+import java.util.HashMap;
 
 /**
  * This class stores a file's contents in a buffer. Lines from the file are
  * available with optional preceding or trailing context lines
  */
 public class FileBuffer {
+    public static final Map<String, FileBuffer> cache = new HashMap<>();
     private String filename;
     private String[] lines;
 
     /**
      * Bring the contents of the file `filename` into buffer
      * @param filename the name of the file whose contents are to be read
-     * @throws IOException if any IO exception occurs doing reading
      */
-    public FileBuffer(String filename) throws IOException {
+    public FileBuffer(String filename) {
         this.filename = filename;
-        lines = Files.readAllLines(Paths.get(filename)).toArray(new String[0]);
+        try {
+            lines = Files.readAllLines(Paths.get(filename)).toArray(new String[0]);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    /**
+     * Gets the FileBuffer instance with specified filename.
+     * If no FileBuffer with the filename, exists, one is created.
+     * @param filename the name of the file to use
+     * @return the FileBuffer instance with specified filename
+     */
+    public static FileBuffer getOrCreate(String filename) {
+        if (!cache.containsKey(filename)) {
+            cache.put(filename, new FileBuffer(filename));
+        }
+        return cache.get(filename);
     }
 
     /**

@@ -266,6 +266,12 @@ public interface ASTVisitor {
     void visit(Modifiers ast);
 
     /*
+     * Visit a NilNode node
+     * @param ast the AST node being visited
+     */
+    void visit(NilNode ast);
+
+    /*
      * Visit a NullLiteral node
      * @param ast the AST node being visited
      */

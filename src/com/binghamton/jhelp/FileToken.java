@@ -1,5 +1,7 @@
 package com.binghamton.jhelp;
 
+import org.antlr.v4.runtime.Token;
+
 /**
  * A class representing a lexer token from a File-like object.
  */
@@ -23,6 +25,17 @@ public class FileToken {
         this.line = line;
         this.colStart = col;
         this.colStop = colStart + lexeme.length();
+    }
+
+    /**
+     * Construct a FileToken from an ANTLR token
+     * @param token the ANTLR generated token
+     */
+    public FileToken(Token token) {
+        this(token.getText(),
+             FileBuffer.getOrCreate(token.getTokenSource().getSourceName()),
+             token.getLine(),
+             token.getStartIndex());
     }
 
     /**
