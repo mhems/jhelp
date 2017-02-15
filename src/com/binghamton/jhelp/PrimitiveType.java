@@ -2,6 +2,8 @@ package com.binghamton.jhelp;
 
 import java.util.List;
 
+import com.binghamton.jhelp.ast.ASTVisitor;
+
 /**
  * Class representing valid Java primitive types
  */
@@ -29,15 +31,12 @@ public class PrimitiveType extends Type {
         VOID
     }
 
-    private Primitive primitive;
-
     /**
      * Construct a new primitive type
      * @param primitive the type of the primitive
      */
     public PrimitiveType(Primitive primitive) {
         super(primitive.name());
-        this.primitive = primitive;
     }
 
     /**
@@ -47,6 +46,15 @@ public class PrimitiveType extends Type {
      */
     public PrimitiveType(Primitive primitive, List<Annotation> annotations) {
         super(primitive.name(), annotations);
-        this.primitive = primitive;
+    }
+
+    /**
+     * Double dispatch super class and this class on parameter
+     * @param v the visitor to accept
+     */
+    @Override
+    public void accept(ASTVisitor v) {
+        super.accept(v);
+        v.visit(this);
     }
 }

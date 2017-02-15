@@ -6,10 +6,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
 
+import com.binghamton.jhelp.ast.ASTVisitor;
+import com.binghamton.jhelp.ast.Visitable;
+
 /**
  * A class abstracting a set of Java modifiers
  */
-public class Modifiers {
+public class Modifiers implements Visitable {
     public static final Modifiers CLASS_MODIFIERS;
     public static final Modifiers FIELD_MODIFIERS;
     public static final Modifiers VARIABLE_MODIFIERS;
@@ -114,17 +117,8 @@ public class Modifiers {
      * Gets the annotations of these modifiers
      * @return the annotations of these modifiers
      */
-    public List<Annotation> getAnnotations() {
-        return annotations.getAnnotations();
-    }
-
-    /**
-     * Determines if any modifiers are present
-     * @return true  if any modifiers are present
-     *         false if no modifiers are present
-     */
-    public boolean hasAnnotations() {
-        return modifiers.size() > 0 || annotations.hasAnnotations();
+    public Annotations getAnnotations() {
+        return annotations;
     }
 
     /**
@@ -269,5 +263,14 @@ public class Modifiers {
      */
     private static Modifiers fromModifierArray(Modifier[] modifiers) {
         return new Modifiers(new ArrayList<Modifier>(Arrays.asList(modifiers)));
+    }
+
+    /**
+     * Double dispatch this class on parameter
+     * @param v the visitor to accept
+     */
+    @Override
+    public void accept(ASTVisitor v) {
+        v.visit(this);
     }
 }

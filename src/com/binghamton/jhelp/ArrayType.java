@@ -1,5 +1,7 @@
 package com.binghamton.jhelp;
 
+import com.binghamton.jhelp.ast.ASTVisitor;
+
 /**
  * Class representing an array type
  */
@@ -32,5 +34,15 @@ public class ArrayType extends ReferenceType {
      */
     public int getDimensions() {
         return rank;
+    }
+
+    /**
+     * Double dispatch super class and this class on parameter
+     * @param v the visitor to accept
+     */
+    @Override
+    public void accept(ASTVisitor v) {
+        super.accept(v);
+        v.visit(this);
     }
 }

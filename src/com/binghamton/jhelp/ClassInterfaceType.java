@@ -2,6 +2,8 @@ package com.binghamton.jhelp;
 
 import java.util.List;
 
+import com.binghamton.jhelp.ast.ASTVisitor;
+
 /**
  * A class representing a Java class or interface type
  */
@@ -62,7 +64,7 @@ public class ClassInterfaceType extends ReferenceType {
      * Get the type arguments to this type
      * @return the type arguments to this type
      */
-    public List<TypeArgument> getArgs() {
+    public List<TypeArgument> getTypeArguments() {
         return args;
     }
 
@@ -99,5 +101,15 @@ public class ClassInterfaceType extends ReferenceType {
      */
     public boolean hasSuperType() {
         return supertype != null;
+    }
+
+    /**
+     * Double dispatch super class and this class on parameter
+     * @param v the visitor to accept
+     */
+    @Override
+    public void accept(ASTVisitor v) {
+        super.accept(v);
+        v.visit(this);
     }
 }

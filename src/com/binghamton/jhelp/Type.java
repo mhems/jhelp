@@ -2,10 +2,13 @@ package com.binghamton.jhelp;
 
 import java.util.List;
 
+import com.binghamton.jhelp.ast.ASTVisitor;
+import com.binghamton.jhelp.ast.Visitable;
+
 /**
  * Abstract base class representing a Java type
  */
-public abstract class Type {
+public abstract class Type implements Visitable {
     protected Annotations annotations;
     protected String name;
 
@@ -106,5 +109,14 @@ public abstract class Type {
     @Override
     public int hashCode() {
         return name.hashCode() ^ annotations.hashCode();
+    }
+
+    /**
+     * Double dispatch this class on parameter
+     * @param v the visitor to accept
+     */
+    @Override
+    public void accept(ASTVisitor v) {
+        v.visit(this);
     }
 }

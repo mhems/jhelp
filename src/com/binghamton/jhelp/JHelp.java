@@ -6,15 +6,13 @@ import java.io.InputStream;
 import java.io.IOException;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.antlr.v4.runtime.Lexer;
 
 import com.binghamton.jhelp.antlr.Java8Lexer;
 import com.binghamton.jhelp.antlr.Java8Parser;
 import com.binghamton.jhelp.ast.CompilationUnit;
+import com.binghamton.jhelp.ast.NonNullVisitor;
 
 /**
  * JHelp application entry point
@@ -52,9 +50,9 @@ public class JHelp {
         Java8Parser parser = new Java8Parser(tokenStream);
 
         CompilationUnit cu = parser.compilationUnit().ret;
-        System.out.println(cu.getPackage().getName());
-        System.out.println(cu.getImports().size());
-        System.out.println(cu.getBodyDeclarations().size());
+        NonNullVisitor nnV = new NonNullVisitor();
+        cu.accept(nnV);
+        System.out.println(nnV.getCount() + " objects verified.");
     }
 
     private static void process(String filename)

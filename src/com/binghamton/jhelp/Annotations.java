@@ -3,10 +3,13 @@ package com.binghamton.jhelp;
 import java.util.List;
 import java.util.ArrayList;
 
+import com.binghamton.jhelp.ast.ASTVisitor;
+import com.binghamton.jhelp.ast.Visitable;
+
 /**
  * A class abstracting a list of Java annotations
  */
-public class Annotations {
+public class Annotations implements Visitable {
     private List<Annotation> annotations;
 
     /**
@@ -87,5 +90,14 @@ public class Annotations {
     @Override
     public int hashCode() {
         return annotations.hashCode();
+    }
+
+    /**
+     * Double dispatch this class on parameter
+     * @param v the visitor to accept
+     */
+    @Override
+    public void accept(ASTVisitor v) {
+        v.visit(this);
     }
 }

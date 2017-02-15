@@ -45,4 +45,14 @@ public class AssignmentExpression extends Expression {
     public Expression getRHS() {
         return rhs;
     }
+
+    /**
+     * Double dispatch this class on parameter
+     * @param v the visitor to accept
+     */
+    @Override
+    public void accept(ASTVisitor v) {
+        super.accept(v);
+        v.visit(this);
+    }
 }

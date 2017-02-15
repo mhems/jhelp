@@ -3,12 +3,14 @@ package com.binghamton.jhelp;
 import java.util.Map;
 import java.util.HashMap;
 
+import com.binghamton.jhelp.ast.ASTVisitor;
 import com.binghamton.jhelp.ast.Expression;
+import com.binghamton.jhelp.ast.Visitable;
 
 /**
  * A class representing a Java annotation
  */
-public class Annotation extends Modifier {
+public class Annotation extends Modifier implements Visitable {
     private Map<String, Expression> nameValueMap = new HashMap<>();
 
     /**
@@ -118,5 +120,14 @@ public class Annotation extends Modifier {
     @Override
     public int hashCode() {
         return super.hashCode() ^ nameValueMap.hashCode();
+    }
+
+    /**
+     * Double dispatch this class on parameter
+     * @param v the visitor to accept
+     */
+    @Override
+    public void accept(ASTVisitor v) {
+        v.visit(this);
     }
 }

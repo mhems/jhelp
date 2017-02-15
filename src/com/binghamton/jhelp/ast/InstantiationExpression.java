@@ -79,4 +79,14 @@ public class InstantiationExpression extends CallExpression {
     public ConcreteBodyDeclaration getAnonymousClass() {
         return classBody;
     }
+
+    /**
+     * Double dispatch this class on parameter
+     * @param v the visitor to accept
+     */
+    @Override
+    public void accept(ASTVisitor v) {
+        super.accept(v);
+        v.visit(this);
+    }
 }

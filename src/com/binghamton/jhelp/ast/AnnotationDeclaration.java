@@ -17,4 +17,14 @@ public class AnnotationDeclaration extends AbstractBodyDeclaration {
     public AnnotationDeclaration(String name, List<Modifier> modifiers) {
         super(name, modifiers);
     }
+
+    /**
+     * Double dispatch this class on parameter
+     * @param v the visitor to accept
+     */
+    @Override
+    public void accept(ASTVisitor v) {
+        super.accept(v);
+        v.visit(this);
+    }
 }

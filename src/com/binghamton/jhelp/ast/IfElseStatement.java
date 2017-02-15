@@ -78,4 +78,14 @@ public class IfElseStatement extends Statement {
     public boolean hasEmptyElseBlock() {
         return elseBody.isEmpty();
     }
+
+    /**
+     * Double dispatch this class on parameter
+     * @param v the visitor to accept
+     */
+    @Override
+    public void accept(ASTVisitor v) {
+        super.accept(v);
+        v.visit(this);
+    }
 }

@@ -3,10 +3,13 @@ package com.binghamton.jhelp;
 import java.util.List;
 import java.util.ArrayList;
 
+import com.binghamton.jhelp.ast.ASTVisitor;
+import com.binghamton.jhelp.ast.Visitable;
+
 /**
  * A class representing a Java type parameter
  */
-public class TypeParameter {
+public class TypeParameter implements Visitable {
     private TypeVariable type;
     private List<ReferenceType> superTypes = new ArrayList<>();
 
@@ -78,5 +81,14 @@ public class TypeParameter {
      */
     public void addSuperType(ReferenceType superType) {
         superTypes.add(superType);
+    }
+
+    /**
+     * Double dispatch this class on parameter
+     * @param v the visitor to accept
+     */
+    @Override
+    public void accept(ASTVisitor v) {
+        v.visit(this);
     }
 }

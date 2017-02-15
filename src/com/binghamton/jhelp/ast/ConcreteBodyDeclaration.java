@@ -132,4 +132,14 @@ public abstract class ConcreteBodyDeclaration extends BodyDeclaration {
     public void addStaticInitializer(Block init) {
         staticInitializers.add(init);
     }
+
+    /**
+     * Double dispatch this class on parameter
+     * @param v the visitor to accept
+     */
+    @Override
+    public void accept(ASTVisitor v) {
+        super.accept(v);
+        v.visit(this);
+    }
 }

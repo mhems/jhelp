@@ -2,6 +2,8 @@ package com.binghamton.jhelp;
 
 import java.util.List;
 
+import com.binghamton.jhelp.ast.ASTVisitor;
+
 /**
  * A class representing the type of a Java method
  */
@@ -54,7 +56,7 @@ public class MethodType extends Type {
      * Gets the parameter types of this method
      * @return the parameter types of this method
      */
-    public List<Type> parameterTypes() {
+    public List<Type> getParameterTypes() {
         return paramTypes;
     }
 
@@ -80,5 +82,15 @@ public class MethodType extends Type {
      */
     public boolean hasTypeParameters() {
         return typeParams != null && typeParams.size() > 0;
+    }
+
+    /**
+     * Double dispatch super class and this class on parameter
+     * @param v the visitor to accept
+     */
+    @Override
+    public void accept(ASTVisitor v) {
+        super.accept(v);
+        v.visit(this);
     }
 }

@@ -172,4 +172,14 @@ public class VariableDeclaration extends Declaration {
     public boolean isVariadic() {
         return isEllipsis;
     }
+
+    /**
+     * Double dispatch this class on parameter
+     * @param v the visitor to accept
+     */
+    @Override
+    public void accept(ASTVisitor v) {
+        super.accept(v);
+        v.visit(this);
+    }
 }

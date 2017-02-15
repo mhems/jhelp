@@ -5,7 +5,7 @@ import com.binghamton.jhelp.FileToken;
 /**
  * Base class representing a node in the AST
  */
-public abstract class ASTNode {
+public abstract class ASTNode implements Visitable {
     private FileToken token;
 
     /**
@@ -37,5 +37,14 @@ public abstract class ASTNode {
     @Override
     public int hashCode() {
         return token.hashCode();
+    }
+
+    /**
+     * Double dispatch this class on parameter
+     * @param v the visitor to accept
+     */
+    @Override
+    public void accept(ASTVisitor v) {
+        v.visit(this);
     }
 }

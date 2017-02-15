@@ -25,4 +25,30 @@ public class ArrayAccessExpression extends Expression {
         this.arrayExpr = arrayExpr;
         this.indexExpr = indexExpr;
     }
+
+    /**
+     * Gets the expression yielding the array to access
+     * @return the expression yielding the array to access
+     */
+    public Expression getArrayExpression() {
+        return arrayExpr;
+    }
+
+    /**
+     * Gets the expression yielding the index to access
+     * @return the expression yielding the index to access
+     */
+    public Expression getIndexExpression() {
+        return indexExpr;
+    }
+
+    /**
+     * Double dispatch this class on parameter
+     * @param v the visitor to accept
+     */
+    @Override
+    public void accept(ASTVisitor v) {
+        super.accept(v);
+        v.visit(this);
+    }
 }

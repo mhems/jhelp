@@ -45,4 +45,14 @@ public class PackageStatement extends ASTNode {
     public String getName() {
         return String.join(".", ids);
     }
+
+    /**
+     * Double dispatch this class on parameter
+     * @param v the visitor to accept
+     */
+    @Override
+    public void accept(ASTVisitor v) {
+        super.accept(v);
+        v.visit(this);
+    }
 }

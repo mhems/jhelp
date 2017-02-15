@@ -60,4 +60,14 @@ public abstract class Declaration extends Statement {
     public Modifiers getModifiers() {
         return modifiers;
     }
+
+    /**
+     * Double dispatch this super class and this class on parameter
+     * @param v the visitor to accept
+     */
+    @Override
+    public void accept(ASTVisitor v) {
+        super.accept(v);
+        v.visit(this);
+    }
 }

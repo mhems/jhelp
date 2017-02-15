@@ -29,4 +29,14 @@ public class ReturnStatement extends Statement {
     public boolean isNonVoid() {
         return expr != null;
     }
+
+    /**
+     * Double dispatch this class on parameter
+     * @param v the visitor to accept
+     */
+    @Override
+    public void accept(ASTVisitor v) {
+        super.accept(v);
+        v.visit(this);
+    }
 }

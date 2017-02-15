@@ -2,6 +2,8 @@ package com.binghamton.jhelp;
 
 import java.util.List;
 
+import com.binghamton.jhelp.ast.ASTVisitor;
+
 /**
  * A class representing a Java type variable
  */
@@ -22,5 +24,15 @@ public class TypeVariable extends ReferenceType {
      */
     public TypeVariable(String name, List<Annotation> annotations) {
         super(name, annotations);
+    }
+
+    /**
+     * Double dispatch super class and this class on parameter
+     * @param v the visitor to accept
+     */
+    @Override
+    public void accept(ASTVisitor v) {
+        super.accept(v);
+        v.visit(this);
     }
 }

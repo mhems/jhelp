@@ -2,10 +2,13 @@ package com.binghamton.jhelp;
 
 import java.util.List;
 
+import com.binghamton.jhelp.ast.ASTVisitor;
+import com.binghamton.jhelp.ast.Visitable;
+
 /**
  * A class representing a Java type argument
  */
-public class TypeArgument {
+public class TypeArgument implements Visitable {
     public static final TypeArgument DIAMOND = new TypeArgument();
 
     private ReferenceType type;
@@ -128,5 +131,14 @@ public class TypeArgument {
      */
     public void setIsUpperBounded(boolean isUpperBound) {
         this.isUpperBound = isUpperBound;
+    }
+
+    /**
+     * Double dispatch this class on parameter
+     * @param v the visitor to accept
+     */
+    @Override
+    public void accept(ASTVisitor v) {
+        v.visit(this);
     }
 }

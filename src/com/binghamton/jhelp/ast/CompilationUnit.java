@@ -5,7 +5,7 @@ import java.util.List;
 /**
  * A class representing a Java compilation unit (file)
  */
-public class CompilationUnit {
+public class CompilationUnit extends ASTNode {
     private PackageStatement pkg;
     private List<ImportStatement> imports;
     private List<BodyDeclaration> bodies;
@@ -46,5 +46,15 @@ public class CompilationUnit {
      */
     public List<BodyDeclaration> getBodyDeclarations() {
         return bodies;
+    }
+
+    /**
+     * Double dispatch this class on parameter
+     * @param v the visitor to accept
+     */
+    @Override
+    public void accept(ASTVisitor v) {
+        super.accept(v);
+        v.visit(this);
     }
 }

@@ -2,6 +2,8 @@ package com.binghamton.jhelp;
 
 import java.util.List;
 
+import com.binghamton.jhelp.ast.ASTVisitor;
+
 /**
  * An abstract class representing reference types.
  * Reference types include:
@@ -27,5 +29,15 @@ public abstract class ReferenceType extends Type {
      */
     public ReferenceType(String name, List<Annotation> annotations) {
         super(name, annotations);
+    }
+
+    /**
+     * Double dispatch super class and this class on parameter
+     * @param v the visitor to accept
+     */
+    @Override
+    public void accept(ASTVisitor v) {
+        super.accept(v);
+        v.visit(this);
     }
 }
