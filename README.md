@@ -7,6 +7,8 @@ beginners
 
 ---
 
+# [Documentation](doc/api/index.html)
+
 JHelp is a Java 8 recognizer, meaning it strives to accept any valid
 Java8 compilation unit while also rejecting invalid input. What sets
 jhelp apart from the far more complete and correct `javac` is its
