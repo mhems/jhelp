@@ -1,4 +1,4 @@
-# JHelp [**Documentation**](https://mhems.github.io/jhelp/doc/api/index.html)
+# JHelp [[**Documentation**]](https://mhems.github.io/jhelp/doc/api/index.html)
 
 ---
 
