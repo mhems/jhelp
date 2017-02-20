@@ -27,7 +27,7 @@ public class ImportManager {
     {
         for (String pkg : autoImportSymbols) {
             try {
-                fetch(pkg);
+                importSymbol(pkg);
             } catch(ClassNotFoundException e) {
                 throw new RuntimeException("class " + pkg + " not found"); // TODO
             }
@@ -72,7 +72,7 @@ public class ImportManager {
      * @return the Class Object reflecting the symbol found
      * @throws ClassNotFoundException iff no such symbol can be found
      */
-    public Class<?> importSym(String name) throws ClassNotFoundException {
+    public Class<?> importSymbol(String name) throws ClassNotFoundException {
         Class<?> cls = null;
         try {
             cls = getOrImport(name);
