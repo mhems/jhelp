@@ -32,6 +32,7 @@ public class JHelp {
                     System.err.println("file " + arg + " not found");
                 } catch(IOException e) {
                     e.printStackTrace();
+                    System.exit(1);
                 }
             }
         } else {

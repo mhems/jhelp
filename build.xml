@@ -31,7 +31,7 @@
     <java classname="org.antlr.v4.Tool" fork="true" failonerror="true" dir="${src.dir}">
       <arg value="-o"/> <arg value="${java-src.dir}/antlr"/>
       <arg value="-package"/> <arg value="${package}.antlr"/>
-      <arg value="-visitor"/>
+      <arg value="-no-visitor"/>
       <arg value="-no-listener"/>
       <arg value="Java8.g4"/>
       <classpath>

@@ -6,6 +6,7 @@ import java.util.List;
 import org.antlr.v4.runtime.Token;
 
 import com.binghamton.jhelp.Modifier;
+import com.binghamton.jhelp.NilType;
 import com.binghamton.jhelp.Type;
 import com.binghamton.jhelp.TypeParameter;
 
@@ -13,7 +14,7 @@ import com.binghamton.jhelp.TypeParameter;
  * A class representing the declaration of a Java method
  */
 public class MethodDeclaration extends Declaration {
-    private Type returnType;
+    private Type returnType = new NilType();
     private List<VariableDeclaration> params = new ArrayList<>();
     private List<Type> exceptions = new ArrayList<>();
     private List<TypeParameter> typeParams = new ArrayList<>();

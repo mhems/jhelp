@@ -280,6 +280,7 @@ public class Java8Parser extends Parser {
 	}
 	public static class LiteralContext extends ParserRuleContext {
 		public Expression ret;
+		public char last;
 		public Token i;
 		public Token f;
 		public Token b;
@@ -296,11 +297,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_literal; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitLiteral(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final LiteralContext literal() throws RecognitionException {
@@ -315,7 +311,14 @@ public class Java8Parser extends Parser {
 				{
 				setState(466);
 				((LiteralContext)_localctx).i = match(IntegerLiteral);
-				((LiteralContext)_localctx).ret =  new LiteralExpression(((LiteralContext)_localctx).i, PrimitiveType.INT);
+
+				            ((LiteralContext)_localctx).last =  ((LiteralContext)_localctx).i.getText().charAt(((LiteralContext)_localctx).i.getText().length()-1);
+				            if (_localctx.last == 'l' || _localctx.last == 'L') {
+				                ((LiteralContext)_localctx).ret =  new LiteralExpression(((LiteralContext)_localctx).i, PrimitiveType.LONG);
+				            } else {
+				                ((LiteralContext)_localctx).ret =  new LiteralExpression(((LiteralContext)_localctx).i, PrimitiveType.INT);
+				            }
+				        
 				}
 				break;
 			case FloatingPointLiteral:
@@ -323,7 +326,14 @@ public class Java8Parser extends Parser {
 				{
 				setState(468);
 				((LiteralContext)_localctx).f = match(FloatingPointLiteral);
-				((LiteralContext)_localctx).ret =  new LiteralExpression(((LiteralContext)_localctx).f, PrimitiveType.FLOAT);
+
+				            ((LiteralContext)_localctx).last =  ((LiteralContext)_localctx).f.getText().charAt(((LiteralContext)_localctx).f.getText().length()-1);
+				            if (_localctx.last == 'd' || _localctx.last == 'D') {
+				                ((LiteralContext)_localctx).ret =  new LiteralExpression(((LiteralContext)_localctx).f, PrimitiveType.DOUBLE);
+				            } else {
+				                ((LiteralContext)_localctx).ret =  new LiteralExpression(((LiteralContext)_localctx).f, PrimitiveType.FLOAT);
+				            }
+				        
 				}
 				break;
 			case BooleanLiteral:
@@ -387,11 +397,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_type_; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitType_(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final Type_Context type_() throws RecognitionException {
@@ -449,11 +454,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_primitiveType; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitPrimitiveType(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final PrimitiveTypeContext primitiveType() throws RecognitionException {
@@ -537,11 +537,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_numericType; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitNumericType(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final NumericTypeContext numericType() throws RecognitionException {
@@ -598,11 +593,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_integralType; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitIntegralType(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final IntegralTypeContext integralType() throws RecognitionException {
@@ -675,11 +665,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_floatingPointType; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitFloatingPointType(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final FloatingPointTypeContext floatingPointType() throws RecognitionException {
@@ -738,11 +723,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_referenceType; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitReferenceType(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ReferenceTypeContext referenceType() throws RecognitionException {
@@ -817,11 +797,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_classOrInterfaceType; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitClassOrInterfaceType(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ClassOrInterfaceTypeContext classOrInterfaceType() throws RecognitionException {
@@ -917,11 +892,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_classType; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitClassType(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ClassTypeContext classType() throws RecognitionException {
@@ -1038,11 +1008,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_classType_lf_classOrInterfaceType; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitClassType_lf_classOrInterfaceType(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ClassType_lf_classOrInterfaceTypeContext classType_lf_classOrInterfaceType() throws RecognitionException {
@@ -1117,11 +1082,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_classType_lfno_classOrInterfaceType; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitClassType_lfno_classOrInterfaceType(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ClassType_lfno_classOrInterfaceTypeContext classType_lfno_classOrInterfaceType() throws RecognitionException {
@@ -1183,11 +1143,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_interfaceType; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitInterfaceType(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final InterfaceTypeContext interfaceType() throws RecognitionException {
@@ -1222,11 +1177,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_interfaceType_lf_classOrInterfaceType; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitInterfaceType_lf_classOrInterfaceType(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final InterfaceType_lf_classOrInterfaceTypeContext interfaceType_lf_classOrInterfaceType() throws RecognitionException {
@@ -1261,11 +1211,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_interfaceType_lfno_classOrInterfaceType; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitInterfaceType_lfno_classOrInterfaceType(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final InterfaceType_lfno_classOrInterfaceTypeContext interfaceType_lfno_classOrInterfaceType() throws RecognitionException {
@@ -1306,11 +1251,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_typeVariable; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitTypeVariable(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final TypeVariableContext typeVariable() throws RecognitionException {
@@ -1373,11 +1313,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_arrayType; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitArrayType(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ArrayTypeContext arrayType() throws RecognitionException {
@@ -1450,11 +1385,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_dims; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitDims(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final DimsContext dims() throws RecognitionException {
@@ -1555,11 +1485,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_typeParameter; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitTypeParameter(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final TypeParameterContext typeParameter() throws RecognitionException {
@@ -1621,11 +1546,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_typeParameterModifier; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitTypeParameterModifier(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final TypeParameterModifierContext typeParameterModifier() throws RecognitionException {
@@ -1672,11 +1592,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_typeBound; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitTypeBound(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final TypeBoundContext typeBound() throws RecognitionException {
@@ -1746,11 +1661,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_additionalBound; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitAdditionalBound(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final AdditionalBoundContext additionalBound() throws RecognitionException {
@@ -1787,11 +1697,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_typeArguments; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitTypeArguments(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final TypeArgumentsContext typeArguments() throws RecognitionException {
@@ -1835,11 +1740,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_typeArgumentList; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitTypeArgumentList(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final TypeArgumentListContext typeArgumentList() throws RecognitionException {
@@ -1897,11 +1797,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_typeArgument; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitTypeArgument(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final TypeArgumentContext typeArgument() throws RecognitionException {
@@ -1958,11 +1853,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_wildcard; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitWildcard(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final WildcardContext wildcard() throws RecognitionException {
@@ -2025,11 +1915,6 @@ public class Java8Parser extends Parser {
 			this.ret = ret;
 		}
 		@Override public int getRuleIndex() { return RULE_wildcardBounds; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitWildcardBounds(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final WildcardBoundsContext wildcardBounds(TypeArgument ret) throws RecognitionException {
@@ -2086,11 +1971,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_typeName; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitTypeName(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final TypeNameContext typeName() throws RecognitionException {
@@ -2145,11 +2025,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_packageOrTypeName; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitPackageOrTypeName(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final PackageOrTypeNameContext packageOrTypeName() throws RecognitionException {
@@ -2225,11 +2100,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_expressionName; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitExpressionName(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ExpressionNameContext expressionName() throws RecognitionException {
@@ -2284,11 +2154,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_ambiguousName; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitAmbiguousName(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final AmbiguousNameContext ambiguousName() throws RecognitionException {
@@ -2380,11 +2245,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_compilationUnit; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitCompilationUnit(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final CompilationUnitContext compilationUnit() throws RecognitionException {
@@ -2473,11 +2333,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_packageDeclaration; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitPackageDeclaration(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final PackageDeclarationContext packageDeclaration() throws RecognitionException {
@@ -2552,11 +2407,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_packageModifier; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitPackageModifier(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final PackageModifierContext packageModifier() throws RecognitionException {
@@ -2603,11 +2453,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_importDeclaration; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitImportDeclaration(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ImportDeclarationContext importDeclaration() throws RecognitionException {
@@ -2674,11 +2519,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_singleTypeImportDeclaration; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitSingleTypeImportDeclaration(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final SingleTypeImportDeclarationContext singleTypeImportDeclaration() throws RecognitionException {
@@ -2719,11 +2559,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_typeImportOnDemandDeclaration; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitTypeImportOnDemandDeclaration(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final TypeImportOnDemandDeclarationContext typeImportOnDemandDeclaration() throws RecognitionException {
@@ -2770,11 +2605,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_singleStaticImportDeclaration; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitSingleStaticImportDeclaration(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final SingleStaticImportDeclarationContext singleStaticImportDeclaration() throws RecognitionException {
@@ -2825,11 +2655,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_staticImportOnDemandDeclaration; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitStaticImportOnDemandDeclaration(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final StaticImportOnDemandDeclarationContext staticImportOnDemandDeclaration() throws RecognitionException {
@@ -2878,11 +2703,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_typeDeclaration; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitTypeDeclaration(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final TypeDeclarationContext typeDeclaration() throws RecognitionException {
@@ -2942,11 +2762,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_classDeclaration; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitClassDeclaration(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ClassDeclarationContext classDeclaration() throws RecognitionException {
@@ -3020,11 +2835,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_normalClassDeclaration; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitNormalClassDeclaration(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final NormalClassDeclarationContext normalClassDeclaration() throws RecognitionException {
@@ -3124,11 +2934,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_classModifier; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitClassModifier(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ClassModifierContext classModifier() throws RecognitionException {
@@ -3227,11 +3032,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_typeParameters; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitTypeParameters(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final TypeParametersContext typeParameters() throws RecognitionException {
@@ -3275,11 +3075,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_typeParameterList; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitTypeParameterList(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final TypeParameterListContext typeParameterList() throws RecognitionException {
@@ -3335,11 +3130,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_superclass; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitSuperclass(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final SuperclassContext superclass() throws RecognitionException {
@@ -3376,11 +3166,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_superinterfaces; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitSuperinterfaces(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final SuperinterfacesContext superinterfaces() throws RecognitionException {
@@ -3422,11 +3207,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_interfaceTypeList; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitInterfaceTypeList(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final InterfaceTypeListContext interfaceTypeList() throws RecognitionException {
@@ -3488,11 +3268,6 @@ public class Java8Parser extends Parser {
 			this.ret = ret;
 		}
 		@Override public int getRuleIndex() { return RULE_classBody; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitClassBody(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ClassBodyContext classBody(ConcreteBodyDeclaration ret) throws RecognitionException {
@@ -3557,11 +3332,6 @@ public class Java8Parser extends Parser {
 			this.ret = ret;
 		}
 		@Override public int getRuleIndex() { return RULE_classBodyDeclaration; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitClassBodyDeclaration(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ClassBodyDeclarationContext classBodyDeclaration(ConcreteBodyDeclaration ret) throws RecognitionException {
@@ -3639,11 +3409,6 @@ public class Java8Parser extends Parser {
 			this.ret = ret;
 		}
 		@Override public int getRuleIndex() { return RULE_classMemberDeclaration; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitClassMemberDeclaration(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ClassMemberDeclarationContext classMemberDeclaration(ConcreteBodyDeclaration ret) throws RecognitionException {
@@ -3727,11 +3492,6 @@ public class Java8Parser extends Parser {
 			this.decl = decl;
 		}
 		@Override public int getRuleIndex() { return RULE_fieldDeclaration; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitFieldDeclaration(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final FieldDeclarationContext fieldDeclaration(BodyDeclaration decl) throws RecognitionException {
@@ -3792,11 +3552,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_fieldModifier; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitFieldModifier(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final FieldModifierContext fieldModifier() throws RecognitionException {
@@ -3907,11 +3662,6 @@ public class Java8Parser extends Parser {
 			this.t = t;
 		}
 		@Override public int getRuleIndex() { return RULE_variableDeclaratorList; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitVariableDeclaratorList(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final VariableDeclaratorListContext variableDeclaratorList(BodyDeclaration decl,List<Modifier> mods,Type t) throws RecognitionException {
@@ -3943,7 +3693,7 @@ public class Java8Parser extends Parser {
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			}
-			((VariableDeclaratorListContext)_localctx).ls =  _localctx.ret;
+			((VariableDeclaratorListContext)_localctx).ret =  _localctx.ls;
 			}
 		}
 		catch (RecognitionException re) {
@@ -3980,11 +3730,6 @@ public class Java8Parser extends Parser {
 			this.t = t;
 		}
 		@Override public int getRuleIndex() { return RULE_variableDeclarator; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitVariableDeclarator(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final VariableDeclaratorContext variableDeclarator(BodyDeclaration decl,List<Modifier> mods,Type t) throws RecognitionException {
@@ -4046,11 +3791,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_variableDeclaratorId; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitVariableDeclaratorId(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final VariableDeclaratorIdContext variableDeclaratorId() throws RecognitionException {
@@ -4108,11 +3848,6 @@ public class Java8Parser extends Parser {
 			this.isVariadic = isVariadic;
 		}
 		@Override public int getRuleIndex() { return RULE_typedVariableDeclaratorId; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitTypedVariableDeclaratorId(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final TypedVariableDeclaratorIdContext typedVariableDeclaratorId(List<Modifier> mods,boolean isVariadic) throws RecognitionException {
@@ -4159,11 +3894,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_variableInitializer; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitVariableInitializer(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final VariableInitializerContext variableInitializer() throws RecognitionException {
@@ -4244,11 +3974,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_unannType; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitUnannType(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final UnannTypeContext unannType() throws RecognitionException {
@@ -4298,11 +4023,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_unannPrimitiveType; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitUnannPrimitiveType(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final UnannPrimitiveTypeContext unannPrimitiveType() throws RecognitionException {
@@ -4367,11 +4087,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_unannReferenceType; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitUnannReferenceType(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final UnannReferenceTypeContext unannReferenceType() throws RecognitionException {
@@ -4446,11 +4161,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_unannClassOrInterfaceType; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitUnannClassOrInterfaceType(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final UnannClassOrInterfaceTypeContext unannClassOrInterfaceType() throws RecognitionException {
@@ -4548,11 +4258,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_unannClassType; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitUnannClassType(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final UnannClassTypeContext unannClassType() throws RecognitionException {
@@ -4655,11 +4360,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_unannClassType_lf_unannClassOrInterfaceType; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitUnannClassType_lf_unannClassOrInterfaceType(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final UnannClassType_lf_unannClassOrInterfaceTypeContext unannClassType_lf_unannClassOrInterfaceType() throws RecognitionException {
@@ -4726,11 +4426,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_unannClassType_lfno_unannClassOrInterfaceType; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitUnannClassType_lfno_unannClassOrInterfaceType(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final UnannClassType_lfno_unannClassOrInterfaceTypeContext unannClassType_lfno_unannClassOrInterfaceType() throws RecognitionException {
@@ -4779,11 +4474,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_unannInterfaceType; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitUnannInterfaceType(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final UnannInterfaceTypeContext unannInterfaceType() throws RecognitionException {
@@ -4818,11 +4508,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_unannInterfaceType_lf_unannClassOrInterfaceType; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitUnannInterfaceType_lf_unannClassOrInterfaceType(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final UnannInterfaceType_lf_unannClassOrInterfaceTypeContext unannInterfaceType_lf_unannClassOrInterfaceType() throws RecognitionException {
@@ -4857,11 +4542,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_unannInterfaceType_lfno_unannClassOrInterfaceType; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitUnannInterfaceType_lfno_unannClassOrInterfaceType(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final UnannInterfaceType_lfno_unannClassOrInterfaceTypeContext unannInterfaceType_lfno_unannClassOrInterfaceType() throws RecognitionException {
@@ -4894,11 +4574,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_unannTypeVariable; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitUnannTypeVariable(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final UnannTypeVariableContext unannTypeVariable() throws RecognitionException {
@@ -4945,11 +4620,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_unannArrayType; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitUnannArrayType(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final UnannArrayTypeContext unannArrayType() throws RecognitionException {
@@ -5023,11 +4693,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_methodDeclaration; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitMethodDeclaration(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final MethodDeclarationContext methodDeclaration() throws RecognitionException {
@@ -5090,11 +4755,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_methodModifier; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitMethodModifier(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final MethodModifierContext methodModifier() throws RecognitionException {
@@ -5230,11 +4890,6 @@ public class Java8Parser extends Parser {
 			this.ret = ret;
 		}
 		@Override public int getRuleIndex() { return RULE_methodHeader; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitMethodHeader(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final MethodHeaderContext methodHeader(MethodDeclaration ret) throws RecognitionException {
@@ -5345,11 +5000,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_result; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitResult(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ResultContext result() throws RecognitionException {
@@ -5416,11 +5066,6 @@ public class Java8Parser extends Parser {
 			this.ret = ret;
 		}
 		@Override public int getRuleIndex() { return RULE_methodDeclarator; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitMethodDeclarator(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final MethodDeclaratorContext methodDeclarator(MethodDeclaration ret) throws RecognitionException {
@@ -5492,11 +5137,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_formalParameterList; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitFormalParameterList(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final FormalParameterListContext formalParameterList() throws RecognitionException {
@@ -5567,11 +5207,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_formalParameters; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitFormalParameters(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final FormalParametersContext formalParameters() throws RecognitionException {
@@ -5673,11 +5308,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_formalParameter; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitFormalParameter(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final FormalParameterContext formalParameter() throws RecognitionException {
@@ -5729,11 +5359,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_variableModifier; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitVariableModifier(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final VariableModifierContext variableModifier() throws RecognitionException {
@@ -5808,11 +5433,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_lastFormalParameter; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitLastFormalParameter(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final LastFormalParameterContext lastFormalParameter() throws RecognitionException {
@@ -5912,11 +5532,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_receiverParameter; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitReceiverParameter(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ReceiverParameterContext receiverParameter() throws RecognitionException {
@@ -5974,11 +5589,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_throws_; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitThrows_(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final Throws_Context throws_() throws RecognitionException {
@@ -6019,11 +5629,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_exceptionTypeList; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitExceptionTypeList(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ExceptionTypeListContext exceptionTypeList() throws RecognitionException {
@@ -6083,11 +5688,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_exceptionType; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitExceptionType(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ExceptionTypeContext exceptionType() throws RecognitionException {
@@ -6136,11 +5736,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_methodBody; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitMethodBody(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final MethodBodyContext methodBody() throws RecognitionException {
@@ -6191,11 +5786,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_instanceInitializer; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitInstanceInitializer(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final InstanceInitializerContext instanceInitializer() throws RecognitionException {
@@ -6231,11 +5821,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_staticInitializer; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitStaticInitializer(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final StaticInitializerContext staticInitializer() throws RecognitionException {
@@ -6290,11 +5875,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_constructorDeclaration; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitConstructorDeclaration(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ConstructorDeclarationContext constructorDeclaration() throws RecognitionException {
@@ -6362,11 +5942,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_constructorModifier; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitConstructorModifier(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ConstructorModifierContext constructorModifier() throws RecognitionException {
@@ -6441,11 +6016,6 @@ public class Java8Parser extends Parser {
 			this.ret = ret;
 		}
 		@Override public int getRuleIndex() { return RULE_constructorDeclarator; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitConstructorDeclarator(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ConstructorDeclaratorContext constructorDeclarator(MethodDeclaration ret) throws RecognitionException {
@@ -6513,11 +6083,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_constructorBody; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitConstructorBody(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ConstructorBodyContext constructorBody() throws RecognitionException {
@@ -6595,11 +6160,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_explicitConstructorInvocation; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitExplicitConstructorInvocation(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ExplicitConstructorInvocationContext explicitConstructorInvocation() throws RecognitionException {
@@ -6806,11 +6366,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_enumDeclaration; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitEnumDeclaration(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final EnumDeclarationContext enumDeclaration() throws RecognitionException {
@@ -6881,11 +6436,6 @@ public class Java8Parser extends Parser {
 			this.ret = ret;
 		}
 		@Override public int getRuleIndex() { return RULE_enumBody; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitEnumBody(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final EnumBodyContext enumBody(EnumDeclaration ret) throws RecognitionException {
@@ -6957,11 +6507,6 @@ public class Java8Parser extends Parser {
 			this.ret = ret;
 		}
 		@Override public int getRuleIndex() { return RULE_enumConstantList; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitEnumConstantList(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final EnumConstantListContext enumConstantList(EnumDeclaration ret) throws RecognitionException {
@@ -7031,11 +6576,6 @@ public class Java8Parser extends Parser {
 			this.ret = ret;
 		}
 		@Override public int getRuleIndex() { return RULE_enumConstant; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitEnumConstant(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final EnumConstantContext enumConstant(EnumDeclaration ret) throws RecognitionException {
@@ -7122,11 +6662,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_enumConstantModifier; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitEnumConstantModifier(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final EnumConstantModifierContext enumConstantModifier() throws RecognitionException {
@@ -7165,11 +6700,6 @@ public class Java8Parser extends Parser {
 			this.ret = ret;
 		}
 		@Override public int getRuleIndex() { return RULE_enumBodyDeclarations; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitEnumBodyDeclarations(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final EnumBodyDeclarationsContext enumBodyDeclarations(EnumDeclaration ret) throws RecognitionException {
@@ -7222,11 +6752,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_interfaceDeclaration; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitInterfaceDeclaration(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final InterfaceDeclarationContext interfaceDeclaration() throws RecognitionException {
@@ -7295,11 +6820,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_normalInterfaceDeclaration; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitNormalInterfaceDeclaration(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final NormalInterfaceDeclarationContext normalInterfaceDeclaration() throws RecognitionException {
@@ -7382,11 +6902,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_interfaceModifier; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitInterfaceModifier(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final InterfaceModifierContext interfaceModifier() throws RecognitionException {
@@ -7477,11 +6992,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_extendsInterfaces; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitExtendsInterfaces(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ExtendsInterfacesContext extendsInterfaces() throws RecognitionException {
@@ -7523,11 +7033,6 @@ public class Java8Parser extends Parser {
 			this.ret = ret;
 		}
 		@Override public int getRuleIndex() { return RULE_interfaceBody; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitInterfaceBody(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final InterfaceBodyContext interfaceBody(InterfaceDeclaration ret) throws RecognitionException {
@@ -7592,11 +7097,6 @@ public class Java8Parser extends Parser {
 			this.ret = ret;
 		}
 		@Override public int getRuleIndex() { return RULE_interfaceMemberDeclaration; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitInterfaceMemberDeclaration(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final InterfaceMemberDeclarationContext interfaceMemberDeclaration(InterfaceDeclaration ret) throws RecognitionException {
@@ -7680,11 +7180,6 @@ public class Java8Parser extends Parser {
 			this.decl = decl;
 		}
 		@Override public int getRuleIndex() { return RULE_constantDeclaration; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitConstantDeclaration(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ConstantDeclarationContext constantDeclaration(BodyDeclaration decl) throws RecognitionException {
@@ -7741,11 +7236,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_constantModifier; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitConstantModifier(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ConstantModifierContext constantModifier() throws RecognitionException {
@@ -7823,11 +7313,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_interfaceMethodDeclaration; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitInterfaceMethodDeclaration(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final InterfaceMethodDeclarationContext interfaceMethodDeclaration() throws RecognitionException {
@@ -7890,11 +7375,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_interfaceMethodModifier; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitInterfaceMethodModifier(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final InterfaceMethodModifierContext interfaceMethodModifier() throws RecognitionException {
@@ -7987,11 +7467,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_annotationTypeDeclaration; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitAnnotationTypeDeclaration(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final AnnotationTypeDeclarationContext annotationTypeDeclaration() throws RecognitionException {
@@ -8055,11 +7530,6 @@ public class Java8Parser extends Parser {
 			this.ret = ret;
 		}
 		@Override public int getRuleIndex() { return RULE_annotationTypeBody; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitAnnotationTypeBody(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final AnnotationTypeBodyContext annotationTypeBody(AnnotationDeclaration ret) throws RecognitionException {
@@ -8124,11 +7594,6 @@ public class Java8Parser extends Parser {
 			this.ret = ret;
 		}
 		@Override public int getRuleIndex() { return RULE_annotationTypeMemberDeclaration; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitAnnotationTypeMemberDeclaration(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final AnnotationTypeMemberDeclarationContext annotationTypeMemberDeclaration(AnnotationDeclaration ret) throws RecognitionException {
@@ -8219,11 +7684,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_annotationTypeElementDeclaration; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitAnnotationTypeElementDeclaration(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final AnnotationTypeElementDeclarationContext annotationTypeElementDeclaration() throws RecognitionException {
@@ -8317,11 +7777,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_annotationTypeElementModifier; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitAnnotationTypeElementModifier(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final AnnotationTypeElementModifierContext annotationTypeElementModifier() throws RecognitionException {
@@ -8380,11 +7835,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_defaultValue; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitDefaultValue(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final DefaultValueContext defaultValue() throws RecognitionException {
@@ -8429,11 +7879,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_annotation; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitAnnotation(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final AnnotationContext annotation() throws RecognitionException {
@@ -8493,11 +7938,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_normalAnnotation; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitNormalAnnotation(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final NormalAnnotationContext normalAnnotation() throws RecognitionException {
@@ -8553,11 +7993,6 @@ public class Java8Parser extends Parser {
 			this.ret = ret;
 		}
 		@Override public int getRuleIndex() { return RULE_elementValuePairList; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitElementValuePairList(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ElementValuePairListContext elementValuePairList(Annotation ret) throws RecognitionException {
@@ -8614,11 +8049,6 @@ public class Java8Parser extends Parser {
 			this.ret = ret;
 		}
 		@Override public int getRuleIndex() { return RULE_elementValuePair; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitElementValuePair(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ElementValuePairContext elementValuePair(Annotation ret) throws RecognitionException {
@@ -8665,11 +8095,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_elementValue; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitElementValue(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ElementValueContext elementValue() throws RecognitionException {
@@ -8729,11 +8154,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_elementValueArrayInitializer; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitElementValueArrayInitializer(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ElementValueArrayInitializerContext elementValueArrayInitializer() throws RecognitionException {
@@ -8797,11 +8217,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_elementValueList; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitElementValueList(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ElementValueListContext elementValueList() throws RecognitionException {
@@ -8859,11 +8274,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_markerAnnotation; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitMarkerAnnotation(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final MarkerAnnotationContext markerAnnotation() throws RecognitionException {
@@ -8904,11 +8314,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_singleElementAnnotation; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitSingleElementAnnotation(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final SingleElementAnnotationContext singleElementAnnotation() throws RecognitionException {
@@ -8954,11 +8359,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_arrayInitializer; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitArrayInitializer(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ArrayInitializerContext arrayInitializer() throws RecognitionException {
@@ -9022,11 +8422,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_variableInitializerList; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitVariableInitializerList(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final VariableInitializerListContext variableInitializerList() throws RecognitionException {
@@ -9086,11 +8481,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_block; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitBlock(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final BlockContext block() throws RecognitionException {
@@ -9146,11 +8536,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_blockStatements; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitBlockStatements(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final BlockStatementsContext blockStatements() throws RecognitionException {
@@ -9212,11 +8597,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_blockStatement; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitBlockStatement(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final BlockStatementContext blockStatement() throws RecognitionException {
@@ -9274,11 +8654,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_localVariableDeclarationStatement; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitLocalVariableDeclarationStatement(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final LocalVariableDeclarationStatementContext localVariableDeclarationStatement() throws RecognitionException {
@@ -9327,11 +8702,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_localVariableDeclaration; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitLocalVariableDeclaration(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final LocalVariableDeclarationContext localVariableDeclaration() throws RecognitionException {
@@ -9404,11 +8774,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_statement; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitStatement(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final StatementContext statement() throws RecognitionException {
@@ -9505,11 +8870,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_statementNoShortIf; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitStatementNoShortIf(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final StatementNoShortIfContext statementNoShortIf() throws RecognitionException {
@@ -9626,11 +8986,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_statementWithoutTrailingSubstatement; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitStatementWithoutTrailingSubstatement(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final StatementWithoutTrailingSubstatementContext statementWithoutTrailingSubstatement() throws RecognitionException {
@@ -9780,11 +9135,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_emptyStatement; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitEmptyStatement(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final EmptyStatementContext emptyStatement() throws RecognitionException {
@@ -9821,11 +9171,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_labeledStatement; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitLabeledStatement(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final LabeledStatementContext labeledStatement() throws RecognitionException {
@@ -9866,11 +9211,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_labeledStatementNoShortIf; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitLabeledStatementNoShortIf(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final LabeledStatementNoShortIfContext labeledStatementNoShortIf() throws RecognitionException {
@@ -9910,11 +9250,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_expressionStatement; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitExpressionStatement(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ExpressionStatementContext expressionStatement() throws RecognitionException {
@@ -9975,11 +9310,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_statementExpression; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitStatementExpression(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final StatementExpressionContext statementExpression() throws RecognitionException {
@@ -10073,11 +9403,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_ifThenStatement; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitIfThenStatement(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final IfThenStatementContext ifThenStatement() throws RecognitionException {
@@ -10129,11 +9454,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_ifThenElseStatement; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitIfThenElseStatement(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final IfThenElseStatementContext ifThenElseStatement() throws RecognitionException {
@@ -10192,11 +9512,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_ifThenElseStatementNoShortIf; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitIfThenElseStatementNoShortIf(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final IfThenElseStatementNoShortIfContext ifThenElseStatementNoShortIf() throws RecognitionException {
@@ -10252,11 +9567,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_assertStatement; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitAssertStatement(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final AssertStatementContext assertStatement() throws RecognitionException {
@@ -10322,11 +9632,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_switchStatement; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitSwitchStatement(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final SwitchStatementContext switchStatement() throws RecognitionException {
@@ -10382,11 +9687,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_switchBlock; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitSwitchBlock(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final SwitchBlockContext switchBlock() throws RecognitionException {
@@ -10462,11 +9762,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_switchBlockStatementGroup; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitSwitchBlockStatementGroup(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final SwitchBlockStatementGroupContext switchBlockStatementGroup() throws RecognitionException {
@@ -10508,11 +9803,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_switchLabels; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitSwitchLabels(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final SwitchLabelsContext switchLabels() throws RecognitionException {
@@ -10569,11 +9859,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_switchLabel; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitSwitchLabel(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final SwitchLabelContext switchLabel() throws RecognitionException {
@@ -10645,11 +9930,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_whileStatement; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitWhileStatement(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final WhileStatementContext whileStatement() throws RecognitionException {
@@ -10697,11 +9977,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_whileStatementNoShortIf; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitWhileStatementNoShortIf(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final WhileStatementNoShortIfContext whileStatementNoShortIf() throws RecognitionException {
@@ -10750,11 +10025,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_doStatement; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitDoStatement(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final DoStatementContext doStatement() throws RecognitionException {
@@ -10805,11 +10075,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_forStatement; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitForStatement(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ForStatementContext forStatement() throws RecognitionException {
@@ -10862,11 +10127,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_forStatementNoShortIf; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitForStatementNoShortIf(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ForStatementNoShortIfContext forStatementNoShortIf() throws RecognitionException {
@@ -10907,9 +10167,9 @@ public class Java8Parser extends Parser {
 
 	public static class BasicForStatementContext extends ParserRuleContext {
 		public ForStatement ret;
-		public List<Statement> forIn;
-		public List<Statement> forUp;
-		public Expression expr;
+		public List<Statement> forIn = new ArrayList<>();
+		public List<Statement> forUp = new ArrayList<>();
+		public Expression expr = new NilExpression();
 		public Token kw;
 		public ForInitContext i;
 		public ExpressionContext e;
@@ -10931,11 +10191,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_basicForStatement; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitBasicForStatement(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final BasicForStatementContext basicForStatement() throws RecognitionException {
@@ -11006,9 +10261,9 @@ public class Java8Parser extends Parser {
 
 	public static class BasicForStatementNoShortIfContext extends ParserRuleContext {
 		public ForStatement ret;
-		public List<Statement> forIn;
-		public List<Statement> forUp;
-		public Expression expr;
+		public List<Statement> forIn = new ArrayList<>();
+		public List<Statement> forUp = new ArrayList<>();
+		public Expression expr = new NilExpression();
 		public Token kw;
 		public ForInitContext i;
 		public ExpressionContext e;
@@ -11030,11 +10285,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_basicForStatementNoShortIf; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitBasicForStatementNoShortIf(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final BasicForStatementNoShortIfContext basicForStatementNoShortIf() throws RecognitionException {
@@ -11117,11 +10367,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_forInit; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitForInit(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ForInitContext forInit() throws RecognitionException {
@@ -11175,11 +10420,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_forUpdate; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitForUpdate(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ForUpdateContext forUpdate() throws RecognitionException {
@@ -11219,11 +10459,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_statementExpressionList; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitStatementExpressionList(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final StatementExpressionListContext statementExpressionList() throws RecognitionException {
@@ -11296,11 +10531,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_enhancedForStatement; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitEnhancedForStatement(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final EnhancedForStatementContext enhancedForStatement() throws RecognitionException {
@@ -11380,11 +10610,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_enhancedForStatementNoShortIf; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitEnhancedForStatementNoShortIf(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final EnhancedForStatementNoShortIfContext enhancedForStatementNoShortIf() throws RecognitionException {
@@ -11448,11 +10673,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_breakStatement; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitBreakStatement(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final BreakStatementContext breakStatement() throws RecognitionException {
@@ -11502,11 +10722,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_continueStatement; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitContinueStatement(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ContinueStatementContext continueStatement() throws RecognitionException {
@@ -11557,11 +10772,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_returnStatement; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitReturnStatement(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ReturnStatementContext returnStatement() throws RecognitionException {
@@ -11618,11 +10828,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_throwStatement; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitThrowStatement(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ThrowStatementContext throwStatement() throws RecognitionException {
@@ -11666,11 +10871,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_synchronizedStatement; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitSynchronizedStatement(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final SynchronizedStatementContext synchronizedStatement() throws RecognitionException {
@@ -11727,11 +10927,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_tryStatement; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitTryStatement(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final TryStatementContext tryStatement() throws RecognitionException {
@@ -11813,11 +11008,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_catches; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitCatches(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final CatchesContext catches() throws RecognitionException {
@@ -11873,11 +11063,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_catchClause; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitCatchClause(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final CatchClauseContext catchClause() throws RecognitionException {
@@ -11937,11 +11122,6 @@ public class Java8Parser extends Parser {
 			this.ret = ret;
 		}
 		@Override public int getRuleIndex() { return RULE_catchFormalParameter; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitCatchFormalParameter(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final CatchFormalParameterContext catchFormalParameter(CatchBlock ret) throws RecognitionException {
@@ -12003,11 +11183,6 @@ public class Java8Parser extends Parser {
 			this.ret = ret;
 		}
 		@Override public int getRuleIndex() { return RULE_catchType; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitCatchType(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final CatchTypeContext catchType(CatchBlock ret) throws RecognitionException {
@@ -12062,11 +11237,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_finally_; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitFinally_(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final Finally_Context finally_() throws RecognitionException {
@@ -12118,11 +11288,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_tryWithResourcesStatement; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitTryWithResourcesStatement(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final TryWithResourcesStatementContext tryWithResourcesStatement() throws RecognitionException {
@@ -12184,11 +11349,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_resourceSpecification; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitResourceSpecification(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ResourceSpecificationContext resourceSpecification() throws RecognitionException {
@@ -12244,11 +11404,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_resourceList; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitResourceList(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ResourceListContext resourceList() throws RecognitionException {
@@ -12316,11 +11471,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_resource; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitResource(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ResourceContext resource() throws RecognitionException {
@@ -12389,11 +11539,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_primary; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitPrimary(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final PrimaryContext primary() throws RecognitionException {
@@ -12499,11 +11644,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_primaryNoNewArray; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitPrimaryNoNewArray(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final PrimaryNoNewArrayContext primaryNoNewArray() throws RecognitionException {
@@ -12625,11 +11765,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_primaryNoNewArray_typeAccess; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitPrimaryNoNewArray_typeAccess(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final PrimaryNoNewArray_typeAccessContext primaryNoNewArray_typeAccess() throws RecognitionException {
@@ -12760,11 +11895,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_primaryNoNewArray_lf_arrayAccess; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitPrimaryNoNewArray_lf_arrayAccess(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final PrimaryNoNewArray_lf_arrayAccessContext primaryNoNewArray_lf_arrayAccess() throws RecognitionException {
@@ -12823,11 +11953,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_primaryNoNewArray_lfno_arrayAccess; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitPrimaryNoNewArray_lfno_arrayAccess(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final PrimaryNoNewArray_lfno_arrayAccessContext primaryNoNewArray_lfno_arrayAccess() throws RecognitionException {
@@ -12945,11 +12070,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_primaryNoNewArray_lf_primary; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitPrimaryNoNewArray_lf_primary(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final PrimaryNoNewArray_lf_primaryContext primaryNoNewArray_lf_primary() throws RecognitionException {
@@ -13018,11 +12138,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_primaryNoNewArray_lf_primary_lf_arrayAccess_lf_primary; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitPrimaryNoNewArray_lf_primary_lf_arrayAccess_lf_primary(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final PrimaryNoNewArray_lf_primary_lf_arrayAccess_lf_primaryContext primaryNoNewArray_lf_primary_lf_arrayAccess_lf_primary() throws RecognitionException {
@@ -13067,11 +12182,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_primaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primary; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitPrimaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primary(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final PrimaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primaryContext primaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primary() throws RecognitionException {
@@ -13174,11 +12284,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_primaryNoNewArray_lfno_primary; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitPrimaryNoNewArray_lfno_primary(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final PrimaryNoNewArray_lfno_primaryContext primaryNoNewArray_lfno_primary() throws RecognitionException {
@@ -13318,11 +12423,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_primaryNoNewArray_lfno_primary_lf_arrayAccess_lfno_primary; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitPrimaryNoNewArray_lfno_primary_lf_arrayAccess_lfno_primary(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final PrimaryNoNewArray_lfno_primary_lf_arrayAccess_lfno_primaryContext primaryNoNewArray_lfno_primary_lf_arrayAccess_lfno_primary() throws RecognitionException {
@@ -13387,11 +12487,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_primaryNoNewArray_lfno_primary_lfno_arrayAccess_lfno_primary; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitPrimaryNoNewArray_lfno_primary_lfno_arrayAccess_lfno_primary(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final PrimaryNoNewArray_lfno_primary_lfno_arrayAccess_lfno_primaryContext primaryNoNewArray_lfno_primary_lfno_arrayAccess_lfno_primary() throws RecognitionException {
@@ -13571,11 +12666,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_classInstanceCreationExpression; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitClassInstanceCreationExpression(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ClassInstanceCreationExpressionContext classInstanceCreationExpression() throws RecognitionException {
@@ -13919,11 +13009,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_classInstanceCreationExpression_lf_primary; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitClassInstanceCreationExpression_lf_primary(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ClassInstanceCreationExpression_lf_primaryContext classInstanceCreationExpression_lf_primary() throws RecognitionException {
@@ -14069,11 +13154,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_classInstanceCreationExpression_lfno_primary; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitClassInstanceCreationExpression_lfno_primary(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ClassInstanceCreationExpression_lfno_primaryContext classInstanceCreationExpression_lfno_primary() throws RecognitionException {
@@ -14308,11 +13388,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_typeArgumentsOrDiamond; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitTypeArgumentsOrDiamond(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final TypeArgumentsOrDiamondContext typeArgumentsOrDiamond() throws RecognitionException {
@@ -14370,11 +13445,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_fieldAccess; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitFieldAccess(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final FieldAccessContext fieldAccess() throws RecognitionException {
@@ -14447,11 +13517,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_fieldAccess_lf_primary; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitFieldAccess_lf_primary(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final FieldAccess_lf_primaryContext fieldAccess_lf_primary() throws RecognitionException {
@@ -14491,11 +13556,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_fieldAccess_lfno_primary; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitFieldAccess_lfno_primary(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final FieldAccess_lfno_primaryContext fieldAccess_lfno_primary() throws RecognitionException {
@@ -14579,11 +13639,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_arrayAccess; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitArrayAccess(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ArrayAccessContext arrayAccess() throws RecognitionException {
@@ -14687,11 +13742,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_arrayAccess_lf_primary; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitArrayAccess_lf_primary(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ArrayAccess_lf_primaryContext arrayAccess_lf_primary() throws RecognitionException {
@@ -14780,11 +13830,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_arrayAccess_lfno_primary; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitArrayAccess_lfno_primary(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ArrayAccess_lfno_primaryContext arrayAccess_lfno_primary() throws RecognitionException {
@@ -14897,11 +13942,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_methodInvocation; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitMethodInvocation(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final MethodInvocationContext methodInvocation() throws RecognitionException {
@@ -15167,11 +14207,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_methodInvocation_lf_primary; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitMethodInvocation_lf_primary(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final MethodInvocation_lf_primaryContext methodInvocation_lf_primary() throws RecognitionException {
@@ -15254,11 +14289,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_methodInvocation_lfno_primary; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitMethodInvocation_lfno_primary(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final MethodInvocation_lfno_primaryContext methodInvocation_lfno_primary() throws RecognitionException {
@@ -15481,11 +14511,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_argumentList; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitArgumentList(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ArgumentListContext argumentList() throws RecognitionException {
@@ -15569,11 +14594,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_methodReference; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitMethodReference(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final MethodReferenceContext methodReference() throws RecognitionException {
@@ -15773,11 +14793,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_methodReference_lf_primary; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitMethodReference_lf_primary(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final MethodReference_lf_primaryContext methodReference_lf_primary() throws RecognitionException {
@@ -15850,11 +14865,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_methodReference_lfno_primary; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitMethodReference_lfno_primary(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final MethodReference_lfno_primaryContext methodReference_lfno_primary() throws RecognitionException {
@@ -16044,11 +15054,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_arrayCreationExpression; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitArrayCreationExpression(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ArrayCreationExpressionContext arrayCreationExpression() throws RecognitionException {
@@ -16159,11 +15164,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_dimExprs; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitDimExprs(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final DimExprsContext dimExprs() throws RecognitionException {
@@ -16226,11 +15226,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_dimExpr; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitDimExpr(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final DimExprContext dimExpr() throws RecognitionException {
@@ -16285,11 +15280,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_constantExpression; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitConstantExpression(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ConstantExpressionContext constantExpression() throws RecognitionException {
@@ -16328,11 +15318,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_expression; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitExpression(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ExpressionContext expression() throws RecognitionException {
@@ -16385,11 +15370,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_lambdaExpression; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitLambdaExpression(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final LambdaExpressionContext lambdaExpression() throws RecognitionException {
@@ -16437,11 +15417,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_lambdaParameters; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitLambdaParameters(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final LambdaParametersContext lambdaParameters() throws RecognitionException {
@@ -16523,11 +15498,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_inferredFormalParameterList; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitInferredFormalParameterList(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final InferredFormalParameterListContext inferredFormalParameterList() throws RecognitionException {
@@ -16587,11 +15557,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_lambdaBody; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitLambdaBody(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final LambdaBodyContext lambdaBody() throws RecognitionException {
@@ -16672,11 +15637,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_assignmentExpression; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitAssignmentExpression(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final AssignmentExpressionContext assignmentExpression() throws RecognitionException {
@@ -16733,11 +15693,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_assignment; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitAssignment(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final AssignmentContext assignment() throws RecognitionException {
@@ -16784,11 +15739,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_leftHandSide; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitLeftHandSide(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final LeftHandSideContext leftHandSide() throws RecognitionException {
@@ -16841,11 +15791,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_assignmentOperator; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitAssignmentOperator(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final AssignmentOperatorContext assignmentOperator() throws RecognitionException {
@@ -16984,11 +15929,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_conditionalExpression; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitConditionalExpression(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ConditionalExpressionContext conditionalExpression() throws RecognitionException {
@@ -17050,11 +15990,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_conditionalOrExpression; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitConditionalOrExpression(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ConditionalOrExpressionContext conditionalOrExpression() throws RecognitionException {
@@ -17133,11 +16068,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_conditionalAndExpression; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitConditionalAndExpression(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ConditionalAndExpressionContext conditionalAndExpression() throws RecognitionException {
@@ -17216,11 +16146,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_inclusiveOrExpression; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitInclusiveOrExpression(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final InclusiveOrExpressionContext inclusiveOrExpression() throws RecognitionException {
@@ -17299,11 +16224,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_exclusiveOrExpression; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitExclusiveOrExpression(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ExclusiveOrExpressionContext exclusiveOrExpression() throws RecognitionException {
@@ -17382,11 +16302,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_andExpression; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitAndExpression(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final AndExpressionContext andExpression() throws RecognitionException {
@@ -17465,11 +16380,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_equalityExpression; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitEqualityExpression(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final EqualityExpressionContext equalityExpression() throws RecognitionException {
@@ -17573,11 +16483,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_relationalExpression; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitRelationalExpression(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final RelationalExpressionContext relationalExpression() throws RecognitionException {
@@ -17722,11 +16627,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_shiftExpression; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitShiftExpression(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final ShiftExpressionContext shiftExpression() throws RecognitionException {
@@ -17849,11 +16749,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_additiveExpression; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitAdditiveExpression(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final AdditiveExpressionContext additiveExpression() throws RecognitionException {
@@ -17953,11 +16848,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_multiplicativeExpression; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitMultiplicativeExpression(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final MultiplicativeExpressionContext multiplicativeExpression() throws RecognitionException {
@@ -18080,11 +16970,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_unaryExpression; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitUnaryExpression(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final UnaryExpressionContext unaryExpression() throws RecognitionException {
@@ -18186,11 +17071,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_preIncrementExpression; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitPreIncrementExpression(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final PreIncrementExpressionContext preIncrementExpression() throws RecognitionException {
@@ -18229,11 +17109,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_preDecrementExpression; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitPreDecrementExpression(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final PreDecrementExpressionContext preDecrementExpression() throws RecognitionException {
@@ -18280,11 +17155,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_unaryExpressionNotPlusMinus; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitUnaryExpressionNotPlusMinus(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final UnaryExpressionNotPlusMinusContext unaryExpressionNotPlusMinus() throws RecognitionException {
@@ -18361,11 +17231,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_postfixExpression; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitPostfixExpression(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final PostfixExpressionContext postfixExpression() throws RecognitionException {
@@ -18449,11 +17314,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_postIncrementExpression; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitPostIncrementExpression(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final PostIncrementExpressionContext postIncrementExpression() throws RecognitionException {
@@ -18491,11 +17351,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_postDecrementExpression; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitPostDecrementExpression(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final PostDecrementExpressionContext postDecrementExpression() throws RecognitionException {
@@ -18557,11 +17412,6 @@ public class Java8Parser extends Parser {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_castExpression; }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof Java8Visitor ) return ((Java8Visitor<? extends T>)visitor).visitCastExpression(this);
-			else return visitor.visitChildren(this);
-		}
 	}
 
 	public final CastExpressionContext castExpression() throws RecognitionException {

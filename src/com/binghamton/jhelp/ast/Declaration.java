@@ -12,7 +12,7 @@ import com.binghamton.jhelp.Modifiers;
  */
 public abstract class Declaration extends Statement {
     protected Token name;
-    protected Modifiers modifiers;
+    protected Modifiers modifiers = new Modifiers();
 
     /**
      * Construct an empty declaration

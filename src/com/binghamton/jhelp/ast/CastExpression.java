@@ -15,7 +15,7 @@ import com.binghamton.jhelp.ReferenceType;
 public class CastExpression extends Expression {
     private Expression expr;
     private Type type;
-    private List<ReferenceType> refTypes;
+    private List<ReferenceType> refTypes = new ArrayList<>();
 
     /**
      * Construct a new cast expression
