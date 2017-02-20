@@ -14,8 +14,6 @@ public class JumpStatement extends Statement {
      * Construct a jump statement
      * @param keyword the jump keyword, either break or continue
      * @param last the last Token of this statement
-     * @param isBreak true  if this is a break statement
-     *                false if this is a continue statement
      */
     public JumpStatement(Token keyword, Token last) {
         this(keyword, last, null);

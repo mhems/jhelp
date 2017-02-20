@@ -22,9 +22,8 @@ public class CaseBlock extends Block {
 
     /**
      * Construct a new, empty case block
-     * @param first the first token of this ASTNode
-     * @param last the last token of this ASTNode
      * @param labels the list of labels for this case block
+     * @param body the body of this case block
      */
     public CaseBlock(List<Expression> labels, Block body) {
         super(labels.get(0).getFirstToken(),

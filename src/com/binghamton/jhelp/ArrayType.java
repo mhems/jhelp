@@ -29,8 +29,7 @@ public class ArrayType extends ReferenceType {
 
     /**
      * Augments the type into a new array type
-     * @param last the terminating Token
-     * @param dimensions the dimensions of the array type
+     * @param dims the dimensions of the array type
      * @return a new array type with same base type and `dimensions`
      */
     @Override

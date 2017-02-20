@@ -25,8 +25,6 @@ public class TypeArgument extends ASTNode {
 
     /**
      * Construct a type argument of a reference type
-     * @param first the first token of this ASTNode
-     * @param last the last token of this ASTNode
      * @param type the reference type
      */
     public TypeArgument(ReferenceType type) {

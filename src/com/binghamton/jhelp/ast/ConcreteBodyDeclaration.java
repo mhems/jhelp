@@ -21,8 +21,6 @@ public abstract class ConcreteBodyDeclaration extends BodyDeclaration {
 
     /**
      * Construct an anonymous declaration
-     * @param first the first token of this ASTNode
-     * @param last the last token of this ASTNode
      */
     public ConcreteBodyDeclaration() {
         super();

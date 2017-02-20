@@ -120,7 +120,7 @@ public abstract class Type extends Expression {
 
     /**
      * Augments the type into a new array type
-     * @param dimensions the dimensions of the array type
+     * @param dims the dimensions of the array type
      * @return a new array type with same base type and `dimensions`
      */
     public ArrayType augment(List<Dimension> dims) {

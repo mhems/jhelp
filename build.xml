@@ -76,9 +76,8 @@
     <delete file="${target.dir}/${project}.jar"/>
     <delete>
       <fileset dir="${java-build.dir}" includes="**/*.class"/>
-    </delete>
-    <delete>
       <fileset dir="${java-src.dir}/antlr"/>
+      <fileset dir="${src.dir}" includes="**/*~" defaultexcludes="no"/>
     </delete>
   </target>
 

@@ -22,9 +22,7 @@ public class Modifier extends Expression {
 
     /**
      * Construct a multi-token annotation modifier
-     * @param name the full name of this annotation
-     * @param first the first Token of this annotation
-     * @param last the last Token of this annotation
+     * @param expr the expression yielding the name of this modifier
      */
     public Modifier(Expression expr) {
         super(expr.getFirstToken(), expr.getLastToken());

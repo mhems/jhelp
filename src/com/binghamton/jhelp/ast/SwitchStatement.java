@@ -14,7 +14,7 @@ public class SwitchStatement extends Statement {
     /**
      * Construct a new switch statement
      * @param keyword the switch keyword
-     * @param the terminating curly brace Token
+     * @param last the terminating curly brace Token
      * @param condition the expression whose value is being switched on
      * @param cases the list of cases in this switch statement
      */

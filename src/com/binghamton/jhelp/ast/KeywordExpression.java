@@ -9,7 +9,7 @@ public class KeywordExpression extends IdentifierExpression {
 
     /**
      * Construct a keyword expression
-     * @param the keyword token
+     * @param keyword the keyword token
      */
     public KeywordExpression(Token keyword) {
         super(keyword);

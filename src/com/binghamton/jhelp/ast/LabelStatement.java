@@ -10,7 +10,7 @@ public class LabelStatement extends Statement {
 
     /**
      * Construct a new labelled statement
-     * @param token the name of the label
+     * @param label the name of the label
      * @param statement the statement being labelled
      */
     public LabelStatement(Token label, Statement statement) {

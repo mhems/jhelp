@@ -111,7 +111,7 @@ public class VariableDeclaration extends Declaration {
 
     /**
      * Sets the initial value of the variable, if any
-     * @param value the expression yielding the inital value
+     * @param initializer the expression yielding the inital value
      */
     public void setInitializer(Expression initializer) {
         this.initializer = initializer;

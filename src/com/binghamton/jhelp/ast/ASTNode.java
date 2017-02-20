@@ -52,7 +52,9 @@ public abstract class ASTNode implements Visitable, Comparable<ASTNode> {
     }
 
     /**
-     *
+     * Construct a new ASTNode from a list of nodes
+     * @param <E> the type of the node list elements
+     * @param nodes the nodes to construct this node from
      */
     public <E extends ASTNode> ASTNode(List<E> nodes) {
         if (!nodes.isEmpty()) {
@@ -165,9 +167,9 @@ public abstract class ASTNode implements Visitable, Comparable<ASTNode> {
     /**
      * Compares nodes based on their starting Tokens
      * @param other the other node to compare against
-     * @return < 0 iff this node lexically precedes other
-     *           1 iff this node is other
-     *         > 0 iff other lexically precedes this node
+     * @return negative number if this node lexically precedes other
+     *         exactly 1 if this node is other
+     *         positive number if other lexically precedes this node
      */
     @Override
     public int compareTo(ASTNode other) {
@@ -176,6 +178,7 @@ public abstract class ASTNode implements Visitable, Comparable<ASTNode> {
 
     /**
      * Determines if any nodes precede candidate
+     * @param <E> the type of the Node list
      * @param candidate the Token holding what may appear first
      * @param nodes a non-null, possibly-empty list of ASTNodes
      * @return the lexically earliest Token among candidate and nodes
@@ -191,6 +194,7 @@ public abstract class ASTNode implements Visitable, Comparable<ASTNode> {
 
     /**
      * Determines if any nodes follow candidate
+     * @param <E> the type of the Node list
      * @param candidate the Token holding what may appear last
      * @param nodes a non-null, possibly-empty list of ASTNodes
      * @return the lexically latest Token among candidate and nodes

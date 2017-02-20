@@ -11,7 +11,7 @@ public class ThrowStatement extends Statement {
     /**
      * Construct a new throw statement
      * @param keyword the throw keyword
-     * @param the terminating semi-colon Token
+     * @param last the terminating semi-colon Token
      * @param expr the expression whose value is being thrown
      */
     public ThrowStatement(Token keyword, Token last, Expression expr) {

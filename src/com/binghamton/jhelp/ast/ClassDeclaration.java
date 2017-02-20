@@ -25,9 +25,8 @@ public class ClassDeclaration extends ConcreteBodyDeclaration {
 
     /**
      * Construct a new ClassDeclaration
-     * @param first the first token of this ASTNode
-     * @param last the last token of this ASTNode
      * @param name the name of the class
+     * @param keyword the class keyword of this declaration
      * @param modifiers the class modifiers, if any
      * @param superInterfaces the list of implemented interfaces, if any
      * @param typeParams type parameters of the class, if any

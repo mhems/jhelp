@@ -17,7 +17,7 @@ public class IdentifierExpression extends Expression {
 
     /**
      * Construct a new identifier expression
-     * @param token the token of this identifier
+     * @param identifier the Token of this identifier
      */
     public IdentifierExpression(Token identifier) {
         this(identifier, new ArrayList<>());
@@ -25,7 +25,7 @@ public class IdentifierExpression extends Expression {
 
     /**
      * Construct a new identifier expression
-     * @param token the token of this identifier
+     * @param identifier the Token of this identifier
      * @param annotations the annotations of this identifier
      */
     public IdentifierExpression(Token identifier,

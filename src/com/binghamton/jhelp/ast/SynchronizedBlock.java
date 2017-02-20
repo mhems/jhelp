@@ -10,7 +10,7 @@ public class SynchronizedBlock extends Block {
 
     /**
      * Construct a new synchronized block
-     * @param the synchronized keyword
+     * @param keyword the synchronized keyword
      * @param lock the expression on which to synchronize
      * @param body the statements to execute synchronously
      */

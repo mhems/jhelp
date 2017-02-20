@@ -19,8 +19,6 @@ public abstract class BodyDeclaration extends Declaration {
 
     /**
      * Construct an empty body declaration
-     * @param first the first token of this ASTNode
-     * @param last the last token of this ASTNode
      */
     public BodyDeclaration() {
         super();

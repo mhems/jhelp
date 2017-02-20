@@ -17,7 +17,7 @@ public class PackageStatement extends Statement {
     /**
      * Construct a new package statement
      * @param ids a list of package identifiers
-     * @param the package keyword
+     * @param keyword the package keyword
      * @param last the terminating semi-colon Token
      * @param annotations list of package annotations, if any
      */
