@@ -1,5 +1,7 @@
 package com.binghamton.jhelp.ast;
 
+import org.antlr.v4.runtime.Token;
+
 /**
  * A class representing a Java symbol access expression
  */
@@ -10,19 +12,19 @@ public class AccessExpression extends Expression {
     /**
      * Construct a new Java symbol access expression
      * @param lhs the left hand side of the access expression
-     * @param identifier the name of the symbol being accessed
+     * @param token the token of the symbol being accessed
      */
-    public AccessExpression(Expression lhs, String identifier) {
-        this(lhs, new IdentifierExpression(identifier));
+    public AccessExpression(Expression lhs, Token token) {
+        this(lhs, new IdentifierExpression(token));
     }
 
     /**
      * Construct a new Java symbol access expression
-     * @param identifier the name of the symbol being accessed
+     * @param token the token of the symbol being accessed
      * @param rhs the right hand side of the access expression
      */
-    public AccessExpression(String identifier, Expression rhs) {
-        this(new IdentifierExpression(identifier), rhs);
+    public AccessExpression(Token token, Expression rhs) {
+        this(new IdentifierExpression(token), rhs);
     }
 
     /**
@@ -31,6 +33,7 @@ public class AccessExpression extends Expression {
      * @param rhs the expression of the symbol being accessed
      */
     public AccessExpression(Expression lhs, Expression rhs) {
+        super(lhs.getFirstToken(), rhs.getLastToken());
         this.lhs = lhs;
         this.rhs = rhs;
     }

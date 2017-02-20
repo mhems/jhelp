@@ -19,6 +19,7 @@ public class TernaryExpression extends Expression {
     public TernaryExpression(Expression condition,
                              Expression thenExpr,
                              Expression elseExpr) {
+        super(condition.getFirstToken(), elseExpr.getLastToken());
         this.condition = condition;
         this.thenExpr = thenExpr;
         this.elseExpr = elseExpr;

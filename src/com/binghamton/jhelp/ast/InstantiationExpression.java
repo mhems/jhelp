@@ -1,6 +1,9 @@
 package com.binghamton.jhelp.ast;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import org.antlr.v4.runtime.Token;
 
 import com.binghamton.jhelp.Annotation;
 import com.binghamton.jhelp.TypeArgument;
@@ -10,23 +13,29 @@ import com.binghamton.jhelp.TypeArgument;
  * inner class.
  */
 public class InstantiationExpression extends CallExpression {
-    private List<TypeArgument> initialTypeArgs;
-    private ConcreteBodyDeclaration classBody;
+    private List<TypeArgument> initialTypeArgs = new ArrayList<>();
+    private ConcreteBodyDeclaration classBody = new ClassDeclaration();
 
     /**
      * Construct an instantiation expression
+     * @param first the first token of this ASTNode
+     * @param last the last token of this ASTNode
      * @param initialTypeArguments the initial type arguments
      * @param annotations the annotations of this instantiation
      * @param name the name of the constructor being called
      * @param finalTypeArguments the final type arguments
      * @param arguments the arguments to the constructor call
      */
-    public InstantiationExpression(List<TypeArgument> initialTypeArguments,
+    public InstantiationExpression(Token first,
+                                   Token last,
+                                   List<TypeArgument> initialTypeArguments,
                                    List<Annotation> annotations,
-                                   String name,
+                                   Token name,
                                    List<TypeArgument> finalTypeArguments,
                                    List<Expression> arguments) {
-        this(initialTypeArguments,
+        this(first,
+             last,
+             initialTypeArguments,
              new IdentifierExpression(name, annotations),
              finalTypeArguments,
              arguments);
@@ -34,18 +43,21 @@ public class InstantiationExpression extends CallExpression {
 
     /**
      * Construct an instantiation expression
+     * @param first the first token of this ASTNode
+     * @param last the last token of this ASTNode
      * @param initialTypeArguments the initial type arguments
      * @param methodExpr the underlying expression evaluating to the constructor
      * @param finalTypeArguments the final type arguments
      * @param arguments the arguments to the constructor call
      */
-    public InstantiationExpression(List<TypeArgument> initialTypeArguments,
+    public InstantiationExpression(Token first,
+                                   Token last,
+                                   List<TypeArgument> initialTypeArguments,
                                    Expression methodExpr,
                                    List<TypeArgument> finalTypeArguments,
                                    List<Expression> arguments) {
-        super(methodExpr, arguments, finalTypeArguments);
+        super(first, last, methodExpr, arguments, finalTypeArguments);
         this.initialTypeArgs = initialTypeArguments;
-        this.classBody = new ClassDeclaration();
     }
 
     /**
@@ -53,7 +65,7 @@ public class InstantiationExpression extends CallExpression {
      * @return true iff this instantiation has any initial type arguments
      */
     public boolean hasInitialTypeArguments() {
-        return initialTypeArgs != null && initialTypeArgs.size() > 0;
+        return initialTypeArgs.size() > 0;
     }
 
     /**

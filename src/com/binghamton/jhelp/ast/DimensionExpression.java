@@ -2,6 +2,8 @@ package com.binghamton.jhelp.ast;
 
 import java.util.List;
 
+import org.antlr.v4.runtime.Token;
+
 import com.binghamton.jhelp.Annotation;
 import com.binghamton.jhelp.Annotations;
 
@@ -14,10 +16,16 @@ public class DimensionExpression extends Expression {
 
     /**
      * Construct an annotated dimension expression
+     * @param first the first token of this ASTNode
+     * @param last the last token of this ASTNode
      * @param annotations the annotations of this expression, if any
      * @param expr the comprising expression of this dimension
      */
-    public DimensionExpression(List<Annotation> annotations, Expression expr) {
+    public DimensionExpression(Token first,
+                               Token last,
+                               List<Annotation> annotations,
+                               Expression expr) {
+        super(first, last);
         this.annotations = new Annotations(annotations);
         this.expr = expr;
     }

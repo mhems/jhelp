@@ -1,5 +1,7 @@
 package com.binghamton.jhelp.ast;
 
+import org.antlr.v4.runtime.Token;
+
 /**
  * A class representing a Java synchronized block
  */
@@ -8,11 +10,13 @@ public class SynchronizedBlock extends Block {
 
     /**
      * Construct a new synchronized block
+     * @param the synchronized keyword
      * @param lock the expression on which to synchronize
      * @param body the statements to execute synchronously
      */
-    public SynchronizedBlock(Expression lock, Block body) {
+    public SynchronizedBlock(Token keyword, Expression lock, Block body) {
         super(body);
+        setFirstToken(keyword);
         this.lock = lock;
     }
 

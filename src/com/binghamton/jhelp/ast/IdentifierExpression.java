@@ -1,6 +1,9 @@
 package com.binghamton.jhelp.ast;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import org.antlr.v4.runtime.Token;
 
 import com.binghamton.jhelp.Annotation;
 import com.binghamton.jhelp.Annotations;
@@ -10,23 +13,24 @@ import com.binghamton.jhelp.Annotations;
  */
 public class IdentifierExpression extends Expression {
     private Annotations annotations;
-    private String identifier;
+    private Token identifier;
 
     /**
      * Construct a new identifier expression
-     * @param identifier the name of this identifier
+     * @param token the token of this identifier
      */
-    public IdentifierExpression(String identifier) {
-        this(identifier, null);
+    public IdentifierExpression(Token identifier) {
+        this(identifier, new ArrayList<>());
     }
 
     /**
      * Construct a new identifier expression
-     * @param identifier the name of this identifier
+     * @param token the token of this identifier
      * @param annotations the annotations of this identifier
      */
-    public IdentifierExpression(String identifier,
+    public IdentifierExpression(Token identifier,
                                 List<Annotation> annotations) {
+        super(getFirstToken(identifier, annotations), identifier);
         this.identifier = identifier;
         this.annotations = new Annotations(annotations);
     }
@@ -35,7 +39,7 @@ public class IdentifierExpression extends Expression {
      * Gets the name of the identifier
      * @return the name of the identifier
      */
-    public String getIdentifier() {
+    public Token getIdentifier() {
         return identifier;
     }
 

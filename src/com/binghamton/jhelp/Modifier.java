@@ -1,5 +1,7 @@
 package com.binghamton.jhelp;
 
+import org.antlr.v4.runtime.Token;
+
 import com.binghamton.jhelp.ast.ASTVisitor;
 import com.binghamton.jhelp.ast.Expression;
 
@@ -7,27 +9,26 @@ import com.binghamton.jhelp.ast.Expression;
  * Class representing Java modifiers and annotations
  */
 public class Modifier extends Expression {
-    public static final Modifier PRIVATE      = new Modifier("private");
-    public static final Modifier PROTECTED    = new Modifier("protected");
-    public static final Modifier PUBLIC       = new Modifier("public");
-    public static final Modifier ABSTRACT     = new Modifier("abstract");
-    public static final Modifier DEFAULT      = new Modifier("default");
-    public static final Modifier FINAL        = new Modifier("final");
-    public static final Modifier NATIVE       = new Modifier("native");
-    public static final Modifier STATIC       = new Modifier("static");
-    public static final Modifier STRICT_FP    = new Modifier("strictfp");
-    public static final Modifier SYNCHRONIZED = new Modifier("synchronized");
-    public static final Modifier TRANSIENT    = new Modifier("transient");
-    public static final Modifier VOLATILE     = new Modifier("volatile");
-
     protected String name;
 
     /**
      * Construct a named modifier
-     * @param name the name of this modifier
+     * @param name the sole Token of this modifier
      */
-    public Modifier(String name) {
-        this.name = name;
+    public Modifier(Token name) {
+        super(name);
+        this.name = name.getText();
+    }
+
+    /**
+     * Construct a multi-token annotation modifier
+     * @param name the full name of this annotation
+     * @param first the first Token of this annotation
+     * @param last the last Token of this annotation
+     */
+    public Modifier(Expression expr) {
+        super(expr.getFirstToken(), expr.getLastToken());
+        this.name = expr.getText();
     }
 
     /**

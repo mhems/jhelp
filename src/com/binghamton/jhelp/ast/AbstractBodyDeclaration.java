@@ -2,6 +2,8 @@ package com.binghamton.jhelp.ast;
 
 import java.util.List;
 
+import org.antlr.v4.runtime.Token;
+
 import com.binghamton.jhelp.Modifier;
 
 /**
@@ -14,10 +16,13 @@ public abstract class AbstractBodyDeclaration extends BodyDeclaration {
     /**
      * Construct a new declaration of an abstract body
      * @param name the name of this declaration
+     * @param keyword the keyword token of this declaration
      * @param modifiers the modifiers of this declaration
      */
-    public AbstractBodyDeclaration(String name, List<Modifier> modifiers) {
-        super(name, modifiers);
+    public AbstractBodyDeclaration(Token name,
+                                   Token keyword,
+                                   List<Modifier> modifiers) {
+        super(name, keyword, modifiers);
     }
 
     /**

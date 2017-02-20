@@ -1,5 +1,7 @@
 package com.binghamton.jhelp.ast;
 
+import org.antlr.v4.runtime.Token;
+
 /**
  * A class representing a Java (do) while statement
  */
@@ -9,23 +11,34 @@ public class WhileStatement extends Block {
 
     /**
      * Construct a new while statement
+     * @param keyword the keyword of the while statement
      * @param condition the condition whose truth dictates iteration
      * @param body the code to conditionally execute
      */
-    public WhileStatement(Expression condition, Block body) {
-        this(condition, body, false);
+    public WhileStatement(Token keyword, Expression condition, Block body) {
+        super(body);
+        setFirstToken(keyword);
+        this.condition = condition;
+        this.isDo = false;
     }
 
     /**
-     * Construct a new while statement
+     * Construct a new do-while statement
+     * @param keyword the keyword of the do-while statement
+     * @param last the terminating Token
      * @param condition the condition whose truth dictates iteration
      * @param body the code to conditionally execute
-     * @param isDo true iff this while statement is a do-while statement
      */
-    public WhileStatement(Expression condition, Block body, boolean isDo) {
+    public WhileStatement(Token keyword,
+                          Token last,
+                          Expression condition,
+                          Block body) {
         super(body);
+        setFirstToken(keyword);
+        setLastToken(last);
         this.condition = condition;
-        this.isDo = isDo;
+        this.isDo = true;
+
     }
 
     /**

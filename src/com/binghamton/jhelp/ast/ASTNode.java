@@ -1,16 +1,26 @@
 package com.binghamton.jhelp.ast;
 
-import org.antlr.v4.runtime.Token;
+import java.util.Comparator;
+import java.util.List;
 
-import com.binghamton.jhelp.FileToken;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.misc.Interval;
 
 /**
  * Base class representing a node in the AST
  */
-public abstract class ASTNode implements Visitable {
-    private FileToken first;
-    private FileToken last;
+public abstract class ASTNode implements Visitable, Comparable<ASTNode> {
+    private Token first;
+    private Token last;
     private boolean singular;
+
+    /**
+     * A comparator that orders Tokens from the same source lexicographically
+     */
+    protected static final Comparator<Token> tokenComparator =
+        Comparator.<Token>comparingInt(t -> t.getLine())
+              .thenComparingInt(t -> t.getCharPositionInLine())
+              .thenComparingInt(t -> t.getStopIndex());
 
     /**
      * Construct a new empty ASTNode, to be used sparingly
@@ -25,17 +35,10 @@ public abstract class ASTNode implements Visitable {
      * @param token the sole Token of this ASTNode
      */
     public ASTNode(Token token) {
-        this(new FileToken(token));
-    }
-
-    /**
-     * Construct a new ASTNode with a single underlying FileToken
-     * @param token the sole FileToken of this ASTNode
-     */
-    public ASTNode(FileToken token) {
         first = last = token;
         singular = true;
     }
+
 
     /**
      * Construct a new ASTNode spanning multiple ANTLR tokens
@@ -43,18 +46,20 @@ public abstract class ASTNode implements Visitable {
      * @param last the last token of this ASTNode
      */
     public ASTNode(Token first, Token last) {
-        this(new FileToken(first), new FileToken(last));
+        this.first = first;
+        this.last = last;
+        setSingular();
     }
 
     /**
-     * Construct a new ASTNode spanning multiple tokens
-     * @param first the first token of this ASTNode
-     * @param last the last token of this ASTNode
+     *
      */
-    public ASTNode(FileToken first, FileToken last) {
-        this.first = first;
-        this.last = last;
-        this.singular = first.equals(last);
+    public <E extends ASTNode> ASTNode(List<E> nodes) {
+        if (!nodes.isEmpty()) {
+            first = nodes.get(0).getFirstToken();
+            last = nodes.get(nodes.size()-1).getLastToken();
+            setSingular();
+        }
     }
 
     /**
@@ -67,34 +72,64 @@ public abstract class ASTNode implements Visitable {
     }
 
     /**
+     * Establishes whether this node is comprised of one or many Tokens
+     */
+    public void setSingular() {
+        singular = first == last;
+    }
+
+    /**
+     * An ASTNode is nil iff it is comprised of no Tokens
+     * @return true  if this Node has no Tokens
+     *         false if this Node is comprised of any Token(s)
+     */
+    public boolean isNil() {
+        return first == null;
+    }
+
+    /**
      * Gets the first token of this ASTNode
      * @return the first token of this ASTNode
      */
-    public FileToken getFirstToken() {
+    public Token getFirstToken() {
         return first;
+    }
+
+    /**
+     * Sets the first token of this ASTNode
+     * @param first the first token of this ASTNode
+     */
+    public void setFirstToken(Token first) {
+        this.first = first;
+        setSingular();
     }
 
     /**
      * Gets the last token of this ASTNode
      * @return the last token of this ASTNode
      */
-    public FileToken getLastToken() {
+    public Token getLastToken() {
         return last;
     }
 
     /**
-     * Determines if this object is equivalent to other
-     * @param other the other object to compare against
-     * @return true iff this is equivalent to other
+     * Sets the last token of this ASTNode
+     * @param last the last token of this ASTNode
+     */
+    public void setLastToken(Token last) {
+        this.last = last;
+        setSingular();
+    }
+
+    /**
+     * Determines if this object is the other object
+     * @param other the other object
+     * @return true iff this == other
      */
     @Override
     public boolean equals(Object other) {
-        if (other instanceof ASTNode) {
-            ASTNode node = (ASTNode)other;
-            return first.equals(node.first) &&
-                (singular || last.equals(node.last));
-        }
-        return false;
+        return this == other;
+
     }
 
     /**
@@ -117,5 +152,55 @@ public abstract class ASTNode implements Visitable {
     @Override
     public void accept(ASTVisitor v) {
         v.visit(this);
+    }
+
+    public String getText() {
+        if (isNil()) {
+            return "";
+        }
+        return first.getInputStream().getText(Interval.of(first.getTokenIndex(),
+                                                          last.getTokenIndex()));
+    }
+
+    /**
+     * Compares nodes based on their starting Tokens
+     * @param other the other node to compare against
+     * @return < 0 iff this node lexically precedes other
+     *           1 iff this node is other
+     *         > 0 iff other lexically precedes this node
+     */
+    @Override
+    public int compareTo(ASTNode other) {
+        return tokenComparator.compare(first, other.first);
+    }
+
+    /**
+     * Determines if any nodes precede candidate
+     * @param candidate the Token holding what may appear first
+     * @param nodes a non-null, possibly-empty list of ASTNodes
+     * @return the lexically earliest Token among candidate and nodes
+     */
+    public static <E extends ASTNode> Token getFirstToken(Token candidate,
+                                                          List<E> nodes) {
+        if (nodes.isEmpty()) {
+            return candidate;
+        } else {
+            return nodes.get(0).getFirstToken();
+        }
+    }
+
+    /**
+     * Determines if any nodes follow candidate
+     * @param candidate the Token holding what may appear last
+     * @param nodes a non-null, possibly-empty list of ASTNodes
+     * @return the lexically latest Token among candidate and nodes
+     */
+    public static <E extends ASTNode> Token getLastToken(Token candidate,
+                                                         List<E> nodes) {
+        if (nodes.isEmpty()) {
+            return candidate;
+        } else {
+            return nodes.get(nodes.size()-1).getLastToken();
+        }
     }
 }

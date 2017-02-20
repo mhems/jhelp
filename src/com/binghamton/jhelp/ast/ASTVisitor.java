@@ -7,6 +7,7 @@ import com.binghamton.jhelp.ClassInterfaceType;
 import com.binghamton.jhelp.MethodType;
 import com.binghamton.jhelp.Modifier;
 import com.binghamton.jhelp.Modifiers;
+import com.binghamton.jhelp.NilType;
 import com.binghamton.jhelp.PrimitiveType;
 import com.binghamton.jhelp.ReferenceType;
 import com.binghamton.jhelp.Type;
@@ -18,6 +19,12 @@ import com.binghamton.jhelp.TypeVariable;
  * Interface for visiting AST nodes
  */
 public interface ASTVisitor {
+
+    /*
+     * Visit a AbstractBodyDeclaration node
+     * @param ast the AST node being visited
+     */
+    void visit(AbstractBodyDeclaration ast);
 
     /*
      * Visit a AccessExpression node
@@ -98,6 +105,12 @@ public interface ASTVisitor {
     void visit(Block ast);
 
     /*
+     * Visit a BodyDeclaration node
+     * @param ast the AST node being visited
+     */
+    void visit(BodyDeclaration ast);
+
+    /*
      * Visit a CallExpression node
      * @param ast the AST node being visited
      */
@@ -134,22 +147,40 @@ public interface ASTVisitor {
     void visit(ClassInterfaceType ast);
 
     /*
-     * Visit a ClassLiteral node
-     * @param ast the AST node being visited
-     */
-    void visit(ClassLiteral ast);
-
-    /*
      * Visit a CompilationUnit node
      * @param ast the AST node being visited
      */
     void visit(CompilationUnit ast);
 
     /*
+     * Visit a ConcreteBodyDeclaration node
+     * @param ast the AST node being visited
+     */
+    void visit(ConcreteBodyDeclaration ast);
+
+    /*
+     * Visit a Declaration node
+     * @param ast the AST node being visited
+     */
+    void visit(Declaration ast);
+
+    /*
+     * Visit a Dimension node
+     * @param ast the AST node being visited
+     */
+    void visit(Dimension ast);
+
+    /*
      * Visit a DimensionExpression node
      * @param ast the AST node being visited
      */
     void visit(DimensionExpression ast);
+
+    /*
+     * Visit a EmptyStatement node
+     * @param ast the AST node being visited
+     */
+    void visit(EmptyStatement ast);
 
     /*
      * Visit a EnumConstant node
@@ -218,6 +249,12 @@ public interface ASTVisitor {
     void visit(JumpStatement ast);
 
     /*
+     * Visit a KeywordExpression node
+     * @param ast the AST node being visited
+     */
+    void visit(KeywordExpression ast);
+
+    /*
      * Visit a LabelStatement node
      * @param ast the AST node being visited
      */
@@ -234,6 +271,12 @@ public interface ASTVisitor {
      * @param ast the AST node being visited
      */
     void visit(LiteralExpression ast);
+
+    /*
+     * Visit a LocalVariableStatement node
+     * @param ast the AST node being visited
+     */
+    void visit(LocalVariableStatement ast);
 
     /*
      * Visit a MethodDeclaration node
@@ -266,16 +309,22 @@ public interface ASTVisitor {
     void visit(Modifiers ast);
 
     /*
-     * Visit a NilNode node
+     * Visit a NilBlock node
      * @param ast the AST node being visited
      */
-    void visit(NilNode ast);
+    void visit(NilBlock ast);
 
     /*
-     * Visit a NullLiteral node
+     * Visit a NilExpression node
      * @param ast the AST node being visited
      */
-    void visit(NullLiteral ast);
+    void visit(NilExpression ast);
+
+    /*
+     * Visit a NilType node
+     * @param ast the AST node being visited
+     */
+    void visit(NilType ast);
 
     /*
      * Visit a PackageStatement node
@@ -308,12 +357,6 @@ public interface ASTVisitor {
     void visit(Statement ast);
 
     /*
-     * Visit a SuperLiteral node
-     * @param ast the AST node being visited
-     */
-    void visit(SuperLiteral ast);
-
-    /*
      * Visit a SwitchStatement node
      * @param ast the AST node being visited
      */
@@ -330,12 +373,6 @@ public interface ASTVisitor {
      * @param ast the AST node being visited
      */
     void visit(TernaryExpression ast);
-
-    /*
-     * Visit a ThisLiteral node
-     * @param ast the AST node being visited
-     */
-    void visit(ThisLiteral ast);
 
     /*
      * Visit a ThrowStatement node
@@ -362,12 +399,6 @@ public interface ASTVisitor {
     void visit(TypeArgument ast);
 
     /*
-     * Visit a TypeExpression node
-     * @param ast the AST node being visited
-     */
-    void visit(TypeExpression ast);
-
-    /*
      * Visit a TypeParameter node
      * @param ast the AST node being visited
      */
@@ -390,12 +421,6 @@ public interface ASTVisitor {
      * @param ast the AST node being visited
      */
     void visit(VariableDeclaration ast);
-
-    /*
-     * Visit a VoidLiteral node
-     * @param ast the AST node being visited
-     */
-    void visit(VoidLiteral ast);
 
     /*
      * Visit a WhileStatement node

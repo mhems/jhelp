@@ -1,10 +1,9 @@
 package com.binghamton.jhelp.ast;
 
 /**
- * A singleton class representing a nil-valued AST node.
- * Useful as a placeholder for optional nodes.
+ * A class representing an absent expression
  */
-public class NilNode extends ASTNode {
+public class NilExpression extends Expression {
 
     /**
      * Double dispatch this class on parameter
@@ -13,5 +12,13 @@ public class NilNode extends ASTNode {
     @Override
     public void accept(ASTVisitor v) {
         v.visit(this);
+    }
+
+    /**
+     * A NilExpression is always nil
+     * @return true
+     */
+    public boolean isNil() {
+        return true;
     }
 }

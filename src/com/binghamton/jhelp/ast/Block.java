@@ -3,27 +3,69 @@ package com.binghamton.jhelp.ast;
 import java.util.List;
 import java.util.ArrayList;
 
+import org.antlr.v4.runtime.Token;
+
 /**
  * Class representing a scope-delimiting block,
  * i.e. { ... }
  */
 public class Block extends Statement {
-    private List<Statement> statements;
+    private List<Statement> statements = new ArrayList<>();
 
     /**
      * Construct an empty block
      */
     public Block() {
-        statements = new ArrayList<Statement>();
+        super();
     }
+
+    /**
+     * Construct an empty open-ended block
+     * @param first the first token of this ASTNode
+     */
+    public Block(Token first) {
+        super(first);
+    }
+
+    /**
+     * Construct an empty block
+     * @param first the first token of this ASTNode
+     * @param last the last token of this ASTNode
+     */
+    public Block(Token first, Token last) {
+        super(first, last);
+    }
+
 
     /**
      * Construct a block comprised of a single statement
      * @param statement the sole statement of this block
      */
     public Block(Statement statement) {
-        this();
+        super(statement.getFirstToken(), statement.getLastToken());
         statements.add(statement);
+    }
+
+    /**
+     * Construct a block comprised of a single statement
+     * @param first the first token of this ASTNode
+     * @param last the last token of this ASTNode
+     * @param statement the sole statement of this block
+     */
+    public Block(Token first, Token last, Statement statement) {
+        super(first, last);
+        statements.add(statement);
+    }
+
+    /**
+     * Construct a block
+     * @param first the first token of this ASTNode
+     * @param last the last token of this ASTNode
+     * @param statements the statements comprising this block
+     */
+    public Block(Token first, Token last, List<Statement> statements) {
+        super(first, last);
+        this.statements = statements;
     }
 
     /**
@@ -31,6 +73,8 @@ public class Block extends Statement {
      * @param statements the statements comprising this block
      */
     public Block(List<Statement> statements) {
+        super(statements.get(0).getFirstToken(),
+              statements.get(statements.size()-1).getLastToken());
         this.statements = statements;
     }
 
@@ -39,6 +83,7 @@ public class Block extends Statement {
      * @param block the other block whose values are to copied
      */
     public Block(Block block) {
+        super(block.getFirstToken(), block.getLastToken());
         this.statements = new ArrayList<>(block.statements);
     }
 
@@ -96,7 +141,7 @@ public class Block extends Statement {
      * @param statements the Statements to add to this block
      */
     public void addStatements(List<Statement> statements) {
-        statements.addAll(statements);
+        this.statements.addAll(statements);
     }
 
     /**

@@ -1,5 +1,7 @@
 package com.binghamton.jhelp.ast;
 
+import org.antlr.v4.runtime.Token;
+
 import com.binghamton.jhelp.Type;
 import com.binghamton.jhelp.VariableSymbol;
 
@@ -12,26 +14,31 @@ public class ForEachStatement extends Block {
 
     /**
      * Construct a new for each statement with a one statement body
+     * @param keyword the for keyword Token
      * @param variable the iteration variable
      * @param iterable the iterable being iterated
      * @param statement the single statement of the for each statement
      */
-    public ForEachStatement(VariableDeclaration variable,
+    public ForEachStatement(Token keyword,
+                            VariableDeclaration variable,
                             Expression iterable,
                             Statement statement) {
-        this(variable, iterable, new Block(statement));
+        this(keyword, variable, iterable, new Block(statement));
     }
 
     /**
      * Construct a new for each statement
+     * @param keyword the for keyword Token
      * @param variable the iteration variable
      * @param iterable the iterable being iterated
      * @param body the body of the for loop
      */
-    public ForEachStatement(VariableDeclaration variable,
+    public ForEachStatement(Token keyword,
+                            VariableDeclaration variable,
                             Expression iterable,
                             Block body) {
         super(body);
+        setFirstToken(keyword);
         this.variable = variable;
         this.iterable = iterable;
     }

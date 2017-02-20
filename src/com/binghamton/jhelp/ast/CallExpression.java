@@ -1,6 +1,9 @@
 package com.binghamton.jhelp.ast;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import org.antlr.v4.runtime.Token;
 
 import com.binghamton.jhelp.TypeArgument;
 
@@ -10,48 +13,83 @@ import com.binghamton.jhelp.TypeArgument;
 public class CallExpression extends Expression {
     private Expression methodExpr;
     private List<Expression> args;
-    private List<TypeArgument> typeArgs;
+    private List<TypeArgument> typeArgs = new ArrayList<>();
 
     /**
      * Construct a new call expression
-     * @param identifier the name of the method being called
+     * @param last the last token of this ASTNode
+     * @param id the token of the method being called
      * @param args the list of arguments to the method call
      */
-    public CallExpression(String identifier, List<Expression> args) {
-        this(new IdentifierExpression(identifier), args);
+    public CallExpression(Token last,
+                          Token id,
+                          List<Expression> args) {
+        this(last, new IdentifierExpression(id), args);
     }
 
     /**
      * Construct a new call expression
+     * @param last the last token of this ASTNode
      * @param methodExpr the expression yielding the method being called
      * @param args the list of arguments to the method call
      */
-    public CallExpression(Expression methodExpr, List<Expression> args) {
+    public CallExpression(Token last,
+                          Expression methodExpr,
+                          List<Expression> args) {
+        super(methodExpr.getFirstToken(), last);
         this.methodExpr = methodExpr;
         this.args = args;
     }
 
     /**
      * Construct a new call expression
-     * @param identifier the name of the method being called
+     * @param last the last token of this ASTNode
+     * @param id the token of the methd being called
      * @param args the list of arguments to the method call
      * @param typeArgs the list of type arguments to the method call
      */
-    public CallExpression(String identifier,
+    public CallExpression(Token last,
+                          Token id,
                           List<Expression> args,
                           List<TypeArgument> typeArgs) {
-        this(new IdentifierExpression(identifier), args, typeArgs);
+        this(ASTNode.getFirstToken(id, typeArgs),
+             last,
+             new IdentifierExpression(id),
+             args,
+             typeArgs);
     }
 
     /**
      * Construct a new call expression
+     * @param last the last token of this ASTNode
      * @param methodExpr the expression yielding the method being called
      * @param args the list of arguments to the method call
      * @param typeArgs the list of type arguments to the method call
      */
-    public CallExpression(Expression methodExpr,
+    public CallExpression(Token last,
+                          Expression methodExpr,
                           List<Expression> args,
                           List<TypeArgument> typeArgs) {
+        super(methodExpr.getFirstToken(), last);
+        this.methodExpr = methodExpr;
+        this.args = args;
+        this.typeArgs = typeArgs;
+    }
+
+    /**
+     * Construct a new call expression
+     * @param first the first token of this ASTNode
+     * @param last the last token of this ASTNode
+     * @param methodExpr the expression yielding the method being called
+     * @param args the list of arguments to the method call
+     * @param typeArgs the list of type arguments to the method call
+     */
+    public CallExpression(Token first,
+                          Token last,
+                          Expression methodExpr,
+                          List<Expression> args,
+                          List<TypeArgument> typeArgs) {
+        super(ASTNode.getFirstToken(first, typeArgs), last);
         this.methodExpr = methodExpr;
         this.args = args;
         this.typeArgs = typeArgs;
@@ -95,7 +133,7 @@ public class CallExpression extends Expression {
      * @return true iff this call has any type arguments
      */
     public boolean hasTypeArguments() {
-        return typeArgs != null && typeArgs.size() > 0;
+        return typeArgs.size() > 0;
     }
 
     /**

@@ -3,6 +3,8 @@ package com.binghamton.jhelp.ast;
 import java.util.List;
 import java.util.ArrayList;
 
+import org.antlr.v4.runtime.Token;
+
 /**
  * A class representing a Java for statement
  */
@@ -13,30 +15,35 @@ public class ForStatement extends Block {
 
     /**
      * Construct a new for statement with a single statement body
+     * @param keyword the for keyword Token
      * @param initializers the initializing statements of the for statement
      * @param condition the iteration condition of the for statement
      * @param updates the updating statements of the for statement
      * @param statement the single statement of the for statement body
      */
-    public ForStatement(List<Statement> initializers,
+    public ForStatement(Token keyword,
+                        List<Statement> initializers,
                         Expression condition,
                         List<Statement> updates,
                         Statement statement) {
-        this(initializers, condition, updates, new Block(statement));
+        this(keyword, initializers, condition, updates, new Block(statement));
     }
 
     /**
      * Construct a new for statement
+     * @param keyword the for keyword Token
      * @param initializers the initializing statements of the for statement
      * @param condition the iteration condition of the for statement
      * @param updates the updating statements of the for statement
      * @param body the body of the for statement
      */
-    public ForStatement(List<Statement> initializers,
+    public ForStatement(Token keyword,
+                        List<Statement> initializers,
                         Expression condition,
                         List<Statement> updates,
                         Block body) {
         super(body);
+        setFirstToken(keyword);
         this.initializers = initializers;
         this.condition = condition;
         this.updates = updates;

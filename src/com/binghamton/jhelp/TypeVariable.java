@@ -1,6 +1,9 @@
 package com.binghamton.jhelp;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import org.antlr.v4.runtime.Token;
 
 import com.binghamton.jhelp.ast.ASTVisitor;
 
@@ -13,8 +16,8 @@ public class TypeVariable extends ReferenceType {
      * Construct a named type variable
      * @param name the name of this type
      */
-    public TypeVariable(String name) {
-        super(name, null);
+    public TypeVariable(Token name) {
+        super(name, new ArrayList<>());
     }
 
     /**
@@ -22,7 +25,7 @@ public class TypeVariable extends ReferenceType {
      * @param name the name of this type
      * @param annotations the annotations of this type
      */
-    public TypeVariable(String name, List<Annotation> annotations) {
+    public TypeVariable(Token name, List<Annotation> annotations) {
         super(name, annotations);
     }
 

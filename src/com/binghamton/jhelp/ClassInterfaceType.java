@@ -1,6 +1,9 @@
 package com.binghamton.jhelp;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import org.antlr.v4.runtime.Token;
 
 import com.binghamton.jhelp.ast.ASTVisitor;
 
@@ -8,24 +11,24 @@ import com.binghamton.jhelp.ast.ASTVisitor;
  * A class representing a Java class or interface type
  */
 public class ClassInterfaceType extends ReferenceType {
-    private List<TypeArgument> args;
+    private List<TypeArgument> args = new ArrayList<>();
     private ClassInterfaceType supertype;
 
     /**
      * Construct a named class or interface type
-     * @param name the name of the class or interface
+     * @param name the Token holding the name of the class or interface
      */
-    public ClassInterfaceType(String name) {
+    public ClassInterfaceType(Token name) {
         super(name);
     }
 
     /**
      * Construct a named, annotated, parameterized class or interface type
-     * @param name the name of the class or interface
+     * @param name the Token holding the name of the class or interface
      * @param annotations the annotations of this type
      * @param args the type arguments to this type
      */
-    public ClassInterfaceType(String name,
+    public ClassInterfaceType(Token name,
                               List<Annotation> annotations,
                               List<TypeArgument> args) {
         this(name, annotations, args, null);
@@ -42,6 +45,22 @@ public class ClassInterfaceType extends ReferenceType {
              subType.annotations.getAnnotations(),
              subType.args,
              superType);
+    }
+
+    /**
+     * Construct a complete class or interface type
+     * @param name the Token holding the name of the class or interface
+     * @param annotations the annotations of this type
+     * @param args the type arguments to this type
+     * @param supertype the super type of this type
+     */
+    public ClassInterfaceType(Token name,
+                              List<Annotation> annotations,
+                              List<TypeArgument> args,
+                              ClassInterfaceType supertype) {
+        super(name, annotations);
+        this.args = args;
+        this.supertype = supertype;
     }
 
     /**
@@ -73,7 +92,7 @@ public class ClassInterfaceType extends ReferenceType {
      * @return true iff this type has type arguments
      */
     public boolean hasArgs() {
-        return args != null && args.size() > 0;
+        return args.size() > 0;
     }
 
     /**

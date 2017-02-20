@@ -1,16 +1,30 @@
 package com.binghamton.jhelp.ast;
 
+import org.antlr.v4.runtime.Token;
+
 /**
  * A class representing a Java return statement
  */
 public class ReturnStatement extends Statement {
-    private Expression expr;
+    private Expression expr = new NilExpression();
+
+    /**
+     * Construct a new value-less return statement
+     * @param keyword the return keyword
+     * @param last the terminating semi-colon
+     */
+    public ReturnStatement(Token keyword, Token last) {
+        super(keyword, last);
+    }
 
     /**
      * Construct a new return statement
-     * @param expr the possibly null expression to return
+     * @param keyword the return keyword
+     * @param last the terminating semi-colon
+     * @param expr the expression to return
      */
-    public ReturnStatement(Expression expr) {
+    public ReturnStatement(Token keyword, Token last, Expression expr) {
+        super(keyword, last);
         this.expr = expr;
     }
 
@@ -26,8 +40,8 @@ public class ReturnStatement extends Statement {
      * Determines if this statement returns anything
      * @return true iff this statement returns anything
      */
-    public boolean isNonVoid() {
-        return expr != null;
+    public boolean isNonTrivial() {
+        return !expr.isNil();
     }
 
     /**

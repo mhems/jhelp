@@ -3,6 +3,8 @@ package com.binghamton.jhelp;
 import java.util.List;
 import java.util.ArrayList;
 
+import org.antlr.v4.runtime.Token;
+
 import com.binghamton.jhelp.ast.ASTVisitor;
 import com.binghamton.jhelp.ast.ASTNode;
 
@@ -10,13 +12,13 @@ import com.binghamton.jhelp.ast.ASTNode;
  * A class abstracting a list of Java annotations
  */
 public class Annotations extends ASTNode {
-    private List<Annotation> annotations;
+    private List<Annotation> annotations = new ArrayList<>();
 
     /**
-     * Construct an empty list of annotations
+     * Construct a emtpy list of annotations
      */
     public Annotations() {
-        annotations = new ArrayList<Annotation>();
+        super();
     }
 
     /**
@@ -24,6 +26,7 @@ public class Annotations extends ASTNode {
      * @param annotations the annotations to construct with
      */
     public Annotations(List<Annotation> annotations) {
+        super(annotations);
         this.annotations = annotations;
     }
 

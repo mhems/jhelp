@@ -1,5 +1,7 @@
 package com.binghamton.jhelp.ast;
 
+import org.antlr.v4.runtime.Token;
+
 /**
  * A class representing a Java throws statement
  */
@@ -8,9 +10,12 @@ public class ThrowStatement extends Statement {
 
     /**
      * Construct a new throw statement
+     * @param keyword the throw keyword
+     * @param the terminating semi-colon Token
      * @param expr the expression whose value is being thrown
      */
-    public ThrowStatement(Expression expr) {
+    public ThrowStatement(Token keyword, Token last, Expression expr) {
+        super(keyword, last);
         this.expr = expr;
     }
 

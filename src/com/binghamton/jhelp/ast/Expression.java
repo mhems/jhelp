@@ -1,30 +1,34 @@
 package com.binghamton.jhelp.ast;
 
+import org.antlr.v4.runtime.Token;
+
 /**
  * Base class representing a Java syntactic expression
  */
 public abstract class Expression extends Statement {
 
     /**
-     * Determines if this object is equivalent to other
-     * @param other the other object to compare against
-     * @return true iff this is equivalent to other
+     * Construct an empty Expression
      */
-    @Override
-    public boolean equals(Object other) {
-        if (other instanceof Expression) {
-            return true; // TODO
-        }
-        return false;
+    public Expression() {
+        super();
     }
 
     /**
-     * Determines the hash code of this object
-     * @return the hash code of this object
+     * Construct a new Expression with a single underlying Token
+     * @param token the sole Token of this ASTNode
      */
-    @Override
-    public int hashCode() {
-        return 0; // TODO
+    public Expression(Token token) {
+        super(token);
+    }
+
+    /**
+     * Construct a new Expression spanning multiple ANTLR tokens
+     * @param first the first token of this ASTNode
+     * @param last the last token of this ASTNode
+     */
+    public Expression(Token first, Token last) {
+        super(first, last);
     }
 
     /**

@@ -1,7 +1,11 @@
 package com.binghamton.jhelp.ast;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import org.antlr.v4.runtime.Token;
+
+import com.binghamton.jhelp.NilType;
 import com.binghamton.jhelp.Type;
 import com.binghamton.jhelp.ReferenceType;
 
@@ -15,26 +19,32 @@ public class CastExpression extends Expression {
 
     /**
      * Construct a new cast expression
+     * @param first the first token of this ASTNode
      * @param expr the expression to cast
      * @param type the type to cast the expression to
      */
-    public CastExpression(Expression expr, Type type) {
+    public CastExpression(Token first, Expression expr, Type type) {
+        super(first, expr.getLastToken());
         this.expr = expr;
         this.type = type;
     }
 
     /**
      * Construct a new bounded cast expression
+     * @param first the first token of this ASTNode
      * @param expr the expression to cast
      * @param refTypes the types to cast the expression to
      */
-    public CastExpression(Expression expr, List<ReferenceType> refTypes) {
+    public CastExpression(Token first,
+                          Expression expr,
+                          List<ReferenceType> refTypes) {
+        super(first, expr.getLastToken());
         this.expr = expr;
         if (refTypes.size() == 1) {
             this.type = refTypes.get(0);
-            this.refTypes = null;
+            this.refTypes = new ArrayList<>();
         } else {
-            this.type = null;
+            this.type = new NilType();
             this.refTypes = refTypes;
         }
     }
@@ -64,7 +74,7 @@ public class CastExpression extends Expression {
      * @return true iff this cast has additional bounds
      */
     public boolean isAdditional() {
-        return refTypes != null && refTypes.size() > 0;
+        return refTypes.size() > 0;
     }
 
     /**

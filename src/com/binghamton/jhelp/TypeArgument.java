@@ -2,6 +2,8 @@ package com.binghamton.jhelp;
 
 import java.util.List;
 
+import org.antlr.v4.runtime.Token;
+
 import com.binghamton.jhelp.ast.ASTVisitor;
 import com.binghamton.jhelp.ast.ASTNode;
 
@@ -9,8 +11,6 @@ import com.binghamton.jhelp.ast.ASTNode;
  * A class representing a Java type argument
  */
 public class TypeArgument extends ASTNode {
-    public static final TypeArgument DIAMOND = new TypeArgument();
-
     private ReferenceType type;
     private Annotations annotations;
     private boolean isWildcard = false;
@@ -19,37 +19,29 @@ public class TypeArgument extends ASTNode {
     /**
      * Construct an empty (diamond) type argument
      */
-    public TypeArgument() { }
+    public TypeArgument() {
+        super();
+    }
 
     /**
      * Construct a type argument of a reference type
+     * @param first the first token of this ASTNode
+     * @param last the last token of this ASTNode
      * @param type the reference type
      */
     public TypeArgument(ReferenceType type) {
+        super(type.getFirstToken(), type.getLastToken());
         this.type = type;
     }
 
     /**
      * Construct a wildcard type argument
+     * @param literal the '?' literal
      * @param annotations the annotations of this type argument
      */
-    public TypeArgument(List<Annotation> annotations) {
+    public TypeArgument(Token literal, List<Annotation> annotations) {
+        super(ASTNode.getFirstToken(literal, annotations), literal);
         this.isWildcard = true;
-        this.annotations = new Annotations(annotations);
-    }
-
-    /**
-     * Construct a bounded wildcard type argument
-     * @param type the bounding type of this type argument
-     * @param isUpperBound true iff `type` is the upper bound
-     * @param annotations the annotations of this type argument
-     */
-    public TypeArgument(ReferenceType type,
-                        boolean isUpperBound,
-                        List<Annotation> annotations) {
-        this.type = type;
-        this.isWildcard = true;
-        this.isUpperBound = isUpperBound;
         this.annotations = new Annotations(annotations);
     }
 
@@ -89,7 +81,7 @@ public class TypeArgument extends ASTNode {
      * @return true iff this argument is empty
      */
     public boolean isDiamond() {
-        return type == null;
+        return type == null && !isWildcard();
     }
 
     /**
@@ -109,6 +101,7 @@ public class TypeArgument extends ASTNode {
      * @param type the bounding type of this wildcard argument
      */
     public void setBoundType(ReferenceType type) {
+        // TODO change last token
         this.type = type;
     }
 

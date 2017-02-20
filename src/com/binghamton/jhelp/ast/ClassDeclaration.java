@@ -1,6 +1,9 @@
 package com.binghamton.jhelp.ast;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import org.antlr.v4.runtime.Token;
 
 import com.binghamton.jhelp.ClassInterfaceType;
 import com.binghamton.jhelp.Modifier;
@@ -10,8 +13,8 @@ import com.binghamton.jhelp.TypeParameter;
  * A class representing a Java class declaration
  */
 public class ClassDeclaration extends ConcreteBodyDeclaration {
-    private List<TypeParameter> typeParams;
-    private ClassInterfaceType superClass;
+    private List<TypeParameter> typeParams = new ArrayList<>();
+    private ClassInterfaceType superClass; // Object
 
     /**
      * Construct an anonymous class declaration
@@ -22,18 +25,21 @@ public class ClassDeclaration extends ConcreteBodyDeclaration {
 
     /**
      * Construct a new ClassDeclaration
-     * @param modifiers the class modifiers, if any
+     * @param first the first token of this ASTNode
+     * @param last the last token of this ASTNode
      * @param name the name of the class
+     * @param modifiers the class modifiers, if any
+     * @param superInterfaces the list of implemented interfaces, if any
      * @param typeParams type parameters of the class, if any
      * @param superClass the name of the super class, if any
-     * @param superInterfaces the list of implemented interfaces, if any
      */
-    public ClassDeclaration(String name,
+    public ClassDeclaration(Token name,
+                            Token keyword,
                             List<Modifier> modifiers,
                             List<ClassInterfaceType> superInterfaces,
                             List<TypeParameter> typeParams,
                             ClassInterfaceType superClass) {
-        super(name, modifiers, superInterfaces);
+        super(name, keyword, modifiers, superInterfaces);
         this.typeParams = typeParams;
         this.superClass = superClass;
     }
@@ -51,7 +57,7 @@ public class ClassDeclaration extends ConcreteBodyDeclaration {
      * @return true iff this class has type parameters
      */
     public boolean hasTypeParameters() {
-        return typeParams != null && typeParams.size() > 0;
+        return typeParams.size() > 0;
     }
 
     /**
@@ -60,6 +66,14 @@ public class ClassDeclaration extends ConcreteBodyDeclaration {
      */
     public ClassInterfaceType getSuperClass() {
         return superClass;
+    }
+
+    /**
+     * Determines if this class has a super class
+     * @return true iff this class has a super class
+     */
+    public boolean hasSuperClass() {
+        return superClass != null;
     }
 
     /**

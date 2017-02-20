@@ -36,6 +36,7 @@ public class JHelp {
             }
         } else {
             try {
+                System.out.println("accepting input from stdin:");
                 process(System.in);
             } catch(IOException e) {
                 e.printStackTrace();

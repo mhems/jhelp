@@ -2,6 +2,8 @@ package com.binghamton.jhelp.ast;
 
 import com.binghamton.jhelp.ClassInterfaceType;
 
+import org.antlr.v4.runtime.Token;
+
 import java.util.List;
 import java.util.ArrayList;
 
@@ -14,17 +16,19 @@ public class CatchBlock extends Block {
 
     /**
      * Construct an empty catch block
+     * @param first the first token of this ASTNode
      */
-    public CatchBlock() {
-        super();
+    public CatchBlock(Token first) {
+        super(first);
     }
 
     /**
      * Construct a Java catch block
+     * @param first the first token of this ASTNode
      * @param body the body of this catch block
      */
-    public CatchBlock(Block body) {
-        super(body.getStatements());
+    public CatchBlock(Token first, Block body) {
+        super(first, body.getLastToken(), body.getStatements());
     }
 
     /**

@@ -1,5 +1,7 @@
 package com.binghamton.jhelp.ast;
 
+import org.antlr.v4.runtime.Token;
+
 import com.binghamton.jhelp.Annotation;
 import com.binghamton.jhelp.Annotations;
 import com.binghamton.jhelp.ArrayType;
@@ -30,8 +32,13 @@ public class NonNullVisitor extends EmptyVisitor {
     }
 
     private void assertNonNull(Object o) {
-        ++count;
         assert(o != null);
+        if (o instanceof Token) {
+            System.out.println(((Token)o).getText());
+        } else {
+            System.out.println(o);
+        }
+        ++count;
     }
 
     /*
@@ -48,7 +55,7 @@ public class NonNullVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(Annotation ast) {
-        for (String s : ast.getArguments().keySet()) {
+        for (Token s : ast.getArguments().keySet()) {
             assertNonNull(s);
             ast.getValue(s).accept(this);
         }
@@ -112,6 +119,17 @@ public class NonNullVisitor extends EmptyVisitor {
     }
 
     /*
+     * Visit a ASTNode node
+     * @param ast the AST node being visited
+     */
+    public void visit(ASTNode ast) {
+        if (!ast.isNil()) {
+        //     System.out.println("<" + ast.getFirstToken() + ", " +
+        //                              ast.getLastToken() + ">");
+        }
+    }
+
+    /*
      * Visit a BinaryExpression node
      * @param ast the AST node being visited
      */
@@ -126,8 +144,22 @@ public class NonNullVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(Block ast) {
-        for (Statement s : ast.getStatements())
+        for (Statement s : ast.getStatements()) {
             s.accept(this);
+        }
+    }
+
+    /*
+     * Visit a BodyDeclaration node
+     * @param ast the AST node being visited
+     */
+    public void visit(BodyDeclaration ast) {
+        for (VariableDeclaration var : ast.getFields())
+            var.accept(this);
+        for (ConcreteBodyDeclaration cls : ast.getInnerBodies())
+            cls.accept(this);
+        for (AbstractBodyDeclaration intf : ast.getInnerInterfaces())
+            intf.accept(this);
     }
 
     /*
@@ -182,7 +214,8 @@ public class NonNullVisitor extends EmptyVisitor {
     public void visit(ClassDeclaration ast) {
         for (TypeParameter p : ast.getTypeParameters())
             p.accept(this);
-        ast.getSuperClass().accept(this);
+        if (ast.hasSuperClass())
+            ast.getSuperClass().accept(this);
     }
 
     /*
@@ -201,11 +234,46 @@ public class NonNullVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(CompilationUnit ast) {
-        ast.getPackage().accept(this);
+        if (ast.hasPackage())
+            ast.getPackage().accept(this);
         for (ImportStatement s : ast.getImports())
             s.accept(this);
         for (BodyDeclaration d : ast.getBodyDeclarations())
             d.accept(this);
+    }
+
+    /*
+     * Visit a ConcreteBodyDeclaration node
+     * @param ast the AST node being visited
+     */
+    public void visit(ConcreteBodyDeclaration ast) {
+        for (ClassInterfaceType im : ast.getSuperInterfaces())
+            im.accept(this);
+        for (MethodDeclaration m : ast.getMethods())
+            m.accept(this);
+        for (MethodDeclaration ctor : ast.getConstructors())
+            ctor.accept(this);
+        for (Block sb : ast.getStaticInitializers())
+            sb.accept(this);
+        for (Block ib : ast.getInstanceInitializers())
+            ib.accept(this);
+    }
+
+    /*
+     * Visit a Declaration node
+     * @param ast the AST node being visited
+     */
+    public void visit(Declaration ast) {
+        assertNonNull(ast.getName());
+        ast.getModifiers().accept(this);
+    }
+
+    /*
+     * Visit a Dimension node
+     * @param ast the AST node being visited
+     */
+    public void visit(Dimension ast) {
+        ast.getAnnotations().accept(this);
     }
 
     /*
@@ -272,8 +340,7 @@ public class NonNullVisitor extends EmptyVisitor {
     public void visit(IfElseStatement ast) {
         ast.getCondition().accept(this);
         ast.getThenBlock().accept(this);
-        if (ast.hasElse())
-            ast.getElseBlock().accept(this);
+        ast.getElseBlock().accept(this);
     }
 
     /*
@@ -314,7 +381,6 @@ public class NonNullVisitor extends EmptyVisitor {
      */
     public void visit(LabelStatement ast) {
         assertNonNull(ast.getLabel());
-        ast.getStatement().accept(this);
     }
 
     /*
@@ -333,6 +399,15 @@ public class NonNullVisitor extends EmptyVisitor {
      */
     public void visit(LiteralExpression ast) {
         assertNonNull(ast.getValue());
+    }
+
+    /*
+     * Visit a LocalVariableStatement node
+     * @param ast the AST node being visited
+     */
+    public void visit(LocalVariableStatement ast) {
+        for (VariableDeclaration var : ast.getVariables())
+            var.accept(this);
     }
 
     /*
@@ -397,7 +472,7 @@ public class NonNullVisitor extends EmptyVisitor {
      */
     public void visit(PackageStatement ast) {
         ast.getAnnotations().accept(this);
-        for (String id : ast.getIdentifiers())
+        for (Token id : ast.getIdentifiers())
             assertNonNull(id);
     }
 
@@ -477,14 +552,6 @@ public class NonNullVisitor extends EmptyVisitor {
     }
 
     /*
-     * Visit a TypeExpression node
-     * @param ast the AST node being visited
-     */
-    public void visit(TypeExpression ast) {
-        ast.getType().accept(this);
-    }
-
-    /*
      * Visit a TypeParameter node
      * @param ast the AST node being visited
      */
@@ -509,10 +576,8 @@ public class NonNullVisitor extends EmptyVisitor {
      */
     public void visit(VariableDeclaration ast) {
         ast.getType().accept(this);
-        for (String s : ast.getNames()) {
-            assertNonNull(s);
-            ast.getInitializer(s).accept(this);
-        }
+        assertNonNull(ast.getName());
+        ast.getInitializer().accept(this);
     }
 
     /*

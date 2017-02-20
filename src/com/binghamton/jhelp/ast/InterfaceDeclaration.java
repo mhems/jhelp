@@ -3,6 +3,8 @@ package com.binghamton.jhelp.ast;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.antlr.v4.runtime.Token;
+
 import com.binghamton.jhelp.ClassInterfaceType;
 import com.binghamton.jhelp.Modifier;
 import com.binghamton.jhelp.TypeParameter;
@@ -11,34 +13,38 @@ import com.binghamton.jhelp.TypeParameter;
  * A class representing the declaration of a Java interface
  */
 public class InterfaceDeclaration extends AbstractBodyDeclaration {
-    private List<ClassInterfaceType> implementees;
+    private List<ClassInterfaceType> implementees = new ArrayList<>();
     private List<MethodDeclaration> methods = new ArrayList<>();
-    private List<TypeParameter> typeParams;
+    private List<TypeParameter> typeParams = new ArrayList<>();
 
     /**
      * Construct a new InterfaceDeclaration
      * @param name the name of this declaration
+     * @param keyword the keyword token of this declaration
      * @param modifiers the modifiers of this declaration
      * @param implementees the interfaces this declaration implements
      */
-    public InterfaceDeclaration(String name,
+    public InterfaceDeclaration(Token name,
+                                Token keyword,
                                 List<Modifier> modifiers,
                                 List<ClassInterfaceType> implementees) {
-        this(name, modifiers, implementees, null);
+        this(name, keyword, modifiers, implementees, new ArrayList<>());
     }
 
     /**
      * Construct a new InterfaceDeclaration
      * @param name the name of this declaration
+     * @param keyword the keyword token of this declaration
      * @param modifiers the modifiers of this declaration
      * @param implementees the interfaces this declaration implements
      * @param typeParams the type parameters of this declaration
      */
-    public InterfaceDeclaration(String name,
+    public InterfaceDeclaration(Token name,
+                                Token keyword,
                                 List<Modifier> modifiers,
                                 List<ClassInterfaceType> implementees,
                                 List<TypeParameter> typeParams) {
-        super(name, modifiers);
+        super(name, keyword, modifiers);
         this.implementees = implementees;
         this.typeParams = typeParams;
     }
@@ -56,7 +62,7 @@ public class InterfaceDeclaration extends AbstractBodyDeclaration {
      * @return true iff this interface has type parameters
      */
     public boolean hasTypeParameters() {
-        return typeParams != null && typeParams.size() > 0;
+        return typeParams.size() > 0;
     }
 
     /**
@@ -64,7 +70,7 @@ public class InterfaceDeclaration extends AbstractBodyDeclaration {
      * @return true iff this declaration implements any interfaces
      */
     public boolean hasSuperInterfaces() {
-        return implementees != null && implementees.size() > 0;
+        return implementees.size() > 0;
     }
 
     /**

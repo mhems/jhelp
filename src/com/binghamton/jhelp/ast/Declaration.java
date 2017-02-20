@@ -2,6 +2,8 @@ package com.binghamton.jhelp.ast;
 
 import java.util.List;
 
+import org.antlr.v4.runtime.Token;
+
 import com.binghamton.jhelp.Modifier;
 import com.binghamton.jhelp.Modifiers;
 
@@ -9,7 +11,7 @@ import com.binghamton.jhelp.Modifiers;
  * Abstract base class for all Java declarations
  */
 public abstract class Declaration extends Statement {
-    protected String name;
+    protected Token name;
     protected Modifiers modifiers;
 
     /**
@@ -24,15 +26,26 @@ public abstract class Declaration extends Statement {
      * @param modifiers the modifiers of this declaration
      */
     public Declaration(List<Modifier> modifiers) {
-        this(null, modifiers);
+        this.modifiers = new Modifiers(modifiers);
     }
 
     /**
-     * Construct a modified declaration
-     * @param name the name of the declared entity
+     * Construct an empty declaration
+     * @param first the first token of this ASTNode
+     * @param last the last token of this ASTNode
+     */
+    public Declaration(Token first, Token last) {
+        super(first, last);
+    }
+
+    /**
+     * Construct an named modified declaration
+     * @param name the name Token of this declaration
+     * @param keyword the keyword of this declaration
      * @param modifiers the modifiers of this declaration
      */
-    public Declaration(String name, List<Modifier> modifiers) {
+    public Declaration(Token name, Token keyword, List<Modifier> modifiers) {
+        super(ASTNode.getFirstToken(keyword, modifiers));
         this.name = name;
         this.modifiers = new Modifiers(modifiers);
     }
@@ -41,7 +54,7 @@ public abstract class Declaration extends Statement {
      * Gets the name of this declaration
      * @return the name of this declaration
      */
-    public String getName() {
+    public Token getName() {
         return name;
     }
 
@@ -49,7 +62,7 @@ public abstract class Declaration extends Statement {
      * Sets the name of this declaration
      * @param name the new name of this declaration
      */
-    public void setName(String name) {
+    public void setName(Token name) {
         this.name = name;
     }
 

@@ -1,5 +1,6 @@
 package com.binghamton.jhelp;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.binghamton.jhelp.ast.ASTVisitor;
@@ -18,7 +19,7 @@ public class MethodType extends Type {
      * @param paramTypes the types of the parameters of this method
      */
     public MethodType(Type returnType, List<Type> paramTypes) {
-        this(returnType, paramTypes, null);
+        this(returnType, paramTypes, new ArrayList<>());
     }
 
     /**
@@ -30,7 +31,6 @@ public class MethodType extends Type {
     public MethodType(Type returnType,
                       List<Type> paramTypes,
                       List<TypeParameter> typeParams) {
-        super(null);
         this.returnType = returnType;
         this.paramTypes = paramTypes;
         this.typeParams = typeParams;
@@ -49,7 +49,7 @@ public class MethodType extends Type {
      * @return true iff this method returns a non-void type
      */
     public boolean returns() {
-        return returnType != null;
+        return ! returnType.getName().equals("void");
     }
 
     /**
@@ -65,7 +65,7 @@ public class MethodType extends Type {
      * @return true iff this method has parameter types
      */
     public boolean hasParameterTypes() {
-        return paramTypes != null && paramTypes.size() > 0;
+        return paramTypes.size() > 0;
     }
 
     /**
@@ -81,7 +81,7 @@ public class MethodType extends Type {
      * @return true iff this method has type parameters
      */
     public boolean hasTypeParameters() {
-        return typeParams != null && typeParams.size() > 0;
+        return typeParams.size() > 0;
     }
 
     /**

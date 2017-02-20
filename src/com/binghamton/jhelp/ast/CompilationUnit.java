@@ -19,6 +19,7 @@ public class CompilationUnit extends ASTNode {
     public CompilationUnit(PackageStatement pkg,
                            List<ImportStatement> imports,
                            List<BodyDeclaration> bodies) {
+        super(pkg.getFirstToken());
         this.pkg = pkg;
         this.imports = imports;
         this.bodies = bodies;
@@ -30,6 +31,14 @@ public class CompilationUnit extends ASTNode {
      */
     public PackageStatement getPackage() {
         return pkg;
+    }
+
+    /**
+     * Determines if this unit has a package statement
+     * @return true iff this unit has a package statement
+     */
+    public boolean hasPackage() {
+        return pkg != null;
     }
 
     /**

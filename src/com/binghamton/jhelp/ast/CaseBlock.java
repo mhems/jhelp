@@ -4,6 +4,8 @@ import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.antlr.v4.runtime.Token;
+
 /**
  * A class representing a Java case block of a Java switch statement
  */
@@ -15,24 +17,19 @@ public class CaseBlock extends Block {
      * @param label the label for this case block
      */
     public CaseBlock(Expression label) {
-        this(new ArrayList<>(Arrays.asList(label)), null);
+        this(new ArrayList<>(Arrays.asList(label)), new NilBlock());
     }
 
     /**
      * Construct a new, empty case block
+     * @param first the first token of this ASTNode
+     * @param last the last token of this ASTNode
      * @param labels the list of labels for this case block
-     */
-    public CaseBlock(List<Expression> labels) {
-        this(labels, null);
-    }
-
-    /**
-     * Construct a new case block
-     * @param labels the list of labels for this case block
-     * @param body the body of the case block
      */
     public CaseBlock(List<Expression> labels, Block body) {
-        super(body);
+        super(labels.get(0).getFirstToken(),
+              labels.get(labels.size()-1).getLastToken(),
+              body.getStatements());
         this.labels = labels;
     }
 

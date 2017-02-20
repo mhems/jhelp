@@ -1,5 +1,7 @@
 package com.binghamton.jhelp.ast;
 
+import org.antlr.v4.runtime.Token;
+
 import com.binghamton.jhelp.Type;
 
 /**
@@ -11,11 +13,12 @@ public class LiteralExpression extends Expression {
 
     /**
      * Construct a new LiteralExpression
-     * @param value the value of the literal
+     * @param token the token of the literal
      * @param type the type of the literal
      */
-    public LiteralExpression(String value, Type type) {
-        this.value = value;
+    public LiteralExpression(Token token, Type type) {
+        super(token);
+        this.value = token.getText();
         this.type = type;
     }
 

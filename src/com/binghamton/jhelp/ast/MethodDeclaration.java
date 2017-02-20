@@ -1,6 +1,9 @@
 package com.binghamton.jhelp.ast;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import org.antlr.v4.runtime.Token;
 
 import com.binghamton.jhelp.Modifier;
 import com.binghamton.jhelp.Type;
@@ -11,10 +14,10 @@ import com.binghamton.jhelp.TypeParameter;
  */
 public class MethodDeclaration extends Declaration {
     private Type returnType;
-    private List<VariableDeclaration> params;
-    private List<Type> exceptions;
-    private List<TypeParameter> typeParams;
-    private Block body;
+    private List<VariableDeclaration> params = new ArrayList<>();
+    private List<Type> exceptions = new ArrayList<>();
+    private List<TypeParameter> typeParams = new ArrayList<>();
+    private Block body = new NilBlock();
 
     /**
      * Construct a method declaration
@@ -93,7 +96,7 @@ public class MethodDeclaration extends Declaration {
      * @return true iff this method has type parameters
      */
     public boolean hasTypeParameters() {
-        return typeParams != null && typeParams.size() > 0;
+        return typeParams.size() > 0;
     }
 
     /**

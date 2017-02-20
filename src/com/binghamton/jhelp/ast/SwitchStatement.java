@@ -2,6 +2,8 @@ package com.binghamton.jhelp.ast;
 
 import java.util.List;
 
+import org.antlr.v4.runtime.Token;
+
 /**
  * A class representing a Java switch statement
  */
@@ -11,10 +13,16 @@ public class SwitchStatement extends Statement {
 
     /**
      * Construct a new switch statement
+     * @param keyword the switch keyword
+     * @param the terminating curly brace Token
      * @param condition the expression whose value is being switched on
      * @param cases the list of cases in this switch statement
      */
-    public SwitchStatement(Expression condition, List<CaseBlock> cases) {
+    public SwitchStatement(Token keyword,
+                           Token last,
+                           Expression condition,
+                           List<CaseBlock> cases) {
+        super(keyword, last);
         this.condition = condition;
         this.cases = cases;
     }

@@ -1,5 +1,7 @@
 package com.binghamton.jhelp.ast;
 
+import org.antlr.v4.runtime.Token;
+
 /**
  * A class representing a Java array access
  */
@@ -9,11 +11,13 @@ public class ArrayAccessExpression extends Expression {
 
     /**
      * Construct an array access expression
-     * @param identifier the name of the array being accessed
+     * @param token the token of the symbol being accessed
      * @param indexExpr the expression yielding the array index
      */
-    public ArrayAccessExpression(String identifier, Expression indexExpr) {
-        this(new IdentifierExpression(identifier), indexExpr);
+    public ArrayAccessExpression(Token last,
+                                 Token token,
+                                 Expression indexExpr) {
+        this(last, new IdentifierExpression(token), indexExpr);
     }
 
     /**
@@ -21,7 +25,10 @@ public class ArrayAccessExpression extends Expression {
      * @param arrayExpr the expression yielding the array being accessed
      * @param indexExpr the expression yielding the array index
      */
-    public ArrayAccessExpression(Expression arrayExpr, Expression indexExpr) {
+    public ArrayAccessExpression(Token last,
+                                 Expression arrayExpr,
+                                 Expression indexExpr) {
+        super(arrayExpr.getFirstToken(), last);
         this.arrayExpr = arrayExpr;
         this.indexExpr = indexExpr;
     }

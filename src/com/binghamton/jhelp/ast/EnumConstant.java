@@ -1,6 +1,9 @@
 package com.binghamton.jhelp.ast;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import org.antlr.v4.runtime.Token;
 
 import com.binghamton.jhelp.Modifier;
 
@@ -12,14 +15,14 @@ public class EnumConstant extends ConcreteBodyDeclaration {
 
     /**
      * Construct an enum constant
-     * @param name the name of this constant
+     * @param name the token holding the name of this constant
      * @param modifiers the modifiers of this constant
      * @param arguments the arguments to this constant
      */
-    public EnumConstant(String name,
+    public EnumConstant(Token name,
                         List<Modifier> modifiers,
                         List<Expression> arguments) {
-        super(name, modifiers, null);
+        super(name, name, modifiers, new ArrayList<>());
         this.arguments = arguments;
     }
 

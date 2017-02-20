@@ -2,6 +2,8 @@ package com.binghamton.jhelp;
 
 import java.util.List;
 
+import org.antlr.v4.runtime.Token;
+
 import com.binghamton.jhelp.ast.ASTVisitor;
 
 /**
@@ -9,9 +11,9 @@ import com.binghamton.jhelp.ast.ASTVisitor;
  */
 public class PrimitiveType extends Type {
 
+    public static final PrimitiveType BOOLEAN = new PrimitiveType(Primitive.BOOLEAN);
     public static final PrimitiveType BYTE    = new PrimitiveType(Primitive.BYTE);
     public static final PrimitiveType CHAR    = new PrimitiveType(Primitive.CHAR);
-    public static final PrimitiveType BOOLEAN = new PrimitiveType(Primitive.BOOLEAN);
     public static final PrimitiveType SHORT   = new PrimitiveType(Primitive.SHORT);
     public static final PrimitiveType INT     = new PrimitiveType(Primitive.INT);
     public static final PrimitiveType LONG    = new PrimitiveType(Primitive.LONG);
@@ -19,33 +21,22 @@ public class PrimitiveType extends Type {
     public static final PrimitiveType DOUBLE  = new PrimitiveType(Primitive.DOUBLE);
     public static final PrimitiveType VOID    = new PrimitiveType(Primitive.VOID);
 
-    public enum Primitive {
-        BYTE,
-        CHAR,
-        SHORT,
-        INT,
-        LONG,
-        FLOAT,
-        DOUBLE,
-        BOOLEAN,
-        VOID
-    }
 
     /**
      * Construct a new primitive type
-     * @param primitive the type of the primitive
+     * @param primitive the primitive Token
      */
-    public PrimitiveType(Primitive primitive) {
-        super(primitive.name());
+    public PrimitiveType(Token primitive) {
+        super(primitive);
     }
 
     /**
      * Construct an annotated primitive type
-     * @param primitive the type of the primitive
+     * @param primitive the primitive Token
      * @param annotations the annotations of this type
      */
-    public PrimitiveType(Primitive primitive, List<Annotation> annotations) {
-        super(primitive.name(), annotations);
+    public PrimitiveType(Token primitive, List<Annotation> annotations) {
+        super(primitive, annotations);
     }
 
     /**
@@ -56,5 +47,21 @@ public class PrimitiveType extends Type {
     public void accept(ASTVisitor v) {
         super.accept(v);
         v.visit(this);
+    }
+
+    public enum Primitive {
+        BOOLEAN,
+        BYTE,
+        CHAR,
+        SHORT,
+        INT,
+        LONG,
+        FLOAT,
+        DOUBLE,
+        VOID
+    }
+
+    private PrimitiveType(Primitive primitive) {
+        super(primitive.name());
     }
 }

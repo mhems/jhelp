@@ -1,50 +1,62 @@
 package com.binghamton.jhelp.ast;
 
-import java.util.List;
 import java.util.ArrayList;
+import java.util.List;
+
+import org.antlr.v4.runtime.Token;
 
 /**
  * A class representing a Java try/catch/finally block
  */
 public class TryCatchBlock extends Statement {
     private Block tryBody;
-    private List<VariableDeclaration> resources;
-    private List<CatchBlock> catches;
+    private List<VariableDeclaration> resources = new ArrayList<>();
+    private List<CatchBlock> catches = new ArrayList<>();
     private Block finallyBody;
 
     /**
      * Construct a try/catch block without a finally block
+     * @param keyword the try keyword
      * @param tryBody the code to try to execute
      * @param catches the list of catch statement to execute on exception
      */
-    public TryCatchBlock(Block tryBody, List<CatchBlock> catches) {
-        this(null, tryBody, catches, null);
+    public TryCatchBlock(Token keyword,
+                         Block tryBody,
+                         List<CatchBlock> catches) {
+        this(keyword, new ArrayList<>(), tryBody, catches, new NilBlock());
     }
 
     /**
      * Construct a try/catch/finally block
+     * @param keyword the try keyword
      * @param tryBody the code to try to execute
      * @param catches the list of catch statement to execute on exception
      * @param finallyBody the block to always execute at end
      */
-    public TryCatchBlock(Block tryBody,
+    public TryCatchBlock(Token keyword,
+                         Block tryBody,
                          List<CatchBlock> catches,
                          Block finallyBody) {
-        this(null, tryBody, catches, finallyBody);
+        this(keyword, new ArrayList<>(), tryBody, catches, finallyBody);
     }
 
     /**
      * Construct a try-with-resources block, possibly with a catch or finally
      * block
+     * @param keyword the try keyword
      * @param resources the list of resources within the try block
      * @param tryBody the code to try to execute
      * @param catches the list of catch statement to execute on exception
      * @param finallyBody the block to always execute at end
      */
-    public TryCatchBlock(List<VariableDeclaration> resources,
+    public TryCatchBlock(Token keyword,
+                         List<VariableDeclaration> resources,
                          Block tryBody,
                          List<CatchBlock> catches,
                          Block finallyBody) {
+        super(keyword,
+              (finallyBody.isNil() ? catches.get(catches.size() - 1)
+                                   : finallyBody).getLastToken());
         this.resources = resources;
         this.tryBody = tryBody;
         this.catches = catches;
@@ -61,7 +73,7 @@ public class TryCatchBlock extends Statement {
 
     /**
      * Gets the resources of this statement, if any
-     * @return the resources of this statement, if any, otherwise `null`
+     * @return the resources of this statement
      */
     public List<VariableDeclaration> getResources() {
         return resources;
@@ -72,7 +84,7 @@ public class TryCatchBlock extends Statement {
      * @return true iff this statement has any resources
      */
     public boolean hasResources() {
-        return resources != null;
+        return numResources() > 0;
     }
 
     /**
@@ -88,7 +100,7 @@ public class TryCatchBlock extends Statement {
      * Gets the number of resources of this statement
      * @return the number of resources of this statement
      */
-    public int getNumResources() {
+    public int numResources() {
         return resources.size();
     }
 
@@ -138,7 +150,7 @@ public class TryCatchBlock extends Statement {
      * @return true iff this statement has a finally block
      */
     public boolean hasFinally() {
-        return finallyBody != null;
+        return !finallyBody.isNil();
     }
 
     /**

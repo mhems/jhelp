@@ -3,6 +3,8 @@ package com.binghamton.jhelp.ast;
 import java.util.List;
 import java.util.ArrayList;
 
+import org.antlr.v4.runtime.Token;
+
 import com.binghamton.jhelp.ClassInterfaceType;
 import com.binghamton.jhelp.Modifier;
 
@@ -17,6 +19,8 @@ public abstract class BodyDeclaration extends Declaration {
 
     /**
      * Construct an empty body declaration
+     * @param first the first token of this ASTNode
+     * @param last the last token of this ASTNode
      */
     public BodyDeclaration() {
         super();
@@ -25,11 +29,13 @@ public abstract class BodyDeclaration extends Declaration {
     /**
      * Construct a new declaration of a body
      * @param name the name of this declaration
+     * @param keyword the keyword of this declaration
      * @param modifiers the modifiers of this declaration
      */
-    public BodyDeclaration(String name,
+    public BodyDeclaration(Token name,
+                           Token keyword,
                            List<Modifier> modifiers) {
-        super(name, modifiers);
+        super(name, keyword, modifiers);
     }
 
     /**

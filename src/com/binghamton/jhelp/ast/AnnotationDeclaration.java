@@ -2,6 +2,8 @@ package com.binghamton.jhelp.ast;
 
 import java.util.List;
 
+import org.antlr.v4.runtime.Token;
+
 import com.binghamton.jhelp.Modifier;
 
 /**
@@ -11,11 +13,14 @@ public class AnnotationDeclaration extends AbstractBodyDeclaration {
 
     /**
      * Construct a new annotation declaration
-     * @param name the name of the annotation
+     * @param name the token holding the name of the annotation
+     * @param at the token holding the @ symbol
      * @param modifiers the modifiers of the annotation
      */
-    public AnnotationDeclaration(String name, List<Modifier> modifiers) {
-        super(name, modifiers);
+    public AnnotationDeclaration(Token name,
+                                 Token at,
+                                 List<Modifier> modifiers) {
+        super(name, at, modifiers);
     }
 
     /**

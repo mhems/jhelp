@@ -3,6 +3,8 @@ package com.binghamton.jhelp;
 import java.util.Map;
 import java.util.HashMap;
 
+import org.antlr.v4.runtime.Token;
+
 import com.binghamton.jhelp.ast.ASTVisitor;
 import com.binghamton.jhelp.ast.Expression;
 
@@ -10,24 +12,27 @@ import com.binghamton.jhelp.ast.Expression;
  * A class representing a Java annotation
  */
 public class Annotation extends Modifier {
-    private Map<String, Expression> nameValueMap = new HashMap<>();
+    private Map<Token, Expression> nameValueMap = new HashMap<>();
+    private Expression expr;
 
     /**
      * Construct a marker or normal annotation
-     * @param typename the type name of the annotation
+     * @param expr the type Token of the annotation
      */
-    public Annotation(String typename) {
-        super(typename);
+    public Annotation(Expression expr) {
+        super(expr);
+        this.expr = expr;
     }
 
     /**
      * Construct a single element annotation
-     * @param typename the type name of the annotation
+     * @param expr the type name of the annotation
      * @param value the single element's value
      */
-    public Annotation(String typename, Expression value) {
-        super(typename);
-        nameValueMap.put("", value);
+    public Annotation(Expression expr, Expression value) {
+        super(expr);
+        this.expr = expr;
+        nameValueMap.put(null, value);
     }
 
     /**
@@ -43,7 +48,15 @@ public class Annotation extends Modifier {
      * @return true iff this annotation is a single element annotation
      */
     public boolean isSingleElement() {
-        return nameValueMap.size() == 1 && nameValueMap.containsKey("");
+        return nameValueMap.size() == 1 && nameValueMap.containsKey(null);
+    }
+
+    /**
+     * Gets the expression this annotation's type name
+     * @return the expression this annotation's type name
+     */
+    public Expression getTypeExpression() {
+        return expr;
     }
 
     /**
@@ -60,7 +73,7 @@ public class Annotation extends Modifier {
      */
     public Expression getSingleValue() {
         if (isSingleElement()) {
-            return nameValueMap.get("");
+            return nameValueMap.get(null);
         }
         throw new RuntimeException(); // TODO
     }
@@ -69,7 +82,7 @@ public class Annotation extends Modifier {
      * Gets the mapping from argument name to value
      * @return the mapping from argument name to value
      */
-    public Map<String, Expression> getArguments() {
+    public Map<Token, Expression> getArguments() {
         if (isNormal()) {
             return nameValueMap;
         }
@@ -81,7 +94,7 @@ public class Annotation extends Modifier {
      * @param name the name of the argument
      * @param value the expression giving the argument value
      */
-    public void addArgument(String name, Expression value) {
+    public void addArgument(Token name, Expression value) {
         nameValueMap.put(name, value);
     }
 
@@ -90,7 +103,7 @@ public class Annotation extends Modifier {
      * @param name the name of the argument
      * @return the value of the argument with name `name`
      */
-    public Expression getValue(String name) {
+    public Expression getValue(Token name) {
         if (isNormal()) {
             return nameValueMap.get(name);
         }

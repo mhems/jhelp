@@ -1,5 +1,7 @@
 package com.binghamton.jhelp.ast;
 
+import org.antlr.v4.runtime.Token;
+
 /**
  * A class representing a Java assignment expression
  */
@@ -17,6 +19,7 @@ public class AssignmentExpression extends Expression {
     public AssignmentExpression(Expression lhs,
                                 AssignmentOperator op,
                                 Expression rhs) {
+        super(lhs.getFirstToken(), rhs.getLastToken());
         this.lhs = lhs;
         this.op = op;
         this.rhs = rhs;

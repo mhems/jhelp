@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.antlr.v4.runtime.Token;
+
 import com.binghamton.jhelp.Modifier;
-import com.binghamton.jhelp.MyPair;
+import com.binghamton.jhelp.NilType;
 import com.binghamton.jhelp.Type;
 
 /**
@@ -15,103 +17,72 @@ import com.binghamton.jhelp.Type;
  */
 public class VariableDeclaration extends Declaration {
     private Type type;
-    private Map<String, Expression> pairs = new HashMap<>();
+    private Token name;
+    private Expression initializer;
     private boolean isEllipsis;
+    private boolean receiver = false;
 
     /**
      * Construct a new variable declaration
-     * @param name the name of the variable being declared
+     * @param name the Token holding the name of the variable being declared
      */
-    public VariableDeclaration(String name) {
-        this(name, null, new ArrayList<Modifier>(), null, false);
+    public VariableDeclaration(Token name) {
+        this(name, new ArrayList<Modifier>());
     }
 
     /**
      * Construct a new named, modified variable declaration
-     * @param name the name of the variable being declared
+     * @param name the Token holding the name of the variable being declared
      * @param modifiers any modifiers on the variable being declared
      */
-    public VariableDeclaration(String name, List<Modifier> modifiers) {
-        this(name, null, modifiers, null, false);
+    public VariableDeclaration(Token name, List<Modifier> modifiers) {
+        this(name, new NilType(), modifiers);
     }
 
     /**
      * Construct a new typed variable declaration
-     * @param name the name of the variable being declared
+     * @param name the Token holding the name of the variable being declared
+     * @param type the type of the variable being declared
+     * @param modifiers any modifiers on the variable being declared
+     */
+    public VariableDeclaration(Token name,
+                               Type type,
+                               List<Modifier> modifiers) {
+        this(name, type, modifiers, false);
+    }
+
+    /**
+     * Construct a new typed variable declaration
+     * @param name the Token holding the name of the variable being declared
      * @param type the type of the variable being declared
      * @param modifiers any modifiers on the variable being declared
      * @param isEllipsis true iff this is a variadic parameter variable
      */
-    public VariableDeclaration(String name,
+    public VariableDeclaration(Token name,
                                Type type,
                                List<Modifier> modifiers,
                                boolean isEllipsis) {
-        this(name, type, modifiers, null, isEllipsis);
-    }
-
-    /**
-     * Construct a new typed variable declaration
-     * @param name the name of the variable being declared
-     * @param type the type of the variable being declared
-     * @param modifiers any modifiers on the variable being declared
-     */
-    public VariableDeclaration(String name,
-                               Type type,
-                               List<Modifier> modifiers) {
-        this(name, type, modifiers, null, false);
+        this(name, type, modifiers, new NilExpression(), isEllipsis);
     }
 
     /**
      * Construct a new typed variable declaration with initial value
-     * @param name the name of the variable being declared
+     * @param name the Token holding the name of the variable being declared
      * @param type the type of the variable being declared
      * @param modifiers any modifiers on the variable being declared
      * @param initializer the expression yielding the variable's inital value
      * @param isEllipsis true iff this variable is variadic
      */
-    public VariableDeclaration(String name,
+    public VariableDeclaration(Token name,
                                Type type,
                                List<Modifier> modifiers,
                                Expression initializer,
                                boolean isEllipsis) {
-        // name could also have trailing [N] where N is trailing dimension quantity
-        super(name, modifiers);
-        pairs.put(name, initializer);
+        super(name, type.getFirstToken(), modifiers);
+        this.name = name;
         this.type = type;
+        this.initializer = initializer;
         this.isEllipsis = isEllipsis;
-    }
-
-    /**
-     * Construct a new typed variable declaration of a name-initializer pair
-     * @param pair a name-initializer pair
-     * @param type the type of the variable being declared
-     * @param modifiers any modifiers on the variable being declared
-     */
-    public VariableDeclaration(MyPair<String, Expression> pair,
-                               Type type,
-                               List<Modifier> modifiers) {
-        super(null, modifiers);
-        this.pairs.put(pair.first, pair.second);
-        this.type = type;
-        this.isEllipsis = false;
-    }
-
-    /**
-     * Construct a new typed variable declaration of multiple name-initializer
-     * pairs
-     * @param pairs a list of name-initializer pairs
-     * @param type the type of the variable being declared
-     * @param modifiers any modifiers on the variable being declared
-     */
-    public VariableDeclaration(List<MyPair<String, Expression>> pairs,
-                               Type type,
-                               List<Modifier> modifiers) {
-        super(null, modifiers);
-        for (MyPair<String, Expression> pair : pairs) {
-            this.pairs.put(pair.first, pair.second);
-        }
-        this.type = type;
-        this.isEllipsis = false;
     }
 
     /**
@@ -127,42 +98,31 @@ public class VariableDeclaration extends Declaration {
      * @return true iff this variable is explicitly typed
      */
     public boolean isTyped() {
-        return type != null;
-    }
-
-    /**
-     * Gets the names of this variable declaration
-     * @return the names of this variable declaration
-     */
-    public Set<String> getNames() {
-        return pairs.keySet();
-    }
-
-    /**
-     * Determines if this declaration declares a certain variable
-     * @param name the name of the variable to inquire about
-     * @return true iff this declaration declares a variable with name `name`
-     */
-    public boolean hasName(String name) {
-        return pairs.containsKey(name);
+        return !type.isNil();
     }
 
     /**
      * Gets the initial value of the variable, if any
-     * @param name the name of the variable
      * @return the initial value of the variable, if any
      */
-    public Expression getInitializer(String name) {
-        return pairs.get(name);
+    public Expression getInitializer() {
+        return initializer;
+    }
+
+    /**
+     * Sets the initial value of the variable, if any
+     * @param value the expression yielding the inital value
+     */
+    public void setInitializer(Expression initializer) {
+        this.initializer = initializer;
     }
 
     /**
      * Determines if this variable has an initial value
-     * @param name the name of the variable
      * @return true iff this variable has an initial value
      */
-    public boolean isInitialized(String name) {
-        return getInitializer(name) != null;
+    public boolean isInitialized() {
+        return !initializer.isNil();
     }
 
     /**
@@ -171,6 +131,23 @@ public class VariableDeclaration extends Declaration {
      */
     public boolean isVariadic() {
         return isEllipsis;
+    }
+
+    /**
+     * Establishes whether this variable is a receiver parameter
+     * @param b true iff this variable should be a receiver parameter
+     *          false otherwise
+     */
+    public void setReceiverParameter(boolean b) {
+        this.receiver = b;
+    }
+
+    /**
+     * Determines if this variable is a receiver parameter
+     * @return true iff this variable is a receiver parameter
+     */
+    public boolean isReceiverParameter() {
+        return receiver;
     }
 
     /**

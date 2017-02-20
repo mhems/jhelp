@@ -2,6 +2,8 @@ package com.binghamton.jhelp.ast;
 
 import java.util.List;
 
+import org.antlr.v4.runtime.Token;
+
 /**
  * A class representing a Java array initializer
  */
@@ -10,9 +12,14 @@ public class ArrayInitializer extends Expression {
 
     /**
      * Construct a new Java array initializer
+     * @param first the first token of this ASTNode
+     * @param last the last token of this ASTNode
      * @param elements the initializers of this array
      */
-    public ArrayInitializer(List<Expression> elements) {
+    public ArrayInitializer(Token first,
+                            Token last,
+                            List<Expression> elements) {
+        super(first, last);
         this.elements = elements;
     }
 

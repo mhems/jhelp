@@ -1,8 +1,10 @@
 package com.binghamton.jhelp.ast;
 
-import com.binghamton.jhelp.VariableSymbol;
-
 import java.util.List;
+
+import org.antlr.v4.runtime.Token;
+
+import com.binghamton.jhelp.VariableSymbol;
 
 /**
  * A class representing a Java lambda expression
@@ -13,10 +15,14 @@ public class LambdaExpression extends Expression {
 
     /**
      * Construct a new lambda expression
+     * @param first the first Token
      * @param params the parameters to the lambda expression
      * @param body the body of the lambda expression
      */
-    public LambdaExpression(List<VariableDeclaration> params, Block body) {
+    public LambdaExpression(Token first,
+                            List<VariableDeclaration> params,
+                            Block body) {
+        super(first, body.getLastToken());
         this.params = params;
         this.body = body;
     }

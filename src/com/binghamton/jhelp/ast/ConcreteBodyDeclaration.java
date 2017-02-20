@@ -3,6 +3,8 @@ package com.binghamton.jhelp.ast;
 import java.util.List;
 import java.util.ArrayList;
 
+import org.antlr.v4.runtime.Token;
+
 import com.binghamton.jhelp.ClassInterfaceType;
 import com.binghamton.jhelp.Modifier;
 
@@ -11,7 +13,7 @@ import com.binghamton.jhelp.Modifier;
  * This includes classes and enums.
  */
 public abstract class ConcreteBodyDeclaration extends BodyDeclaration {
-    protected List<ClassInterfaceType> implementees;
+    protected List<ClassInterfaceType> implementees = new ArrayList<>();
     protected List<MethodDeclaration> methods = new ArrayList<>();
     protected List<MethodDeclaration> ctors = new ArrayList<>();
     protected List<Block> instanceInitializers = new ArrayList<>();
@@ -19,6 +21,8 @@ public abstract class ConcreteBodyDeclaration extends BodyDeclaration {
 
     /**
      * Construct an anonymous declaration
+     * @param first the first token of this ASTNode
+     * @param last the last token of this ASTNode
      */
     public ConcreteBodyDeclaration() {
         super();
@@ -27,13 +31,15 @@ public abstract class ConcreteBodyDeclaration extends BodyDeclaration {
     /**
      * Construct a new concrete body declaration
      * @param name the name of the declaration
+     * @param keyword the keyword of the declaration
      * @param modifiers the modifiers of the declaration
      * @param implementees the interfaces this declaration implements
      */
-    public ConcreteBodyDeclaration(String name,
+    public ConcreteBodyDeclaration(Token name,
+                                   Token keyword,
                                    List<Modifier> modifiers,
                                    List<ClassInterfaceType> implementees) {
-        super(name, modifiers);
+        super(name, keyword, modifiers);
         this.implementees = implementees;
     }
 
@@ -42,7 +48,7 @@ public abstract class ConcreteBodyDeclaration extends BodyDeclaration {
      * @return true iff this declaration implements any interfaces
      */
     public boolean hasSuperInterfaces() {
-        return implementees != null && implementees.size() > 0;
+        return implementees.size() > 0;
     }
 
     /**
