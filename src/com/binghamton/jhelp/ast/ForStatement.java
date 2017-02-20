@@ -3,44 +3,50 @@ package com.binghamton.jhelp.ast;
 import java.util.List;
 import java.util.ArrayList;
 
+import org.antlr.v4.runtime.Token;
+
 /**
  * A class representing a Java for statement
  */
-public class ForStatement extends Statement {
+public class ForStatement extends Block {
     private List<Statement> initializers;
     private Expression condition;
-    private List<Expression> updates;
-    private Block body;
+    private List<Statement> updates;
 
     /**
      * Construct a new for statement with a single statement body
+     * @param keyword the for keyword Token
      * @param initializers the initializing statements of the for statement
      * @param condition the iteration condition of the for statement
      * @param updates the updating statements of the for statement
      * @param statement the single statement of the for statement body
      */
-    public ForStatement(List<Statement> initializers,
+    public ForStatement(Token keyword,
+                        List<Statement> initializers,
                         Expression condition,
-                        List<Expression> updates,
+                        List<Statement> updates,
                         Statement statement) {
-        this(initializers, condition, updates, new Block(statement));
+        this(keyword, initializers, condition, updates, new Block(statement));
     }
 
     /**
      * Construct a new for statement
+     * @param keyword the for keyword Token
      * @param initializers the initializing statements of the for statement
      * @param condition the iteration condition of the for statement
      * @param updates the updating statements of the for statement
      * @param body the body of the for statement
      */
-    public ForStatement(List<Statement> initializers,
+    public ForStatement(Token keyword,
+                        List<Statement> initializers,
                         Expression condition,
-                        List<Expression> updates,
+                        List<Statement> updates,
                         Block body) {
+        super(body);
+        setFirstToken(keyword);
         this.initializers = initializers;
         this.condition = condition;
         this.updates = updates;
-        this.body = body;
     }
 
     /**
@@ -56,7 +62,7 @@ public class ForStatement extends Statement {
      * @param index the 0-indexed initializer to retrieve
      * @return the initializer at index `index`
      */
-    public Statement getInitializer(int index;) {
+    public Statement getInitializer(int index) {
         return initializers.get(index);
     }
 
@@ -77,36 +83,37 @@ public class ForStatement extends Statement {
     }
 
     /**
-     * Gets the updater expressions that update this statement
-     * @return the updater expressions that update this statement
+     * Gets the updater statements that update this statement
+     * @return the updater statements that update this statement
      */
-    public List<Expression> getUpdaters() {
+    public List<Statement> getUpdaters() {
         return updates;
     }
 
     /**
-     * Gets a particular updater of this statement
+     * Gets a particular updater of this for statement
      * @param index the 0-indexed updater to retrieve
      * @return the update at index `index`
      */
-    public Expression getUpdate(int index;) {
+    public Statement getUpdate(int index) {
         return updates.get(index);
     }
 
     /**
-     * Gets the number of updaters of this case statement
-     * @return the number of updaters of this case statement
+     * Gets the number of updaters of this for statement
+     * @return the number of updaters of this for statement
      */
     public int getNumUpdaters() {
-        return updaters.size();
+        return updates.size();
     }
 
     /**
-     * Gets the body of the for statement
-     * @return the body of the for statement
+     * Double dispatch this class on parameter
+     * @param v the visitor to accept
      */
-    public Block getBody() {
-        return body;
+    @Override
+    public void accept(ASTVisitor v) {
+        super.accept(v);
+        v.visit(this);
     }
-
 }

@@ -1,29 +1,67 @@
 package com.binghamton.jhelp;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.binghamton.jhelp.ast.ASTVisitor;
+import com.binghamton.jhelp.ast.Dimension;
+
+import org.antlr.v4.runtime.Token;
+
 /**
  * Class representing an array type
  */
-public class ArrayType extends Type {
-    private int rank;
+public class ArrayType extends ReferenceType {
+    private List<Dimension> dims;
 
     /**
      * Construct a named array type
-     * @param name the name of the array type
-     * @param rank the dimensions of the array type
+     * @param type the type of the array elements
+     * @param dims the dimensions of the array type
      */
-    public ArrayType(String name, int rank) {
-	super(name);
-	this.rank = rank;
+    public ArrayType(Type type, List<Dimension> dims) {
+        super(type.getFirstToken(),
+              dims.get(dims.size()-1).getLastToken(),
+              type.name,
+              type.annotations.getAnnotations());
+        this.dims = dims;
     }
 
     /**
-     * Construct a named, annotated array type
-     * @param name the name of the array type
-     * @param annotations the annotations of the array type
-     * @param rank the dimensions of the array type
+     * Augments the type into a new array type
+     * @param dims the dimensions of the array type
+     * @return a new array type with same base type and `dimensions`
      */
-    public ArrayType(String name, Annotations annotations, int rank) {
-	super(name, annotations);
-	this.rank = rank;
+    @Override
+    public ArrayType augment(List<Dimension> dims) {
+        List<Dimension> newDims = new ArrayList<>(this.dims);
+        newDims.addAll(dims);
+        return new ArrayType(this, newDims);
+    }
+
+    /**
+     * Gets the dimensions of this array
+     * @return the dimensions of this array
+     */
+    public List<Dimension> getDimensions() {
+        return dims;
+    }
+
+    /**
+     * Gets the number of dimensions of this array
+     * @return the number of dimensions of this array
+     */
+    public int rank() {
+        return dims.size();
+    }
+
+    /**
+     * Double dispatch super class and this class on parameter
+     * @param v the visitor to accept
+     */
+    @Override
+    public void accept(ASTVisitor v) {
+        super.accept(v);
+        v.visit(this);
     }
 }

@@ -1,5 +1,12 @@
 // Generated from Java8.g4 by ANTLR 4.6
 package com.binghamton.jhelp.antlr;
+
+    import java.util.ArrayList;
+    import java.util.List;
+
+    import com.binghamton.jhelp.*;
+    import com.binghamton.jhelp.ast.*;
+
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Token;

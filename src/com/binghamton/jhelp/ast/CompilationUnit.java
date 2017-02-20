@@ -1,9 +1,11 @@
 package com.binghamton.jhelp.ast;
 
+import java.util.List;
+
 /**
  * A class representing a Java compilation unit (file)
  */
-public class CompilationUnit {
+public class CompilationUnit extends ASTNode {
     private PackageStatement pkg;
     private List<ImportStatement> imports;
     private List<BodyDeclaration> bodies;
@@ -17,6 +19,7 @@ public class CompilationUnit {
     public CompilationUnit(PackageStatement pkg,
                            List<ImportStatement> imports,
                            List<BodyDeclaration> bodies) {
+        super(pkg.getFirstToken());
         this.pkg = pkg;
         this.imports = imports;
         this.bodies = bodies;
@@ -28,6 +31,14 @@ public class CompilationUnit {
      */
     public PackageStatement getPackage() {
         return pkg;
+    }
+
+    /**
+     * Determines if this unit has a package statement
+     * @return true iff this unit has a package statement
+     */
+    public boolean hasPackage() {
+        return pkg != null;
     }
 
     /**
@@ -44,5 +55,15 @@ public class CompilationUnit {
      */
     public List<BodyDeclaration> getBodyDeclarations() {
         return bodies;
+    }
+
+    /**
+     * Double dispatch this class on parameter
+     * @param v the visitor to accept
+     */
+    @Override
+    public void accept(ASTVisitor v) {
+        super.accept(v);
+        v.visit(this);
     }
 }

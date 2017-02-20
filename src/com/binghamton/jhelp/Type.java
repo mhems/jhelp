@@ -1,22 +1,54 @@
 package com.binghamton.jhelp;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.antlr.v4.runtime.Token;
+
+import com.binghamton.jhelp.ast.ASTVisitor;
+import com.binghamton.jhelp.ast.ASTNode;
+import com.binghamton.jhelp.ast.Dimension;
+import com.binghamton.jhelp.ast.Expression;
+
 /**
  * Abstract base class representing a Java type
  */
-public abstact class Type {
+public abstract class Type extends Expression {
+    protected Annotations annotations;
+    protected String name;
 
-    // TODO should this be a singleton subclass?
-    public static final Type VOID = new Type("void");
+    /**
+     * Construct an unnamed type
+     */
+    public Type() {
+        super();
+    }
 
-    private Annotations annotations;
-    private String name;
+    /**
+     * Construct a named type
+     * @param name the Token holding the name of this type
+     */
+    public Type(Token name) {
+        this(name, new ArrayList<>());
+    }
 
     /**
      * Construct a named type
      * @param name the name of this type
      */
     public Type(String name) {
-	this(name, new Annotations);
+        this(name, new ArrayList<>());
+    }
+
+    /**
+     * Construct a named, annotated type
+     * @param name the Token holding the name of this type
+     * @param annotations the annotations of this type
+     */
+    public Type(Token name, List<Annotation> annotations) {
+        super(ASTNode.getFirstToken(name, annotations), name);
+        this.name = name.getText();
+        this.annotations = new Annotations(annotations);
     }
 
     /**
@@ -24,9 +56,42 @@ public abstact class Type {
      * @param name the name of this type
      * @param annotations the annotations of this type
      */
-    public Type(String name, Annotations annotations) {
-	this.name = name;
-	this.annotations = annotations;
+    public Type(String name, List<Annotation> annotations) {
+        super();
+        this.name = name;
+        this.annotations = new Annotations(annotations);
+    }
+
+    /**
+     * Construct a type
+     * @param first the first Token in this type declaration
+     * @param last the last Token in this type declaration
+     * @param name the name of this type
+     * @param annotations the annotations of this type
+     */
+    public Type(Token first,
+                Token last,
+                Token name,
+                List<Annotation> annotations) {
+        super(first, last);
+        this.name = name.getText();
+        this.annotations = new Annotations(annotations);
+    }
+
+    /**
+     * Construct a type
+     * @param first the first Token in this type declaration
+     * @param last the last Token in this type declaration
+     * @param name the name of this type
+     * @param annotations the annotations of this type
+     */
+    public Type(Token first,
+                Token last,
+                String name,
+                List<Annotation> annotations) {
+        super(first, last);
+        this.name = name;
+        this.annotations = new Annotations(annotations);
     }
 
     /**
@@ -34,7 +99,7 @@ public abstact class Type {
      * @return this type's name
      */
     public String getName() {
-	return name;
+        return name;
     }
 
     /**
@@ -42,7 +107,27 @@ public abstact class Type {
      * @return this type's annotations
      */
     public Annotations getAnnotations() {
-	return annotations;
+        return annotations;
+    }
+
+    /**
+     * Sets this type's annotations
+     * @param annotations this type's new annotations
+     */
+    public void setAnnotations(List<Annotation> annotations) {
+        this.annotations = new Annotations(annotations);
+    }
+
+    /**
+     * Augments the type into a new array type
+     * @param dims the dimensions of the array type
+     * @return a new array type with same base type and `dimensions`
+     */
+    public ArrayType augment(List<Dimension> dims) {
+        if (dims.size() == 0) {
+            throw new IllegalArgumentException("dimensions must not be empty");
+        }
+        return new ArrayType(this, dims);
     }
 
     /**
@@ -51,7 +136,7 @@ public abstact class Type {
      * @return true  if this type and `other` are type-equivalent
      * @       false otherwise
      */
-    public abstract boolean matches(Type other);
+    //public abstract boolean matches(Type other);
 
     /**
      * Determines if this type is a sub-type of `other`
@@ -59,7 +144,7 @@ public abstact class Type {
      * @return true  if this type is a sub-type of `other`
      * @       false otherwise
      */
-    public abstract boolean isSubtype(Type other);
+    //public abstract boolean isSubtype(Type other);
 
     /**
      * Determines if this type is a sub-type of `other`
@@ -67,7 +152,7 @@ public abstact class Type {
      * @return true  if this type is a sub-type of `other`
      * @       false otherwise
      */
-    public abstract boolean isSupertype(Type other);
+    //public abstract boolean isSupertype(Type other);
 
     /**
      * Determines if this object is equivalent to other
@@ -76,8 +161,12 @@ public abstact class Type {
      */
     @Override
     public boolean equals(Object other) {
-        // TODO
-        return true;
+        if (other instanceof Type) {
+            Type type = (Type)other;
+            return name.equals(type.name) &&
+                annotations.equals(type.annotations);
+        }
+        return false;
     }
 
     /**
@@ -86,8 +175,16 @@ public abstact class Type {
      */
     @Override
     public int hashCode() {
-        // TODO
-        return 0;
+        return name.hashCode() ^ annotations.hashCode();
     }
 
+    /**
+     * Double dispatch this class on parameter
+     * @param v the visitor to accept
+     */
+    @Override
+    public void accept(ASTVisitor v) {
+        super.accept(v);
+        v.visit(this);
+    }
 }

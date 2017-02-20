@@ -1,16 +1,23 @@
 package com.binghamton.jhelp.ast;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import org.antlr.v4.runtime.Token;
+
+import com.binghamton.jhelp.Modifier;
+import com.binghamton.jhelp.Type;
+import com.binghamton.jhelp.TypeParameter;
 
 /**
  * A class representing the declaration of a Java method
  */
 public class MethodDeclaration extends Declaration {
     private Type returnType;
-    private List<VariableDeclaration> params;
-    private Dimension dim;
-    private List<Type> exceptions;
-    private Block body;
+    private List<VariableDeclaration> params = new ArrayList<>();
+    private List<Type> exceptions = new ArrayList<>();
+    private List<TypeParameter> typeParams = new ArrayList<>();
+    private Block body = new NilBlock();
 
     /**
      * Construct a method declaration
@@ -69,6 +76,30 @@ public class MethodDeclaration extends Declaration {
     }
 
     /**
+     * Gets the type parameters of this method
+     * @return the type parameters of this method
+     */
+    public List<TypeParameter> getTypeParameters() {
+        return typeParams;
+    }
+
+    /**
+     * Sets the type parameters of this method
+     * @param typeParams the new type parameters of this method
+     */
+    public void setTypeParameters(List<TypeParameter> typeParams) {
+        this.typeParams = typeParams;
+    }
+
+    /**
+     * Determines if this method has type parameters
+     * @return true iff this method has type parameters
+     */
+    public boolean hasTypeParameters() {
+        return typeParams.size() > 0;
+    }
+
+    /**
      * Sets this method's body
      * @param body this method's body
      */
@@ -82,5 +113,15 @@ public class MethodDeclaration extends Declaration {
      */
     public Block getBody() {
         return body;
+    }
+
+    /**
+     * Double dispatch this class on parameter
+     * @param v the visitor to accept
+     */
+    @Override
+    public void accept(ASTVisitor v) {
+        super.accept(v);
+        v.visit(this);
     }
 }

@@ -1,40 +1,46 @@
 package com.binghamton.jhelp.ast;
 
+import org.antlr.v4.runtime.Token;
+
 import com.binghamton.jhelp.Type;
 import com.binghamton.jhelp.VariableSymbol;
 
 /**
  * A class representing a Java for-each statement
  */
-public class ForEachStatement extends Statement {
+public class ForEachStatement extends Block {
     private VariableDeclaration variable;
     private Expression iterable;
-    private Block body;
 
     /**
      * Construct a new for each statement with a one statement body
+     * @param keyword the for keyword Token
      * @param variable the iteration variable
      * @param iterable the iterable being iterated
      * @param statement the single statement of the for each statement
      */
-    public ForEachStatement(VariableDeclaration variable,
+    public ForEachStatement(Token keyword,
+                            VariableDeclaration variable,
                             Expression iterable,
                             Statement statement) {
-        this(variable, iterable, new Block(statement));
+        this(keyword, variable, iterable, new Block(statement));
     }
 
     /**
      * Construct a new for each statement
+     * @param keyword the for keyword Token
      * @param variable the iteration variable
      * @param iterable the iterable being iterated
      * @param body the body of the for loop
      */
-    public ForEachStatement(VariableDeclaration variable,
+    public ForEachStatement(Token keyword,
+                            VariableDeclaration variable,
                             Expression iterable,
                             Block body) {
+        super(body);
+        setFirstToken(keyword);
         this.variable = variable;
         this.iterable = iterable;
-        this.body = body;
     }
 
     /**
@@ -54,10 +60,12 @@ public class ForEachStatement extends Statement {
     }
 
     /**
-     * Gets the body of the for each statement
-     * @return the body of the for each statement
+     * Double dispatch this class on parameter
+     * @param v the visitor to accept
      */
-    public Block getBody() {
-        return body;
+    @Override
+    public void accept(ASTVisitor v) {
+        super.accept(v);
+        v.visit(this);
     }
 }

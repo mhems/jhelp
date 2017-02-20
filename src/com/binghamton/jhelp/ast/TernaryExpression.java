@@ -5,22 +5,23 @@ package com.binghamton.jhelp.ast;
  */
 public class TernaryExpression extends Expression {
     private Expression condition;
-    private Expression ifExpr;
+    private Expression thenExpr;
     private Expression elseExpr;
 
     /**
      * Construct a new ternary expression
      * @param condition the conditional to evaluate
-     * @param ifExpr the expression whose value is to be returned if
+     * @param thenExpr the expression whose value is to be returned if
      * condition evaluates to true
      * @param elseExpr the expression whose value is to be returned if
      * condition evaluates to false
      */
     public TernaryExpression(Expression condition,
-                             Expression ifExpr,
+                             Expression thenExpr,
                              Expression elseExpr) {
+        super(condition.getFirstToken(), elseExpr.getLastToken());
         this.condition = condition;
-        this.ifExpr = ifExpr;
+        this.thenExpr = thenExpr;
         this.elseExpr = elseExpr;
     }
 
@@ -36,8 +37,8 @@ public class TernaryExpression extends Expression {
      * Gets the expression to yield iff condition is true
      * @return the expression to yield iff condition is true
      */
-    public Expression getIfExpression() {
-        return ifExpr;
+    public Expression getThenExpression() {
+        return thenExpr;
     }
 
     /**
@@ -46,5 +47,15 @@ public class TernaryExpression extends Expression {
      */
     public Expression getElseExpression() {
         return elseExpr;
+    }
+
+    /**
+     * Double dispatch this class on parameter
+     * @param v the visitor to accept
+     */
+    @Override
+    public void accept(ASTVisitor v) {
+        super.accept(v);
+        v.visit(this);
     }
 }

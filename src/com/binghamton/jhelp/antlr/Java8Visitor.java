@@ -1,5 +1,12 @@
 // Generated from Java8.g4 by ANTLR 4.6
 package com.binghamton.jhelp.antlr;
+
+    import java.util.ArrayList;
+    import java.util.List;
+
+    import com.binghamton.jhelp.*;
+    import com.binghamton.jhelp.ast.*;
+
 import org.antlr.v4.runtime.tree.ParseTreeVisitor;
 
 /**
@@ -167,12 +174,6 @@ public interface Java8Visitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitWildcardBounds(Java8Parser.WildcardBoundsContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link Java8Parser#packageName}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitPackageName(Java8Parser.PackageNameContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link Java8Parser#typeName}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -190,12 +191,6 @@ public interface Java8Visitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitExpressionName(Java8Parser.ExpressionNameContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link Java8Parser#methodName}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitMethodName(Java8Parser.MethodNameContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link Java8Parser#ambiguousName}.
 	 * @param ctx the parse tree
@@ -352,6 +347,12 @@ public interface Java8Visitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitVariableDeclaratorId(Java8Parser.VariableDeclaratorIdContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link Java8Parser#typedVariableDeclaratorId}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitTypedVariableDeclaratorId(Java8Parser.TypedVariableDeclaratorIdContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link Java8Parser#variableInitializer}.
 	 * @param ctx the parse tree
@@ -550,12 +551,6 @@ public interface Java8Visitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitConstructorDeclarator(Java8Parser.ConstructorDeclaratorContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link Java8Parser#simpleTypeName}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitSimpleTypeName(Java8Parser.SimpleTypeNameContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link Java8Parser#constructorBody}.
 	 * @param ctx the parse tree
@@ -899,12 +894,6 @@ public interface Java8Visitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitSwitchLabel(Java8Parser.SwitchLabelContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link Java8Parser#enumConstantName}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitEnumConstantName(Java8Parser.EnumConstantNameContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link Java8Parser#whileStatement}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -1078,6 +1067,12 @@ public interface Java8Visitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitPrimaryNoNewArray(Java8Parser.PrimaryNoNewArrayContext ctx);
+	/**
+	 * Visit a parse tree produced by {@link Java8Parser#primaryNoNewArray_typeAccess}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitPrimaryNoNewArray_typeAccess(Java8Parser.PrimaryNoNewArray_typeAccessContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link Java8Parser#primaryNoNewArray_lf_arrayAccess}.
 	 * @param ctx the parse tree
@@ -1409,23 +1404,11 @@ public interface Java8Visitor<T> extends ParseTreeVisitor<T> {
 	 */
 	T visitPostIncrementExpression(Java8Parser.PostIncrementExpressionContext ctx);
 	/**
-	 * Visit a parse tree produced by {@link Java8Parser#postIncrementExpression_lf_postfixExpression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitPostIncrementExpression_lf_postfixExpression(Java8Parser.PostIncrementExpression_lf_postfixExpressionContext ctx);
-	/**
 	 * Visit a parse tree produced by {@link Java8Parser#postDecrementExpression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitPostDecrementExpression(Java8Parser.PostDecrementExpressionContext ctx);
-	/**
-	 * Visit a parse tree produced by {@link Java8Parser#postDecrementExpression_lf_postfixExpression}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitPostDecrementExpression_lf_postfixExpression(Java8Parser.PostDecrementExpression_lf_postfixExpressionContext ctx);
 	/**
 	 * Visit a parse tree produced by {@link Java8Parser#castExpression}.
 	 * @param ctx the parse tree

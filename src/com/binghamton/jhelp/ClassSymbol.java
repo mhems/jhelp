@@ -3,6 +3,7 @@ package com.binghamton.jhelp;
 import java.util.Set;
 import java.util.TreeSet;
 
+import com.binghamton.jhelp.ast.NilBlock;
 import com.binghamton.jhelp.ast.Block;
 
 /**
@@ -13,7 +14,7 @@ public class ClassSymbol extends Symbol {
     private Set<InterfaceSymbol> implementees = new TreeSet<>();
     private Set<VariableSymbol> fields = new TreeSet<>();
     private Set<MethodSymbol> methods = new TreeSet<>();
-    private Block staticInit = new Block();
+    private Block staticInit = new NilBlock();
     private Package pkg = Package.DEFAULT_PACKAGE;
 
     /**

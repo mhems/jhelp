@@ -17,6 +17,7 @@ public class BinaryExpression extends Expression {
     public BinaryExpression(Expression lhs,
                             BinaryOperator op,
                             Expression rhs) {
+        super(lhs.getFirstToken(), rhs.getLastToken());
         this.lhs = lhs;
         this.op = op;
         this.rhs = rhs;
@@ -44,5 +45,15 @@ public class BinaryExpression extends Expression {
      */
     public Expression getRHS() {
         return rhs;
+    }
+
+    /**
+     * Double dispatch this class on parameter
+     * @param v the visitor to accept
+     */
+    @Override
+    public void accept(ASTVisitor v) {
+        super.accept(v);
+        v.visit(this);
     }
 }

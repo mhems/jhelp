@@ -5,6 +5,7 @@ package com.binghamton.jhelp.ast;
  */
 public enum UnaryOperator {
     BITWISE_NEGATION,
+    PLUS,
     NEGATION,
     INCREMENT,
     PRE_INCREMENT,

@@ -1,28 +1,35 @@
 package com.binghamton.jhelp.ast;
 
+import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.antlr.v4.runtime.Token;
+
 /**
  * A class representing a Java case block of a Java switch statement
  */
-public class CaseBlock extends ASTNode {
+public class CaseBlock extends Block {
     private List<Expression> labels;
-    private Block body;
+
+    /**
+     * Construct a new, empty case block with one label
+     * @param label the label for this case block
+     */
+    public CaseBlock(Expression label) {
+        this(new ArrayList<>(Arrays.asList(label)), new NilBlock());
+    }
 
     /**
      * Construct a new, empty case block
      * @param labels the list of labels for this case block
-     */
-    public CaseBlock(List<Expression> labels) {
-        this(labels, null);
-    }
-
-    /**
-     * Construct a new case block
-     * @param labels the list of labels for this case block
-     * @param body the body of the case block
+     * @param body the body of this case block
      */
     public CaseBlock(List<Expression> labels, Block body) {
+        super(labels.get(0).getFirstToken(),
+              labels.get(labels.size()-1).getLastToken(),
+              body.getStatements());
         this.labels = labels;
-        this.body = body;
     }
 
     /**
@@ -38,7 +45,7 @@ public class CaseBlock extends ASTNode {
      * @param index the 0-indexed label to retrieve
      * @return the label at index `index`
      */
-    public Expression getLabel(int index;) {
+    public Expression getLabel(int index) {
         return labels.get(index);
     }
 
@@ -51,18 +58,12 @@ public class CaseBlock extends ASTNode {
     }
 
     /**
-     * Gets the body that executes for this case block
-     * @return the body that executes for this case block
+     * Double dispatch this class on parameter
+     * @param v the visitor to accept
      */
-    public Block getBody() {
-        return body;
-    }
-
-    /**
-     * Determines if the block has a body
-     * @return true iff the block has a body
-     */
-    public boolean hasBody() {
-        return body != null;
+    @Override
+    public void accept(ASTVisitor v) {
+        super.accept(v);
+        v.visit(this);
     }
 }

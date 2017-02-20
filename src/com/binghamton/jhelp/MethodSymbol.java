@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.ArrayList;
 
 import com.binghamton.jhelp.ast.Block;
+import com.binghamton.jhelp.ast.NilBlock;
 
 /**
  * A class representing a Java method
@@ -15,7 +16,7 @@ public class MethodSymbol extends Symbol {
     private Scope scope;
     private List<VariableSymbol> params = new ArrayList<>();
     private Set<ClassSymbol> exceptions = new TreeSet<>();
-    private Block body;
+    private Block body = new NilBlock();
 
     /**
      * Constructs a new named method symbol
@@ -107,7 +108,7 @@ public class MethodSymbol extends Symbol {
      * @return true iff this method is implemented
      */
     public boolean isImplemented() {
-        return body != null;
+        return !body.isNil();
     }
 
     /**

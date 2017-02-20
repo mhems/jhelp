@@ -1,32 +1,44 @@
 package com.binghamton.jhelp.ast;
 
+import org.antlr.v4.runtime.Token;
+
 /**
  * A class representing a Java (do) while statement
  */
-public class WhileStatement extends Statement {
+public class WhileStatement extends Block {
     private Expression condition;
-    private Block body;
     private boolean isDo;
 
     /**
      * Construct a new while statement
+     * @param keyword the keyword of the while statement
      * @param condition the condition whose truth dictates iteration
      * @param body the code to conditionally execute
      */
-    public WhileStatement(Expression condition, Block body) {
-        this(condition, body, false);
+    public WhileStatement(Token keyword, Expression condition, Block body) {
+        super(body);
+        setFirstToken(keyword);
+        this.condition = condition;
+        this.isDo = false;
     }
 
     /**
-     * Construct a new while statement
+     * Construct a new do-while statement
+     * @param keyword the keyword of the do-while statement
+     * @param last the terminating Token
      * @param condition the condition whose truth dictates iteration
      * @param body the code to conditionally execute
-     * @param isDo true iff this while statement is a do-while statement
      */
-    public WhileStatement(Expression condition, Block body, boolean isDo) {
+    public WhileStatement(Token keyword,
+                          Token last,
+                          Expression condition,
+                          Block body) {
+        super(body);
+        setFirstToken(keyword);
+        setLastToken(last);
         this.condition = condition;
-        this.body = body;
-        this.isDo = isDo;
+        this.isDo = true;
+
     }
 
     /**
@@ -38,18 +50,20 @@ public class WhileStatement extends Statement {
     }
 
     /**
-     * Gets the code this statement conditionally executes
-     * @return the code this statement conditionally executes
-     */
-    public Block getBody() {
-        return body;
-    }
-
-    /**
      * Determines if this while statement is a do-while statement
      * @return true iff this while statement is a do-while statement
      */
     public boolean isDoWhile() {
         return isDo;
+    }
+
+    /**
+     * Double dispatch this class on parameter
+     * @param v the visitor to accept
+     */
+    @Override
+    public void accept(ASTVisitor v) {
+        super.accept(v);
+        v.visit(this);
     }
 }

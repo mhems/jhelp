@@ -1,20 +1,23 @@
 package com.binghamton.jhelp.ast;
 
+import org.antlr.v4.runtime.Token;
+
 /**
  * A class representing a Java synchronized block
  */
-public class SynchronizedBlock extends Statement {
+public class SynchronizedBlock extends Block {
     private Expression lock;
-    private Block body;
 
     /**
      * Construct a new synchronized block
+     * @param keyword the synchronized keyword
      * @param lock the expression on which to synchronize
      * @param body the statements to execute synchronously
      */
-    public SynchronizedStatement(Expression lock, Block body) {
+    public SynchronizedBlock(Token keyword, Expression lock, Block body) {
+        super(body);
+        setFirstToken(keyword);
         this.lock = lock;
-        this.body = body;
     }
 
     /**
@@ -26,10 +29,12 @@ public class SynchronizedBlock extends Statement {
     }
 
     /**
-     * Gets the code to execute synchronously
-     * @return the code to execute synchronously
+     * Double dispatch this class on parameter
+     * @param v the visitor to accept
      */
-    public Block getBody() {
-        return body;
+    @Override
+    public void accept(ASTVisitor v) {
+        super.accept(v);
+        v.visit(this);
     }
 }

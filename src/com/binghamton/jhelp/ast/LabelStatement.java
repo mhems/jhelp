@@ -1,35 +1,38 @@
 package com.binghamton.jhelp.ast;
 
+import org.antlr.v4.runtime.Token;
+
 /**
  * A class representing a Java label statement
  */
 public class LabelStatement extends Statement {
-    private String label;
-    private Statement statement;
+    private Token label;
 
     /**
      * Construct a new labelled statement
      * @param label the name of the label
      * @param statement the statement being labelled
      */
-    public LabelStatement(String label, Statement statement) {
+    public LabelStatement(Token label, Statement statement) {
+        super(label, statement.getLastToken());
         this.label = label;
-        this.statement = statement;
     }
 
     /**
-     * Gets the name of the label
-     * @return the name of the label
+     * Gets the text of the label
+     * @return the textname of the label
      */
-    public String getLabel() {
+    public Token getLabel() {
         return label;
     }
 
     /**
-     * Gets the labelled statement
-     * @return the labelled statement
+     * Double dispatch this class on parameter
+     * @param v the visitor to accept
      */
-    public Statement getStatement() {
-        return statement;
+    @Override
+    public void accept(ASTVisitor v) {
+        super.accept(v);
+        v.visit(this);
     }
 }

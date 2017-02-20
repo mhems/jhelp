@@ -7,7 +7,7 @@ public enum AssignmentOperator {
     EQUALS,
     ADDITION,
     SUBTRACTION,
-    MULTIPLACATION,
+    MULTIPLICATION,
     DIVISION,
     MODULUS,
     LEFT_SHIFT,

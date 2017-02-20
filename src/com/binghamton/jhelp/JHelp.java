@@ -6,14 +6,13 @@ import java.io.InputStream;
 import java.io.IOException;
 
 import org.antlr.v4.runtime.ANTLRInputStream;
-import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.ParseTreeWalker;
+import org.antlr.v4.runtime.Lexer;
 
 import com.binghamton.jhelp.antlr.Java8Lexer;
 import com.binghamton.jhelp.antlr.Java8Parser;
+import com.binghamton.jhelp.ast.CompilationUnit;
+import com.binghamton.jhelp.ast.NonNullVisitor;
 
 /**
  * JHelp application entry point
@@ -37,6 +36,7 @@ public class JHelp {
             }
         } else {
             try {
+                System.out.println("accepting input from stdin:");
                 process(System.in);
             } catch(IOException e) {
                 e.printStackTrace();
@@ -50,14 +50,10 @@ public class JHelp {
         CommonTokenStream tokenStream = new CommonTokenStream(lexer);
         Java8Parser parser = new Java8Parser(tokenStream);
 
-        // ParserRuleContext root = parser.compilationUnit();
-        // System.out.println(root.toStringTree(parser));
-        System.out.println("----------------------------------------");
-
-        ParseTree tree = parser.compilationUnit();
-        ParseTreeWalker walker = new ParseTreeWalker();
-        MyListener listener = new MyListener();
-        walker.walk(listener, tree);
+        CompilationUnit cu = parser.compilationUnit().ret;
+        NonNullVisitor nnV = new NonNullVisitor();
+        cu.accept(nnV);
+        System.out.println(nnV.getCount() + " objects verified.");
     }
 
     private static void process(String filename)

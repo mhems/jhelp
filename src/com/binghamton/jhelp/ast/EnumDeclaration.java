@@ -3,23 +3,29 @@ package com.binghamton.jhelp.ast;
 import java.util.List;
 import java.util.ArrayList;
 
+import org.antlr.v4.runtime.Token;
+
+import com.binghamton.jhelp.ClassInterfaceType;
+import com.binghamton.jhelp.Modifier;
+
 /**
  * A class representing enum declarations
  */
 public class EnumDeclaration extends ConcreteBodyDeclaration {
     private List<EnumConstant> constants = new ArrayList<>();
-    private List<ConcreteBodyDeclaration> bodies = new ArrayList<>();
 
     /**
      * Construct a new enum declaration
      * @param name the name of the declaration
+     * @param keyword the keyword Token of this declaration
      * @param modifiers the modifiers of the declaration
      * @param implementees the interfaces this declaration implements
      */
-    public EnumDeclaration(String name,
+    public EnumDeclaration(Token name,
+                           Token keyword,
                            List<Modifier> modifiers,
-                           List<String> implementees) {
-        super(name, modifiers, implementees);
+                           List<ClassInterfaceType> implementees) {
+        super(name, keyword, modifiers, implementees);
     }
 
     /**
@@ -39,18 +45,12 @@ public class EnumDeclaration extends ConcreteBodyDeclaration {
     }
 
     /**
-     * Gets the bodies of this declaration
-     * @return the bodies of this declaration
+     * Double dispatch this class on parameter
+     * @param v the visitor to accept
      */
-    public List<ConcreteBodyDeclaration> getBodies() {
-        return bodies;
-    }
-
-    /**
-     * Add a body declaration to this declaration
-     * @param d the declaration to add to this declaration
-     */
-    public void addBody(ConcreteBodyDeclaration d) {
-        bodies.add(d);
+    @Override
+    public void accept(ASTVisitor v) {
+        super.accept(v);
+        v.visit(this);
     }
 }
