@@ -20,7 +20,7 @@ import com.binghamton.jhelp.ast.NonNullVisitor;
 public class JHelp {
 
     /**
-     * Main method to invoke jhelp cli
+     * Main method to invoke jhelp CLI
      * @param args user-provided command-line arguments
      */
     public static void main(String[] args) {

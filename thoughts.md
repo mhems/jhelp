@@ -88,8 +88,7 @@ Compile Errors
 Anticipated Challenges
 ---
 * Generics
-* Handling of jars
-* Imports/packages
+* Handling of 3rd-party jars
 * Lambdas
 * anonymous classes
 * exceptions
@@ -99,16 +98,12 @@ TODO
 ---
 * Gather corpus of correct and incorrect files of various degrees of difficulty
   for testing
-* Test speed of c++11 implementation
-* Module Design
-* Design extensible AST API
 * Create symbol table
 * Type checking visitor
 * Syntactic pre-processor
 * Parallel invocation of `javac` and capture/internalization of any errors
 * usage correction
 * grammar for error messages
-* grammar for class files' symbols as produced by `javap`
 * (time permitting) config files
 * testing framework
   * API to mock up specific errors
