@@ -1,7 +1,5 @@
 package com.binghamton.jhelp.util;
 
-import java.util.Comparator;
-
 /**
  * An abstract base class for fuzzy string matchers to extend with their own
  * algorithm for computing edit distance.
@@ -43,7 +41,7 @@ public abstract class StringMatcher {
 
     /**
      * Construct a StringMatcher with given CharEquater
-     * @param charComparator the Comparator to use when comparing characters
+     * @param charEquater the CharEquater to use when comparing characters
      * among Strings
      */
     public StringMatcher(StringMatcher.CharEquater charEquater) {
