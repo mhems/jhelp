@@ -1,4 +1,4 @@
-package com.binghamton.jhelp;
+package com.binghamton.jhelp.util;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,7 +12,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 /**
- * A utility class to search for Java library classes in a jar file.
+ * A utility class to search for Java classes within a jar file.
  */
 public class SymbolFinder {
     private static final String EXT = ".class";
