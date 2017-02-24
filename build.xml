@@ -27,13 +27,23 @@
   </path>
 
   <target name="antlr">
-    <description>Builds recognizer from grammar files.</description>
+    <description>Builds recognizers from grammar files.</description>
     <java classname="org.antlr.v4.Tool" fork="true" failonerror="true" dir="${src.dir}">
       <arg value="-o"/> <arg value="${java-src.dir}/antlr"/>
       <arg value="-package"/> <arg value="${package}.antlr"/>
       <arg value="-no-visitor"/>
       <arg value="-no-listener"/>
       <arg value="Java8.g4"/>
+      <classpath>
+        <path refid="lib.classpath"/>
+      </classpath>
+    </java>
+    <java classname="org.antlr.v4.Tool" fork="true" failonerror="true" dir="${src.dir}">
+      <arg value="-o"/> <arg value="${java-src.dir}/antlr"/>
+      <arg value="-package"/> <arg value="${package}.antlr"/>
+      <arg value="-no-visitor"/>
+      <arg value="-no-listener"/>
+      <arg value="Balance.g4"/>
       <classpath>
         <path refid="lib.classpath"/>
       </classpath>
