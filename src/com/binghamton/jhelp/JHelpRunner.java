@@ -6,6 +6,7 @@ import java.util.List;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 
 import com.binghamton.jhelp.error.ExceptionError;
@@ -33,34 +34,23 @@ public class JHelpRunner {
      */
     public int run(String[] filenames) {
         InputStream[] streams = new InputStream[filenames.length];
-        String cur = null;
-        try {
-            for (int i = 0; i < streams.length; i++) {
-                cur = filenames[i];
-                streams[i] = new BufferedInputStream(new FileInputStream(cur));
-            }
-        } catch(FileNotFoundException e) {
-            errors.add(new ExceptionError(e));
-            return report();
-        }
-        return run(streams);
-    }
-
-    /**
-     * Run this Runner Validators against input streams
-     * @param streams the input streams to validate
-     * @return the number of errors produced
-     */
-    public int run(InputStream[] streams) {
         List<JHelpError> errs;
         for (Validator v : validators) {
+            try {
+                for (int i = 0; i < filenames.length; i++) {
+                    streams[i] = new BufferedInputStream(new FileInputStream(filenames[i]));
+                }
+            } catch(FileNotFoundException e) {
+                errors.add(new ExceptionError(e));
+                return report(); // fatal
+            }
             errs = v.validate(streams);
             errors.addAll(errs);
             if (v.isFatal() && !errs.isEmpty()) {
                 return report();
             }
         }
-        return errors.size();
+        return report();
     }
 
     /**

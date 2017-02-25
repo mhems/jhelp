@@ -10,6 +10,6 @@ public class ExceptionError extends JHelpError {
 
     @Override
     public String getMessage() {
-        return ex.getMessage();
+        return ex.toString();
     }
 }
