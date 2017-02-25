@@ -2,26 +2,25 @@ package com.binghamton.jhelp.error;
 
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.BalanceChecker;
+import com.binghamton.jhelp.BalancedValidator;
 
 /**
  * A class representing the class of syntax errors due to unbalanced tokens
  * This includes mismatched braces as well as missing or extra braces.
  */
-public class UnbalancedBracesException extends JHelpException {
-    public static final long serialVersionUID = 0;
+public class UnbalancedBracesError extends JHelpError {
 
     private Token left;
     private Token right;
 
     /**
-     * Construct an UnbalancedBracesException with the offending Tokens
+     * Construct an UnbalancedBracesError with the offending Tokens
      * @param opening either the mismatching opening Token or null iff too many
      * closing braces
      * @param closing either the mismatching closing Token or null iff too many
      * opening braces
      */
-    public UnbalancedBracesException(Token opening, Token closing) {
+    public UnbalancedBracesError(Token opening, Token closing) {
         left = opening;
         right = closing;
     }
@@ -34,8 +33,8 @@ public class UnbalancedBracesException extends JHelpException {
     public String getMessage() {
         String leftError, rightError;
         StringBuilder b = new StringBuilder();
-        b.append("Unbalanced braces exception ");
-        b.append(JHelpException.getTokenErrorString(left == null ? right : left));
+        b.append("Unbalanced braces error ");
+        b.append(JHelpError.getTokenErrorString(left == null ? right : left));
         b.append(":\n");
 
         if (left == null || right == null) {
@@ -44,7 +43,7 @@ public class UnbalancedBracesException extends JHelpException {
             b.append(String.format("'%s' ", first));
             b.append(left == null ? "closing" : "opening");
             b.append(" brace, either delete it or add a ");
-            b.append(String.format("'%s' ", BalanceChecker.PAIRS.get(first)));
+            b.append(String.format("'%s' ", BalancedValidator.PAIRS.get(first)));
             b.append(left == null ? "opening" : "closing");
             b.append(" brace\n");
         } else {

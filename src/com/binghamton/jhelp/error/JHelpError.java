@@ -3,10 +3,9 @@ package com.binghamton.jhelp.error;
 import org.antlr.v4.runtime.Token;
 
 /**
- * The base class for all JHelp Exceptions
+ * The base class for all JHelp errors
  */
-public class JHelpException extends RuntimeException {
-    public static final long serialVersionUID = 0;
+public abstract class JHelpError {
 
     public static String getTokenErrorString(Token token) {
         return String.format("from %s on line %d, column %d",
@@ -14,4 +13,6 @@ public class JHelpException extends RuntimeException {
                              token.getLine(),
                              token.getStartIndex());
     }
+
+    public abstract String getMessage();
 }
