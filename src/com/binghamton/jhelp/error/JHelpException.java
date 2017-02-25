@@ -1,4 +1,4 @@
-package com.binghamton.jhelp;
+package com.binghamton.jhelp.error;
 
 import org.antlr.v4.runtime.Token;
 

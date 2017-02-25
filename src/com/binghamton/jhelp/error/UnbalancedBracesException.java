@@ -1,6 +1,8 @@
-package com.binghamton.jhelp;
+package com.binghamton.jhelp.error;
 
 import org.antlr.v4.runtime.Token;
+
+import com.binghamton.jhelp.BalanceChecker;
 
 /**
  * A class representing the class of syntax errors due to unbalanced tokens

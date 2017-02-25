@@ -11,12 +11,12 @@ import java.util.Stack;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.binghamton.jhelp.antlr.BalanceLexer;
-
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.Lexer;
 
+import com.binghamton.jhelp.antlr.BalanceLexer;
+import com.binghamton.jhelp.error.UnbalancedBracesException;
 
 /**
  * A class housing methods to check a source file has balanced punctuation.

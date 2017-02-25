@@ -22,13 +22,10 @@ public class SymbolFinder {
     /**
      * Construct a SymbolFinder with the name of a jar file
      * @param filename the name of the jar file to search through
+     * @throws IOException if I/O exception occurs during processing `filename`
      */
-    public SymbolFinder(String filename) {
-        try {
-            rt_jar = new JarFile(new File(filename));
-        } catch(IOException e) {
-            e.printStackTrace();
-        }
+    public SymbolFinder(String filename) throws IOException {
+        rt_jar = new JarFile(new File(filename));
         if (rt_jar != null) {
             ArrayList<String> tokens = new ArrayList<>();
             String curname, cls, pkg;
