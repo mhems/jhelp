@@ -17,6 +17,13 @@ public class Modifiers extends ASTNode {
     private Annotations annotations = new Annotations();
 
     /**
+     * Construct an empty set of Modifiers
+     */
+    public Modifiers() {
+        super();
+    }
+
+    /**
      * Construct a collection of modifiers from a list
      * @param modifiers the list of modifiers to initialize with
      */

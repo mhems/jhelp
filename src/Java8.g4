@@ -64,12 +64,27 @@ grammar Java8;
 /*
  * Productions from §3 (Lexical Structure)
  */
-// TODO refine to respect type suffix, if any
+
 literal returns [Expression ret]
+    locals [char last]
     :   i = IntegerLiteral
-        {$ret = new LiteralExpression($i, PrimitiveType.INT);}
+        {
+            $last = $i.getText().charAt($i.getText().length()-1);
+            if ($last == 'l' || $last == 'L') {
+                $ret = new LiteralExpression($i, PrimitiveType.LONG);
+            } else {
+                $ret = new LiteralExpression($i, PrimitiveType.INT);
+            }
+        }
     |   f = FloatingPointLiteral
-        {$ret = new LiteralExpression($f, PrimitiveType.FLOAT);}
+        {
+            $last = $f.getText().charAt($f.getText().length()-1);
+            if ($last == 'd' || $last == 'D') {
+                $ret = new LiteralExpression($f, PrimitiveType.DOUBLE);
+            } else {
+                $ret = new LiteralExpression($f, PrimitiveType.FLOAT);
+            }
+        }
     |   b = BooleanLiteral
         {$ret = new LiteralExpression($b, PrimitiveType.BOOLEAN);}
     |   c = CharacterLiteral
@@ -455,7 +470,7 @@ variableDeclaratorList [BodyDeclaration decl, List<Modifier> mods, Type t]
     locals [List<VariableDeclaration> ls = new ArrayList<>()]
     :   (d1 = variableDeclarator[$decl, $mods, $t] {$ls.add($d1.ret);})
         (',' d = variableDeclarator[$decl, $mods, $t] {$ls.add($d.ret);})*
-        {$ls = $ret;}
+        {$ret = $ls;}
     ;
 
 variableDeclarator [BodyDeclaration decl, List<Modifier> mods, Type t]
@@ -1202,9 +1217,9 @@ forStatementNoShortIf returns [Statement ret]
     ;
 
 basicForStatement returns [ForStatement ret]
-    locals [List<Statement> forIn,
-            List<Statement> forUp,
-            Expression expr]
+    locals [List<Statement> forIn = new ArrayList<>(),
+            List<Statement> forUp = new ArrayList<>(),
+            Expression expr = new NilExpression()]
     :   kw = 'for' '(' (i = forInit {$forIn = $i.ret;})? ';'
                        (e = expression {$expr = $e.ret;})? ';'
                        (u = forUpdate {$forUp = $u.ret;})? ')'
@@ -1213,9 +1228,9 @@ basicForStatement returns [ForStatement ret]
     ;
 
 basicForStatementNoShortIf returns [ForStatement ret]
-    locals [List<Statement> forIn,
-            List<Statement> forUp,
-            Expression expr]
+    locals [List<Statement> forIn = new ArrayList<>(),
+            List<Statement> forUp = new ArrayList<>(),
+            Expression expr = new NilExpression()]
     :   kw = 'for' '(' (i = forInit {$forIn = $i.ret;})? ';'
                        (e = expression {$expr = $e.ret;})? ';'
                        (u = forUpdate {$forUp = $u.ret;})? ')'

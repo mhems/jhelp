@@ -27,13 +27,23 @@
   </path>
 
   <target name="antlr">
-    <description>Builds recognizer from grammar files.</description>
+    <description>Builds recognizers from grammar files.</description>
     <java classname="org.antlr.v4.Tool" fork="true" failonerror="true" dir="${src.dir}">
       <arg value="-o"/> <arg value="${java-src.dir}/antlr"/>
       <arg value="-package"/> <arg value="${package}.antlr"/>
-      <arg value="-visitor"/>
+      <arg value="-no-visitor"/>
       <arg value="-no-listener"/>
       <arg value="Java8.g4"/>
+      <classpath>
+        <path refid="lib.classpath"/>
+      </classpath>
+    </java>
+    <java classname="org.antlr.v4.Tool" fork="true" failonerror="true" dir="${src.dir}">
+      <arg value="-o"/> <arg value="${java-src.dir}/antlr"/>
+      <arg value="-package"/> <arg value="${package}.antlr"/>
+      <arg value="-no-visitor"/>
+      <arg value="-no-listener"/>
+      <arg value="Balance.g4"/>
       <classpath>
         <path refid="lib.classpath"/>
       </classpath>
@@ -43,7 +53,7 @@
   <target name="compile">
     <description>Compiles all source code.</description>
     <javac destdir="${build.dir}" source="1.8"
-	   includeantruntime="false" debug="yes">
+       includeantruntime="false" debug="yes">
       <src path="${java-src.dir}"/>
       <classpath refid="compile.classpath"/>
       <compilerarg value="-Xlint:all"/>
@@ -72,12 +82,18 @@
   </target>
 
   <target name="clean">
-    <description>Removes build and antlr-generated files.</description>
+    <description>Removes class and back-up files.</description>
     <delete file="${target.dir}/${project}.jar"/>
     <delete>
       <fileset dir="${java-build.dir}" includes="**/*.class"/>
-      <fileset dir="${java-src.dir}/antlr"/>
       <fileset dir="${src.dir}" includes="**/*~" defaultexcludes="no"/>
+    </delete>
+  </target>
+
+  <target name="cleanall" depends="clean">
+    <description>Removes class and back-up files and antlr-generated files.</description>
+    <delete>
+      <fileset dir="${java-src.dir}/antlr"/>
     </delete>
   </target>
 

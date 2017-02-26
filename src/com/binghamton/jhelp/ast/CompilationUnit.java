@@ -19,7 +19,7 @@ public class CompilationUnit extends ASTNode {
     public CompilationUnit(PackageStatement pkg,
                            List<ImportStatement> imports,
                            List<BodyDeclaration> bodies) {
-        super(pkg.getFirstToken());
+        super();
         this.pkg = pkg;
         this.imports = imports;
         this.bodies = bodies;

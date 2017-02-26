@@ -49,10 +49,10 @@ public class TypeArgument extends ASTNode {
      * @throws RuntimeException if this argument is a wildcard
      */
     public ReferenceType getType() {
-        if (!isWildcard()) {
-            return type;
+        if (isDiamond()) {
+            throw new RuntimeException(); // TODO
         }
-        throw new RuntimeException(); // TODO
+        return type;
     }
 
     /**
@@ -60,8 +60,8 @@ public class TypeArgument extends ASTNode {
      * @return the annotations of this type argument
      */
     public Annotations getAnnotations() {
-        if (!isWildcard) {
-            return type.getAnnotations();
+        if (!isWildcard()) {
+            throw new RuntimeException(); // TODO
         }
         return annotations;
     }
@@ -90,6 +90,17 @@ public class TypeArgument extends ASTNode {
     public ReferenceType getBoundType() {
         if (isWildcard()) {
             return type;
+        }
+        throw new RuntimeException(); // TODO
+    }
+
+    /**
+     * Determines if this wildcard type argument is bounded
+     * @return true iff this wildcard type argument is bounded
+     */
+    public boolean hasBound() {
+        if (isWildcard()) {
+            return type != null;
         }
         throw new RuntimeException(); // TODO
     }

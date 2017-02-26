@@ -1,5 +1,6 @@
 package com.binghamton.jhelp.ast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.antlr.v4.runtime.Token;
@@ -11,7 +12,7 @@ import com.binghamton.jhelp.Type;
  */
 public class ArrayConstruction extends Expression {
     private Type type;
-    private List<DimensionExpression> dimExprs;
+    private List<DimensionExpression> dimExprs = new ArrayList<>();
     private List<Dimension> dims;
     private ArrayInitializer initializer;
 

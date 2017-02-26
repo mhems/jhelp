@@ -33,11 +33,11 @@ public class NonNullVisitor extends EmptyVisitor {
 
     private void assertNonNull(Object o) {
         assert(o != null);
-        if (o instanceof Token) {
-            System.out.println(((Token)o).getText());
-        } else {
-            System.out.println(o);
-        }
+        // if (o instanceof Token) {
+        //     System.out.println(((Token)o).getText());
+        // } else {
+        //     System.out.println(o);
+        // }
         ++count;
     }
 
@@ -55,9 +55,15 @@ public class NonNullVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(Annotation ast) {
-        for (Token s : ast.getArguments().keySet()) {
-            assertNonNull(s);
-            ast.getValue(s).accept(this);
+        if (ast.isMarker()) {
+            ast.getTypeExpression().accept(this);
+        } else if (ast.isSingleElement()) {
+            ast.getSingleValue().accept(this);
+        } else {
+            for (Token s : ast.getArguments().keySet()) {
+                assertNonNull(s);
+                ast.getValue(s).accept(this);
+            }
         }
     }
 
@@ -87,7 +93,8 @@ public class NonNullVisitor extends EmptyVisitor {
         ast.getElementType().accept(this);
         for (DimensionExpression e : ast.getDimensionExpressions())
             e.accept(this);
-        ast.getInitializer().accept(this);
+        if (ast.hasInitializer())
+            ast.getInitializer().accept(this);
     }
 
     /*
@@ -547,8 +554,15 @@ public class NonNullVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(TypeArgument ast) {
-        ast.getType().accept(this);
-        ast.getAnnotations().accept(this);
+        if (ast.isWildcard()) {
+            ast.getAnnotations().accept(this);
+            if (ast.hasBound()) {
+                ast.getBoundType().accept(this);
+            }
+        }
+        else if (!ast.isDiamond()) {
+            ast.getType().accept(this);
+        }
     }
 
     /*

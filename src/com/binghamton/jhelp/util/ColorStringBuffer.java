@@ -1,4 +1,4 @@
-package com.binghamton.jhelp;
+package com.binghamton.jhelp.util;
 
 /**
  * Class composing a `StringBuffer` with the additional API of basic terminal
