@@ -1,6 +1,5 @@
 package com.binghamton.jhelp;
 
-import java.io.InputStream;
 import java.io.IOException;
 
 import java.util.ArrayList;
@@ -9,11 +8,12 @@ import java.util.Stack;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.Lexer;
 
 import com.binghamton.jhelp.antlr.BalanceLexer;
+import com.binghamton.jhelp.error.ExceptionError;
 import com.binghamton.jhelp.error.JHelpError;
 import com.binghamton.jhelp.error.UnbalancedBracesError;
 
@@ -36,19 +36,22 @@ public class BalancedValidator implements Validator {
     }
 
     /**
-     * Validates the InputStream by checking for unbalanced braces
-     * @param streams the InputStreams to validate
+     * Validates the filenames' contents by checking for unbalanced braces
+     * @param filenames the names of the files to validate
      * @return a List of JHelpErrors, if any, that occured during validation
-     * @throws IOException if any I/O errors occur during validation
      */
-    public List<JHelpError> validateOrThrow(InputStream[] streams) throws IOException {
+    public List<JHelpError> validate(String[] filenames) {
         Lexer lexer;
-        List<JHelpError> errs = Validator.buildErrors();
-        for (InputStream stream : streams) {
-            lexer = new BalanceLexer(new ANTLRInputStream(stream));
-            errs.addAll(check(lexer.getAllTokens()));
+        List<JHelpError> errors = Validator.buildErrors();
+        try {
+            for (String filename : filenames) {
+                lexer = new BalanceLexer(new ANTLRFileStream(filename));
+                errors.addAll(check(lexer.getAllTokens()));
+            }
+        } catch (IOException e) {
+            errors.add(new ExceptionError(e));
         }
-        return errs;
+        return errors;
     }
 
     private static List<JHelpError> check(List<? extends Token> tokens) {

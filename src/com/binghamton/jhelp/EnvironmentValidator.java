@@ -3,7 +3,7 @@ package com.binghamton.jhelp;
 import java.io.InputStream;
 import java.util.List;
 
-import com.binghamton.jhelp.error.InvalidUseError;
+import com.binghamton.jhelp.error.InvalidUsageError;
 import com.binghamton.jhelp.error.JHelpError;
 
 /**
@@ -17,29 +17,34 @@ public class EnvironmentValidator implements Validator {
 
     /**
      * Validates the user's environment
-     * @param streams unused
+     * @param filenames unused
      * @return a List of JHelpErrors, if any, that occured during validation
      */
-    public List<JHelpError> validateOrThrow(InputStream[] streams) {
+    public List<JHelpError> validate(String[] filenames) {
         List<JHelpError> errors = Validator.buildErrors();
 
         String version = System.getProperty("java.specification.version");
         String[] versionNums = version.split("\\.");
-        int major = Integer.parseInt(versionNums[0]);
-        int minor = Integer.parseInt(versionNums[1]);
-
-        System.out.println("Hello, " + System.getProperty("user.name"));
+        final int major = Integer.parseInt(versionNums[0]);
+        final int minor = Integer.parseInt(versionNums[1]);
 
         if (minor < 8) {
-            errors.add(new InvalidUseError(){
+            errors.add(new InvalidUsageError(){
+                    @Override
                     public String getMessage() {
-                        return "Java 1.8 or higher must be used.";
+                        return String.format("Java 1.8 or higher must be used, Java %d.%d was detected",
+                                             major,
+                                             minor);
                     }
                 });
         }
 
-        System.out.print("OS: " + System.getProperty("os.name"));
-        System.out.println(", version: " + System.getProperty("os.version"));
+        System.out.println("Detected Java " + System.getProperty("java.version"));
+        System.out.print("Detected OS is " +
+                         System.getProperty("os.name") +
+                         " " +
+                         System.getProperty("os.version") +
+                         "\n");
 
         return errors;
     }

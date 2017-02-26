@@ -1,13 +1,16 @@
 package com.binghamton.jhelp;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import com.binghamton.jhelp.error.ExceptionError;
 import com.binghamton.jhelp.error.JHelpError;
@@ -16,8 +19,18 @@ import com.binghamton.jhelp.error.JHelpError;
  * A class responsible for validating input and tracking errors.
  */
 public class JHelpRunner {
+    public static final FileFilter JAVA_FILTER = pathname -> pathname.getName().endsWith(".java");
+    private final String[] args;
     private List<Validator> validators = new ArrayList<>();
     private List<JHelpError> errors = new ArrayList<>();
+
+    /**
+     * Construct a JHelpRunner from CLI input
+     * @param args the application arguments
+     */
+    public JHelpRunner(String[] args) {
+        this.args = expandFiles(args);
+    }
 
     /**
      * Add a Validator to the List of Validators to be run
@@ -29,22 +42,12 @@ public class JHelpRunner {
 
     /**
      * Run this Runner Validators against file input
-     * @param filenames the names of the files to validate
      * @return the number of errors produced
      */
-    public int run(String[] filenames) {
-        InputStream[] streams = new InputStream[filenames.length];
+    public int run() {
         List<JHelpError> errs;
         for (Validator v : validators) {
-            try {
-                for (int i = 0; i < filenames.length; i++) {
-                    streams[i] = new BufferedInputStream(new FileInputStream(filenames[i]));
-                }
-            } catch(FileNotFoundException e) {
-                errors.add(new ExceptionError(e));
-                return report(); // fatal
-            }
-            errs = v.validate(streams);
+            errs = v.validate(args);
             errors.addAll(errs);
             if (v.isFatal() && !errs.isEmpty()) {
                 return report();
@@ -61,7 +64,28 @@ public class JHelpRunner {
         int num = 1;
         for (JHelpError error : errors) {
             System.out.println(num + ".) " + error.getMessage());
+            ++num;
         }
         return num - 1;
+    }
+
+    private static String[] expandFiles(String[] filenames) {
+        List<String> names = new ArrayList<>();
+        for (String name : filenames) {
+            names.addAll(Arrays.asList(getJavaFiles(new File(name))));
+        }
+        return names.toArray(new String[0]);
+    }
+
+    private static String[] getJavaFiles(File file) {
+        if (file.isDirectory()) {
+            List<String> filenames = new ArrayList<>();
+            for (File f : file.listFiles(JAVA_FILTER)) {
+                filenames.addAll(Arrays.asList(getJavaFiles(f)));
+            }
+            return filenames.toArray(new String[0]);
+        } else {
+            return new String[]{file.getAbsolutePath()};
+        }
     }
 }

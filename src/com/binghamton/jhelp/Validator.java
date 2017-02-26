@@ -1,11 +1,8 @@
 package com.binghamton.jhelp;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.binghamton.jhelp.error.ExceptionError;
 import com.binghamton.jhelp.error.JHelpError;
 
 /**
@@ -28,26 +25,11 @@ public interface Validator {
     }
 
     /**
-     * Validates the InputStreams on some criterion or throws an IOException
-     * @param streams the InputStreams to validate
-     * @return a List of JHelpErrors, if any, that occured during validation
-     * @throws IOException if any I/O errors occur during validation
-     */
-    List<JHelpError> validateOrThrow(InputStream[] streams) throws IOException;
-
-
-    /**
-     * Validates the InputStreams on some criterion
-     * @param streams the InputStreams to validate
+     * Validates the filenames or their contents on some criterion
+     * @param filenames the names of the files to validate
      * @return a List of JHelpErrors, if any, that occured during validation
      */
-    default List<JHelpError> validate(InputStream[] streams) {
-        try {
-            return validateOrThrow(streams);
-        } catch (IOException e) {
-            return buildErrors(new ExceptionError(e));
-        }
-    }
+    List<JHelpError> validate(String[] filenames);
 
     /**
      * Signifies if any errors this Validator produces are fatal
