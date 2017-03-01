@@ -25,6 +25,9 @@ public class ImportManager {
     private final Set<String> onDemandPackages = new HashSet<>(autoImportPackages);
 
     {
+        for (String pkg : autoImportPackages) {
+            addOnDemandPackage(pkg);
+        }
         for (String pkg : autoImportSymbols) {
             try {
                 importSymbol(pkg);

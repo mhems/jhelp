@@ -6,8 +6,6 @@ import java.util.List;
 import com.binghamton.jhelp.ast.ASTVisitor;
 import com.binghamton.jhelp.ast.Dimension;
 
-import org.antlr.v4.runtime.Token;
-
 /**
  * Class representing an array type
  */

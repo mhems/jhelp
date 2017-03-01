@@ -3,8 +3,6 @@ package com.binghamton.jhelp;
 import java.util.List;
 import java.util.ArrayList;
 
-import org.antlr.v4.runtime.Token;
-
 import com.binghamton.jhelp.ast.ASTVisitor;
 import com.binghamton.jhelp.ast.ASTNode;
 

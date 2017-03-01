@@ -21,6 +21,7 @@ import com.binghamton.jhelp.error.JHelpError;
 public class JHelpRunner {
     public static final FileFilter JAVA_FILTER = pathname -> pathname.getName().endsWith(".java");
     private final String[] args;
+    private final boolean profiling = true;
     private List<Validator> validators = new ArrayList<>();
     private List<JHelpError> errors = new ArrayList<>();
 
@@ -46,12 +47,20 @@ public class JHelpRunner {
      */
     public int run() {
         List<JHelpError> errs;
+        long start, stop;
+        int i = 1;
         for (Validator v : validators) {
+            start = System.nanoTime();
             errs = v.validate(args);
+            stop = System.nanoTime();
+            if (profiling) {
+                System.out.printf("validator %d took '%f' ms\n", i, (stop - start)/1e6);
+            }
             errors.addAll(errs);
             if (v.isFatal() && !errs.isEmpty()) {
                 return report();
             }
+            ++i;
         }
         return report();
     }

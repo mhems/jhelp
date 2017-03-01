@@ -2,7 +2,6 @@ package com.binghamton.jhelp;
 
 import com.binghamton.jhelp.ast.Expression;
 
-import org.antlr.v4.runtime.Token;
 /**
  * A class representing a Java variable at any scope
  */

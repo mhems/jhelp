@@ -51,7 +51,8 @@ public class PackageStatement extends Statement {
      * @return the period-separated name of the declared package
      */
     public String getName() {
-        return getText();
+        String[] names = ids.stream().map(t -> t.getText()).toArray(i -> new String[i]);
+        return String.join(".", names);
     }
 
     /**

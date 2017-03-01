@@ -41,7 +41,7 @@ public class NonNullVisitor extends EmptyVisitor {
         ++count;
     }
 
-    /*
+    /**
      * Visit a AccessExpression node
      * @param ast the AST node being visited
      */
@@ -50,7 +50,7 @@ public class NonNullVisitor extends EmptyVisitor {
         ast.getRHS().accept(this);
     }
 
-    /*
+    /**
      * Visit a Annotation node
      * @param ast the AST node being visited
      */
@@ -67,7 +67,7 @@ public class NonNullVisitor extends EmptyVisitor {
         }
     }
 
-    /*
+    /**
      * Visit a Annotations node
      * @param ast the AST node being visited
      */
@@ -76,7 +76,7 @@ public class NonNullVisitor extends EmptyVisitor {
             a.accept(this);
     }
 
-    /*
+    /**
      * Visit a ArrayAccessExpression node
      * @param ast the AST node being visited
      */
@@ -85,7 +85,7 @@ public class NonNullVisitor extends EmptyVisitor {
         ast.getIndexExpression().accept(this);
     }
 
-    /*
+    /**
      * Visit a ArrayConstruction node
      * @param ast the AST node being visited
      */
@@ -97,7 +97,7 @@ public class NonNullVisitor extends EmptyVisitor {
             ast.getInitializer().accept(this);
     }
 
-    /*
+    /**
      * Visit a ArrayInitializer node
      * @param ast the AST node being visited
      */
@@ -106,7 +106,17 @@ public class NonNullVisitor extends EmptyVisitor {
             e.accept(this);
     }
 
-    /*
+    /**
+     * Visit a ArrayType node
+     * @param ast the AST node being visited
+     */
+    public void visit(ArrayType ast) {
+        for (Dimension d : ast.getDimensions()) {
+            d.accept(this);
+        }
+    }
+
+    /**
      * Visit a AssertStatement node
      * @param ast the AST node being visited
      */
@@ -115,7 +125,7 @@ public class NonNullVisitor extends EmptyVisitor {
         ast.getMessage().accept(this);
     }
 
-    /*
+    /**
      * Visit a AssignmentExpression node
      * @param ast the AST node being visited
      */
@@ -125,7 +135,7 @@ public class NonNullVisitor extends EmptyVisitor {
         ast.getRHS().accept(this);
     }
 
-    /*
+    /**
      * Visit a ASTNode node
      * @param ast the AST node being visited
      */
@@ -136,7 +146,7 @@ public class NonNullVisitor extends EmptyVisitor {
         }
     }
 
-    /*
+    /**
      * Visit a BinaryExpression node
      * @param ast the AST node being visited
      */
@@ -146,7 +156,7 @@ public class NonNullVisitor extends EmptyVisitor {
         ast.getRHS().accept(this);
     }
 
-    /*
+    /**
      * Visit a Block node
      * @param ast the AST node being visited
      */
@@ -156,7 +166,7 @@ public class NonNullVisitor extends EmptyVisitor {
         }
     }
 
-    /*
+    /**
      * Visit a BodyDeclaration node
      * @param ast the AST node being visited
      */
@@ -169,7 +179,7 @@ public class NonNullVisitor extends EmptyVisitor {
             intf.accept(this);
     }
 
-    /*
+    /**
      * Visit a CallExpression node
      * @param ast the AST node being visited
      */
@@ -181,7 +191,7 @@ public class NonNullVisitor extends EmptyVisitor {
             t.accept(this);
     }
 
-    /*
+    /**
      * Visit a CaseBlock node
      * @param ast the AST node being visited
      */
@@ -190,7 +200,7 @@ public class NonNullVisitor extends EmptyVisitor {
             e.accept(this);
     }
 
-    /*
+    /**
      * Visit a CastExpression node
      * @param ast the AST node being visited
      */
@@ -204,7 +214,7 @@ public class NonNullVisitor extends EmptyVisitor {
         }
     }
 
-    /*
+    /**
      * Visit a CatchBlock node
      * @param ast the AST node being visited
      */
@@ -214,7 +224,7 @@ public class NonNullVisitor extends EmptyVisitor {
             t.accept(this);
     }
 
-    /*
+    /**
      * Visit a ClassDeclaration node
      * @param ast the AST node being visited
      */
@@ -225,7 +235,7 @@ public class NonNullVisitor extends EmptyVisitor {
             ast.getSuperClass().accept(this);
     }
 
-    /*
+    /**
      * Visit a ClassInterfaceType node
      * @param ast the AST node being visited
      */
@@ -236,7 +246,7 @@ public class NonNullVisitor extends EmptyVisitor {
             ast.getSuperType().accept(this);
     }
 
-    /*
+    /**
      * Visit a CompilationUnit node
      * @param ast the AST node being visited
      */
@@ -249,7 +259,7 @@ public class NonNullVisitor extends EmptyVisitor {
             d.accept(this);
     }
 
-    /*
+    /**
      * Visit a ConcreteBodyDeclaration node
      * @param ast the AST node being visited
      */
@@ -266,7 +276,7 @@ public class NonNullVisitor extends EmptyVisitor {
             ib.accept(this);
     }
 
-    /*
+    /**
      * Visit a Declaration node
      * @param ast the AST node being visited
      */
@@ -275,7 +285,7 @@ public class NonNullVisitor extends EmptyVisitor {
         ast.getModifiers().accept(this);
     }
 
-    /*
+    /**
      * Visit a Dimension node
      * @param ast the AST node being visited
      */
@@ -283,7 +293,7 @@ public class NonNullVisitor extends EmptyVisitor {
         ast.getAnnotations().accept(this);
     }
 
-    /*
+    /**
      * Visit a DimensionExpression node
      * @param ast the AST node being visited
      */
@@ -292,7 +302,7 @@ public class NonNullVisitor extends EmptyVisitor {
         ast.getExpression().accept(this);
     }
 
-    /*
+    /**
      * Visit a EnumConstant node
      * @param ast the AST node being visited
      */
@@ -301,7 +311,7 @@ public class NonNullVisitor extends EmptyVisitor {
             e.accept(this);
     }
 
-    /*
+    /**
      * Visit a EnumDeclaration node
      * @param ast the AST node being visited
      */
@@ -310,7 +320,7 @@ public class NonNullVisitor extends EmptyVisitor {
             c.accept(this);
     }
 
-    /*
+    /**
      * Visit a ForEachStatement node
      * @param ast the AST node being visited
      */
@@ -319,7 +329,7 @@ public class NonNullVisitor extends EmptyVisitor {
         ast.getIterable().accept(this);
     }
 
-    /*
+    /**
      * Visit a ForStatement node
      * @param ast the AST node being visited
      */
@@ -331,7 +341,7 @@ public class NonNullVisitor extends EmptyVisitor {
             e.accept(this);
     }
 
-    /*
+    /**
      * Visit a IdentifierExpression node
      * @param ast the AST node being visited
      */
@@ -340,7 +350,7 @@ public class NonNullVisitor extends EmptyVisitor {
         assertNonNull(ast.getIdentifier());
     }
 
-    /*
+    /**
      * Visit a IfElseStatement node
      * @param ast the AST node being visited
      */
@@ -350,7 +360,7 @@ public class NonNullVisitor extends EmptyVisitor {
         ast.getElseBlock().accept(this);
     }
 
-    /*
+    /**
      * Visit a ImportStatement node
      * @param ast the AST node being visited
      */
@@ -358,7 +368,7 @@ public class NonNullVisitor extends EmptyVisitor {
         assertNonNull(ast.getName());
     }
 
-    /*
+    /**
      * Visit a InstantiationExpression node
      * @param ast the AST node being visited
      */
@@ -369,7 +379,7 @@ public class NonNullVisitor extends EmptyVisitor {
             ast.getAnonymousClass().accept(this);
     }
 
-    /*
+    /**
      * Visit a InterfaceDeclaration node
      * @param ast the AST node being visited
      */
@@ -382,7 +392,7 @@ public class NonNullVisitor extends EmptyVisitor {
             p.accept(this);
     }
 
-    /*
+    /**
      * Visit a LabelStatement node
      * @param ast the AST node being visited
      */
@@ -390,7 +400,7 @@ public class NonNullVisitor extends EmptyVisitor {
         assertNonNull(ast.getLabel());
     }
 
-    /*
+    /**
      * Visit a LambdaExpression node
      * @param ast the AST node being visited
      */
@@ -400,7 +410,7 @@ public class NonNullVisitor extends EmptyVisitor {
         ast.getBody().accept(this);
     }
 
-    /*
+    /**
      * Visit a LiteralExpression node
      * @param ast the AST node being visited
      */
@@ -408,7 +418,7 @@ public class NonNullVisitor extends EmptyVisitor {
         assertNonNull(ast.getValue());
     }
 
-    /*
+    /**
      * Visit a LocalVariableStatement node
      * @param ast the AST node being visited
      */
@@ -417,7 +427,7 @@ public class NonNullVisitor extends EmptyVisitor {
             var.accept(this);
     }
 
-    /*
+    /**
      * Visit a MethodDeclaration node
      * @param ast the AST node being visited
      */
@@ -432,7 +442,7 @@ public class NonNullVisitor extends EmptyVisitor {
         ast.getBody().accept(this);
     }
 
-    /*
+    /**
      * Visit a MethodReferenceExpression node
      * @param ast the AST node being visited
      */
@@ -443,7 +453,7 @@ public class NonNullVisitor extends EmptyVisitor {
         ast.getRHS().accept(this);
     }
 
-    /*
+    /**
      * Visit a MethodType node
      * @param ast the AST node being visited
      */
@@ -455,7 +465,7 @@ public class NonNullVisitor extends EmptyVisitor {
             t.accept(this);
     }
 
-    /*
+    /**
      * Visit a Modifier node
      * @param ast the AST node being visited
      */
@@ -463,7 +473,7 @@ public class NonNullVisitor extends EmptyVisitor {
         assertNonNull(ast.getName());
     }
 
-    /*
+    /**
      * Visit a Modifiers node
      * @param ast the AST node being visited
      */
@@ -473,7 +483,7 @@ public class NonNullVisitor extends EmptyVisitor {
             m.accept(this);
     }
 
-    /*
+    /**
      * Visit a PackageStatement node
      * @param ast the AST node being visited
      */
@@ -483,7 +493,7 @@ public class NonNullVisitor extends EmptyVisitor {
             assertNonNull(id);
     }
 
-    /*
+    /**
      * Visit a ReturnStatement node
      * @param ast the AST node being visited
      */
@@ -491,7 +501,7 @@ public class NonNullVisitor extends EmptyVisitor {
         ast.getExpression().accept(this);
     }
 
-    /*
+    /**
      * Visit a SwitchStatement node
      * @param ast the AST node being visited
      */
@@ -501,7 +511,7 @@ public class NonNullVisitor extends EmptyVisitor {
             b.accept(this);
     }
 
-    /*
+    /**
      * Visit a SynchronizedBlock node
      * @param ast the AST node being visited
      */
@@ -509,7 +519,7 @@ public class NonNullVisitor extends EmptyVisitor {
         ast.getLock().accept(this);
     }
 
-    /*
+    /**
      * Visit a TernaryExpression node
      * @param ast the AST node being visited
      */
@@ -519,7 +529,7 @@ public class NonNullVisitor extends EmptyVisitor {
         ast.getElseExpression().accept(this);
     }
 
-    /*
+    /**
      * Visit a ThrowStatement node
      * @param ast the AST node being visited
      */
@@ -527,7 +537,7 @@ public class NonNullVisitor extends EmptyVisitor {
         ast.getExpression().accept(this);
     }
 
-    /*
+    /**
      * Visit a TryCatchBlock node
      * @param ast the AST node being visited
      */
@@ -540,7 +550,7 @@ public class NonNullVisitor extends EmptyVisitor {
         ast.getFinallyBody().accept(this);
     }
 
-    /*
+    /**
      * Visit a Type node
      * @param ast the AST node being visited
      */
@@ -549,7 +559,7 @@ public class NonNullVisitor extends EmptyVisitor {
         assertNonNull(ast.getName());
     }
 
-    /*
+    /**
      * Visit a TypeArgument node
      * @param ast the AST node being visited
      */
@@ -565,7 +575,7 @@ public class NonNullVisitor extends EmptyVisitor {
         }
     }
 
-    /*
+    /**
      * Visit a TypeParameter node
      * @param ast the AST node being visited
      */
@@ -575,7 +585,7 @@ public class NonNullVisitor extends EmptyVisitor {
             t.accept(this);
     }
 
-    /*
+    /**
      * Visit a UnaryExpression node
      * @param ast the AST node being visited
      */
@@ -584,7 +594,7 @@ public class NonNullVisitor extends EmptyVisitor {
         assertNonNull(ast.getOperator());
     }
 
-    /*
+    /**
      * Visit a VariableDeclaration node
      * @param ast the AST node being visited
      */
@@ -594,7 +604,7 @@ public class NonNullVisitor extends EmptyVisitor {
         ast.getInitializer().accept(this);
     }
 
-    /*
+    /**
      * Visit a WhileStatement node
      * @param ast the AST node being visited
      */
