@@ -796,7 +796,7 @@ enumDeclaration returns [EnumDeclaration ret]
             List<ClassInterfaceType> sis = new ArrayList<>()]
     :   (m = classModifier {$mods.add($m.ret);})*
         kw = 'enum' id = Identifier (il = superinterfaces {$sis = $il.ret;})?
-        {$ret = new EnumDeclaration($kw, $id, $mods, $sis);}
+        {$ret = new EnumDeclaration($id, $kw, $mods, $sis);}
         enumBody[$ret]
     ;
 
@@ -848,7 +848,7 @@ normalInterfaceDeclaration returns [InterfaceDeclaration ret]
         kw = 'interface' id = Identifier
         (t = typeParameters {$tpars = $t.ret;})?
         (e = extendsInterfaces {$eis = $e.ret;})?
-        {$ret = new InterfaceDeclaration($kw, $id, $mods, $eis, $tpars);}
+        {$ret = new InterfaceDeclaration($id, $kw, $mods, $eis, $tpars);}
         interfaceBody[$ret]
     ;
 

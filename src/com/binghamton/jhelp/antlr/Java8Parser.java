@@ -6405,7 +6405,7 @@ public class Java8Parser extends Parser {
 				}
 			}
 
-			((EnumDeclarationContext)_localctx).ret =  new EnumDeclaration(((EnumDeclarationContext)_localctx).kw, ((EnumDeclarationContext)_localctx).id, _localctx.mods, _localctx.sis);
+			((EnumDeclarationContext)_localctx).ret =  new EnumDeclaration(((EnumDeclarationContext)_localctx).id, ((EnumDeclarationContext)_localctx).kw, _localctx.mods, _localctx.sis);
 			setState(1638);
 			enumBody(_localctx.ret);
 			}
@@ -6870,7 +6870,7 @@ public class Java8Parser extends Parser {
 				}
 			}
 
-			((NormalInterfaceDeclarationContext)_localctx).ret =  new InterfaceDeclaration(((NormalInterfaceDeclarationContext)_localctx).kw, ((NormalInterfaceDeclarationContext)_localctx).id, _localctx.mods, _localctx.eis, _localctx.tpars);
+			((NormalInterfaceDeclarationContext)_localctx).ret =  new InterfaceDeclaration(((NormalInterfaceDeclarationContext)_localctx).id, ((NormalInterfaceDeclarationContext)_localctx).kw, _localctx.mods, _localctx.eis, _localctx.tpars);
 			setState(1722);
 			interfaceBody(_localctx.ret);
 			}
