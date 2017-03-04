@@ -66,6 +66,7 @@ public class TopLevelVisitor extends EmptyVisitor {
         }
         if (ast.hasSuperClass()) {
             System.out.printf("this class extends class '%s'\n", ast.getSuperClass().getName());
+            ast.getSuperClass().accept(this);
         }
 
     }

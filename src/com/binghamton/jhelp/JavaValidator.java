@@ -14,7 +14,10 @@ import com.binghamton.jhelp.antlr.MyToken;
 import com.binghamton.jhelp.antlr.MyTokenFactory;
 import com.binghamton.jhelp.ast.ASTVisitor;
 import com.binghamton.jhelp.ast.CompilationUnit;
+import com.binghamton.jhelp.ast.PackageLevelVisitor;
 import com.binghamton.jhelp.ast.TopLevelVisitor;
+import com.binghamton.jhelp.ast.BodyLevelVisitor;
+import com.binghamton.jhelp.ast.CodeLevelVisitor;
 import com.binghamton.jhelp.error.ExceptionError;
 import com.binghamton.jhelp.error.JHelpError;
 
@@ -53,7 +56,17 @@ public class JavaValidator implements Validator {
                 parser.setBuildParseTree(false);
                 cu = parser.compilationUnit().ret;
                 if (parser.getNumberOfSyntaxErrors() == 0) {
+                    System.out.println("---------- PACKAGE ----------");
+                    visitor = new PackageLevelVisitor();
+                    cu.accept(visitor);
+                    System.out.println("---------- TOP ----------");
                     visitor = new TopLevelVisitor();
+                    cu.accept(visitor);
+                    System.out.println("---------- BODY ----------");
+                    visitor = new BodyLevelVisitor();
+                    cu.accept(visitor);
+                    System.out.println("---------- CODE ----------");
+                    visitor = new CodeLevelVisitor();
                     cu.accept(visitor);
                 }
             }
