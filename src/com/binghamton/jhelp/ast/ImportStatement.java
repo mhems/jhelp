@@ -45,6 +45,10 @@ public class ImportStatement extends Statement {
         return getText();
     }
 
+    public String getImportName() {
+        return nameExpr.getText();
+    }
+
     /**
      * Determines if this import is static
      * @return true iff this import is static

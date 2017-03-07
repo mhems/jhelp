@@ -19,7 +19,6 @@ public class VariableDeclaration extends Declaration {
     private Type type;
     private Token name;
     private Expression initializer;
-    private boolean isEllipsis;
     private boolean receiver = false;
 
     /**
@@ -48,7 +47,7 @@ public class VariableDeclaration extends Declaration {
     public VariableDeclaration(Token name,
                                Type type,
                                List<Modifier> modifiers) {
-        this(name, type, modifiers, false);
+        this(name, type, modifiers, new NilExpression());
     }
 
     /**
@@ -61,8 +60,8 @@ public class VariableDeclaration extends Declaration {
     public VariableDeclaration(Token name,
                                Type type,
                                List<Modifier> modifiers,
-                               boolean isEllipsis) {
-        this(name, type, modifiers, new NilExpression(), isEllipsis);
+                               Token ellipsis) {
+        this(name, type.augment(ellipsis), modifiers, new NilExpression());
     }
 
     /**
@@ -76,13 +75,11 @@ public class VariableDeclaration extends Declaration {
     public VariableDeclaration(Token name,
                                Type type,
                                List<Modifier> modifiers,
-                               Expression initializer,
-                               boolean isEllipsis) {
+                               Expression initializer) {
         super(name, type.getFirstToken(), modifiers);
         this.name = name;
         this.type = type;
         this.initializer = initializer;
-        this.isEllipsis = isEllipsis;
     }
 
     /**
@@ -123,14 +120,6 @@ public class VariableDeclaration extends Declaration {
      */
     public boolean isInitialized() {
         return !initializer.isNil();
-    }
-
-    /**
-     * Determines if this variable is a variadic parameter
-     * @return true iff this variable is a variadic parameter
-     */
-    public boolean isVariadic() {
-        return isEllipsis;
     }
 
     /**

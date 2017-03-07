@@ -3,6 +3,8 @@ package com.binghamton.jhelp;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.antlr.v4.runtime.Token;
+
 import com.binghamton.jhelp.ast.ASTVisitor;
 import com.binghamton.jhelp.ast.Dimension;
 
@@ -34,6 +36,13 @@ public class ArrayType extends ReferenceType {
     public ArrayType augment(List<Dimension> dims) {
         List<Dimension> newDims = new ArrayList<>(this.dims);
         newDims.addAll(dims);
+        return new ArrayType(this, newDims);
+    }
+
+    @Override
+    public ArrayType augment(Token ellipsis) {
+        List<Dimension> newDims = new ArrayList<>(this.dims);
+        newDims.add(new Dimension(ellipsis));
         return new ArrayType(this, newDims);
     }
 

@@ -498,7 +498,7 @@ variableDeclaratorId returns [Token ret, List<Dimension> d]
         {$ret = $id;}
     ;
 
-typedVariableDeclaratorId [List<Modifier> mods, boolean isVariadic]
+typedVariableDeclaratorId [List<Modifier> mods]
         returns [VariableDeclaration ret]
     locals [Type type]
     :   t = unannType id = variableDeclaratorId
@@ -507,7 +507,7 @@ typedVariableDeclaratorId [List<Modifier> mods, boolean isVariadic]
             if ($id.d.size() > 0) {
                 $type = $t.ret.augment($id.d);
             }
-            $ret = new VariableDeclaration($id.ret, $type, $mods, $isVariadic);
+            $ret = new VariableDeclaration($id.ret, $type, $mods);
         }
     ;
 
@@ -668,7 +668,7 @@ formalParameters returns [List<VariableDeclaration> ret]
 formalParameter returns [VariableDeclaration ret]
     locals [List<Modifier> mods = new ArrayList<>()]
     :   (m = variableModifier {$mods.add($m.ret);})*
-        v = typedVariableDeclaratorId[$mods, false] {$ret = $v.ret;}
+        v = typedVariableDeclaratorId[$mods] {$ret = $v.ret;}
     ;
 
 variableModifier returns [Modifier ret]
@@ -682,14 +682,14 @@ lastFormalParameter returns [VariableDeclaration ret]
     :   (m = variableModifier {$mods.add($m.ret);})*
         t = unannType
         (a = annotation {$mods.add($a.ret);})*
-        '...'
+        e = '...'
         n = variableDeclaratorId
         {
             $type = $t.ret;
             if ($n.d.size() > 0) {
                 $type = $t.ret.augment($n.d);
             }
-            $ret = new VariableDeclaration($n.ret, $type, $mods, true);
+            $ret = new VariableDeclaration($n.ret, $type, $mods, $e);
         }
     |   f = formalParameter {$ret = $f.ret;}
     ;
@@ -941,14 +941,11 @@ annotationTypeElementDeclaration returns [VariableDeclaration ret]
         (dv = defaultValue {$expr = $dv.ret;})? ';'
         {
             if ($ls != null) {
-                $ret = new VariableDeclaration($id,
-                                               $t.ret.augment($ls),
-                                               $mods,
-                                               $expr,
-                                               false);
+                $ret = new VariableDeclaration($id, $t.ret.augment($ls),
+                                               $mods, $expr);
             } else {
                 $ret = new VariableDeclaration($id, $t.ret,
-                                               $mods, $expr, false);
+                                               $mods, $expr);
             }
         }
     ;
@@ -1263,7 +1260,7 @@ statementExpressionList returns [List<Statement> ret]
 enhancedForStatement returns [ForEachStatement ret]
     locals [List<Modifier> mods = new ArrayList<>()]
     :   kw = 'for' '(' (m = variableModifier {$mods.add($m.ret);})*
-                        v = typedVariableDeclaratorId[$mods, false] ':'
+                        v = typedVariableDeclaratorId[$mods] ':'
                         e = expression ')'
                         s = statement
         {$ret = new ForEachStatement($kw, $v.ret, $e.ret, new Block($s.ret));}
@@ -1272,7 +1269,7 @@ enhancedForStatement returns [ForEachStatement ret]
 enhancedForStatementNoShortIf returns [ForEachStatement ret]
     locals [List<Modifier> mods = new ArrayList<>()]
     :   kw = 'for' '(' (m = variableModifier {$mods.add($m.ret);})*
-                        v = typedVariableDeclaratorId[$mods, false] ':'
+                        v = typedVariableDeclaratorId[$mods] ':'
                         e = expression ')'
                         s = statementNoShortIf
         {$ret = new ForEachStatement($kw, $v.ret, $e.ret, new Block($s.ret));}
@@ -1373,7 +1370,7 @@ resourceList returns [List<VariableDeclaration> ret]
 resource returns [VariableDeclaration ret]
     locals [List<Modifier> mods = new ArrayList<>()]
     :   (m = variableModifier {$mods.add($m.ret);})*
-        v = typedVariableDeclaratorId[$mods, false] '='
+        v = typedVariableDeclaratorId[$mods] '='
         e = expression
         {
             $v.ret.setInitializer($e.ret);

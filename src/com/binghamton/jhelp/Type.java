@@ -130,6 +130,12 @@ public abstract class Type extends Expression {
         return new ArrayType(this, dims);
     }
 
+    public ArrayType augment(Token ellipsis) {
+        List<Dimension> dims = new ArrayList<>();
+        dims.add(new Dimension(ellipsis));
+        return new ArrayType(this, dims);
+    }
+
     /**
      * Determines if this type and `other` are type-equivalent
      * @param other the other Type to inspect

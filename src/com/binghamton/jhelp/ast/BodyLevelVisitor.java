@@ -106,6 +106,7 @@ public class BodyLevelVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(CompilationUnit ast) {
+
         for (BodyDeclaration decl : ast.getBodyDeclarations()) {
             decl.accept(this);
         }
@@ -197,7 +198,6 @@ public class BodyLevelVisitor extends EmptyVisitor {
         System.out.println("parameters:");
         for (VariableDeclaration v : ast.getParameters()) {
             v.getType().accept(this);
-            System.out.println("is variadic ? " + v.isVariadic());
             System.out.println("is receiver ? " + v.isReceiverParameter());
         }
         if (ast.getExceptions().size() > 0) {

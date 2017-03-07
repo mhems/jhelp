@@ -13,6 +13,10 @@ import com.binghamton.jhelp.Annotations;
 public class Dimension extends ASTNode {
     private Annotations annotations;
 
+    public Dimension(Token ellipsis) {
+        this(ellipsis, ellipsis);
+    }
+
     /**
      * Construct a new Dimension object
      * @param first the opening brace Token

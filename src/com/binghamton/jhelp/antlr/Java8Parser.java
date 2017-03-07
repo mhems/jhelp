@@ -3830,7 +3830,6 @@ public class Java8Parser extends Parser {
 
 	public static class TypedVariableDeclaratorIdContext extends ParserRuleContext {
 		public List<Modifier> mods;
-		public boolean isVariadic;
 		public VariableDeclaration ret;
 		public Type type;
 		public UnannTypeContext t;
@@ -3842,16 +3841,15 @@ public class Java8Parser extends Parser {
 			return getRuleContext(VariableDeclaratorIdContext.class,0);
 		}
 		public TypedVariableDeclaratorIdContext(ParserRuleContext parent, int invokingState) { super(parent, invokingState); }
-		public TypedVariableDeclaratorIdContext(ParserRuleContext parent, int invokingState, List<Modifier> mods, boolean isVariadic) {
+		public TypedVariableDeclaratorIdContext(ParserRuleContext parent, int invokingState, List<Modifier> mods) {
 			super(parent, invokingState);
 			this.mods = mods;
-			this.isVariadic = isVariadic;
 		}
 		@Override public int getRuleIndex() { return RULE_typedVariableDeclaratorId; }
 	}
 
-	public final TypedVariableDeclaratorIdContext typedVariableDeclaratorId(List<Modifier> mods,boolean isVariadic) throws RecognitionException {
-		TypedVariableDeclaratorIdContext _localctx = new TypedVariableDeclaratorIdContext(_ctx, getState(), mods, isVariadic);
+	public final TypedVariableDeclaratorIdContext typedVariableDeclaratorId(List<Modifier> mods) throws RecognitionException {
+		TypedVariableDeclaratorIdContext _localctx = new TypedVariableDeclaratorIdContext(_ctx, getState(), mods);
 		enterRule(_localctx, 110, RULE_typedVariableDeclaratorId);
 		try {
 			enterOuterAlt(_localctx, 1);
@@ -3865,7 +3863,7 @@ public class Java8Parser extends Parser {
 			            if (((TypedVariableDeclaratorIdContext)_localctx).id.d.size() > 0) {
 			                ((TypedVariableDeclaratorIdContext)_localctx).type =  ((TypedVariableDeclaratorIdContext)_localctx).t.ret.augment(((TypedVariableDeclaratorIdContext)_localctx).id.d);
 			            }
-			            ((TypedVariableDeclaratorIdContext)_localctx).ret =  new VariableDeclaration(((TypedVariableDeclaratorIdContext)_localctx).id.ret, _localctx.type, _localctx.mods, _localctx.isVariadic);
+			            ((TypedVariableDeclaratorIdContext)_localctx).ret =  new VariableDeclaration(((TypedVariableDeclaratorIdContext)_localctx).id.ret, _localctx.type, _localctx.mods);
 			        
 			}
 		}
@@ -5333,7 +5331,7 @@ public class Java8Parser extends Parser {
 				_la = _input.LA(1);
 			}
 			setState(1405);
-			((FormalParameterContext)_localctx).v = typedVariableDeclaratorId(_localctx.mods, false);
+			((FormalParameterContext)_localctx).v = typedVariableDeclaratorId(_localctx.mods);
 			((FormalParameterContext)_localctx).ret =  ((FormalParameterContext)_localctx).v.ret;
 			}
 		}
@@ -5406,6 +5404,7 @@ public class Java8Parser extends Parser {
 		public VariableModifierContext m;
 		public UnannTypeContext t;
 		public AnnotationContext a;
+		public Token e;
 		public VariableDeclaratorIdContext n;
 		public FormalParameterContext f;
 		public UnannTypeContext unannType() {
@@ -5479,7 +5478,7 @@ public class Java8Parser extends Parser {
 					_la = _input.LA(1);
 				}
 				setState(1432);
-				match(ELLIPSIS);
+				((LastFormalParameterContext)_localctx).e = match(ELLIPSIS);
 				setState(1433);
 				((LastFormalParameterContext)_localctx).n = variableDeclaratorId();
 
@@ -5487,7 +5486,7 @@ public class Java8Parser extends Parser {
 				            if (((LastFormalParameterContext)_localctx).n.d.size() > 0) {
 				                ((LastFormalParameterContext)_localctx).type =  ((LastFormalParameterContext)_localctx).t.ret.augment(((LastFormalParameterContext)_localctx).n.d);
 				            }
-				            ((LastFormalParameterContext)_localctx).ret =  new VariableDeclaration(((LastFormalParameterContext)_localctx).n.ret, _localctx.type, _localctx.mods, true);
+				            ((LastFormalParameterContext)_localctx).ret =  new VariableDeclaration(((LastFormalParameterContext)_localctx).n.ret, _localctx.type, _localctx.mods, ((LastFormalParameterContext)_localctx).e);
 				        
 				}
 				break;
@@ -7742,14 +7741,11 @@ public class Java8Parser extends Parser {
 			match(SEMI);
 
 			            if (_localctx.ls != null) {
-			                ((AnnotationTypeElementDeclarationContext)_localctx).ret =  new VariableDeclaration(((AnnotationTypeElementDeclarationContext)_localctx).id,
-			                                               ((AnnotationTypeElementDeclarationContext)_localctx).t.ret.augment(_localctx.ls),
-			                                               _localctx.mods,
-			                                               _localctx.expr,
-			                                               false);
+			                ((AnnotationTypeElementDeclarationContext)_localctx).ret =  new VariableDeclaration(((AnnotationTypeElementDeclarationContext)_localctx).id, ((AnnotationTypeElementDeclarationContext)_localctx).t.ret.augment(_localctx.ls),
+			                                               _localctx.mods, _localctx.expr);
 			            } else {
 			                ((AnnotationTypeElementDeclarationContext)_localctx).ret =  new VariableDeclaration(((AnnotationTypeElementDeclarationContext)_localctx).id, ((AnnotationTypeElementDeclarationContext)_localctx).t.ret,
-			                                               _localctx.mods, _localctx.expr, false);
+			                                               _localctx.mods, _localctx.expr);
 			            }
 			        
 			}
@@ -10560,7 +10556,7 @@ public class Java8Parser extends Parser {
 				_la = _input.LA(1);
 			}
 			setState(2384);
-			((EnhancedForStatementContext)_localctx).v = typedVariableDeclaratorId(_localctx.mods, false);
+			((EnhancedForStatementContext)_localctx).v = typedVariableDeclaratorId(_localctx.mods);
 			setState(2385);
 			match(COLON);
 			setState(2386);
@@ -10639,7 +10635,7 @@ public class Java8Parser extends Parser {
 				_la = _input.LA(1);
 			}
 			setState(2401);
-			((EnhancedForStatementNoShortIfContext)_localctx).v = typedVariableDeclaratorId(_localctx.mods, false);
+			((EnhancedForStatementNoShortIfContext)_localctx).v = typedVariableDeclaratorId(_localctx.mods);
 			setState(2402);
 			match(COLON);
 			setState(2403);
@@ -11496,7 +11492,7 @@ public class Java8Parser extends Parser {
 				_la = _input.LA(1);
 			}
 			setState(2560);
-			((ResourceContext)_localctx).v = typedVariableDeclaratorId(_localctx.mods, false);
+			((ResourceContext)_localctx).v = typedVariableDeclaratorId(_localctx.mods);
 			setState(2561);
 			match(ASSIGN);
 			setState(2562);
