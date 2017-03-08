@@ -5,14 +5,11 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.Annotation;
-import com.binghamton.jhelp.Annotations;
-
 /**
  * A class representing a Java identifier, as an expression
  */
 public class IdentifierExpression extends Expression {
-    private Annotations annotations;
+    private Annotation[] annotations;
     private Token identifier;
 
     /**
@@ -32,7 +29,7 @@ public class IdentifierExpression extends Expression {
                                 List<Annotation> annotations) {
         super(getFirstToken(identifier, annotations), identifier);
         this.identifier = identifier;
-        this.annotations = new Annotations(annotations);
+        this.annotations = annotations.toArray(this.annotations);
     }
 
     /**
@@ -47,7 +44,7 @@ public class IdentifierExpression extends Expression {
      * Gets the annotations of this identifier, if any
      * @return the annotations of this identifier, if any
      */
-    public Annotations getAnnotations() {
+    public Annotation[] getAnnotations() {
         return annotations;
     }
 

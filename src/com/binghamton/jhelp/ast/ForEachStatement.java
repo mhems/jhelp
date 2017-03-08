@@ -2,7 +2,6 @@ package com.binghamton.jhelp.ast;
 
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.Type;
 import com.binghamton.jhelp.VariableSymbol;
 
 /**

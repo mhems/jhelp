@@ -2,20 +2,6 @@ package com.binghamton.jhelp.ast;
 
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.Annotation;
-import com.binghamton.jhelp.Annotations;
-import com.binghamton.jhelp.ArrayType;
-import com.binghamton.jhelp.ClassInterfaceType;
-import com.binghamton.jhelp.MethodType;
-import com.binghamton.jhelp.Modifier;
-import com.binghamton.jhelp.Modifiers;
-import com.binghamton.jhelp.PrimitiveType;
-import com.binghamton.jhelp.ReferenceType;
-import com.binghamton.jhelp.Type;
-import com.binghamton.jhelp.TypeArgument;
-import com.binghamton.jhelp.TypeParameter;
-import com.binghamton.jhelp.TypeVariable;
-
 /**
  * A testing class to ensure AST is built without any null values
  */
@@ -68,15 +54,6 @@ public class NonNullVisitor extends EmptyVisitor {
     }
 
     /**
-     * Visit a Annotations node
-     * @param ast the AST node being visited
-     */
-    public void visit(Annotations ast) {
-        for (Annotation a : ast.getAnnotations())
-            a.accept(this);
-    }
-
-    /**
      * Visit a ArrayAccessExpression node
      * @param ast the AST node being visited
      */
@@ -90,7 +67,7 @@ public class NonNullVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(ArrayConstruction ast) {
-        ast.getElementType().accept(this);
+        ast.getElementTypeExpression().accept(this);
         for (DimensionExpression e : ast.getDimensionExpressions())
             e.accept(this);
         if (ast.hasInitializer())
@@ -104,16 +81,6 @@ public class NonNullVisitor extends EmptyVisitor {
     public void visit(ArrayInitializer ast) {
         for (Expression e : ast.getInitializers())
             e.accept(this);
-    }
-
-    /**
-     * Visit a ArrayType node
-     * @param ast the AST node being visited
-     */
-    public void visit(ArrayType ast) {
-        for (Dimension d : ast.getDimensions()) {
-            d.accept(this);
-        }
     }
 
     /**
@@ -205,12 +172,9 @@ public class NonNullVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(CastExpression ast) {
-        ast.getExpression().accept(this);
-        if (ast.isAdditional()) {
-            for (ReferenceType t : ast.getTypeBounds())
-                t.accept(this);
-        } else {
-            ast.getTargetType().accept(this);
+        ast.getSourceExpression().accept(this);
+        for (Expression e : ast.getTargetExpressions()) {
+            e.accept(this);
         }
     }
 
@@ -220,7 +184,7 @@ public class NonNullVisitor extends EmptyVisitor {
      */
     public void visit(CatchBlock ast) {
         ast.getVariable().accept(this);
-        for (ClassInterfaceType t : ast.getExceptionTypes())
+        for (Expression t : ast.getExceptionTypes())
             t.accept(this);
     }
 
@@ -233,17 +197,6 @@ public class NonNullVisitor extends EmptyVisitor {
             p.accept(this);
         if (ast.hasSuperClass())
             ast.getSuperClass().accept(this);
-    }
-
-    /**
-     * Visit a ClassInterfaceType node
-     * @param ast the AST node being visited
-     */
-    public void visit(ClassInterfaceType ast) {
-        for (TypeArgument t : ast.getTypeArguments())
-            t.accept(this);
-        if (ast.hasSuperType())
-            ast.getSuperType().accept(this);
     }
 
     /**
@@ -264,7 +217,7 @@ public class NonNullVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(ConcreteBodyDeclaration ast) {
-        for (ClassInterfaceType im : ast.getSuperInterfaces())
+        for (Expression im : ast.getSuperInterfaces())
             im.accept(this);
         for (MethodDeclaration m : ast.getMethods())
             m.accept(this);
@@ -282,7 +235,6 @@ public class NonNullVisitor extends EmptyVisitor {
      */
     public void visit(Declaration ast) {
         assertNonNull(ast.getName());
-        ast.getModifiers().accept(this);
     }
 
     /**
@@ -290,7 +242,9 @@ public class NonNullVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(Dimension ast) {
-        ast.getAnnotations().accept(this);
+        for (Annotation a : ast.getAnnotations()) {
+            a.accept(this);
+        }
     }
 
     /**
@@ -298,7 +252,9 @@ public class NonNullVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(DimensionExpression ast) {
-        ast.getAnnotations().accept(this);
+        for (Annotation a : ast.getAnnotations()) {
+            a.accept(this);
+        }
         ast.getExpression().accept(this);
     }
 
@@ -346,7 +302,9 @@ public class NonNullVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(IdentifierExpression ast) {
-        ast.getAnnotations().accept(this);
+        for (Annotation a : ast.getAnnotations()) {
+            a.accept(this);
+        }
         assertNonNull(ast.getIdentifier());
     }
 
@@ -373,8 +331,6 @@ public class NonNullVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(InstantiationExpression ast) {
-        for (TypeArgument t : ast.getInitialTypeArguments())
-            t.accept(this);
         if (ast.hasAnonymousClass())
             ast.getAnonymousClass().accept(this);
     }
@@ -384,7 +340,7 @@ public class NonNullVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(InterfaceDeclaration ast) {
-        for (ClassInterfaceType t : ast.getSuperInterfaces())
+        for (Expression t : ast.getSuperInterfaces())
             t.accept(this);
         for (MethodDeclaration m : ast.getMethods())
             m.accept(this);
@@ -432,10 +388,10 @@ public class NonNullVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(MethodDeclaration ast) {
-        ast.getReturnType().accept(this);
+        ast.getReturnTypeExpression().accept(this);
         for (VariableDeclaration v : ast.getParameters())
             v.accept(this);
-        for (Type t : ast.getExceptions())
+        for (Expression t : ast.getExceptions())
             t.accept(this);
         for (TypeParameter p : ast.getTypeParameters())
             p.accept(this);
@@ -448,39 +404,7 @@ public class NonNullVisitor extends EmptyVisitor {
      */
     public void visit(MethodReferenceExpression ast) {
         ast.getLHS().accept(this);
-        for (TypeArgument t : ast.getTypeArguments())
-            t.accept(this);
         ast.getRHS().accept(this);
-    }
-
-    /**
-     * Visit a MethodType node
-     * @param ast the AST node being visited
-     */
-    public void visit(MethodType ast) {
-        for (TypeParameter p : ast.getTypeParameters())
-            p.accept(this);
-        ast.getReturnType().accept(this);
-        for (Type t : ast.getParameterTypes())
-            t.accept(this);
-    }
-
-    /**
-     * Visit a Modifier node
-     * @param ast the AST node being visited
-     */
-    public void visit(Modifier ast) {
-        assertNonNull(ast.getName());
-    }
-
-    /**
-     * Visit a Modifiers node
-     * @param ast the AST node being visited
-     */
-    public void visit(Modifiers ast) {
-        ast.getAnnotations().accept(this);
-        for (Modifier m : ast.getModifiers())
-            m.accept(this);
     }
 
     /**
@@ -488,7 +412,9 @@ public class NonNullVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(PackageStatement ast) {
-        ast.getAnnotations().accept(this);
+        for (Annotation a : ast.getAnnotations()) {
+            a.accept(this);
+        }
         for (Token id : ast.getIdentifiers())
             assertNonNull(id);
     }
@@ -551,21 +477,13 @@ public class NonNullVisitor extends EmptyVisitor {
     }
 
     /**
-     * Visit a Type node
-     * @param ast the AST node being visited
-     */
-    public void visit(Type ast) {
-        ast.getAnnotations().accept(this);
-        assertNonNull(ast.getName());
-    }
-
-    /**
      * Visit a TypeArgument node
      * @param ast the AST node being visited
      */
     public void visit(TypeArgument ast) {
         if (ast.isWildcard()) {
-            ast.getAnnotations().accept(this);
+            for (Annotation a : ast.getAnnotations())
+                a.accept(this);
             if (ast.hasBound()) {
                 ast.getBoundType().accept(this);
             }
@@ -580,8 +498,8 @@ public class NonNullVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(TypeParameter ast) {
-        ast.getType().accept(this);
-        for (ReferenceType t : ast.getSuperTypes())
+        assertNonNull(ast.getToken());
+        for (Expression t : ast.getSuperTypes())
             t.accept(this);
     }
 
@@ -599,8 +517,8 @@ public class NonNullVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(VariableDeclaration ast) {
-        ast.getType().accept(this);
         assertNonNull(ast.getName());
+        ast.getExpression().accept(this);
         ast.getInitializer().accept(this);
     }
 

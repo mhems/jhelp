@@ -1,33 +1,60 @@
 package com.binghamton.jhelp;
 
-import java.util.Set;
-import java.util.TreeSet;
+import java.lang.reflect.Field;
+import java.lang.reflect.Executable;
 
 /**
  * A class representing the abstract notion of a Java symbol
  * Java symbols include classes, enums, interfaces, methods, and variables
  */
 public abstract class Symbol {
-    private String id;
+    public static enum SymbolKind {CLASS, METHOD, VARIABLE};
+    public static enum AccessLevel {PUBLIC, PROTECTED, PACKAGE_PRIVATE, PRIVATE};
+
+    protected static final ClassSymbol[] CLASS_ARRAY = null;
+    protected static final MethodSymbol[] METHOD_ARRAY = null;
+    protected static final VariableSymbol[] VARIABLE_ARRAY = null;
+
+    protected SymbolKind kind;
+    private String name;
     private AccessLevel access;
     private Modifiers modifiers;
+    private AnnotationSymbol[] annotations;
 
     /**
-     * Construct a named Symbol
-     * @param id the name of the symbol
+     * Construct a named Symbol with default access and no modifiers
+     * @param name the name of the symbol
      */
-    public Symbol(String id) {
-        this.id = id;
+    public Symbol(String name) {
+        this(name, new Modifiers());
+    }
+
+    public Symbol(String name, int modifiers) {
+        this(name, Modifiers.fromEncodedModifier(modifiers));
     }
 
     /**
-     * Construct a named Symbol with access `access`
-     * @param id the name of the symbol
-     * @param access the access level of the symbol
+     * Construct a named Symbol with access level and modifiers
+     * @param name the name of this Symbol
+     * @param modifiers the modifiers of this Symbol
      */
-    public Symbol(String id, AccessLevel access) {
-        this.id = id;
-        this.access = access;
+    public Symbol(String name, Modifiers modifiers) {
+        this.name = name;
+        this.modifiers = modifiers;
+        this.access = AccessLevel.PACKAGE_PRIVATE;
+        for (Modifier modifier : modifiers.getModifiers()) {
+            switch (modifier.getName()) {
+            case "public":
+                this.access = AccessLevel.PUBLIC;
+                break;
+            case "protected":
+                this.access = AccessLevel.PROTECTED;
+                break;
+            case "private":
+                this.access = AccessLevel.PRIVATE;
+                break;
+            }
+        }
     }
 
     /**
@@ -35,7 +62,7 @@ public abstract class Symbol {
      * @return the name of this symbol
      */
     public String getName() {
-        return id;
+        return name;
     }
 
     /**
@@ -54,12 +81,28 @@ public abstract class Symbol {
         return modifiers;
     }
 
+    public AnnotationSymbol[] getAnnotations() {
+        return annotations;
+    }
+
+    public void setAnnotations(AnnotationSymbol[] annotations) {
+        this.annotations = annotations;
+    }
+
     /**
      * Sets the access level of this symbol
      * @param lvl the level of this symbol
      */
     public void setAccessLevel(AccessLevel lvl) {
         access = lvl;
+    }
+
+    /**
+     * Determines the specific kind of Symbol of this instance
+     * @return the specific kind of Symbol of this instance
+     */
+    public SymbolKind getKind() {
+        return kind;
     }
 
     /**
@@ -82,15 +125,14 @@ public abstract class Symbol {
     /**
      * Determines if this symbol is equivalent to another symbol
      * @param other the other Object to compare against
-     * @return true iff this symbol is equivalent ot `other`
+     * @return true iff this symbol is equivalent to `other`
      */
     @Override
     public boolean equals(Object other) {
         if (other instanceof Symbol) {
             Symbol sym = (Symbol)other;
-            return id.equals(sym.id) &&
-                access == sym.access &&
-                modifiers.equals(sym.modifiers);
+            return name.equals(sym.name) &&
+                kind == sym.kind;
         }
         return false;
     }
@@ -101,6 +143,34 @@ public abstract class Symbol {
      */
     @Override
     public int hashCode() {
-        return id.hashCode() ^ access.hashCode() ^ modifiers.hashCode();
+        return name.hashCode() ^ access.hashCode() ^ modifiers.hashCode();
+    }
+
+    public String repr() {
+        return name;
+    }
+
+    protected static ClassSymbol[] fromClasses(Class<?>[] classes) {
+        ClassSymbol[] syms = new ClassSymbol[classes.length];
+        for (int i = 0; i < syms.length; i++) {
+            syms[i] = new ReflectedClassSymbol(classes[i]);
+        }
+        return syms;
+    }
+
+    protected static MethodSymbol[] fromMethods(Executable[] methods) {
+        MethodSymbol[] syms = new MethodSymbol[methods.length];
+        for (int i = 0; i < syms.length; i++) {
+            syms[i] = new ReflectedMethodSymbol(methods[i]);
+        }
+        return syms;
+    }
+
+    protected static VariableSymbol[] fromFields(Field[] fields) {
+        VariableSymbol[] syms = new VariableSymbol[fields.length];
+        for (int i = 0; i < syms.length; i++) {
+            syms[i] = new ReflectedVariableSymbol(fields[i]);
+        }
+        return syms;
     }
 }

@@ -5,7 +5,6 @@ import java.util.ArrayList;
 
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.ClassInterfaceType;
 import com.binghamton.jhelp.Modifier;
 
 /**
@@ -32,8 +31,9 @@ public abstract class BodyDeclaration extends Declaration {
      */
     public BodyDeclaration(Token name,
                            Token keyword,
-                           List<Modifier> modifiers) {
-        super(name, keyword, modifiers);
+                           List<Modifier> modifiers,
+                           List<Annotation> annotations) {
+        super(name, keyword, modifiers, annotations);
     }
 
     /**

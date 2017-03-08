@@ -1,5 +1,7 @@
 package com.binghamton.jhelp.ast;
 
+import java.util.List;
+
 import org.antlr.v4.runtime.Token;
 
 /**
@@ -13,6 +15,11 @@ public class KeywordExpression extends IdentifierExpression {
      */
     public KeywordExpression(Token keyword) {
         super(keyword);
+    }
+
+    public KeywordExpression(Token keyword,
+                             List<Annotation> annotations) {
+        super(keyword, annotations);
     }
 
     /**

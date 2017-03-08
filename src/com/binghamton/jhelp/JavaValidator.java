@@ -41,6 +41,7 @@ public class JavaValidator implements Validator {
         ASTVisitor visitor;
         List<JHelpError> errors = Validator.buildErrors();
         try {
+            Program program = new Program();
             for (String filename : filenames) {
                 input = new ANTLRFileStream(filename);
                 lexer = new Java8Lexer(input);
@@ -57,18 +58,21 @@ public class JavaValidator implements Validator {
                 cu = parser.compilationUnit().ret;
                 if (parser.getNumberOfSyntaxErrors() == 0) {
                     System.out.println("---------- PACKAGE ----------");
-                    visitor = new PackageLevelVisitor();
+                    visitor = new PackageLevelVisitor(program, filename);
                     cu.accept(visitor);
                     System.out.println("---------- TOP ----------");
                     visitor = new TopLevelVisitor();
-                    cu.accept(visitor);
+                    // cu.accept(visitor);
                     System.out.println("---------- BODY ----------");
                     visitor = new BodyLevelVisitor();
-                    cu.accept(visitor);
+                    // cu.accept(visitor);
                     System.out.println("---------- CODE ----------");
                     visitor = new CodeLevelVisitor();
-                    cu.accept(visitor);
+                    // cu.accept(visitor);
                 }
+            }
+            for (Package p : program.getPackages()) {
+                System.out.println(p.repr());
             }
         } catch (IOException e) {
             errors.add(new ExceptionError(e));

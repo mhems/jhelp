@@ -1,18 +1,15 @@
-package com.binghamton.jhelp;
+package com.binghamton.jhelp.ast;
 
 import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.ast.ASTVisitor;
-import com.binghamton.jhelp.ast.ASTNode;
-
 /**
  * A class representing a Java type argument
  */
 public class TypeArgument extends ASTNode {
-    private ReferenceType type;
-    private Annotations annotations;
+    private Expression type;
+    private Annotation[] annotations = {};
     private boolean isWildcard = false;
     private boolean isUpperBound;
 
@@ -27,7 +24,7 @@ public class TypeArgument extends ASTNode {
      * Construct a type argument of a reference type
      * @param type the reference type
      */
-    public TypeArgument(ReferenceType type) {
+    public TypeArgument(Expression type) {
         super(type.getFirstToken(), type.getLastToken());
         this.type = type;
     }
@@ -40,7 +37,7 @@ public class TypeArgument extends ASTNode {
     public TypeArgument(Token literal, List<Annotation> annotations) {
         super(ASTNode.getFirstToken(literal, annotations), literal);
         this.isWildcard = true;
-        this.annotations = new Annotations(annotations);
+        this.annotations = annotations.toArray(this.annotations);
     }
 
     /**
@@ -48,7 +45,7 @@ public class TypeArgument extends ASTNode {
      * @return the type of this argument if it is not a wildcard
      * @throws RuntimeException if this argument is a wildcard
      */
-    public ReferenceType getType() {
+    public Expression getType() {
         if (isDiamond()) {
             throw new RuntimeException(); // TODO
         }
@@ -59,7 +56,7 @@ public class TypeArgument extends ASTNode {
      * Gets the annotations of this type argument
      * @return the annotations of this type argument
      */
-    public Annotations getAnnotations() {
+    public Annotation[] getAnnotations() {
         if (!isWildcard()) {
             throw new RuntimeException(); // TODO
         }
@@ -87,7 +84,7 @@ public class TypeArgument extends ASTNode {
      * @return the bounding type if this is a wildcard argument
      * @throws RuntimeException if this is not a wildcard argument
      */
-    public ReferenceType getBoundType() {
+    public Expression getBoundType() {
         if (isWildcard()) {
             return type;
         }
@@ -109,9 +106,9 @@ public class TypeArgument extends ASTNode {
      * Sets the bounding type of this wildcard argument
      * @param type the bounding type of this wildcard argument
      */
-    public void setBoundType(ReferenceType type) {
-        // TODO change last token
+    public void setBoundType(Expression type) {
         this.type = type;
+        setLastToken(type.getLastToken());
     }
 
     /**

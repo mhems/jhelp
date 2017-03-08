@@ -13,6 +13,7 @@ import com.binghamton.jhelp.Modifiers;
 public abstract class Declaration extends Statement {
     protected Token name;
     protected Modifiers modifiers = new Modifiers();
+    protected Annotation[] annotations = {};
 
     /**
      * Construct an empty declaration
@@ -25,8 +26,9 @@ public abstract class Declaration extends Statement {
      * Construct an unnamed modified declaration
      * @param modifiers the modifiers of this declaration
      */
-    public Declaration(List<Modifier> modifiers) {
+    public Declaration(List<Modifier> modifiers, List<Annotation> annotations) {
         this.modifiers = new Modifiers(modifiers);
+        this.annotations = annotations.toArray(this.annotations);
     }
 
     /**
@@ -44,10 +46,14 @@ public abstract class Declaration extends Statement {
      * @param keyword the keyword of this declaration
      * @param modifiers the modifiers of this declaration
      */
-    public Declaration(Token name, Token keyword, List<Modifier> modifiers) {
+    public Declaration(Token name,
+                       Token keyword,
+                       List<Modifier> modifiers,
+                       List<Annotation> annotations) {
         super(ASTNode.getFirstToken(keyword, modifiers));
         this.name = name;
         this.modifiers = new Modifiers(modifiers);
+        this.annotations = annotations.toArray(this.annotations);
     }
 
     /**
@@ -72,6 +78,10 @@ public abstract class Declaration extends Statement {
      */
     public Modifiers getModifiers() {
         return modifiers;
+    }
+
+    public Annotation[] getAnnotations() {
+        return annotations;
     }
 
     /**

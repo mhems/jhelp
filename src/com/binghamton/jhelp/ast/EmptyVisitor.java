@@ -1,20 +1,5 @@
 package com.binghamton.jhelp.ast;
 
-import com.binghamton.jhelp.Annotation;
-import com.binghamton.jhelp.Annotations;
-import com.binghamton.jhelp.ArrayType;
-import com.binghamton.jhelp.ClassInterfaceType;
-import com.binghamton.jhelp.MethodType;
-import com.binghamton.jhelp.Modifier;
-import com.binghamton.jhelp.Modifiers;
-import com.binghamton.jhelp.NilType;
-import com.binghamton.jhelp.PrimitiveType;
-import com.binghamton.jhelp.ReferenceType;
-import com.binghamton.jhelp.Type;
-import com.binghamton.jhelp.TypeArgument;
-import com.binghamton.jhelp.TypeParameter;
-import com.binghamton.jhelp.TypeVariable;
-
 /**
  * Base class for visiting AST nodes
  */
@@ -39,12 +24,6 @@ public abstract class EmptyVisitor implements ASTVisitor {
     public void visit(Annotation ast) { }
 
     /**
-     * Visit a Annotations node
-     * @param ast the AST node being visited
-     */
-    public void visit(Annotations ast) { }
-
-    /**
      * Visit a AnnotationDeclaration node
      * @param ast the AST node being visited
      */
@@ -67,12 +46,6 @@ public abstract class EmptyVisitor implements ASTVisitor {
      * @param ast the AST node being visited
      */
     public void visit(ArrayInitializer ast) { }
-
-    /**
-     * Visit a ArrayType node
-     * @param ast the AST node being visited
-     */
-    public void visit(ArrayType ast) { }
 
     /**
      * Visit a AssertStatement node
@@ -139,12 +112,6 @@ public abstract class EmptyVisitor implements ASTVisitor {
      * @param ast the AST node being visited
      */
     public void visit(ClassDeclaration ast) { }
-
-    /**
-     * Visit a ClassInterfaceType node
-     * @param ast the AST node being visited
-     */
-    public void visit(ClassInterfaceType ast) { }
 
     /**
      * Visit a CompilationUnit node
@@ -285,28 +252,10 @@ public abstract class EmptyVisitor implements ASTVisitor {
     public void visit(MethodDeclaration ast) { }
 
     /**
-     * Visit a MethodType node
-     * @param ast the AST node being visited
-     */
-    public void visit(MethodType ast) { }
-
-    /**
      * Visit a MethodReferenceExpression node
      * @param ast the AST node being visited
      */
     public void visit(MethodReferenceExpression ast) { }
-
-    /**
-     * Visit a Modifier node
-     * @param ast the AST node being visited
-     */
-    public void visit(Modifier ast) { }
-
-    /**
-     * Visit a Modifiers node
-     * @param ast the AST node being visited
-     */
-    public void visit(Modifiers ast) { }
 
     /**
      * Visit a NilBlock node
@@ -321,28 +270,10 @@ public abstract class EmptyVisitor implements ASTVisitor {
     public void visit(NilExpression ast) { }
 
     /**
-     * Visit a NilType node
-     * @param ast the AST node being visited
-     */
-    public void visit(NilType ast) { }
-
-    /**
      * Visit a PackageStatement node
      * @param ast the AST node being visited
      */
     public void visit(PackageStatement ast) { }
-
-    /**
-     * Visit a PrimitiveType node
-     * @param ast the AST node being visited
-     */
-    public void visit(PrimitiveType ast) { }
-
-    /**
-     * Visit a ReferenceType node
-     * @param ast the AST node being visited
-     */
-    public void visit(ReferenceType ast) { }
 
     /**
      * Visit a ReturnStatement node
@@ -387,12 +318,6 @@ public abstract class EmptyVisitor implements ASTVisitor {
     public void visit(TryCatchBlock ast) { }
 
     /**
-     * Visit a Type node
-     * @param ast the AST node being visited
-     */
-    public void visit(Type ast) { }
-
-    /**
      * Visit a TypeArgument node
      * @param ast the AST node being visited
      */
@@ -403,12 +328,6 @@ public abstract class EmptyVisitor implements ASTVisitor {
      * @param ast the AST node being visited
      */
     public void visit(TypeParameter ast) { }
-
-    /**
-     * Visit a TypeVariable node
-     * @param ast the AST node being visited
-     */
-    public void visit(TypeVariable ast) { }
 
     /**
      * Visit a UnaryExpression node

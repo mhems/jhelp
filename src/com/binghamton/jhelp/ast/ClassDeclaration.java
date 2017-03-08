@@ -5,16 +5,14 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.ClassInterfaceType;
 import com.binghamton.jhelp.Modifier;
-import com.binghamton.jhelp.TypeParameter;
 
 /**
  * A class representing a Java class declaration
  */
 public class ClassDeclaration extends ConcreteBodyDeclaration {
     private List<TypeParameter> typeParams = new ArrayList<>();
-    private ClassInterfaceType superClass; // Object
+    private Expression superClass;
 
     /**
      * Construct an anonymous class declaration
@@ -35,10 +33,11 @@ public class ClassDeclaration extends ConcreteBodyDeclaration {
     public ClassDeclaration(Token name,
                             Token keyword,
                             List<Modifier> modifiers,
-                            List<ClassInterfaceType> superInterfaces,
+                            List<Annotation> annotations,
+                            List<Expression> superInterfaces,
                             List<TypeParameter> typeParams,
-                            ClassInterfaceType superClass) {
-        super(name, keyword, modifiers, superInterfaces);
+                            Expression superClass) {
+        super(name, keyword, modifiers, annotations, superInterfaces);
         this.typeParams = typeParams;
         this.superClass = superClass;
     }
@@ -63,7 +62,7 @@ public class ClassDeclaration extends ConcreteBodyDeclaration {
      * Gets this class's super class
      * @return this class's super class
      */
-    public ClassInterfaceType getSuperClass() {
+    public Expression getSuperClass() {
         return superClass;
     }
 

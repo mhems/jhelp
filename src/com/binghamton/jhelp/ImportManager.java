@@ -13,29 +13,13 @@ import java.util.Set;
  */
 public class ImportManager {
     private static final Set<String> autoImportPackages = new HashSet<>();
-    private static final Set<String> autoImportSymbols = new HashSet<>();
 
     static {
         autoImportPackages.add("java.lang");
-        autoImportSymbols.add("Object");
-        autoImportSymbols.add("String");
     }
 
-    private final Map<String, Class<?>> cache = new HashMap<>();
+    private final Map<String, ReflectedClassSymbol> cache = new HashMap<>();
     private final Set<String> onDemandPackages = new HashSet<>(autoImportPackages);
-
-    {
-        for (String pkg : autoImportPackages) {
-            addOnDemandPackage(pkg);
-        }
-        for (String pkg : autoImportSymbols) {
-            try {
-                importSymbol(pkg);
-            } catch(ClassNotFoundException e) {
-                throw new RuntimeException("class " + pkg + " not found"); // TODO
-            }
-        }
-    }
 
     /**
      * Attempt to add a package to the set of on demand packages
@@ -75,30 +59,31 @@ public class ImportManager {
      * @return the Class Object reflecting the symbol found
      * @throws ClassNotFoundException iff no such symbol can be found
      */
-    public Class<?> importSymbol(String name) throws ClassNotFoundException {
-        Class<?> cls = null;
+    public ReflectedClassSymbol importSymbol(String name) throws ClassNotFoundException {
+        ReflectedClassSymbol cls = null;
         try {
             cls = getOrImport(name);
         } catch(ClassNotFoundException e) {
             for (String pkg : onDemandPackages) {
                 try {
-                    cache.put(name, getOrImport(pkg + '.' + name));
+                    cls = getOrImport(pkg + "." + name);
+                    cache.put(name, cls);
                     break;
                 } catch(ClassNotFoundException _e) {
                     // squelched, parent exception re-raised below
                 }
-                if (cls == null) {
-                    // since prefixing did not work, re-raise original exception
-                    throw e;
-                }
+            }
+            if (cls == null) {
+                // since prefixing did not work, re-raise original exception
+                throw e;
             }
         }
         return cls;
     }
 
-    private Class<?> getOrImport(String name) throws ClassNotFoundException {
+    private ReflectedClassSymbol getOrImport(String name) throws ClassNotFoundException {
         if (!isImported(name)) {
-            cache.put(name, Class.forName(name));
+            cache.put(name, new ReflectedClassSymbol(Class.forName(name)));
         }
         return cache.get(name);
     }

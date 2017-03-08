@@ -19,8 +19,9 @@ public class AnnotationDeclaration extends AbstractBodyDeclaration {
      */
     public AnnotationDeclaration(Token name,
                                  Token at,
-                                 List<Modifier> modifiers) {
-        super(name, at, modifiers);
+                                 List<Modifier> modifiers,
+                                 List<Annotation> annotations) {
+        super(name, at, modifiers, annotations);
     }
 
     /**

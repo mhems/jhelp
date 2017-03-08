@@ -9,33 +9,35 @@ import java.util.Set;
 import org.antlr.v4.runtime.Token;
 
 import com.binghamton.jhelp.Modifier;
-import com.binghamton.jhelp.NilType;
-import com.binghamton.jhelp.Type;
 
 /**
  * A class representing a Java variable declaration
  */
 public class VariableDeclaration extends Declaration {
-    private Type type;
+    private Expression expr;
     private Token name;
     private Expression initializer;
     private boolean receiver = false;
+    private Token ellipsis;
+    private Annotation[] ellipsisAnnotations = {};
 
     /**
      * Construct a new variable declaration
      * @param name the Token holding the name of the variable being declared
      */
     public VariableDeclaration(Token name) {
-        this(name, new ArrayList<Modifier>());
+        this(name, new ArrayList<Modifier>(), new ArrayList<Annotation>());
     }
 
     /**
-     * Construct a new named, modified variable declaration
+     * Construct a new named, untyped, modified variable declaration
      * @param name the Token holding the name of the variable being declared
      * @param modifiers any modifiers on the variable being declared
      */
-    public VariableDeclaration(Token name, List<Modifier> modifiers) {
-        this(name, new NilType(), modifiers);
+    public VariableDeclaration(Token name,
+                               List<Modifier> modifiers,
+                               List<Annotation> annotations) {
+        this(name, new NilExpression(), modifiers, annotations);
     }
 
     /**
@@ -45,9 +47,10 @@ public class VariableDeclaration extends Declaration {
      * @param modifiers any modifiers on the variable being declared
      */
     public VariableDeclaration(Token name,
-                               Type type,
-                               List<Modifier> modifiers) {
-        this(name, type, modifiers, new NilExpression());
+                               Expression expr,
+                               List<Modifier> modifiers,
+                               List<Annotation> annotations) {
+        this(name, expr, modifiers, annotations, new NilExpression());
     }
 
     /**
@@ -58,10 +61,14 @@ public class VariableDeclaration extends Declaration {
      * @param isEllipsis true iff this is a variadic parameter variable
      */
     public VariableDeclaration(Token name,
-                               Type type,
+                               Expression expr,
                                List<Modifier> modifiers,
-                               Token ellipsis) {
-        this(name, type.augment(ellipsis), modifiers, new NilExpression());
+                               List<Annotation> annotations,
+                               Token ellipsis,
+                               List<Annotation> ellipsisAnnotations) {
+        this(name, expr, modifiers, annotations, new NilExpression());
+        this.ellipsis = ellipsis;
+        this.ellipsisAnnotations = ellipsisAnnotations.toArray(this.ellipsisAnnotations);
     }
 
     /**
@@ -73,12 +80,13 @@ public class VariableDeclaration extends Declaration {
      * @param isEllipsis true iff this variable is variadic
      */
     public VariableDeclaration(Token name,
-                               Type type,
+                               Expression expr,
                                List<Modifier> modifiers,
+                               List<Annotation> annotations,
                                Expression initializer) {
-        super(name, type.getFirstToken(), modifiers);
+        super(name, expr.getFirstToken(), modifiers, annotations);
         this.name = name;
-        this.type = type;
+        this.expr = expr;
         this.initializer = initializer;
     }
 
@@ -86,17 +94,17 @@ public class VariableDeclaration extends Declaration {
      * Gets the type of this variable, if any
      * @return the type of this variable, if any
      */
-    public Type getType() {
-        return type;
+    public Expression getExpression() {
+        return expr;
     }
 
     /**
      * Determines if this variable is explicitly typed
      * @return true iff this variable is explicitly typed
      */
-    public boolean isTyped() {
-        return !type.isNil();
-    }
+    // public boolean isTyped() {
+    //     return !type.isNil();
+    // }
 
     /**
      * Gets the initial value of the variable, if any
@@ -137,6 +145,10 @@ public class VariableDeclaration extends Declaration {
      */
     public boolean isReceiverParameter() {
         return receiver;
+    }
+
+    public boolean isVariadic() {
+        return ellipsis != null;
     }
 
     /**

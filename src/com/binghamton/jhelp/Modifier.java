@@ -41,16 +41,20 @@ public class Modifier extends Expression {
      * Construct a multi-token annotation modifier
      * @param expr the expression yielding the name of this modifier
      */
-    protected Modifier(Expression expr) {
-        super(expr.getFirstToken(), expr.getLastToken());
-        this.name = expr.getText();
-    }
+    // protected Modifier(Expression expr) {
+    //     super(expr.getFirstToken(), expr.getLastToken());
+    //     this.name = expr.getText();
+    // }
 
     /**
      * Gets this modifier's name
      * @return this modifier's name
      */
     public String getName() {
+        return name;
+    }
+
+    public String toString() {
         return name;
     }
 

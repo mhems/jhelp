@@ -21,8 +21,9 @@ public abstract class AbstractBodyDeclaration extends BodyDeclaration {
      */
     public AbstractBodyDeclaration(Token name,
                                    Token keyword,
-                                   List<Modifier> modifiers) {
-        super(name, keyword, modifiers);
+                                   List<Modifier> modifiers,
+                                   List<Annotation> annotations) {
+        super(name, keyword, modifiers, annotations);
     }
 
     /**

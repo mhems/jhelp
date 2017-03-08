@@ -1,15 +1,16 @@
 package com.binghamton.jhelp;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.antlr.v4.runtime.Token;
-
-import com.binghamton.jhelp.ast.ASTVisitor;
 
 /**
  * Class representing valid Java primitive types
  */
-public class PrimitiveType extends Type {
+public class PrimitiveType implements Type {
 
     public static final PrimitiveType BOOLEAN = new PrimitiveType(Primitive.BOOLEAN);
     public static final PrimitiveType BYTE    = new PrimitiveType(Primitive.BYTE);
@@ -21,47 +22,86 @@ public class PrimitiveType extends Type {
     public static final PrimitiveType DOUBLE  = new PrimitiveType(Primitive.DOUBLE);
     public static final PrimitiveType VOID    = new PrimitiveType(Primitive.VOID);
 
+    private static final Map<String, Primitive> PRIMITIVE_MAP = new HashMap<>();
+    private static final Map<Primitive, ReflectedClassSymbol> BOX_MAP = new HashMap<>();
+    // TODO this is unnecessary, see below
+    public static final Map<String, PrimitiveType> UNBOX_MAP = new HashMap<>();
+
+    static {
+        try {
+            // TODO this should be made to use the global cache of Str -> RefClsSym
+            Class<?> cls;
+            ReflectedClassSymbol rcls;
+            for (Primitive p : Primitive.values()) {
+                PRIMITIVE_MAP.put(p.name, p);
+                cls = Class.forName("java.lang." + p.classname);
+                BOX_MAP.put(p, new ReflectedClassSymbol(cls));
+            }
+        } catch (ClassNotFoundException e) {
+            System.err.println("FATAL ERROR"); // TODO
+        }
+
+        UNBOX_MAP.put("Boolean", BOOLEAN);
+        UNBOX_MAP.put("Byte", BYTE);
+        UNBOX_MAP.put("Character", CHAR);
+        UNBOX_MAP.put("Short", SHORT);
+        UNBOX_MAP.put("Integer", INT);
+        UNBOX_MAP.put("Long", LONG);
+        UNBOX_MAP.put("Float", FLOAT);
+        UNBOX_MAP.put("Double", DOUBLE);
+        UNBOX_MAP.put("Void", VOID);
+    }
+
+    private Primitive primitive;
+    private Token token;
+    private AnnotationSymbol[] annotations = {};
 
     /**
      * Construct a new primitive type
      * @param primitive the primitive Token
      */
     public PrimitiveType(Token primitive) {
-        super(primitive);
+        this.token = primitive;
+        this.primitive = PRIMITIVE_MAP.get(token.getText());
     }
 
-    /**
-     * Construct an annotated primitive type
-     * @param primitive the primitive Token
-     * @param annotations the annotations of this type
-     */
-    public PrimitiveType(Token primitive, List<Annotation> annotations) {
-        super(primitive, annotations);
+    public AnnotationSymbol[] getAnnotations() {
+        return annotations;
     }
 
-    /**
-     * Double dispatch super class and this class on parameter
-     * @param v the visitor to accept
-     */
-    @Override
-    public void accept(ASTVisitor v) {
-        super.accept(v);
-        v.visit(this);
+    public ClassSymbol box() {
+        return BOX_MAP.get(primitive);
     }
 
-    public enum Primitive {
-        BOOLEAN,
-        BYTE,
-        CHAR,
-        SHORT,
-        INT,
-        LONG,
-        FLOAT,
-        DOUBLE,
-        VOID
+    public String getName() {
+        return primitive.name;
+    }
+
+    public String getTypeName() {
+        return getName();
+    }
+
+    private enum Primitive {
+        BOOLEAN("boolean", "Boolean"),
+        BYTE("byte", "Byte"),
+        CHAR("char", "Character"),
+        SHORT("short", "Short"),
+        INT("int", "Integer"),
+        LONG("long", "Long"),
+        FLOAT("float", "Float"),
+        DOUBLE("double", "Double"),
+        VOID("void", "Void");
+
+        protected final String name;
+        protected final String classname;
+
+        Primitive(String name, String classname) {
+            this.name = name;
+            this.classname = classname;
+        }
     }
 
     private PrimitiveType(Primitive primitive) {
-        super(primitive.name());
+        this.primitive = primitive;
     }
 }

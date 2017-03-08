@@ -5,7 +5,6 @@ import java.util.ArrayList;
 
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.ClassInterfaceType;
 import com.binghamton.jhelp.Modifier;
 
 /**
@@ -13,7 +12,7 @@ import com.binghamton.jhelp.Modifier;
  * This includes classes and enums.
  */
 public abstract class ConcreteBodyDeclaration extends BodyDeclaration {
-    protected List<ClassInterfaceType> implementees = new ArrayList<>();
+    protected List<Expression> implementees = new ArrayList<>();
     protected List<MethodDeclaration> methods = new ArrayList<>();
     protected List<MethodDeclaration> ctors = new ArrayList<>();
     protected List<Block> instanceInitializers = new ArrayList<>();
@@ -36,8 +35,9 @@ public abstract class ConcreteBodyDeclaration extends BodyDeclaration {
     public ConcreteBodyDeclaration(Token name,
                                    Token keyword,
                                    List<Modifier> modifiers,
-                                   List<ClassInterfaceType> implementees) {
-        super(name, keyword, modifiers);
+                                   List<Annotation> annotations,
+                                   List<Expression> implementees) {
+        super(name, keyword, modifiers, annotations);
         this.implementees = implementees;
     }
 
@@ -53,7 +53,7 @@ public abstract class ConcreteBodyDeclaration extends BodyDeclaration {
      * Gets the implemented interfaces of this declaration
      * @return the implemented interfaces of this declaration
      */
-    public List<ClassInterfaceType> getSuperInterfaces() {
+    public List<Expression> getSuperInterfaces() {
         return implementees;
     }
 

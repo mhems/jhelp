@@ -20,9 +20,10 @@ public class EnumConstant extends ConcreteBodyDeclaration {
      * @param arguments the arguments to this constant
      */
     public EnumConstant(Token name,
-                        List<Modifier> modifiers,
+                        List<Annotation> annotations,
                         List<Expression> arguments) {
-        super(name, name, modifiers, new ArrayList<>());
+        super(name, name, new ArrayList<Modifier>(),
+              annotations, new ArrayList<>());
         this.arguments = arguments;
     }
 

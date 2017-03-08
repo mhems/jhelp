@@ -1,19 +1,16 @@
-package com.binghamton.jhelp;
+package com.binghamton.jhelp.ast;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.ast.ASTVisitor;
-import com.binghamton.jhelp.ast.ASTNode;
-
 /**
  * A class representing a Java type parameter
  */
 public class TypeParameter extends ASTNode {
-    private TypeVariable type;
-    private List<ReferenceType> superTypes = new ArrayList<>();
+    private Token name;
+    private List<Expression> superTypes;
 
     /**
      * Construct a named type parameter
@@ -40,10 +37,10 @@ public class TypeParameter extends ASTNode {
      */
     public TypeParameter(Token name,
                          List<Annotation> annotations,
-                         List<ReferenceType> superTypes) {
+                         List<Expression> superTypes) {
         super(ASTNode.getFirstToken(name, annotations),
               ASTNode.getLastToken(name, superTypes));
-        type = new TypeVariable(name, annotations);
+        this.name = name;
         this.superTypes = superTypes;
     }
 
@@ -51,15 +48,19 @@ public class TypeParameter extends ASTNode {
      * Gets the underlying type variable of this parameter
      * @return the underlying type variable of this parameter
      */
-    public TypeVariable getType() {
-        return type;
+    public String getName() {
+        return name.getText();
+    }
+
+    public Token getToken() {
+        return name;
     }
 
     /**
      * Gets the super types of this parameter, if any
      * @return the super types of this parameter, if any
      */
-    public List<ReferenceType> getSuperTypes() {
+    public List<Expression> getSuperTypes() {
         return superTypes;
     }
 
@@ -83,7 +84,7 @@ public class TypeParameter extends ASTNode {
      * Adds a super type to this type parameter
      * @param superType the super type of this type parameter
      */
-    public void addSuperType(ReferenceType superType) {
+    public void addSuperType(Expression superType) {
         superTypes.add(superType);
     }
 

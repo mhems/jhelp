@@ -1,20 +1,5 @@
 package com.binghamton.jhelp.ast;
 
-import com.binghamton.jhelp.Annotation;
-import com.binghamton.jhelp.Annotations;
-import com.binghamton.jhelp.ArrayType;
-import com.binghamton.jhelp.ClassInterfaceType;
-import com.binghamton.jhelp.MethodType;
-import com.binghamton.jhelp.Modifier;
-import com.binghamton.jhelp.Modifiers;
-import com.binghamton.jhelp.PrimitiveType;
-import com.binghamton.jhelp.ReferenceType;
-import com.binghamton.jhelp.Type;
-import com.binghamton.jhelp.TypeArgument;
-import com.binghamton.jhelp.TypeParameter;
-import com.binghamton.jhelp.TypeVariable;
-import com.binghamton.jhelp.util.StringUtils;
-
 /**
  * The body level Visitor for visiting the member declarations contained within
  * body declarations
@@ -30,30 +15,12 @@ public class BodyLevelVisitor extends EmptyVisitor {
     }
 
     /**
-     * Visit a Annotations node
-     * @param ast the AST node being visited
-     */
-    public void visit(Annotations ast) {
-        for (Annotation a : ast.getAnnotations()) {
-            a.accept(this);
-        }
-    }
-
-    /**
      * Visit a AnnotationDeclaration node
      * @param ast the AST node being visited
      */
     public void visit(AnnotationDeclaration ast) {
         System.out.printf("in annotation declaration '%s'\n",
                           ast.getName().getText());
-    }
-
-    /**
-     * Visit a ArrayType node
-     * @param ast the AST node being visited
-     */
-    public void visit(ArrayType ast) {
-        System.out.println("array type, rank " + ast.rank());
     }
 
     /**
@@ -81,24 +48,6 @@ public class BodyLevelVisitor extends EmptyVisitor {
         if (ast.hasSuperClass()) {
             ast.getSuperClass().accept(this);
         }
-    }
-
-    /**
-     * Visit a ClassInterfaceType node
-     * @param ast the AST node being visited
-     */
-    public void visit(ClassInterfaceType ast) {
-        System.out.printf("class type: %s", ast.getName());
-        if (ast.hasArgs()) {
-            System.out.printf("<%s>",
-                              StringUtils.join(", ",
-                                               ast.getTypeArguments()));
-        }
-        if (ast.hasSuperType()) {
-            System.out.printf(" extends ");
-            ast.getSuperType().accept(this);
-        }
-        System.out.println();
     }
 
     /**
@@ -140,7 +89,9 @@ public class BodyLevelVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(Dimension ast) {
-        ast.getAnnotations().accept(this);
+        for (Annotation a : ast.getAnnotations()) {
+            a.accept(this);
+        }
     }
 
     /**
@@ -188,7 +139,7 @@ public class BodyLevelVisitor extends EmptyVisitor {
     public void visit(MethodDeclaration ast) {
         System.out.printf("method '%s'\n", ast.getName().getText());
         System.out.println("  returns ");
-        ast.getReturnType().accept(this);
+        ast.getReturnTypeExpression().accept(this);
         if (ast.hasTypeParameters()) {
             System.out.println("type params:");
             for (TypeParameter tp : ast.getTypeParameters()) {
@@ -197,42 +148,15 @@ public class BodyLevelVisitor extends EmptyVisitor {
         }
         System.out.println("parameters:");
         for (VariableDeclaration v : ast.getParameters()) {
-            v.getType().accept(this);
+            v.getExpression().accept(this);
             System.out.println("is receiver ? " + v.isReceiverParameter());
         }
         if (ast.getExceptions().size() > 0) {
             System.out.println("throws:");
-            for (Type t : ast.getExceptions()) {
+            for (Expression t : ast.getExceptions()) {
                 t.accept(this);
             }
         }
-    }
-
-    /**
-     * Visit a MethodType node
-     * @param ast the AST node being visited
-     */
-    public void visit(MethodType ast) {
-        System.out.println("method type");
-    }
-
-    /**
-     * Visit a Modifier node
-     * @param ast the AST node being visited
-     */
-    public void visit(Modifier ast) {
-        System.out.println(ast.getName());
-    }
-
-    /**
-     * Visit a Modifiers node
-     * @param ast the AST node being visited
-     */
-    public void visit(Modifiers ast) {
-        for (Modifier m : ast.getModifiers()) {
-            m.accept(this);
-        }
-        ast.getAnnotations().accept(this);
     }
 
     /**
@@ -241,22 +165,6 @@ public class BodyLevelVisitor extends EmptyVisitor {
      */
     public void visit(PackageStatement ast) {
         System.out.println("in package " + ast.getText());
-    }
-
-    /**
-     * Visit a PrimitiveType node
-     * @param ast the AST node being visited
-     */
-    public void visit(PrimitiveType ast) {
-        System.out.println("primitive " + ast.getText());
-    }
-
-    /**
-     * Visit a ReferenceType node
-     * @param ast the AST node being visited
-     */
-    public void visit(ReferenceType ast) {
-        System.out.println("reference type " + ast.getText());
     }
 
     /**
@@ -276,20 +184,12 @@ public class BodyLevelVisitor extends EmptyVisitor {
     }
 
     /**
-     * Visit a TypeVariable node
-     * @param ast the AST node being visited
-     */
-    public void visit(TypeVariable ast) {
-        System.out.println("type variable " + ast.getText());
-    }
-
-    /**
      * Visit a VariableDeclaration node
      * @param ast the AST node being visited
      */
     public void visit(VariableDeclaration ast) {
         System.out.printf("declaring variable '%s':\n",
                           ast.getName().getText());
-        ast.getType().accept(this);
+        ast.getExpression().accept(this);
     }
 }

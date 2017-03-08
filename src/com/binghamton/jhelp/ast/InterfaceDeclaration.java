@@ -5,15 +5,13 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.ClassInterfaceType;
 import com.binghamton.jhelp.Modifier;
-import com.binghamton.jhelp.TypeParameter;
 
 /**
  * A class representing the declaration of a Java interface
  */
 public class InterfaceDeclaration extends AbstractBodyDeclaration {
-    private List<ClassInterfaceType> implementees = new ArrayList<>();
+    private List<Expression> implementees = new ArrayList<>();
     private List<MethodDeclaration> methods = new ArrayList<>();
     private List<TypeParameter> typeParams = new ArrayList<>();
 
@@ -27,8 +25,9 @@ public class InterfaceDeclaration extends AbstractBodyDeclaration {
     public InterfaceDeclaration(Token name,
                                 Token keyword,
                                 List<Modifier> modifiers,
-                                List<ClassInterfaceType> implementees) {
-        this(name, keyword, modifiers, implementees, new ArrayList<>());
+                                List<Annotation> annotations,
+                                List<Expression> implementees) {
+        this(name, keyword, modifiers, annotations, implementees, new ArrayList<>());
     }
 
     /**
@@ -42,9 +41,10 @@ public class InterfaceDeclaration extends AbstractBodyDeclaration {
     public InterfaceDeclaration(Token name,
                                 Token keyword,
                                 List<Modifier> modifiers,
-                                List<ClassInterfaceType> implementees,
+                                List<Annotation> annotations,
+                                List<Expression> implementees,
                                 List<TypeParameter> typeParams) {
-        super(name, keyword, modifiers);
+        super(name, keyword, modifiers, annotations);
         this.implementees = implementees;
         this.typeParams = typeParams;
     }
@@ -77,7 +77,7 @@ public class InterfaceDeclaration extends AbstractBodyDeclaration {
      * Gets the implemented interfaces of this declaration
      * @return the implemented interfaces of this declaration
      */
-    public List<ClassInterfaceType> getSuperInterfaces() {
+    public List<Expression> getSuperInterfaces() {
         return implementees;
     }
 

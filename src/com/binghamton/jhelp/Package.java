@@ -1,16 +1,22 @@
 package com.binghamton.jhelp;
 
 import java.util.Set;
-import java.util.TreeSet;
+import java.util.HashSet;
 
 /**
  * A class representing a Java package
  */
 public class Package {
-    public static final Package DEFAULT_PACKAGE = new Package("");
+    public static final Package DEFAULT_PACKAGE = new Package("<DEFAULT>") {
+            public boolean isDefault() {
+                return true;
+            }
+        };
+
     private String name;
-    private Set<Symbol> symbols = new TreeSet<>();
-    private Set<Package> subpackages = new TreeSet<>();
+    private SymbolTable<ClassSymbol> classes = new SymbolTable<>();
+    private Package parent;
+    private Set<Package> children = new HashSet<>();
 
     /**
      * Constructs a new Package with name `name`
@@ -18,6 +24,13 @@ public class Package {
      */
     public Package(String name) {
         this.name = name;
+    }
+
+    public Package makeChildPackage(String childName) {
+        Package child = new Package(childName);
+        child.parent = this;
+        addSubPackage(child);
+        return child;
     }
 
     /**
@@ -28,12 +41,28 @@ public class Package {
         return name;
     }
 
-    /**
-     * Gets the symbols within this package
-     * @return the symbols within this package
-     */
-    public Set<Symbol> getSymbols() {
-        return symbols;
+    public void setParent(Package pkg) {
+        parent = pkg;
+    }
+
+    public boolean hasParent() {
+        return parent != null;
+    }
+
+    public String getQualifiedName() {
+        String qname = getName();
+        if (hasParent()) {
+            qname = parent.getQualifiedName() + "." + qname;
+        }
+        return qname;
+    }
+
+    public void addClass(ClassSymbol cls) {
+        classes.put(cls);
+    }
+
+    public SymbolTable<ClassSymbol> getClassTable() {
+        return classes;
     }
 
     /**
@@ -41,7 +70,7 @@ public class Package {
      * @return the packages within this package
      */
     public Set<Package> getSubPackages() {
-        return subpackages;
+        return children;
     }
 
     /**
@@ -49,16 +78,7 @@ public class Package {
      * @return true iff this package is the default package
      */
     public boolean isDefault() {
-        return this.equals(DEFAULT_PACKAGE);
-    }
-
-    /**
-     * Attempts to add a symbol to the package
-     * @param sym the symbol to attempt to add
-     * @return true iff the symbol was added, false otherwise
-     */
-    public boolean addSymbol(Symbol sym) {
-        return symbols.add(sym);
+        return false;
     }
 
     /**
@@ -67,23 +87,7 @@ public class Package {
      * @return true iff the package was added, false otherwise
      */
     public boolean addSubPackage(Package subPkg) {
-        return subpackages.add(subPkg);
-    }
-
-    /**
-     * Gets the number of symbols within this package
-     * @return the number of symbols within this package
-     */
-    public int numSymbols() {
-        return symbols.size();
-    }
-
-    /**
-     * Gets the number of packages within this package
-     * @return the number of packages within this package
-     */
-    public int numSubPackages() {
-        return subpackages.size();
+        return children.add(subPkg);
     }
 
     /**
@@ -92,7 +96,7 @@ public class Package {
      */
     @Override
     public int hashCode() {
-        return name.hashCode() ^ symbols.hashCode() ^ subpackages.hashCode();
+        return name.hashCode();
     }
 
     /**
@@ -104,10 +108,24 @@ public class Package {
     public boolean equals(Object other) {
         if (other instanceof Package) {
             Package otherPkg = (Package)other;
-            return name.equals(otherPkg.name) &&
-                symbols.equals(otherPkg.symbols) &&
-                subpackages.equals(otherPkg.subpackages);
+            return name.equals(otherPkg.name);
         }
         return false;
+    }
+
+    public String repr() {
+        StringBuilder sb = new StringBuilder("package ");
+        sb.append(name);
+        sb.append("\n");
+        sb.append("declares:\n");
+        sb.append(classes.repr());
+        sb.append("\n");
+        sb.append("has children: ");
+        for (Package cp : children) {
+            sb.append("  ");
+            sb.append(cp.repr());
+            sb.append("\n");
+        }
+        return sb.toString();
     }
 }

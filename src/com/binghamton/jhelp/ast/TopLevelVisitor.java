@@ -1,15 +1,5 @@
 package com.binghamton.jhelp.ast;
 
-import com.binghamton.jhelp.Annotation;
-import com.binghamton.jhelp.Annotations;
-import com.binghamton.jhelp.ArrayType;
-import com.binghamton.jhelp.ClassInterfaceType;
-import com.binghamton.jhelp.Modifier;
-import com.binghamton.jhelp.Modifiers;
-import com.binghamton.jhelp.ReferenceType;
-import com.binghamton.jhelp.TypeArgument;
-import com.binghamton.jhelp.TypeParameter;
-
 /**
  * The top level Visitor for visiting top-level declarations and adding them to
  * the symbol table
@@ -25,32 +15,11 @@ public class TopLevelVisitor extends EmptyVisitor {
     }
 
     /**
-     * Visit a Annotations node
-     * @param ast the AST node being visited
-     */
-    public void visit(Annotations ast) {
-        for (Annotation a : ast.getAnnotations()) {
-            a.accept(this);
-        }
-    }
-
-    /**
      * Visit a AnnotationDeclaration node
      * @param ast the AST node being visited
      */
     public void visit(AnnotationDeclaration ast) {
         System.out.println("annotation declaration");
-    }
-
-    /**
-     * Visit a ArrayType node
-     * @param ast the AST node being visited
-     */
-    public void visit(ArrayType ast) {
-        System.out.printf("array type has %d dims\n.", ast.rank());
-        for (Dimension d : ast.getDimensions()) {
-            d.accept(this);
-        }
     }
 
     /**
@@ -65,22 +34,11 @@ public class TopLevelVisitor extends EmptyVisitor {
             }
         }
         if (ast.hasSuperClass()) {
-            System.out.printf("this class extends class '%s'\n", ast.getSuperClass().getName());
+            System.out.printf("this class extends class '%s'\n",
+                              ast.getSuperClass().getText());
             ast.getSuperClass().accept(this);
         }
 
-    }
-
-    /**
-     * Visit a ClassInterfaceType node
-     * @param ast the AST node being visited
-     */
-    public void visit(ClassInterfaceType ast) {
-        System.out.printf("class/interface type '%s'\n", ast.getName());
-        for (TypeArgument t : ast.getTypeArguments())
-            t.accept(this);
-        if (ast.hasSuperType())
-            ast.getSuperType().accept(this);
     }
 
     /**
@@ -91,9 +49,7 @@ public class TopLevelVisitor extends EmptyVisitor {
         if (ast.hasPackage()) {
             ast.getPackage().accept(this);
         }
-        for (ImportStatement s : ast.getImports()) {
-            s.accept(this);
-        }
+
         for (BodyDeclaration decl : ast.getBodyDeclarations()) {
             decl.accept(this);
         }
@@ -123,7 +79,9 @@ public class TopLevelVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(Dimension ast) {
-        ast.getAnnotations().accept(this);
+        for (Annotation a : ast.getAnnotations()) {
+            a.accept(this);
+        }
     }
 
     /**
@@ -132,17 +90,6 @@ public class TopLevelVisitor extends EmptyVisitor {
      */
     public void visit(EnumDeclaration ast) {
         System.out.println("enum declared");
-    }
-
-    /**
-     * Visit a ImportStatement node
-     * @param ast the AST node being visited
-     */
-    public void visit(ImportStatement ast) {
-        System.out.printf("importing '%s', static ? %s, demand ? %s\n",
-                          ast.getNameExpression().getText(),
-                          ast.isStatic(),
-                          ast.isDemand());
     }
 
     /**
@@ -162,41 +109,14 @@ public class TopLevelVisitor extends EmptyVisitor {
     }
 
     /**
-     * Visit a Modifier node
-     * @param ast the AST node being visited
-     */
-    public void visit(Modifier ast) {
-        System.out.printf("modifier '%s'\n", ast.getName());
-    }
-
-    /**
-     * Visit a Modifiers node
-     * @param ast the AST node being visited
-     */
-    public void visit(Modifiers ast) {
-        System.out.printf("modifiers detected");
-        for (Modifier m : ast.getModifiers()) {
-            m.accept(this);
-        }
-        ast.getAnnotations().accept(this);
-    }
-
-    /**
      * Visit a PackageStatement node
      * @param ast the AST node being visited
      */
     public void visit(PackageStatement ast) {
         System.out.printf("in package '%s'\n", ast.getName());
-        ast.getAnnotations().accept(this);
-    }
-
-    /**
-     * Visit a ReferenceType node
-     * @param ast the AST node being visited
-     */
-    public void visit(ReferenceType ast) {
-        System.out.printf("ref. type '%s'\n", ast.getName());
-        ast.getAnnotations().accept(this);
+        for (Annotation a : ast.getAnnotations()) {
+            a.accept(this);
+        }
     }
 
     /**
@@ -207,7 +127,9 @@ public class TopLevelVisitor extends EmptyVisitor {
         System.out.println("type argument");
         if (ast.isWildcard()) {
             System.out.println("its a wildcard");
-            ast.getAnnotations().accept(this);
+            for (Annotation a : ast.getAnnotations()) {
+                a.accept(this);
+            }
             if (ast.hasBound()) {
                 System.out.printf("upper bounded ? %s\n", ast.isUpperBounded());
                 ast.getBoundType().accept(this);
@@ -226,11 +148,8 @@ public class TopLevelVisitor extends EmptyVisitor {
      */
     public void visit(TypeParameter ast) {
         System.out.println("type parameter");
-        ast.getType().accept(this);
-        if (ast.hasSuperType()) {
-            for (ReferenceType rt : ast.getSuperTypes()) {
-                rt.accept(this);
-            }
+        for (Expression rt : ast.getSuperTypes()) {
+            rt.accept(this);
         }
     }
 }

@@ -6,15 +6,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
 
-import com.binghamton.jhelp.ast.ASTVisitor;
-import com.binghamton.jhelp.ast.ASTNode;
+import com.binghamton.jhelp.util.StringUtils;
 
 /**
  * A class abstracting a set of Java modifiers
  */
-public class Modifiers extends ASTNode {
+public class Modifiers {
     private Set<Modifier> modifiers = new HashSet<>();
-    private Annotations annotations = new Annotations();
 
     /**
      * Construct an empty set of Modifiers
@@ -28,10 +26,7 @@ public class Modifiers extends ASTNode {
      * @param modifiers the list of modifiers to initialize with
      */
     public Modifiers(List<Modifier> modifiers) {
-        super(modifiers);
-        for (Modifier m : modifiers) {
-            addOrPanic(m);
-        }
+        this.modifiers.addAll(modifiers);
     }
 
     /**
@@ -42,51 +37,20 @@ public class Modifiers extends ASTNode {
         return modifiers;
     }
 
-    /**
-     * Gets the annotations of these modifiers
-     * @return the annotations of these modifiers
-     */
-    public Annotations getAnnotations() {
-        return annotations;
+    public boolean contains(Modifier modifier) {
+        return modifiers.contains(modifier);
     }
 
-    /**
-     * Attempts to add a modifier to this set
-     * @param m the modifier to attempt to add
-     * @return true iff the modifier was successfully added
-     */
-    public boolean addModifier(Modifier m) {
-        boolean ret = true;
-        if (m instanceof Annotation) {
-            annotations.addAnnotation((Annotation)m);
-        } else {
-            ret = modifiers.add(m);
-        }
-        return ret;
+    public String getText() {
+        return toString();
     }
 
-    /**
-     * Attempts to add a modifier to this set.
-     * If the modifier already exists, an exception is thrown
-     * @param m the modifier to attempt to add
-     * @throws Error if `m` is already contained in modifiers
-     */
-    public void addOrPanic(Modifier m) {
-        if (!addModifier(m)) {
-            // throw new RepeatModifierException(m); // TODO
-        }
+    public String toString() {
+        return StringUtils.join(" ", modifiers);
     }
 
-    /**
-     * Determine if a modifier is in this collection of modifiers
-     * @param m the modifier to inquire about
-     * @return true iff the modifier `m` is in this collection of modifiers
-     */
-    public boolean contains(Modifier m) {
-        if (m instanceof Annotation) {
-            return annotations.contains((Annotation)m);
-        }
-        return modifiers.contains(m);
+    public boolean addModifier(Modifier modifier) {
+        return modifiers.add(modifier);
     }
 
     /**
@@ -94,21 +58,11 @@ public class Modifiers extends ASTNode {
      * @param modifier the encoded integer of modifiers
      * @return a new Modifiers object with the modifiers encoded in `modifier`
      */
-    public static Modifiers fromEncodedModifier(int modifier) {
-        Modifiers modifiers = new Modifiers();
-        for (String m : java.lang.reflect.Modifier.toString(modifier).split(" ")) {
-            modifiers.addModifier(new Modifier(m));
+    public static Modifiers fromEncodedModifier(int modifiers) {
+        Modifiers mods = new Modifiers();
+        for (String m : java.lang.reflect.Modifier.toString(modifiers).split(" ")) {
+            mods.addModifier(new Modifier(m));
         }
-        return modifiers;
-    }
-
-    /**
-     * Double dispatch this class on parameter
-     * @param v the visitor to accept
-     */
-    @Override
-    public void accept(ASTVisitor v) {
-        super.accept(v);
-        v.visit(this);
+        return mods;
     }
 }
