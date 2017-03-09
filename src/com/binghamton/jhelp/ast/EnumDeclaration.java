@@ -18,6 +18,7 @@ public class EnumDeclaration extends ConcreteBodyDeclaration {
      * @param name the name of the declaration
      * @param keyword the keyword Token of this declaration
      * @param modifiers the modifiers of the declaration
+     * @param annotations the annotations of this declaration
      * @param implementees the interfaces this declaration implements
      */
     public EnumDeclaration(Token name,

@@ -20,6 +20,7 @@ public class InterfaceDeclaration extends AbstractBodyDeclaration {
      * @param name the name of this declaration
      * @param keyword the keyword token of this declaration
      * @param modifiers the modifiers of this declaration
+     * @param annotations the annotations of this declaration
      * @param implementees the interfaces this declaration implements
      */
     public InterfaceDeclaration(Token name,
@@ -35,6 +36,7 @@ public class InterfaceDeclaration extends AbstractBodyDeclaration {
      * @param name the name of this declaration
      * @param keyword the keyword token of this declaration
      * @param modifiers the modifiers of this declaration
+     * @param annotations the annotations of this declaration
      * @param implementees the interfaces this declaration implements
      * @param typeParams the type parameters of this declaration
      */

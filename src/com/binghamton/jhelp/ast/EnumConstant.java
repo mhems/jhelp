@@ -16,7 +16,7 @@ public class EnumConstant extends ConcreteBodyDeclaration {
     /**
      * Construct an enum constant
      * @param name the token holding the name of this constant
-     * @param modifiers the modifiers of this constant
+     * @param annotations the annotations of this constant
      * @param arguments the arguments to this constant
      */
     public EnumConstant(Token name,

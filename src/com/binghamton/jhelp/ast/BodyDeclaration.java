@@ -28,6 +28,7 @@ public abstract class BodyDeclaration extends Declaration {
      * @param name the name of this declaration
      * @param keyword the keyword of this declaration
      * @param modifiers the modifiers of this declaration
+     * @param annotations the annotations of this declaration
      */
     public BodyDeclaration(Token name,
                            Token keyword,

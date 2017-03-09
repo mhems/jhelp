@@ -15,8 +15,8 @@ public class CastExpression extends Expression {
     /**
      * Construct a new cast expression
      * @param first the first token of this ASTNode
-     * @param expr the expression to cast
-     * @param type the type to cast the expression to
+     * @param source the expression to cast
+     * @param target the Expression yielding the type to cast to
      */
     public CastExpression(Token first, Expression source, Expression target) {
         super(first, source.getLastToken());
@@ -27,8 +27,8 @@ public class CastExpression extends Expression {
     /**
      * Construct a new bounded cast expression
      * @param first the first token of this ASTNode
-     * @param expr the expression to cast
-     * @param refTypes the types to cast the expression to
+     * @param source the expression to cast
+     * @param targets the Expressions yielding the types to cast to
      */
     public CastExpression(Token first,
                           Expression source,

@@ -8,6 +8,8 @@ import org.antlr.v4.runtime.Token;
  * A class representing a Java switch statement
  */
 public class SwitchStatement extends Statement {
+    // TODO defines new scope, local vars declared in case blocks are hoisted
+    // (without initializer?)  outside their case block into this switch scope
     private Expression condition;
     private List<CaseBlock> cases;
 

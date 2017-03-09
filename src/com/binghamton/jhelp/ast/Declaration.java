@@ -25,6 +25,7 @@ public abstract class Declaration extends Statement {
     /**
      * Construct an unnamed modified declaration
      * @param modifiers the modifiers of this declaration
+     * @param annotations the annotations of this declaration
      */
     public Declaration(List<Modifier> modifiers, List<Annotation> annotations) {
         this.modifiers = new Modifiers(modifiers);
@@ -45,6 +46,7 @@ public abstract class Declaration extends Statement {
      * @param name the name Token of this declaration
      * @param keyword the keyword of this declaration
      * @param modifiers the modifiers of this declaration
+     * @param annotations the annotations of this declaration
      */
     public Declaration(Token name,
                        Token keyword,

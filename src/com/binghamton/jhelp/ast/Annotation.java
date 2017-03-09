@@ -15,6 +15,7 @@ public class Annotation extends Expression {
 
     /**
      * Construct an annotation
+     * @param at the '@' Token
      * @param expr the type Token of the annotation
      */
     public Annotation(Token at, Expression expr) {
@@ -24,6 +25,8 @@ public class Annotation extends Expression {
 
     /**
      * Construct a single element annotation
+     * @param at the '@' Token
+     * @param last the terminating ')' Token
      * @param expr the type name of the annotation
      * @param value the single element's value
      */

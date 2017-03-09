@@ -21,6 +21,7 @@ public class MethodDeclaration extends Declaration {
     /**
      * Construct a method declaration
      * @param modifiers the modifiers of this method
+     * @param annotations the annotations of this method
      */
     public MethodDeclaration(List<Modifier> modifiers,
                              List<Annotation> annotations) {
@@ -29,7 +30,7 @@ public class MethodDeclaration extends Declaration {
 
     /**
      * Sets this method's return type
-     * @param returnType this method's return type
+     * @param returnTypeExpr this method's return type
      */
     public void setReturnType(Expression returnTypeExpr) {
         this.returnType = returnType;

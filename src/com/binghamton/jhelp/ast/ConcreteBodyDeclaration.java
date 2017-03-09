@@ -30,6 +30,7 @@ public abstract class ConcreteBodyDeclaration extends BodyDeclaration {
      * @param name the name of the declaration
      * @param keyword the keyword of the declaration
      * @param modifiers the modifiers of the declaration
+     * @param annotations the annotations of this declaration
      * @param implementees the interfaces this declaration implements
      */
     public ConcreteBodyDeclaration(Token name,

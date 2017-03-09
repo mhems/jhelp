@@ -19,7 +19,7 @@ public class ArrayConstruction extends Expression {
     /**
      * Constructs a new array construction expression
      * @param first the first token of this ASTNode
-     * @param type the type of the array elements
+     * @param expr the Expression yielding the type of the array elements
      * @param dimExprs the dimension expressions
      * @param dims the number of remaining dimensions
      */
@@ -38,7 +38,7 @@ public class ArrayConstruction extends Expression {
     /**
      * Constructs a new array with initializer
      * @param first the first token of this ASTNode
-     * @param type the type of the array elements
+     * @param expr the Expression yielding the type of the array elements
      * @param dims the number of dimensions of this array
      * @param initializer the initializer of this array
      */

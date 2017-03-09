@@ -33,6 +33,7 @@ public class VariableDeclaration extends Declaration {
      * Construct a new named, untyped, modified variable declaration
      * @param name the Token holding the name of the variable being declared
      * @param modifiers any modifiers on the variable being declared
+     * @param annotations the annotations of the variable being declared
      */
     public VariableDeclaration(Token name,
                                List<Modifier> modifiers,
@@ -43,8 +44,9 @@ public class VariableDeclaration extends Declaration {
     /**
      * Construct a new typed variable declaration
      * @param name the Token holding the name of the variable being declared
-     * @param type the type of the variable being declared
+     * @param expr the Expression yielding the type of the variable
      * @param modifiers any modifiers on the variable being declared
+     * @param annotations the annotations of the variable being declared
      */
     public VariableDeclaration(Token name,
                                Expression expr,
@@ -56,9 +58,11 @@ public class VariableDeclaration extends Declaration {
     /**
      * Construct a new typed variable declaration
      * @param name the Token holding the name of the variable being declared
-     * @param type the type of the variable being declared
+     * @param expr the Expression yielding the type of the variable
      * @param modifiers any modifiers on the variable being declared
-     * @param isEllipsis true iff this is a variadic parameter variable
+     * @param annotations the annotations of the variable being declared
+     * @param ellipsis the ellipsis Token
+     * @param ellipsisAnnotations the annotations of the ellipsis
      */
     public VariableDeclaration(Token name,
                                Expression expr,
@@ -74,10 +78,10 @@ public class VariableDeclaration extends Declaration {
     /**
      * Construct a new typed variable declaration with initial value
      * @param name the Token holding the name of the variable being declared
-     * @param type the type of the variable being declared
+     * @param expr the Expression yielding the type of the variable
      * @param modifiers any modifiers on the variable being declared
+     * @param annotations the annotations of the variable being declared
      * @param initializer the expression yielding the variable's inital value
-     * @param isEllipsis true iff this variable is variadic
      */
     public VariableDeclaration(Token name,
                                Expression expr,
@@ -97,14 +101,6 @@ public class VariableDeclaration extends Declaration {
     public Expression getExpression() {
         return expr;
     }
-
-    /**
-     * Determines if this variable is explicitly typed
-     * @return true iff this variable is explicitly typed
-     */
-    // public boolean isTyped() {
-    //     return !type.isNil();
-    // }
 
     /**
      * Gets the initial value of the variable, if any
