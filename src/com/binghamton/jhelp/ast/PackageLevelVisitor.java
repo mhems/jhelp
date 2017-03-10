@@ -108,7 +108,7 @@ public class PackageLevelVisitor extends EmptyVisitor {
             decl.accept(this);
         }
         if (!bodyNames.contains(filename)) {
-            // TODO
+            // TODO convert to error
             System.err.printf("file '%s' must declare a body with name of this file\n",
                               filename);
         }

@@ -103,9 +103,9 @@ literal returns [Expression ret]
     |   c = CharacterLiteral
         {$ret = new LiteralExpression($c, PrimitiveType.CHAR);}
     |   s = StringLiteral
-        {$ret = new LiteralExpression($s, null);} // TODO String
+        {$ret = new LiteralExpression($s, null);}
     |   n = NullLiteral
-        {$ret = new KeywordExpression($n);}
+        {$ret = new LiteralExpression($n, null);}
     ;
 
 /*

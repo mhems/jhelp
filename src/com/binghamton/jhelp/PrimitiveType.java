@@ -23,22 +23,11 @@ public class PrimitiveType implements Type {
     public static final PrimitiveType VOID    = new PrimitiveType(Primitive.VOID);
 
     private static final Map<String, Primitive> PRIMITIVE_MAP = new HashMap<>();
-    private static final Map<Primitive, ReflectedClassSymbol> BOX_MAP = new HashMap<>();
-    // TODO this is unnecessary, see below
     public static final Map<String, PrimitiveType> UNBOX_MAP = new HashMap<>();
 
     static {
-        try {
-            // TODO this should be made to use the global cache of Str -> RefClsSym
-            Class<?> cls;
-            ReflectedClassSymbol rcls;
-            for (Primitive p : Primitive.values()) {
-                PRIMITIVE_MAP.put(p.name, p);
-                cls = Class.forName("java.lang." + p.classname);
-                BOX_MAP.put(p, new ReflectedClassSymbol(cls));
-            }
-        } catch (ClassNotFoundException e) {
-            System.err.println("FATAL ERROR"); // TODO
+        for (Primitive p : Primitive.values()) {
+            PRIMITIVE_MAP.put(p.name, p);
         }
 
         UNBOX_MAP.put("Boolean", BOOLEAN);
@@ -69,8 +58,12 @@ public class PrimitiveType implements Type {
         return annotations;
     }
 
+    public void setAnnotations(AnnotationSymbol[] annotations) {
+        this.annotations = annotations;
+    }
+
     public ClassSymbol box() {
-        return BOX_MAP.get(primitive);
+        return ImportManager.get("java.lang." + primitive.classname);
     }
 
     public String getName() {

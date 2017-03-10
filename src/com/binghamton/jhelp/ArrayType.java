@@ -14,10 +14,9 @@ public class ArrayType implements Type {
 
     /**
      * Construct a named array type
-     * @param type the type of the array elements
-     * @param dims the dimensions of the array type
+     * @param base the base Type of the array
      */
-    public ArrayType(Type type) {
+    public ArrayType(Type base) {
         this.base = base;
     }
 
@@ -35,6 +34,10 @@ public class ArrayType implements Type {
 
     public AnnotationSymbol[] getAnnotations() {
         return annotations;
+    }
+
+    public void setAnnotations(AnnotationSymbol[] annotations) {
+        this.annotations = annotations;
     }
 
     public int rank() {

@@ -96,7 +96,7 @@ public class Package {
      */
     @Override
     public int hashCode() {
-        return name.hashCode();
+        return getQualifiedName().hashCode();
     }
 
     /**
@@ -107,8 +107,7 @@ public class Package {
     @Override
     public boolean equals(Object other) {
         if (other instanceof Package) {
-            Package otherPkg = (Package)other;
-            return name.equals(otherPkg.name);
+            return getQualifiedName().equals(((Package)other).getQualifiedName());
         }
         return false;
     }

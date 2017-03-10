@@ -1,17 +1,9 @@
 package com.binghamton.jhelp;
 
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.List;
-import java.util.ArrayList;
-
-import com.binghamton.jhelp.util.StringUtils;
-
 /**
  * A class representing a Java method
  */
-public abstract class MethodSymbol extends Symbol {
-
+public abstract class MethodSymbol extends CallableSymbol {
 
         {
             kind = SymbolKind.METHOD;
@@ -38,42 +30,9 @@ public abstract class MethodSymbol extends Symbol {
         super(name, modifiers);
     }
 
-    /**
-     * Gets the return type of this method
-     * @return the return type of this method
-     */
     public abstract Type getReturnType();
 
-    /**
-     * Gets the formal parameters of this method
-     * @return the formal parameters of this method
-     */
-    public abstract Type[] getParameterTypes();
-
-    public abstract ClassSymbol[] getExceptionClasses();
-
-    public abstract TypeVariable[] getTypeParameters();
-
-    public boolean hasTypeParameters() {
-        return getTypeParameters().length > 0;
-    }
-
     public String getTypeName() {
-        StringBuilder sb = new StringBuilder();
-        if (hasTypeParameters()) {
-            sb.append("<");
-            sb.append(StringUtils.join(", ",
-                                       getTypeParameters(),
-                                       t -> t.getTypeName()));
-            sb.append(">");
-        }
-        sb.append("(");
-        sb.append(StringUtils.join(", ",
-                                   getParameterTypes(),
-                                   t -> t.getTypeName()));
-        sb.append(")");
-        sb.append(" -> ");
-        sb.append(getReturnType().getTypeName());
-        return sb.toString();
+        return super.getTypeName() + " -> " +  getReturnType().getTypeName();
     }
 }

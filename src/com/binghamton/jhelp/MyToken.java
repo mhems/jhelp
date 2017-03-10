@@ -74,4 +74,12 @@ public class MyToken extends CommonToken {
     public String getTextUpTo(MyToken stop) {
         return stream.getText(this, stop);
     }
+
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(type) ^
+            Integer.hashCode(channel) ^
+            Integer.hashCode(start) ^
+            Integer.hashCode(stop);
+    }
 }

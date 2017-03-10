@@ -2,32 +2,53 @@ package com.binghamton.jhelp;
 
 public class ReflectedClassSymbol extends ClassSymbol {
     private Class<? extends Object> cls;
+    private ClassSymbol superClass;
+    private ClassSymbol[] interfaces;
+    private MethodSymbol[] methods;
+    private ConstructorSymbol[] ctors;
+    private VariableSymbol[] fields;
+    private TypeVariable[] params;
 
+    public static ReflectedClassSymbol get(Class<?> cls) {
+        ReflectedClassSymbol ret = null;
+        try {
+            ret = ImportManager.getOrImport(cls.getName());
+        } catch(ClassNotFoundException e) {
+            System.err.println("FATAL ERROR - could not import " + cls.getName());
+        }
+        return ret;
+    }
 
     public ReflectedClassSymbol(Class<? extends Object> cls) {
         super(cls.getName(), cls.getModifiers());
         this.cls = cls;
+        superClass = get(cls.getSuperclass());
+        interfaces = fromClasses(cls.getInterfaces());
+        methods = fromMethods(cls.getMethods());
+        ctors = fromConstructors(cls.getConstructors());
+        fields = fromFields(cls.getFields());
+        params = fromTypeParameters(cls.getTypeParameters());
     }
 
     @Override
     public ClassSymbol getSuperClass() {
-        return new ReflectedClassSymbol(cls.getSuperclass());
+        return superClass;
     }
 
     public ClassSymbol[] getInterfaces() {
-        return fromClasses(cls.getInterfaces());
+        return interfaces;
     }
 
     public MethodSymbol[] getMethods() {
-        return fromMethods(cls.getMethods());
+        return methods;
     }
 
-    public MethodSymbol[] getConstructors() {
-        return fromMethods(cls.getConstructors());
+    public ConstructorSymbol[] getConstructors() {
+        return ctors;
     }
 
     public VariableSymbol[] getFields() {
-        return fromFields(cls.getFields());
+        return fields;
     }
 
     public boolean isEnum() {
@@ -46,7 +67,7 @@ public class ReflectedClassSymbol extends ClassSymbol {
     }
 
     public TypeVariable[] getTypeParameters() {
-        return null; // TODO
+        return params;
     }
 
     public boolean isAnonymous() {

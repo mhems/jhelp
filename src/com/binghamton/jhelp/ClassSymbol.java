@@ -33,9 +33,9 @@ public abstract class ClassSymbol extends Symbol implements Type {
     }
 
     public abstract ClassSymbol[] getInterfaces();
-    public abstract ClassSymbol getSuperClass();
+    public abstract Type getSuperClass();
     public abstract MethodSymbol[] getMethods();
-    public abstract MethodSymbol[] getConstructors();
+    public abstract ConstructorSymbol[] getConstructors();
     public abstract VariableSymbol[] getFields();
     public abstract boolean isEnum();
     public abstract boolean isClass();

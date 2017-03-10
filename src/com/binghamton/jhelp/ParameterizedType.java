@@ -22,7 +22,11 @@ public class ParameterizedType implements Type {
     }
 
     public AnnotationSymbol[] getAnnotations() {
-        return wrapped.getAnnotations(); // TODO correct?
+        return wrapped.getAnnotations(); // TODO correct or return empty array?
+    }
+
+    public void setAnnotations(AnnotationSymbol[] annotations) {
+        wrapped.setAnnotations(annotations); // TODO correct or no-op?
     }
 
     public String getTypeName() {

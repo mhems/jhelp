@@ -12,14 +12,47 @@ import java.util.Set;
  * for in the on demand packages, of which java.lang is contained in.
  */
 public class ImportManager {
-    private static final Set<String> autoImportPackages = new HashSet<>();
+    private static final Set<String> autoImportPackageNames = new HashSet<>();
+    private static final Map<String, ReflectedClassSymbol> cache = new HashMap<>();
 
     static {
-        autoImportPackages.add("java.lang");
+        autoImportPackageNames.add("java.lang");
+        try {
+            getOrImport("java.lang.Object");
+            getOrImport("java.lang.String");
+            getOrImport("java.lang.Enum");
+            getOrImport("java.lang.annotation.Annotation");
+        } catch (ClassNotFoundException e) {
+            System.err.println("FATAL ERROR"); // TODO convert to error
+        }
     }
 
-    private final Map<String, ReflectedClassSymbol> cache = new HashMap<>();
-    private final Set<String> onDemandPackages = new HashSet<>(autoImportPackages);
+    private final Set<String> onDemandPackages = new HashSet<>(autoImportPackageNames);
+
+    /**
+     * Determines if a symbol has been explicity imported
+     * @param name the name of the symbol to query
+     * @return true iff the symbol has been explicity imported,
+     *         false otherwise
+     */
+    public static boolean isImported(String name) {
+        return cache.containsKey(name);
+    }
+
+    public static ReflectedClassSymbol get(String name) {
+        if (!isImported(name)) {
+            throw new IllegalArgumentException("can only retrieve symbols that have already been imported");
+        }
+        return cache.get(name);
+    }
+
+    public static ReflectedClassSymbol getOrImport(String name)
+        throws ClassNotFoundException {
+        if (!isImported(name)) {
+            cache.put(name, new ReflectedClassSymbol(Class.forName(name)));
+        }
+        return cache.get(name);
+    }
 
     /**
      * Attempt to add a package to the set of on demand packages
@@ -39,16 +72,6 @@ public class ImportManager {
      */
     public boolean isOnDemand(String pkg) {
         return onDemandPackages.contains(pkg);
-    }
-
-    /**
-     * Determines if a symbol has been explicity imported
-     * @param name the name of the symbol to query
-     * @return true iff the symbol has been explicity imported,
-     *         false otherwise
-     */
-    public boolean isImported(String name) {
-        return cache.containsKey(name);
     }
 
     /**
@@ -79,12 +102,5 @@ public class ImportManager {
             }
         }
         return cls;
-    }
-
-    private ReflectedClassSymbol getOrImport(String name) throws ClassNotFoundException {
-        if (!isImported(name)) {
-            cache.put(name, new ReflectedClassSymbol(Class.forName(name)));
-        }
-        return cache.get(name);
     }
 }

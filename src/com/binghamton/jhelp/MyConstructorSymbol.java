@@ -2,38 +2,25 @@ package com.binghamton.jhelp;
 
 import org.antlr.v4.runtime.Token;
 
-public class MyMethodSymbol extends MethodSymbol {
-    private Type returnType;
+public class MyConstructorSymbol extends ConstructorSymbol {
     private VariableSymbol[] params = {};
     private Type[] paramTypes = {};
     private TypeVariable[] typeVars = {};
     private Type[] exceptions = {};
     private Token token;
 
-    public MyMethodSymbol(Token token) {
+    public MyConstructorSymbol(Token token) {
         super(token.getText());
         this.token = token;
     }
 
-    public MyMethodSymbol(Token token, Modifiers modifiers) {
+    public MyConstructorSymbol(Token token, Modifiers modifiers) {
         super(token.getText(), modifiers);
         this.token = token;
     }
 
     public Token getToken() {
         return token;
-    }
-
-    /**
-     * Sets the return type of this method
-     * @param type the return type of this method
-     */
-    public void setReturnType(Type type) {
-        returnType = type;
-    }
-
-    public Type getReturnType() {
-        return returnType;
     }
 
     public VariableSymbol[] getParameters() {

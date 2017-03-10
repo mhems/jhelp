@@ -368,7 +368,7 @@ public class Java8Parser extends Parser {
 				{
 				setState(458);
 				((LiteralContext)_localctx).n = match(NullLiteral);
-				((LiteralContext)_localctx).ret =  new KeywordExpression(((LiteralContext)_localctx).n);
+				((LiteralContext)_localctx).ret =  new LiteralExpression(((LiteralContext)_localctx).n, null);
 				}
 				break;
 			default:

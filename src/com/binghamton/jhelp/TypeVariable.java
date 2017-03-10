@@ -18,9 +18,11 @@ public class TypeVariable implements Type {
     /**
      * Construct a named type variable
      * @param name the name of this type
+     * @param bounds the bounds of this type
      */
-    public TypeVariable(String name) {
+    public TypeVariable(String name, Type[] bounds) {
         this.name = name;
+        this.bounds = bounds;
     }
 
     public String getName() {
@@ -29,6 +31,10 @@ public class TypeVariable implements Type {
 
     public AnnotationSymbol[] getAnnotations() {
         return annotations;
+    }
+
+    public void setAnnotations(AnnotationSymbol[] annotations) {
+        this.annotations = annotations;
     }
 
     public String getTypeName() {

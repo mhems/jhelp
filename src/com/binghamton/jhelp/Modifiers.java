@@ -23,15 +23,15 @@ public class Modifiers {
 
     /**
      * Construct a collection of modifiers from a list
-     * @param modifiers the list of modifiers to initialize with
+     * @param modifiers the List of modifiers to initialize with
      */
     public Modifiers(List<Modifier> modifiers) {
         this.modifiers.addAll(modifiers);
     }
 
     /**
-     * Gets the set of modifiers
-     * @return the set of modifiers
+     * Gets the Set of Modifiers
+     * @return the Set of Modifiers
      */
     public Set<Modifier> getModifiers() {
         return modifiers;
@@ -55,8 +55,8 @@ public class Modifiers {
 
     /**
      * Utility method to convert a Modifier array into a Modifiers object
-     * @param modifier the encoded integer of modifiers
-     * @return a new Modifiers object with the modifiers encoded in `modifier`
+     * @param modifiers the encoded integer of modifiers
+     * @return a new Modifiers object with the modifiers encoded in `modifiers`
      */
     public static Modifiers fromEncodedModifier(int modifiers) {
         Modifiers mods = new Modifiers();

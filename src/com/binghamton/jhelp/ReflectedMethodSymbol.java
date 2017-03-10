@@ -1,17 +1,25 @@
 package com.binghamton.jhelp;
 
-import java.lang.reflect.Executable;
+import java.lang.reflect.Method;
 
 public class ReflectedMethodSymbol extends MethodSymbol {
-    private Executable method;
+    private Method method;
+    private Type returnType;
+    private TypeVariable[] params;
+    private Type[] argTypes;
+    private Type[] exceptions;
 
-    public ReflectedMethodSymbol(Executable method) {
+    public ReflectedMethodSymbol(Method method) {
         super(method.getName(), method.getModifiers());
         this.method = method;
+        returnType = fromType(method.getAnnotatedReturnType());
+        params = fromTypeParameters(method.getTypeParameters());
+        argTypes = fromTypes(method.getAnnotatedParameterTypes());
+        exceptions = fromTypes(method.getAnnotatedExceptionTypes());
     }
 
     public Type getReturnType() {
-        return null; // TODO
+        return returnType;
     }
 
     /**
@@ -19,14 +27,14 @@ public class ReflectedMethodSymbol extends MethodSymbol {
      * @return the formal parameters of this method
      */
     public Type[] getParameterTypes() {
-        return null; // TODO
+        return params;
     }
 
-    public ClassSymbol[] getExceptionClasses() {
-        return fromClasses(method.getExceptionTypes());
+    public Type[] getExceptionTypes() {
+        return exceptions;
     }
 
     public TypeVariable[] getTypeParameters() {
-        return null;
+        return params;
     }
 }
