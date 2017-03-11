@@ -32,4 +32,8 @@ public class ReflectedConstructorSymbol extends ConstructorSymbol {
     public TypeVariable[] getTypeParameters() {
         return params;
     }
+
+    public ClassSymbol getDeclaringClass() {
+        return ReflectedClassSymbol.get(ctor.getDeclaringClass());
+    }
 }

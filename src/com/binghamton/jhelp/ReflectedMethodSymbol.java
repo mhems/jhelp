@@ -37,4 +37,8 @@ public class ReflectedMethodSymbol extends MethodSymbol {
     public TypeVariable[] getTypeParameters() {
         return params;
     }
+
+    public ClassSymbol getDeclaringClass() {
+        return ReflectedClassSymbol.get(method.getDeclaringClass());
+    }
 }

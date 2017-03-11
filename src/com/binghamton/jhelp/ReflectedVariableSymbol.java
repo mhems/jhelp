@@ -6,6 +6,10 @@ public class ReflectedVariableSymbol extends VariableSymbol {
     private Field field = null;
     private Type type;
 
+        {
+            setVariableKind(VariableKind.FIELD);
+        }
+
     public ReflectedVariableSymbol(Field field) {
         super(field.getName(), field.getModifiers());
         this.field = field;
@@ -14,5 +18,13 @@ public class ReflectedVariableSymbol extends VariableSymbol {
 
     public Type getType() {
         return type;
+    }
+
+    public ClassSymbol getDeclaringClass() {
+        return ReflectedClassSymbol.get(field.getDeclaringClass());
+    }
+
+    public CallableSymbol getDeclaringCallable() {
+        return null;
     }
 }

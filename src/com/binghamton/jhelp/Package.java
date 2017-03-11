@@ -107,7 +107,8 @@ public class Package {
     @Override
     public boolean equals(Object other) {
         if (other instanceof Package) {
-            return getQualifiedName().equals(((Package)other).getQualifiedName());
+            Package pkg = (Package)other;
+            return getQualifiedName().equals(pkg.getQualifiedName());
         }
         return false;
     }

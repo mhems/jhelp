@@ -1,5 +1,6 @@
 package com.binghamton.jhelp;
 
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,5 +43,18 @@ public class ArrayType implements Type {
 
     public int rank() {
         return 1 + base.rank();
+    }
+
+    public boolean equals(Object other) {
+        if (other instanceof ArrayType) {
+            ArrayType type = (ArrayType)other;
+            return Arrays.equals(annotations, type.annotations) &&
+                base.equals(type);
+        }
+        return false;
+    }
+
+    public int hashCode() {
+        return base.hashCode() ^ annotations.length;
     }
 }

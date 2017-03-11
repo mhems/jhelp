@@ -111,6 +111,16 @@ public abstract class Symbol {
         return kind;
     }
 
+    public abstract boolean equals(Object other);
+
+    public abstract int hashCode();
+
+    public abstract String toString();
+
+    public String repr() {
+        return toString();
+    }
+
     /**
      * Attempts to add modifier to this symbol's modifiers
      * @param modifier the modifier to attempt to add
@@ -126,34 +136,6 @@ public abstract class Symbol {
      */
     public int numModifiers() {
         return modifiers.getModifiers().size();
-    }
-
-    /**
-     * Determines if this symbol is equivalent to another symbol
-     * @param other the other Object to compare against
-     * @return true iff this symbol is equivalent to `other`
-     */
-    @Override
-    public boolean equals(Object other) {
-        if (other instanceof Symbol) {
-            Symbol sym = (Symbol)other;
-            return name.equals(sym.name) &&
-                kind == sym.kind;
-        }
-        return false;
-    }
-
-    /**
-     * Determines the hash code of this symbol
-     * @return the hash code of this symbol
-     */
-    @Override
-    public int hashCode() {
-        return name.hashCode() ^ access.hashCode() ^ modifiers.hashCode();
-    }
-
-    public String repr() {
-        return name;
     }
 
     protected static AnnotationSymbol[] fromAnnotations(Annotation[] annotations) {

@@ -1,5 +1,7 @@
 package com.binghamton.jhelp;
 
+import java.util.Arrays;
+
 import com.binghamton.jhelp.util.StringUtils;
 
 public class ParameterizedType implements Type {
@@ -45,5 +47,18 @@ public class ParameterizedType implements Type {
 
     public Type[] getParameters() {
         return params;
+    }
+
+    public boolean equals(Object other) {
+        if (other instanceof ParameterizedType) {
+            ParameterizedType type = (ParameterizedType)other;
+            return wrapped.equals(type.wrapped) &&
+                Arrays.equals(params, type.params);
+        }
+        return false;
+    }
+
+    public int hashCode() {
+        return wrapped.hashCode() ^ params.length;
     }
 }

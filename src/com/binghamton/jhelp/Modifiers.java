@@ -2,6 +2,8 @@ package com.binghamton.jhelp;
 
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
@@ -12,7 +14,27 @@ import com.binghamton.jhelp.util.StringUtils;
  * A class abstracting a set of Java modifiers
  */
 public class Modifiers {
+    private static final List<Modifier> ORDERED_MODIFIERS = new ArrayList<>();
+    private static final Comparator<Modifier> BY_STANDARD;
     private Set<Modifier> modifiers = new HashSet<>();
+
+    static {
+        BY_STANDARD = (a, b) ->
+            ORDERED_MODIFIERS.indexOf(a) - ORDERED_MODIFIERS.indexOf(b);
+
+        ORDERED_MODIFIERS.add(Modifier.PUBLIC);
+        ORDERED_MODIFIERS.add(Modifier.PROTECTED);
+        ORDERED_MODIFIERS.add(Modifier.PRIVATE);
+        ORDERED_MODIFIERS.add(Modifier.ABSTRACT);
+        ORDERED_MODIFIERS.add(Modifier.DEFAULT);
+        ORDERED_MODIFIERS.add(Modifier.STATIC);
+        ORDERED_MODIFIERS.add(Modifier.FINAL);
+        ORDERED_MODIFIERS.add(Modifier.TRANSIENT);
+        ORDERED_MODIFIERS.add(Modifier.VOLATILE);
+        ORDERED_MODIFIERS.add(Modifier.SYNCHRONIZED);
+        ORDERED_MODIFIERS.add(Modifier.NATIVE);
+        ORDERED_MODIFIERS.add(Modifier.STRICT_FP);
+    }
 
     /**
      * Construct an empty set of Modifiers
@@ -46,7 +68,9 @@ public class Modifiers {
     }
 
     public String toString() {
-        return StringUtils.join(" ", modifiers);
+        List<Modifier> mods = new ArrayList<>(modifiers);
+        Collections.sort(mods, BY_STANDARD);
+        return StringUtils.join(" ", mods);
     }
 
     public boolean addModifier(Modifier modifier) {

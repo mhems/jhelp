@@ -3,6 +3,7 @@ package com.binghamton.jhelp;
 import org.antlr.v4.runtime.Token;
 
 public class MyMethodSymbol extends MethodSymbol {
+    private ClassSymbol owner;
     private Type returnType;
     private VariableSymbol[] params = {};
     private Type[] paramTypes = {};
@@ -66,5 +67,13 @@ public class MyMethodSymbol extends MethodSymbol {
 
     public void setTypeParameters(TypeVariable[] vars) {
         typeVars = vars;
+    }
+
+    public ClassSymbol getDeclaringClass() {
+        return owner;
+    }
+
+    public void setDeclaringClass(ClassSymbol sym) {
+        owner = sym;
     }
 }

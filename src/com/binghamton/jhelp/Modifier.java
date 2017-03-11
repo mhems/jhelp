@@ -18,6 +18,7 @@ public class Modifier extends Expression {
     public static final Modifier PUBLIC    = new Modifier("public");
     public static final Modifier STATIC    = new Modifier("static");
     public static final Modifier STRICT_FP = new Modifier("strictfp");
+    public static final Modifier SYNCHRONIZED = new Modifier("synchronized");
     public static final Modifier TRANSIENT = new Modifier("transient");
     public static final Modifier VOLATILE  = new Modifier("volatile");
 
@@ -36,15 +37,6 @@ public class Modifier extends Expression {
         super(name);
         this.name = name.getText();
     }
-
-    /**
-     * Construct a multi-token annotation modifier
-     * @param expr the expression yielding the name of this modifier
-     */
-    // protected Modifier(Expression expr) {
-    //     super(expr.getFirstToken(), expr.getLastToken());
-    //     this.name = expr.getText();
-    // }
 
     /**
      * Gets this modifier's name

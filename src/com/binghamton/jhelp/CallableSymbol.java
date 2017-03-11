@@ -1,5 +1,7 @@
 package com.binghamton.jhelp;
 
+import java.util.Arrays;
+
 import com.binghamton.jhelp.util.StringUtils;
 
 /**
@@ -28,6 +30,8 @@ public abstract class CallableSymbol extends Symbol {
     public CallableSymbol(String name, int modifiers) {
         super(name, modifiers);
     }
+
+    public abstract ClassSymbol getDeclaringClass();
 
     /**
      * Gets the formal parameters of this Callable
@@ -58,5 +62,41 @@ public abstract class CallableSymbol extends Symbol {
                                    t -> t.getTypeName()));
         sb.append(")");
         return sb.toString();
+    }
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder(getModifiers().toString());
+        sb.append(" ");
+        sb.append(toSubString());
+        return sb.toString();
+    }
+
+    protected String toSubString() {
+        StringBuilder sb = new StringBuilder(getName());
+        sb.append(getTypeName());
+        if (getExceptionTypes().length > 0) {
+            sb.append(" throws ");
+            sb.append(StringUtils.join(", ",
+                                       getExceptionTypes(),
+                                       t -> t.getTypeName()));
+        }
+        return sb.toString();
+    }
+
+    public boolean equals(Object other) {
+        if (other instanceof CallableSymbol) {
+            CallableSymbol sym = (CallableSymbol)other;
+            return getName().equals(sym.getName()) &&
+                getDeclaringClass().equals(sym.getDeclaringClass()) &&
+                Arrays.equals(getParameterTypes(),
+                              sym.getParameterTypes());
+        }
+        return false;
+    }
+
+    public int hashCode() {
+        return getName().hashCode() ^
+            getDeclaringClass().hashCode() ^
+            getParameterTypes().length;
     }
 }

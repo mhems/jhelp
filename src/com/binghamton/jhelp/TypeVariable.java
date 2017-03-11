@@ -1,5 +1,6 @@
 package com.binghamton.jhelp;
 
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,6 +15,12 @@ public class TypeVariable implements Type {
     private AnnotationSymbol[] annotations = {};
     private String name;
     private Type[] bounds = {};
+
+    public TypeVariable(String name) {
+        this.name = name;
+        // TODO correct?
+        this.bounds = new Type[]{ImportManager.get("java.lang.Object")};
+    }
 
     /**
      * Construct a named type variable
@@ -52,5 +59,19 @@ public class TypeVariable implements Type {
 
     public Type[] getBounds() {
         return bounds;
+    }
+
+    public boolean equals(Object other) {
+        if (other instanceof TypeVariable) {
+            TypeVariable type = (TypeVariable)other;
+            return name.equals(type.name) &&
+                Arrays.equals(annotations, type.annotations) &&
+                Arrays.equals(bounds, type.bounds);
+        }
+        return false;
+    }
+
+    public int hashCode() {
+        return name.hashCode() ^ annotations.length ^ bounds.length;
     }
 }

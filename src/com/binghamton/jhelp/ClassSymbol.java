@@ -49,6 +49,18 @@ public abstract class ClassSymbol extends Symbol implements Type {
     public abstract String getPackageName();
     public abstract Package getPackage();
 
+    public boolean equals(Object other) {
+        if (other instanceof ClassSymbol) {
+            ClassSymbol sym = (ClassSymbol)other;
+            return getQualifiedName().equals(sym.getQualifiedName());
+        }
+        return false;
+    }
+
+    public int hashCode() {
+        return getQualifiedName().hashCode();
+    }
+
     public boolean hasTypeParameters() {
         return getTypeParameters().length > 0;
     }
@@ -88,6 +100,23 @@ public abstract class ClassSymbol extends Symbol implements Type {
                                        getInterfaces(),
                                        c -> c.getTypeName()));
         }
+        return sb.toString();
+    }
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder(getModifiers().toString());
+        if (isEnum()) {
+            sb.append("enum");
+        } else if (isInterface()) {
+            sb.append("interface");
+        } else if (isAnnotation()) {
+            sb.append("@interface");
+        } else {
+            sb.append("class");
+        }
+        sb.append(" ");
+        sb.append(getPackageName());
+        sb.append(getTypeName());
         return sb.toString();
     }
 }

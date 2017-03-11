@@ -3,6 +3,7 @@ package com.binghamton.jhelp;
 import org.antlr.v4.runtime.Token;
 
 public class MyConstructorSymbol extends ConstructorSymbol {
+    private ClassSymbol owner;
     private VariableSymbol[] params = {};
     private Type[] paramTypes = {};
     private TypeVariable[] typeVars = {};
@@ -53,5 +54,13 @@ public class MyConstructorSymbol extends ConstructorSymbol {
 
     public void setTypeParameters(TypeVariable[] vars) {
         typeVars = vars;
+    }
+
+    public ClassSymbol getDeclaringClass() {
+        return owner;
+    }
+
+    public void setDeclaringClass(ClassSymbol sym) {
+        owner = sym;
     }
 }

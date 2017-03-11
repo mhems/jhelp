@@ -1,5 +1,6 @@
 package com.binghamton.jhelp;
 
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -56,6 +57,19 @@ public class PrimitiveType implements Type {
 
     public AnnotationSymbol[] getAnnotations() {
         return annotations;
+    }
+
+    public boolean equals(Object other) {
+        if (other instanceof PrimitiveType) {
+            PrimitiveType type = (PrimitiveType)other;
+            return primitive == type.primitive &&
+                Arrays.equals(annotations, type.annotations);
+        }
+        return false;
+    }
+
+    public int hashCode() {
+        return primitive.hashCode();
     }
 
     public void setAnnotations(AnnotationSymbol[] annotations) {

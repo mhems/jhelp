@@ -1,5 +1,7 @@
 package com.binghamton.jhelp;
 
+import java.util.Arrays;
+
 public class WildcardType implements Type {
     private AnnotationSymbol[] annotations;
     private boolean upper;
@@ -43,5 +45,19 @@ public class WildcardType implements Type {
 
     public Type getBound() {
         return bound;
+    }
+
+    public boolean equals(Object other) {
+        if (other instanceof WildcardType) {
+            WildcardType type = (WildcardType)other;
+            return Arrays.equals(annotations, type.annotations) &&
+                bound.equals(type.bound) &&
+                upper == type.upper;
+        }
+        return false;
+    }
+
+    public int hashCode() {
+        return bound.hashCode() ^ Boolean.hashCode(upper);
     }
 }

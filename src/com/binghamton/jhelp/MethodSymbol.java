@@ -35,4 +35,13 @@ public abstract class MethodSymbol extends CallableSymbol {
     public String getTypeName() {
         return super.getTypeName() + " -> " +  getReturnType().getTypeName();
     }
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder(getModifiers().toString());
+        sb.append(" ");
+        sb.append(getReturnType().getTypeName());
+        sb.append(" ");
+        sb.append(toSubString());
+        return sb.toString();
+    }
 }

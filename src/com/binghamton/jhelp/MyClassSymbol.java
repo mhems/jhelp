@@ -3,9 +3,9 @@ package com.binghamton.jhelp;
 import org.antlr.v4.runtime.Token;
 
 public class MyClassSymbol extends ClassSymbol {
-    enum CLASS_KIND {CLASS, INTERFACE, ENUM, ANNOTATION};
+    enum ClassKind {CLASS, INTERFACE, ENUM, ANNOTATION};
 
-    private CLASS_KIND classKind;
+    private ClassKind classKind;
     private Type superClass = null;
     private ClassSymbol[] implementees = {};
     private VariableSymbol[] fields = {};
@@ -14,7 +14,7 @@ public class MyClassSymbol extends ClassSymbol {
     private ImportManager importer;
     private boolean anonymous = false;
     private boolean inner = false;
-    private Package pkg;
+    private Package pkg = Package.DEFAULT_PACKAGE;
     private Token token;
 
     public MyClassSymbol(Token token) {
@@ -61,7 +61,11 @@ public class MyClassSymbol extends ClassSymbol {
         fields = syms;
     }
 
-    public void setClassKind(CLASS_KIND kind) {
+    public ClassKind getClassKind() {
+        return classKind;
+    }
+
+    public void setClassKind(ClassKind kind) {
         classKind = kind;
     }
 
@@ -73,10 +77,10 @@ public class MyClassSymbol extends ClassSymbol {
         this.importer = importer;
     }
 
-    public boolean isEnum() { return classKind == CLASS_KIND.ENUM; }
-    public boolean isClass() { return classKind == CLASS_KIND.CLASS; }
-    public boolean isInterface() { return classKind == CLASS_KIND.INTERFACE; }
-    public boolean isAnnotation() { return classKind == CLASS_KIND.ANNOTATION; }
+    public boolean isEnum() { return classKind == ClassKind.ENUM; }
+    public boolean isClass() { return classKind == ClassKind.CLASS; }
+    public boolean isInterface() { return classKind == ClassKind.INTERFACE; }
+    public boolean isAnnotation() { return classKind == ClassKind.ANNOTATION; }
     public Type getSuperClass() { return superClass; }
     public TypeVariable[] getTypeParameters() { return null; /* TODO */ }
     public boolean isAnonymous() { return anonymous; }
@@ -89,7 +93,8 @@ public class MyClassSymbol extends ClassSymbol {
     }
 
     public void setSuperClassForEnum() {
-        superClass = new ParameterizedType(ImportManager.get("java.lang.Enum"), this);
+        superClass = new ParameterizedType(ImportManager.get("java.lang.Enum"),
+                                           this);
     }
 
     public void setSuperClassForAnnotation() {

@@ -10,6 +10,10 @@ public interface Type {
     String getName();
     String getTypeName();
 
+    default String repr() {
+        return getTypeName();
+    }
+
     default int rank() {
         return 0;
     }
