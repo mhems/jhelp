@@ -84,6 +84,17 @@ public class NonNullVisitor extends EmptyVisitor {
     }
 
     /**
+     * Visit a ArrayTypeExpression node
+     * @param ast the AST node being visited
+     */
+    public void visit(ArrayTypeExpression ast) {
+        ast.getExpression().accept(this);
+        for (Dimension dim : ast.getDimensions()) {
+            dim.accept(this);
+        }
+    }
+
+    /**
      * Visit a AssertStatement node
      * @param ast the AST node being visited
      */
@@ -490,6 +501,17 @@ public class NonNullVisitor extends EmptyVisitor {
         }
         else if (!ast.isDiamond()) {
             ast.getType().accept(this);
+        }
+    }
+
+    /**
+     * Visit a TypeExpression node
+     * @param ast the AST node being visited
+     */
+    public void visit(TypeExpression ast) {
+        ast.getExpression().accept(this);
+        for (TypeArgument arg : ast.getTypeArguments()) {
+            arg.accept(this);
         }
     }
 

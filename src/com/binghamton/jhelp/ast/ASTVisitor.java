@@ -48,6 +48,12 @@ public interface ASTVisitor {
     void visit(ArrayInitializer ast);
 
     /**
+     * Visit a ArrayTypeExpression node
+     * @param ast the AST node being visited
+     */
+    void visit(ArrayTypeExpression ast);
+
+    /**
      * Visit a AssertStatement node
      * @param ast the AST node being visited
      */
@@ -322,6 +328,12 @@ public interface ASTVisitor {
      * @param ast the AST node being visited
      */
     void visit(TypeArgument ast);
+
+    /**
+     * Visit a TypeExpression node
+     * @param ast the AST node being visited
+     */
+    void visit(TypeExpression ast);
 
     /**
      * Visit a TypeParameter node

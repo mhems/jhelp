@@ -3,12 +3,12 @@ package com.binghamton.jhelp;
 import org.antlr.v4.runtime.Token;
 
 import com.binghamton.jhelp.ast.ASTVisitor;
-import com.binghamton.jhelp.ast.Expression;
+import com.binghamton.jhelp.ast.ASTNode;
 
 /**
- * Class representing Java modifiers and annotations
+ * Class representing Java modifiers
  */
-public class Modifier extends Expression {
+public class Modifier extends ASTNode {
     public static final Modifier ABSTRACT  = new Modifier("abstract");
     public static final Modifier DEFAULT   = new Modifier("default");
     public static final Modifier FINAL     = new Modifier("final");
