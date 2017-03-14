@@ -21,6 +21,11 @@ public class ArrayType implements Type {
         this.base = base;
     }
 
+    public ArrayType(Type base, AnnotationSymbol[] annotations) {
+        this.base = base;
+        this.annotations = annotations;
+    }
+
     public Type getBaseType() {
         return base;
     }

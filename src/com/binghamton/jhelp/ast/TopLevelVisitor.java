@@ -1,25 +1,69 @@
 package com.binghamton.jhelp.ast;
 
+import java.util.List;
+
+import com.binghamton.jhelp.AnnotationSymbol;
+import com.binghamton.jhelp.ArrayType;
+import com.binghamton.jhelp.ClassSymbol;
+import com.binghamton.jhelp.MyClassSymbol;
+import com.binghamton.jhelp.Package;
+import com.binghamton.jhelp.ParameterizedType;
+import com.binghamton.jhelp.Program;
+import com.binghamton.jhelp.Type;
+import com.binghamton.jhelp.TypeVariable;
+import com.binghamton.jhelp.WildcardType;
+
 /**
  * The top level Visitor for visiting top-level declarations and adding them to
  * the symbol table
  */
 public class TopLevelVisitor extends EmptyVisitor {
 
-    /**
-     * Visit a Annotation node
-     * @param ast the AST node being visited
-     */
-    public void visit(Annotation ast) {
-        System.out.printf("encountered annotation '%s'\n", ast.getTypeExpression());
+    private Package pkg = Package.DEFAULT_PACKAGE;
+    private Program program;
+
+    public TopLevelVisitor(Program program) {
+        this.program = program;
     }
 
     /**
-     * Visit a AnnotationDeclaration node
+     * Visit a AccessExpression node
      * @param ast the AST node being visited
      */
-    public void visit(AnnotationDeclaration ast) {
-        System.out.println("annotation declaration");
+    public void visit(AccessExpression ast) {
+        System.out.println("visiting access expr");
+        ast.getLHS().accept(this);
+
+        Type parent = ast.getLHS().getType();
+        ClassSymbol sym;
+        // TODO determine class that lhs refers to
+
+        Expression rhs = ast.getRHS();
+        rhs.accept(this);
+        if (rhs instanceof IdentifierExpression) {
+            System.out.println("rhs is a ID expr");
+        } else if (rhs instanceof TypeExpression) {
+            System.out.println("rhs is a type expr");
+        } else {
+            throw new IllegalArgumentException("rhs of access is neither id or type (" +
+                                               rhs.getText() + ")");
+        }
+    }
+
+    /**
+     * Visit a ArrayTypeExpression node
+     * @param ast the AST node being visited
+     */
+    public void visit(ArrayTypeExpression ast) {
+        System.out.println("visiting array type expr");
+        Type arrayType;
+        ast.getExpression().accept(this);
+        arrayType = ast.getExpression().getType();
+        for (Dimension dim : ast.getDimensions()) {
+            arrayType = new ArrayType(arrayType,
+                                      makeAnnotations(dim.getAnnotations()));
+        }
+        ast.setType(arrayType);
     }
 
     /**
@@ -27,18 +71,13 @@ public class TopLevelVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(ClassDeclaration ast) {
-        System.out.printf("this class has name '%s'\n", ast.getName().getText());
+        MyClassSymbol sym = (MyClassSymbol)ast.getSymbol();
         if (ast.hasTypeParameters()) {
-            for (TypeParameter tp : ast.getTypeParameters()) {
-                tp.accept(this);
-            }
+            sym.setTypeParameters(makeTypeParameters(ast.getTypeParameters()));
         }
         if (ast.hasSuperClass()) {
-            System.out.printf("this class extends class '%s'\n",
-                              ast.getSuperClass().getText());
             ast.getSuperClass().accept(this);
         }
-
     }
 
     /**
@@ -61,35 +100,20 @@ public class TopLevelVisitor extends EmptyVisitor {
      */
     public void visit(ConcreteBodyDeclaration ast) {
         if (ast.hasSuperInterfaces()) {
-            System.out.printf("this declaration implements '%s'\n", ast.getSuperInterfaces());
+            MyClassSymbol sym = (MyClassSymbol)ast.getSymbol();
+            sym.setInterfaces(makeInterfaces(ast.getSuperInterfaces()));
         }
     }
 
     /**
-     * Visit a Declaration node
+     * Visit a IdentifierExpression node
      * @param ast the AST node being visited
      */
-    public void visit(Declaration ast) {
-        System.out.printf("this declaration has name '%s'\n", ast.getName().getText());
-        System.out.printf("this declaration has modifiers '%s'\n", ast.getModifiers().getText());
-    }
-
-    /**
-     * Visit a Dimension node
-     * @param ast the AST node being visited
-     */
-    public void visit(Dimension ast) {
-        for (Annotation a : ast.getAnnotations()) {
-            a.accept(this);
-        }
-    }
-
-    /**
-     * Visit a EnumDeclaration node
-     * @param ast the AST node being visited
-     */
-    public void visit(EnumDeclaration ast) {
-        System.out.println("enum declared");
+    public void visit(IdentifierExpression ast) {
+        System.out.println("visiting ID expr: " + ast.getText());
+        String id = ast.getIdentifier().getText();
+        AnnotationSymbol[] anns = makeAnnotations(ast.getAnnotations());
+        // TODO
     }
 
     /**
@@ -97,14 +121,12 @@ public class TopLevelVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(InterfaceDeclaration ast) {
-        System.out.printf("declaring interface '%s'\n", ast.getName().getText());
+        MyClassSymbol sym = (MyClassSymbol)ast.getSymbol();
         if (ast.hasTypeParameters()) {
-            for (TypeParameter tp : ast.getTypeParameters()) {
-                tp.accept(this);
-            }
+            sym.setTypeParameters(makeTypeParameters(ast.getTypeParameters()));
         }
         if (ast.hasSuperInterfaces()) {
-            System.out.printf("it extends interfaces '%s'\n", ast.getSuperInterfaces());
+            sym.setInterfaces(makeInterfaces(ast.getSuperInterfaces()));
         }
     }
 
@@ -113,10 +135,8 @@ public class TopLevelVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(PackageStatement ast) {
-        System.out.printf("in package '%s'\n", ast.getName());
-        for (Annotation a : ast.getAnnotations()) {
-            a.accept(this);
-        }
+        pkg = program.getPackage(ast.getName());
+        pkg.setAnnotations(makeAnnotations(ast.getAnnotations()));
     }
 
     /**
@@ -124,22 +144,42 @@ public class TopLevelVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(TypeArgument ast) {
-        System.out.println("type argument");
         if (ast.isWildcard()) {
-            System.out.println("its a wildcard");
-            for (Annotation a : ast.getAnnotations()) {
-                a.accept(this);
-            }
-            if (ast.hasBound()) {
-                System.out.printf("upper bounded ? %s\n", ast.isUpperBounded());
+            WildcardType type = new WildcardType();
+            if (ast.hasExplicitBound()) {
                 ast.getBoundType().accept(this);
+                type = new WildcardType(ast.isUpperBounded(),
+                                        ast.getBoundType().getType());
+            } else {
+                type = new WildcardType();
             }
+            type.setAnnotations(makeAnnotations(ast.getAnnotations()));
+            ast.setType(type);
         }
-        else if (!ast.isDiamond()) {
-            ast.getType().accept(this);
-        } else {
-            System.out.println("its a diamond");
+        else {
+            ast.getTypeExpression().accept(this);
+            ast.setType(ast.getTypeExpression().getType());
         }
+    }
+
+    /**
+     * Visit a TypeExpression node
+     * @param ast the AST node being visited
+     */
+    public void visit(TypeExpression ast) {
+        System.out.println("visiting type expr");
+        Expression raw = ast.getExpression();
+        raw.accept(this);
+
+        List<TypeArgument> args = ast.getTypeArguments();
+        Type[] tArgs = new Type[args.size()];
+        int pos = 0;
+        for (TypeArgument arg : args) {
+            arg.accept(this);
+            tArgs[pos] = arg.getType();
+            ++pos;
+        }
+        ast.setType(new ParameterizedType(raw.getType(), tArgs));
     }
 
     /**
@@ -147,9 +187,48 @@ public class TopLevelVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(TypeParameter ast) {
-        System.out.println("type parameter");
-        for (Expression rt : ast.getSuperTypes()) {
-            rt.accept(this);
+        String name = ast.getName();
+        TypeVariable type;
+        if (ast.hasSuperTypes()) {
+            Type[] bounds = new Type[ast.getSuperTypes().size()];
+            int pos = 0;
+            for (Expression rt : ast.getSuperTypes()) {
+                rt.accept(this);
+                bounds[pos] = rt.getType();
+                ++pos;
+            }
+            type = new TypeVariable(name, bounds);
+        } else {
+            type = new TypeVariable(name);
         }
+        type.setAnnotations(makeAnnotations(ast.getAnnotations()));
+        ast.setType(type);
+    }
+
+    private TypeVariable[] makeTypeParameters(List<TypeParameter> params) {
+        TypeVariable[] ret = new TypeVariable[params.size()];
+        for (int i = 0; i < ret.length; i++) {
+            params.get(i).accept(this);
+            ret[i] = (TypeVariable)params.get(i).getType();
+        }
+        return ret;
+    }
+
+    private Type[] makeInterfaces(List<Expression> interfaces) {
+        Type[] ret = new Type[interfaces.size()];
+        for (int i = 0; i < ret.length; i++) {
+            interfaces.get(i).accept(this);
+            ret[i] = interfaces.get(i).getType();
+        }
+        return ret;
+    }
+
+    private AnnotationSymbol[] makeAnnotations(Annotation[] annotations) {
+        AnnotationSymbol[] ret = new AnnotationSymbol[annotations.length];
+        for (int i = 0; i < ret.length; i++) {
+            annotations[i].accept(this);
+            ret[i] = new AnnotationSymbol((ClassSymbol)annotations[i].getType());
+        }
+        return ret;
     }
 }

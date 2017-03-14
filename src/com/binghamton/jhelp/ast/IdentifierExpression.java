@@ -9,7 +9,7 @@ import org.antlr.v4.runtime.Token;
  * A class representing a Java identifier, as an expression
  */
 public class IdentifierExpression extends Expression {
-    private Annotation[] annotations;
+    private Annotation[] annotations = {};
     private Token identifier;
 
     /**

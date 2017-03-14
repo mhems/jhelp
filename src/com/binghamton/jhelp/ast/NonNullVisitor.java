@@ -495,12 +495,12 @@ public class NonNullVisitor extends EmptyVisitor {
         if (ast.isWildcard()) {
             for (Annotation a : ast.getAnnotations())
                 a.accept(this);
-            if (ast.hasBound()) {
+            if (ast.hasExplicitBound()) {
                 ast.getBoundType().accept(this);
             }
         }
         else if (!ast.isDiamond()) {
-            ast.getType().accept(this);
+            ast.getTypeExpression().accept(this);
         }
     }
 

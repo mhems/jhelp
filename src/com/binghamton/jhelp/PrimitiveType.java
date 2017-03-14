@@ -31,15 +31,15 @@ public class PrimitiveType implements Type {
             PRIMITIVE_MAP.put(p.name, p);
         }
 
-        UNBOX_MAP.put("Boolean", BOOLEAN);
-        UNBOX_MAP.put("Byte", BYTE);
-        UNBOX_MAP.put("Character", CHAR);
-        UNBOX_MAP.put("Short", SHORT);
-        UNBOX_MAP.put("Integer", INT);
-        UNBOX_MAP.put("Long", LONG);
-        UNBOX_MAP.put("Float", FLOAT);
-        UNBOX_MAP.put("Double", DOUBLE);
-        UNBOX_MAP.put("Void", VOID);
+        UNBOX_MAP.put("boolean", BOOLEAN);
+        UNBOX_MAP.put("byte", BYTE);
+        UNBOX_MAP.put("char", CHAR);
+        UNBOX_MAP.put("short", SHORT);
+        UNBOX_MAP.put("int", INT);
+        UNBOX_MAP.put("long", LONG);
+        UNBOX_MAP.put("float", FLOAT);
+        UNBOX_MAP.put("double", DOUBLE);
+        UNBOX_MAP.put("void", VOID);
     }
 
     private Primitive primitive;

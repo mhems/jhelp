@@ -61,8 +61,8 @@ public class JavaValidator implements Validator {
                     visitor = new PackageLevelVisitor(program, filename);
                     cu.accept(visitor);
                     System.out.println("---------- TOP ----------");
-                    visitor = new TopLevelVisitor();
-                    // cu.accept(visitor);
+                    visitor = new TopLevelVisitor(program);
+                    cu.accept(visitor);
                     System.out.println("---------- BODY ----------");
                     visitor = new BodyLevelVisitor();
                     // cu.accept(visitor);
@@ -71,6 +71,7 @@ public class JavaValidator implements Validator {
                     // cu.accept(visitor);
                 }
             }
+            System.out.println("====================");
             for (Package p : program.getPackages()) {
                 System.out.println(p.repr());
             }

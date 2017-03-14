@@ -8,7 +8,7 @@ import org.antlr.v4.runtime.Token;
  * Class representing a dimension expression
  */
 public class DimensionExpression extends Expression {
-    private Annotation[] annotations;
+    private Annotation[] annotations = {};
     private Expression expr;
 
     /**

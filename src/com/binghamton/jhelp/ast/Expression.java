@@ -2,10 +2,14 @@ package com.binghamton.jhelp.ast;
 
 import org.antlr.v4.runtime.Token;
 
+import com.binghamton.jhelp.Type;
+
 /**
  * Base class representing a Java syntactic expression
  */
 public abstract class Expression extends Statement {
+
+    protected Type type;
 
     /**
      * Construct an empty Expression
@@ -39,5 +43,13 @@ public abstract class Expression extends Statement {
     public void accept(ASTVisitor v) {
         super.accept(v);
         v.visit(this);
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
     }
 }

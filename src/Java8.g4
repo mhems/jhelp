@@ -370,7 +370,7 @@ normalClassDeclaration returns [ClassDeclaration ret]
     locals [List<Modifier> mods = new ArrayList<>(),
             List<Annotation> ans = new ArrayList<>(),
             List<TypeParameter> tpars = new ArrayList<>(),
-            Expression scls = null,
+            Expression scls = new NilExpression(),
             List<Expression> sis = new ArrayList<>()]
     :   (
             (m = classModifier {$mods.add($m.ret);}) |

@@ -12,7 +12,7 @@ import com.binghamton.jhelp.Modifier;
  */
 public class ClassDeclaration extends ConcreteBodyDeclaration {
     private List<TypeParameter> typeParams = new ArrayList<>();
-    private Expression superClass;
+    private Expression superClass = new NilExpression();
 
     /**
      * Construct an anonymous class declaration
@@ -72,7 +72,7 @@ public class ClassDeclaration extends ConcreteBodyDeclaration {
      * @return true iff this class has a super class
      */
     public boolean hasSuperClass() {
-        return superClass != null;
+        return !superClass.isNil();
     }
 
     /**

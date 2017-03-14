@@ -1,7 +1,7 @@
 package com.binghamton.jhelp;
 
-import java.util.Set;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A class representing a Java package
@@ -16,7 +16,8 @@ public class Package {
     private String name;
     private SymbolTable<ClassSymbol> classes = new SymbolTable<>();
     private Package parent;
-    private Set<Package> children = new HashSet<>();
+    private List<Package> children = new ArrayList<>();
+    private AnnotationSymbol[] annotations = {};
 
     /**
      * Constructs a new Package with name `name`
@@ -61,6 +62,14 @@ public class Package {
         classes.put(cls);
     }
 
+    public AnnotationSymbol[] getAnnotations() {
+        return annotations;
+    }
+
+    public void setAnnotations(AnnotationSymbol[] annotations) {
+        this.annotations = annotations;
+    }
+
     public SymbolTable<ClassSymbol> getClassTable() {
         return classes;
     }
@@ -69,8 +78,12 @@ public class Package {
      * Gets the packages within this package
      * @return the packages within this package
      */
-    public Set<Package> getSubPackages() {
+    public List<Package> getSubPackages() {
         return children;
+    }
+
+    public boolean hasSubPackages() {
+        return children.size() > 0;
     }
 
     /**
@@ -84,10 +97,9 @@ public class Package {
     /**
      * Attempts to add a subpackage to the package
      * @param subPkg the package to attempt to add
-     * @return true iff the package was added, false otherwise
      */
-    public boolean addSubPackage(Package subPkg) {
-        return children.add(subPkg);
+    public void addSubPackage(Package subPkg) {
+        children.add(subPkg);
     }
 
     /**

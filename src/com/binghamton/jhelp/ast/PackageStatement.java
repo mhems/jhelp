@@ -8,7 +8,7 @@ import org.antlr.v4.runtime.Token;
  * A class representing a Java package statement
  */
 public class PackageStatement extends Statement {
-    private Annotation[] annotations;
+    private Annotation[] annotations = {};
     private List<Token> ids;
 
     /**

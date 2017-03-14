@@ -1,10 +1,10 @@
 package com.binghamton.jhelp;
 
-import java.util.Set;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;;
 
 public class Program {
-    private Set<Package> packages = new HashSet<>();
+    private List<Package> packages = new ArrayList<>();
 
         {
             packages.add(Package.DEFAULT_PACKAGE);
@@ -20,19 +20,27 @@ public class Program {
     }
 
     public Package getPackage(String name) {
-        for (Package pkg : packages) {
-            if (pkg.getName().equals(name)) {
-                return pkg;
+        Package pkg = null;
+        List<Package> pkgs = packages;
+        for (String part : name.split("\\.")) {
+            for (Package p : pkgs) {
+                if (p.getName().equals(part)) {
+                    pkg = p;
+                    if (p.hasSubPackages()) {
+                        pkgs = pkg.getSubPackages();
+                    }
+                    break;
+                }
             }
         }
-        return null;
+        return pkg;
     }
 
     public void addPackage(Package pkg) {
         packages.add(pkg);
     }
 
-    public Set<Package> getPackages() {
+    public List<Package> getPackages() {
         return packages;
     }
 }

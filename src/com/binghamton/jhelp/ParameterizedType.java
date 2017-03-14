@@ -8,7 +8,12 @@ public class ParameterizedType implements Type {
     private Type wrapped;
     private Type[] params;
 
-    public ParameterizedType(Type wrapped, Type... parameters) {
+    public ParameterizedType(Type wrapped, Type parameter) {
+        this.wrapped = wrapped;
+        this.params = new Type[]{parameter};
+    }
+
+    public ParameterizedType(Type wrapped, Type[] parameters) {
         this.wrapped = wrapped;
         this.params = parameters;
     }
@@ -32,7 +37,7 @@ public class ParameterizedType implements Type {
     }
 
     public String getTypeName() {
-        StringBuilder sb = new StringBuilder(wrapped.getTypeName());
+        StringBuilder sb = new StringBuilder(wrapped.getName());
         sb.append("<");
         if (params.length > 0) {
             sb.append(StringUtils.join(", ", params, t -> t.getTypeName()));

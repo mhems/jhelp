@@ -4,14 +4,18 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
+import com.binghamton.jhelp.Type;
+
 /**
  * A class representing a Java type argument
  */
 public class TypeArgument extends ASTNode {
-    private Expression type;
+    // either expresses a reference type or wildcard bound
+    private Expression typeExpr = new NilExpression();
     private Annotation[] annotations = {};
     private boolean isWildcard = false;
     private boolean isUpperBound;
+    private Type type;
 
     /**
      * Construct an empty (diamond) type argument
@@ -26,7 +30,7 @@ public class TypeArgument extends ASTNode {
      */
     public TypeArgument(Expression type) {
         super(type.getFirstToken(), type.getLastToken());
-        this.type = type;
+        this.typeExpr = type;
     }
 
     /**
@@ -45,11 +49,8 @@ public class TypeArgument extends ASTNode {
      * @return the type of this argument if it is not a wildcard
      * @throws RuntimeException if this argument is a wildcard
      */
-    public Expression getType() {
-        if (isDiamond()) {
-            throw new RuntimeException(); // TODO
-        }
-        return type;
+    public Expression getTypeExpression() {
+        return typeExpr;
     }
 
     /**
@@ -57,9 +58,6 @@ public class TypeArgument extends ASTNode {
      * @return the annotations of this type argument
      */
     public Annotation[] getAnnotations() {
-        if (!isWildcard()) {
-            throw new RuntimeException(); // TODO
-        }
         return annotations;
     }
 
@@ -76,7 +74,11 @@ public class TypeArgument extends ASTNode {
      * @return true iff this argument is empty
      */
     public boolean isDiamond() {
-        return type == null && !isWildcard();
+        return typeExpr.isNil() && !isWildcard();
+    }
+
+    public boolean hasExplicitBound() {
+        return typeExpr.isNil();
     }
 
     /**
@@ -85,21 +87,7 @@ public class TypeArgument extends ASTNode {
      * @throws RuntimeException if this is not a wildcard argument
      */
     public Expression getBoundType() {
-        if (isWildcard()) {
-            return type;
-        }
-        throw new RuntimeException(); // TODO
-    }
-
-    /**
-     * Determines if this wildcard type argument is bounded
-     * @return true iff this wildcard type argument is bounded
-     */
-    public boolean hasBound() {
-        if (isWildcard()) {
-            return type != null;
-        }
-        throw new RuntimeException(); // TODO
+        return typeExpr;
     }
 
     /**
@@ -107,7 +95,7 @@ public class TypeArgument extends ASTNode {
      * @param type the bounding type of this wildcard argument
      */
     public void setBoundType(Expression type) {
-        this.type = type;
+        this.typeExpr = type;
         setLastToken(type.getLastToken());
     }
 
@@ -117,9 +105,6 @@ public class TypeArgument extends ASTNode {
      * @throws RuntimeException if this is not a wildcarded argument
      */
     public boolean isUpperBounded() {
-        if (!isWildcard) {
-            throw new RuntimeException(); // TODO
-        }
         return isUpperBound;
     }
 
@@ -140,5 +125,13 @@ public class TypeArgument extends ASTNode {
     public void accept(ASTVisitor v) {
         super.accept(v);
         v.visit(this);
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
     }
 }

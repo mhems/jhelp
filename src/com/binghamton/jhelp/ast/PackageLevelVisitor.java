@@ -1,5 +1,6 @@
 package com.binghamton.jhelp.ast;
 
+import java.io.File;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -12,6 +13,7 @@ import com.binghamton.jhelp.MyClassSymbol;
 import com.binghamton.jhelp.Package;
 import com.binghamton.jhelp.Program;
 import com.binghamton.jhelp.ReflectedClassSymbol;
+import com.binghamton.jhelp.Symbol;
 
 /**
  * The package (highest) level Visitor for visiting packages and their top level
@@ -32,34 +34,22 @@ public class PackageLevelVisitor extends EmptyVisitor {
     private Package pkg = Package.DEFAULT_PACKAGE;
     private ImportManager importer = new ImportManager();
     private Set<String> bodyNames = new HashSet<>();
+    private Set<String> simpleImportNames = new HashSet<>();
     private Program program;
     private String filename;
-    private ClassSymbol currentClass;
 
     public PackageLevelVisitor(Program program, String filename) {
         this.program = program;
-        this.filename = filename.substring(0,
-                                           filename.length() - ".java".length());
+        this.filename = new File(filename).getName();
+        this.filename = this.filename.substring(0,
+                                                this.filename.length() - ".java".length());
     }
-
-   /**
-     * Visit a AnnotationDeclaration node
-     * @param ast the AST node being visited
-     */
-    public void visit(AnnotationDeclaration ast) {
-        System.out.println("annotation declaration");
-     }
 
     /**
      * Visit a BodyDeclaration node
      * @param ast the AST node being visited
      */
     public void visit(BodyDeclaration ast) {
-        MyClassSymbol cls = new MyClassSymbol(ast.getName(), ast.getModifiers());
-        cls.setImportManager(importer);
-        pkg.addClass(cls);
-        bodyNames.add(ast.getName().getText());
-        currentClass = cls;
         if (!Character.isUpperCase(ast.getName().getText().charAt(0))) {
             System.err.printf("Body names should be capitalized, '%s' is not\n",
                               ast.getName().getText());
@@ -72,20 +62,34 @@ public class PackageLevelVisitor extends EmptyVisitor {
             }
         }
 
+        MyClassSymbol sym = new MyClassSymbol(ast.getName(), ast.getModifiers());
+        sym.setPackage(pkg);
+        sym.setImportManager(importer);
+        if (ast instanceof AnnotationDeclaration) {
+            sym.setClassKind(MyClassSymbol.ClassKind.ANNOTATION);
+            sym.setSuperClassForAnnotation();
+        } else if (ast instanceof ClassDeclaration) {
+            sym.setClassKind(MyClassSymbol.ClassKind.CLASS);
+            sym.setSuperClassForClass();
+        } else if (ast instanceof EnumDeclaration) {
+            sym.setClassKind(MyClassSymbol.ClassKind.ENUM);
+            sym.setSuperClassForEnum();
+        } else if (ast instanceof InterfaceDeclaration) {
+            sym.setClassKind(MyClassSymbol.ClassKind.INTERFACE);
+        }
+
+        pkg.addClass(sym);
+        ast.setSymbol(sym);
+        bodyNames.add(ast.getName().getText());
+
         for (ConcreteBodyDeclaration c : ast.getInnerBodies()) {
             c.accept(this);
+            ((MyClassSymbol)c.getSymbol()).setDeclaringClass(sym);
         }
         for (AbstractBodyDeclaration a : ast.getInnerInterfaces()) {
             a.accept(this);
+            ((MyClassSymbol)a.getSymbol()).setDeclaringClass(sym);
         }
-    }
-
-    /**
-     * Visit a ClassDeclaration node
-     * @param ast the AST node being visited
-     */
-    public void visit(ClassDeclaration ast) {
-        System.out.printf("this class has name '%s'\n", ast.getName().getText());
     }
 
     /**
@@ -108,18 +112,9 @@ public class PackageLevelVisitor extends EmptyVisitor {
             decl.accept(this);
         }
         if (!bodyNames.contains(filename)) {
-            // TODO convert to error
-            System.err.printf("file '%s' must declare a body with name of this file\n",
+            System.err.printf("file '%s.java' must declare a body with name of this file\n",
                               filename);
         }
-    }
-
-    /**
-     * Visit a EnumDeclaration node
-     * @param ast the AST node being visited
-     */
-    public void visit(EnumDeclaration ast) {
-        System.out.println("enum declared");
     }
 
     /**
@@ -127,26 +122,23 @@ public class PackageLevelVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(ImportStatement ast) {
-        System.out.printf("importing '%s', static ? %s, demand ? %s\n",
-                          ast.getImportName(),
-                          ast.isStatic(),
-                          ast.isDemand());
+        // TODO incomplete
         if (ast.isDemand()) {
-            importer.addOnDemandPackage(ast.getImportName());
+            if (ast.isStatic()) {
+                importer.addOnDemandStaticPackage(ast.getImportName());
+            } else {
+                importer.addOnDemandPackage(ast.getImportName());
+            }
+        } else {
+            // if (!simpleImportNames.add(ast.getImportName())) {
+            //     System.err.printf("cannot import same simple type");
+            // }
+            try {
+                pkg.getClassTable().put(importer.importSymbol(ast.getImportName()));
+            } catch (ClassNotFoundException e) {
+                System.err.printf("class '%s' not found\n", ast.getImportName());
+            }
         }
-        try {
-            pkg.getClassTable().put(importer.importSymbol(ast.getImportName()));
-        } catch (ClassNotFoundException e) {
-            System.err.printf("class '%s' not found\n", ast.getImportName());
-        }
-    }
-
-    /**
-     * Visit a InterfaceDeclaration node
-     * @param ast the AST node being visited
-     */
-    public void visit(InterfaceDeclaration ast) {
-        System.out.printf("declaring interface '%s'\n", ast.getName().getText());
     }
 
     /**
@@ -166,9 +158,6 @@ public class PackageLevelVisitor extends EmptyVisitor {
                 }
             }
             parent = pkg;
-        }
-        for (Annotation a : ast.getAnnotations()) {
-            a.accept(this);
         }
     }
 }

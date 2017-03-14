@@ -1,5 +1,8 @@
 package com.binghamton.jhelp;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.binghamton.jhelp.util.StringUtils;
 
 /**
@@ -32,11 +35,12 @@ public abstract class ClassSymbol extends Symbol implements Type {
         super(name, modifiers);
     }
 
-    public abstract ClassSymbol[] getInterfaces();
+    public abstract Type[] getInterfaces();
     public abstract Type getSuperClass();
     public abstract MethodSymbol[] getMethods();
     public abstract ConstructorSymbol[] getConstructors();
     public abstract VariableSymbol[] getFields();
+    public abstract ClassSymbol getDeclaringClass();
     public abstract boolean isEnum();
     public abstract boolean isClass();
     public abstract boolean isInterface();
@@ -74,11 +78,26 @@ public abstract class ClassSymbol extends Symbol implements Type {
     }
 
     public String getQualifiedName() {
-        return getPackageName() + "." + getName();
+        StringBuilder sb = new StringBuilder();
+        {
+            List<String> names = new ArrayList<>();
+            ClassSymbol cur = getDeclaringClass();
+            while (cur != null) {
+                names.add(cur.getName());
+                cur = cur.getDeclaringClass();
+            }
+            for (int i = names.size() - 1; i >= 0; i--) {
+                sb.append(names.get(i));
+                sb.append(".");
+            }
+        }
+
+        sb.append(getName());
+        return sb.toString();
     }
 
     public String getTypeName() {
-        StringBuilder sb = new StringBuilder(getName());
+        StringBuilder sb = new StringBuilder(getQualifiedName());
         if (hasTypeParameters()) {
             sb.append("<");
             sb.append(StringUtils.join(", ",
@@ -86,25 +105,34 @@ public abstract class ClassSymbol extends Symbol implements Type {
                                        tp -> tp.getTypeName()));
             sb.append(">");
         }
-        if (isClass() && hasSuperClass()) {
-            sb.append(" extends ");
-            sb.append(getSuperClass().getTypeName());
-        }
-        if (hasInterfaces()) {
-            if (isClass() || isEnum()) {
-                sb.append(" implements ");
-            } else {
+
+        if (false) { // TODO
+            if (hasSuperClass()) {
                 sb.append(" extends ");
+                sb.append(getSuperClass().getTypeName());
             }
-            sb.append(StringUtils.join(", ",
-                                       getInterfaces(),
-                                       c -> c.getTypeName()));
+
+            if (hasInterfaces()) {
+                if (isClass() || isEnum()) {
+                    sb.append(" implements ");
+                } else {
+                    sb.append(" extends ");
+                }
+                sb.append(StringUtils.join(", ",
+                                           getInterfaces(),
+                                           c -> c.getTypeName()));
+            }
         }
+
         return sb.toString();
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder(getModifiers().toString());
+        StringBuilder sb = new StringBuilder();
+        if (hasModifiers()) {
+            sb.append(getModifiers().toString());
+            sb.append(" ");
+        }
         if (isEnum()) {
             sb.append("enum");
         } else if (isInterface()) {
@@ -115,7 +143,6 @@ public abstract class ClassSymbol extends Symbol implements Type {
             sb.append("class");
         }
         sb.append(" ");
-        sb.append(getPackageName());
         sb.append(getTypeName());
         return sb.toString();
     }

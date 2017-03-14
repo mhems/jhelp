@@ -2590,7 +2590,7 @@ public class Java8Parser extends Parser {
 		public List<Modifier> mods = new ArrayList<>();
 		public List<Annotation> ans = new ArrayList<>();
 		public List<TypeParameter> tpars = new ArrayList<>();
-		public Expression scls = null;
+		public Expression scls = new NilExpression();
 		public List<Expression> sis = new ArrayList<>();
 		public ClassModifierContext m;
 		public AnnotationContext a;

@@ -28,6 +28,8 @@ public class ImportManager {
     }
 
     private final Set<String> onDemandPackages = new HashSet<>(autoImportPackageNames);
+    private final Map<String, String> staticMap = new HashMap<>();
+    private final Set<String> onDemandStaticPackages = new HashSet<>();
 
     /**
      * Determines if a symbol has been explicity imported
@@ -50,6 +52,7 @@ public class ImportManager {
         throws ClassNotFoundException {
         if (!isImported(name)) {
             cache.put(name, new ReflectedClassSymbol(Class.forName(name)));
+            cache.get(name).init();
         }
         return cache.get(name);
     }
@@ -62,6 +65,14 @@ public class ImportManager {
      */
     public boolean addOnDemandPackage(String pkg) {
         return onDemandPackages.add(pkg);
+    }
+
+    public boolean addOnDemandStaticPackage(String pkg) {
+        return onDemandStaticPackages.add(pkg);
+    }
+
+    public void addStaticImport(String typename, String identifier) {
+        staticMap.put(typename, identifier);
     }
 
     /**

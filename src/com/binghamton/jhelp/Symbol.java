@@ -48,7 +48,7 @@ public abstract class Symbol {
         this.name = name;
         this.modifiers = modifiers;
         this.access = AccessLevel.PACKAGE_PRIVATE;
-        for (Modifier modifier : modifiers.getModifiers()) {
+        for (Modifier modifier : this.modifiers.getModifiers()) {
             switch (modifier.getName()) {
             case "public":
                 this.access = AccessLevel.PUBLIC;
@@ -89,6 +89,14 @@ public abstract class Symbol {
 
     public AnnotationSymbol[] getAnnotations() {
         return annotations;
+    }
+
+    public boolean hasModifiers() {
+        return modifiers.getModifiers().size() > 0;
+    }
+
+    public boolean hasAnnotations() {
+        return annotations.length > 0;
     }
 
     public void setAnnotations(AnnotationSymbol[] annotations) {
@@ -207,8 +215,10 @@ public abstract class Symbol {
             ret = new ArrayType(ret);
         } else if (type instanceof java.lang.reflect.ParameterizedType) {
             java.lang.reflect.ParameterizedType ref = (java.lang.reflect.ParameterizedType)type;
-            ret = new ParameterizedType(fromType(ref.getOwnerType()),
-                                        fromTypes(ref.getActualTypeArguments()));
+            // TODO fix cyclic recursion
+            ret = /*new ParameterizedType(*/fromType(ref.getRawType());//,
+                                        // fromTypes(ref.getActualTypeArguments()));
+
         } else if (type instanceof java.lang.reflect.TypeVariable<?>) {
             ret = fromTypeVariable((java.lang.reflect.TypeVariable<?>)type);
         } else if (type instanceof java.lang.reflect.WildcardType) {
@@ -221,7 +231,14 @@ public abstract class Symbol {
                 ret = new WildcardType(false, fromType(lb[0]));
             }
         } else if (type instanceof Class<?>) {
-            ret = ReflectedClassSymbol.get((Class<?>)type);
+            Class<?> cls = (Class<?>)type;
+            if (cls.isPrimitive()) {
+                ret = PrimitiveType.UNBOX_MAP.get(cls.getName());
+            } else {
+                ret = ReflectedClassSymbol.get((Class<?>)type);
+            }
+        } else {
+            throw new IllegalArgumentException();
         }
         return ret;
     }

@@ -6,6 +6,7 @@ import org.antlr.v4.runtime.Token;
 
 import com.binghamton.jhelp.Modifier;
 import com.binghamton.jhelp.Modifiers;
+import com.binghamton.jhelp.Symbol;
 
 /**
  * Abstract base class for all Java declarations
@@ -14,6 +15,7 @@ public abstract class Declaration extends Statement {
     protected Token name;
     protected Modifiers modifiers = new Modifiers();
     protected Annotation[] annotations = {};
+    protected Symbol sym;
 
     /**
      * Construct an empty declaration
@@ -56,6 +58,14 @@ public abstract class Declaration extends Statement {
         this.name = name;
         this.modifiers = new Modifiers(modifiers);
         this.annotations = annotations.toArray(this.annotations);
+    }
+
+    public Symbol getSymbol() {
+        return sym;
+    }
+
+    public void setSymbol(Symbol sym) {
+        this.sym = sym;
     }
 
     /**

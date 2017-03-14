@@ -3,14 +3,16 @@ package com.binghamton.jhelp;
 import org.antlr.v4.runtime.Token;
 
 public class MyClassSymbol extends ClassSymbol {
-    enum ClassKind {CLASS, INTERFACE, ENUM, ANNOTATION};
+    public enum ClassKind {CLASS, INTERFACE, ENUM, ANNOTATION};
 
     private ClassKind classKind;
     private Type superClass = null;
-    private ClassSymbol[] implementees = {};
+    private Type[] implementees = {};
+    private ClassSymbol declarer;
     private VariableSymbol[] fields = {};
     private MethodSymbol[] methods = {};
     private ConstructorSymbol[] ctors = {};
+    private TypeVariable[] params = {};
     private ImportManager importer;
     private boolean anonymous = false;
     private boolean inner = false;
@@ -31,7 +33,15 @@ public class MyClassSymbol extends ClassSymbol {
         return token;
     }
 
-    public ClassSymbol[] getInterfaces() {
+    public ClassSymbol getDeclaringClass() {
+        return declarer;
+    }
+
+    public void setDeclaringClass(ClassSymbol cls) {
+        declarer = cls;
+    }
+
+    public Type[] getInterfaces() {
         return implementees;
     }
 
@@ -46,8 +56,8 @@ public class MyClassSymbol extends ClassSymbol {
         return fields;
     }
 
-    public void setInterfaces(ClassSymbol[] syms) {
-        implementees = syms;
+    public void setInterfaces(Type[] interfaces) {
+        implementees = interfaces;
     }
 
     public void setMethods(MethodSymbol[] syms) {
@@ -77,12 +87,16 @@ public class MyClassSymbol extends ClassSymbol {
         this.importer = importer;
     }
 
+    public void setTypeParameters(TypeVariable[] params) {
+        this.params = params;
+    }
+
     public boolean isEnum() { return classKind == ClassKind.ENUM; }
     public boolean isClass() { return classKind == ClassKind.CLASS; }
     public boolean isInterface() { return classKind == ClassKind.INTERFACE; }
     public boolean isAnnotation() { return classKind == ClassKind.ANNOTATION; }
     public Type getSuperClass() { return superClass; }
-    public TypeVariable[] getTypeParameters() { return null; /* TODO */ }
+    public TypeVariable[] getTypeParameters() { return params; }
     public boolean isAnonymous() { return anonymous; }
     public void setAnonymous(boolean anonymous) { this.anonymous = anonymous; }
     public boolean isInnerClass() { return inner; }
@@ -123,5 +137,15 @@ public class MyClassSymbol extends ClassSymbol {
 
     public PrimitiveType unbox() {
         return null;
+    }
+
+    public String getQualifiedName() {
+        StringBuilder sb = new StringBuilder();
+        if (!getPackage().isDefault()) {
+            sb.append(getPackage().getQualifiedName());
+            sb.append(".");
+        }
+        sb.append(super.getQualifiedName());
+        return sb.toString();
     }
 }

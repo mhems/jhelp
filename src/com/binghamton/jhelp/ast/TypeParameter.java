@@ -5,12 +5,16 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
+import com.binghamton.jhelp.Type;
+
 /**
  * A class representing a Java type parameter
  */
 public class TypeParameter extends ASTNode {
     private Token name;
-    private List<Expression> superTypes;
+    private List<Expression> superTypes = new ArrayList<>();
+    private Type type;
+    private Annotation[] annotations;
 
     /**
      * Construct a named type parameter
@@ -40,8 +44,13 @@ public class TypeParameter extends ASTNode {
                          List<Expression> superTypes) {
         super(ASTNode.getFirstToken(name, annotations),
               ASTNode.getLastToken(name, superTypes));
+        this.annotations = annotations.toArray(new Annotation[annotations.size()]);
         this.name = name;
         this.superTypes = superTypes;
+    }
+
+    public Annotation[] getAnnotations() {
+        return annotations;
     }
 
     /**
@@ -68,7 +77,7 @@ public class TypeParameter extends ASTNode {
      * Determines if this parameters has any super types
      * @return true iff this parameters has any super types
      */
-    public boolean hasSuperType() {
+    public boolean hasSuperTypes() {
         return numSuperTypes() > 0;
     }
 
@@ -96,5 +105,13 @@ public class TypeParameter extends ASTNode {
     public void accept(ASTVisitor v) {
         super.accept(v);
         v.visit(this);
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
     }
 }
