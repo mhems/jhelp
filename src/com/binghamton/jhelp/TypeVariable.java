@@ -18,7 +18,6 @@ public class TypeVariable implements Type {
 
     public TypeVariable(String name) {
         this.name = name;
-        // TODO correct?
         this.bounds = new Type[]{ImportManager.get("java.lang.Object")};
     }
 
@@ -73,5 +72,9 @@ public class TypeVariable implements Type {
 
     public int hashCode() {
         return name.hashCode() ^ annotations.length ^ bounds.length;
+    }
+
+    public Type erase() {
+        return bounds[0].erase();
     }
 }

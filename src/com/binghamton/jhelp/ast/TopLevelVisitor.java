@@ -21,6 +21,7 @@ public class TopLevelVisitor extends EmptyVisitor {
 
     private Package pkg = Package.DEFAULT_PACKAGE;
     private Program program;
+    private MyClassSymbol currentClass;
 
     public TopLevelVisitor(Program program) {
         this.program = program;
@@ -31,23 +32,35 @@ public class TopLevelVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(AccessExpression ast) {
-        System.out.println("visiting access expr");
         ast.getLHS().accept(this);
 
         Type parent = ast.getLHS().getType();
         ClassSymbol sym;
-        // TODO determine class that lhs refers to
+        if (parent instanceof ParameterizedType) {
+            sym = (ClassSymbol)((ParameterizedType)parent).getWrappedType();
+        } else if (parent instanceof ClassSymbol) {
+            sym = (ClassSymbol)parent;
+        } else {
+            System.err.println("unknown lhs type: " + ast.getLHS().getText());
+            return;
+        }
 
         Expression rhs = ast.getRHS();
         rhs.accept(this);
-        if (rhs instanceof IdentifierExpression) {
-            System.out.println("rhs is a ID expr");
-        } else if (rhs instanceof TypeExpression) {
-            System.out.println("rhs is a type expr");
-        } else {
-            throw new IllegalArgumentException("rhs of access is neither id or type (" +
-                                               rhs.getText() + ")");
+
+        if (!(rhs instanceof IdentifierExpression)) {
+            System.err.println("unknown rhs type: " + ast.getRHS().getText());
+            return;
         }
+
+        for (ClassSymbol inner : sym.getInnerClasses()) {
+            if (inner.getName().equals(rhs.getText())) {
+                ast.setType(inner);
+                break;
+            }
+        }
+
+        System.out.println("access expr '" + ast.getText() + "' resolved to " + ast.getType());
     }
 
     /**
@@ -55,7 +68,6 @@ public class TopLevelVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(ArrayTypeExpression ast) {
-        System.out.println("visiting array type expr");
         Type arrayType;
         ast.getExpression().accept(this);
         arrayType = ast.getExpression().getType();
@@ -72,11 +84,13 @@ public class TopLevelVisitor extends EmptyVisitor {
      */
     public void visit(ClassDeclaration ast) {
         MyClassSymbol sym = (MyClassSymbol)ast.getSymbol();
+        currentClass = sym;
         if (ast.hasTypeParameters()) {
             sym.setTypeParameters(makeTypeParameters(ast.getTypeParameters()));
         }
         if (ast.hasSuperClass()) {
             ast.getSuperClass().accept(this);
+            sym.setSuperClass(ast.getSuperClass().getType());
         }
     }
 
@@ -101,6 +115,7 @@ public class TopLevelVisitor extends EmptyVisitor {
     public void visit(ConcreteBodyDeclaration ast) {
         if (ast.hasSuperInterfaces()) {
             MyClassSymbol sym = (MyClassSymbol)ast.getSymbol();
+            currentClass = sym;
             sym.setInterfaces(makeInterfaces(ast.getSuperInterfaces()));
         }
     }
@@ -110,10 +125,18 @@ public class TopLevelVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(IdentifierExpression ast) {
-        System.out.println("visiting ID expr: " + ast.getText());
         String id = ast.getIdentifier().getText();
         AnnotationSymbol[] anns = makeAnnotations(ast.getAnnotations());
-        // TODO
+        ClassSymbol sym = pkg.getClassTable().get(id);
+        if (sym != null) {
+            ast.setType(sym);
+        } else {
+            try {
+                ast.setType(currentClass.getImportManager().importSymbol(id));
+            } catch (ClassNotFoundException e) {
+                System.err.println("id '" + id + "' does not name top-level class nor imported class");
+            }
+        }
     }
 
     /**
@@ -122,6 +145,7 @@ public class TopLevelVisitor extends EmptyVisitor {
      */
     public void visit(InterfaceDeclaration ast) {
         MyClassSymbol sym = (MyClassSymbol)ast.getSymbol();
+        currentClass = sym;
         if (ast.hasTypeParameters()) {
             sym.setTypeParameters(makeTypeParameters(ast.getTypeParameters()));
         }
@@ -167,7 +191,6 @@ public class TopLevelVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(TypeExpression ast) {
-        System.out.println("visiting type expr");
         Expression raw = ast.getExpression();
         raw.accept(this);
 

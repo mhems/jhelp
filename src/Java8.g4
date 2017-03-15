@@ -167,9 +167,8 @@ classType returns [Expression ret]
     |   st = classOrInterfaceType '.'
         (a = annotation {$anns.add($a.ret);})*
         id = Identifier
-        {$ret = new IdentifierExpression($id, $anns);}
+        {$ret = new AccessExpression($st.ret, new IdentifierExpression($id, $anns));}
         (targs = typeArguments {$ret = new TypeExpression($ret, $targs.ret);})?
-        {$ret = new AccessExpression($st.ret, $ret);}
     ;
 
 classType_lfno_classOrInterfaceType returns [Expression ret]

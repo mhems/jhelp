@@ -3,6 +3,7 @@ package com.binghamton.jhelp;
 public class ReflectedClassSymbol extends ClassSymbol {
     private Class<? extends Object> cls;
     private ClassSymbol declarer;
+    private ClassSymbol[] inners;
     private Type superClass;
     private Type[] interfaces;
     private MethodSymbol[] methods;
@@ -21,7 +22,7 @@ public class ReflectedClassSymbol extends ClassSymbol {
     }
 
     public ReflectedClassSymbol(Class<? extends Object> cls) {
-        super(cls.getName(), cls.getModifiers());
+        super(cls.getSimpleName(), cls.getModifiers());
         this.cls = cls;
     }
 
@@ -34,6 +35,7 @@ public class ReflectedClassSymbol extends ClassSymbol {
             superClass = fromType(cls.getAnnotatedSuperclass());
         }
         interfaces = fromTypes(cls.getAnnotatedInterfaces());
+        inners = fromClasses(cls.getDeclaredClasses());
         methods = fromMethods(cls.getMethods());
         ctors = fromConstructors(cls.getConstructors());
         fields = fromFields(cls.getFields());
@@ -47,6 +49,10 @@ public class ReflectedClassSymbol extends ClassSymbol {
 
     public ClassSymbol getDeclaringClass() {
         return declarer;
+    }
+
+    public ClassSymbol[] getInnerClasses() {
+        return inners;
     }
 
     public Type[] getInterfaces() {

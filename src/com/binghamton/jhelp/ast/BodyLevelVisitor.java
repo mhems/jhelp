@@ -1,10 +1,20 @@
 package com.binghamton.jhelp.ast;
 
+import com.binghamton.jhelp.Package;
+import com.binghamton.jhelp.Program;
+
 /**
  * The body level Visitor for visiting the member declarations contained within
  * body declarations
  */
 public class BodyLevelVisitor extends EmptyVisitor {
+
+    private Package pkg = Package.DEFAULT_PACKAGE;
+    private Program program;
+
+    public BodyLevelVisitor(Program program) {
+        this.program = program;
+    }
 
     /**
      * Visit a Annotation node

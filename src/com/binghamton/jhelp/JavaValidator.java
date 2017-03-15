@@ -64,10 +64,10 @@ public class JavaValidator implements Validator {
                     visitor = new TopLevelVisitor(program);
                     cu.accept(visitor);
                     System.out.println("---------- BODY ----------");
-                    visitor = new BodyLevelVisitor();
+                    visitor = new BodyLevelVisitor(program);
                     // cu.accept(visitor);
                     System.out.println("---------- CODE ----------");
-                    visitor = new CodeLevelVisitor();
+                    visitor = new CodeLevelVisitor(program);
                     // cu.accept(visitor);
                 }
             }

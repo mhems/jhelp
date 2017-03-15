@@ -62,4 +62,8 @@ public class ArrayType implements Type {
     public int hashCode() {
         return base.hashCode() ^ annotations.length;
     }
+
+    public Type erase() {
+        return base.erase();
+    }
 }

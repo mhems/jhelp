@@ -85,7 +85,10 @@ public class VariableDeclaration extends Declaration {
                                List<Modifier> modifiers,
                                List<Annotation> annotations,
                                Expression initializer) {
-        super(name, expr.getFirstToken(), modifiers, annotations);
+        super(name,
+              expr.isNil() ? name : expr.getFirstToken(),
+              modifiers,
+              annotations);
         this.name = name;
         this.expr = expr;
         this.initializer = initializer;

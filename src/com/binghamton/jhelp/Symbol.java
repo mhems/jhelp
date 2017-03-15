@@ -215,9 +215,8 @@ public abstract class Symbol {
             ret = new ArrayType(ret);
         } else if (type instanceof java.lang.reflect.ParameterizedType) {
             java.lang.reflect.ParameterizedType ref = (java.lang.reflect.ParameterizedType)type;
-            // TODO fix cyclic recursion
-            ret = /*new ParameterizedType(*/fromType(ref.getRawType());//,
-                                        // fromTypes(ref.getActualTypeArguments()));
+            ret = new ParameterizedType(fromType(ref.getRawType()),
+                                        fromTypes(ref.getActualTypeArguments()));
 
         } else if (type instanceof java.lang.reflect.TypeVariable<?>) {
             ret = fromTypeVariable((java.lang.reflect.TypeVariable<?>)type);
@@ -245,8 +244,10 @@ public abstract class Symbol {
 
     protected static
     TypeVariable fromTypeVariable(java.lang.reflect.TypeVariable<?> type) {
-        return new TypeVariable(type.getName(),
-                                fromTypes(type.getAnnotatedBounds()));
+            // TODO fix cyclic recursion
+        // creation of type variable must not create bounds ???
+        return new TypeVariable(type.getName());
+                                // fromTypes(type.getAnnotatedBounds()));
     }
 
     protected static

@@ -78,17 +78,35 @@ public class PackageLevelVisitor extends EmptyVisitor {
             sym.setClassKind(MyClassSymbol.ClassKind.INTERFACE);
         }
 
-        pkg.addClass(sym);
-        ast.setSymbol(sym);
-        bodyNames.add(ast.getName().getText());
+        if (!ast.isInnerDeclaration()) {
+            pkg.addClass(sym);
+            bodyNames.add(ast.getName().getText());
+        }
 
+        ast.setSymbol(sym);
+
+        MyClassSymbol[] innerSyms = new MyClassSymbol[ast.getInnerBodies().size() +
+                                                      ast.getInnerInterfaces().size()];
+        int pos = 0;
+        MyClassSymbol cur;
         for (ConcreteBodyDeclaration c : ast.getInnerBodies()) {
+            c.setInnerDeclaration(true);
             c.accept(this);
-            ((MyClassSymbol)c.getSymbol()).setDeclaringClass(sym);
+            cur = (MyClassSymbol)c.getSymbol();
+            cur.setDeclaringClass(sym);
+            innerSyms[pos] = cur;
+            ++pos;
         }
         for (AbstractBodyDeclaration a : ast.getInnerInterfaces()) {
+            a.setInnerDeclaration(true);
             a.accept(this);
-            ((MyClassSymbol)a.getSymbol()).setDeclaringClass(sym);
+            cur = (MyClassSymbol)a.getSymbol();
+            cur.setDeclaringClass(sym);
+            innerSyms[pos] = cur;
+            ++pos;
+        }
+        if (pos > 0) {
+            sym.setInnerClasses(innerSyms);
         }
     }
 

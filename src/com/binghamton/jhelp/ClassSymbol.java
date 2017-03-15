@@ -47,6 +47,7 @@ public abstract class ClassSymbol extends Symbol implements Type {
     public abstract boolean isAnnotation();
     public abstract TypeVariable[] getTypeParameters();
     public abstract boolean isAnonymous();
+    public abstract ClassSymbol[] getInnerClasses();
     public abstract boolean isInnerClass();
     public abstract boolean isBoxed();
     public abstract PrimitiveType unbox();
@@ -67,6 +68,10 @@ public abstract class ClassSymbol extends Symbol implements Type {
 
     public boolean hasTypeParameters() {
         return getTypeParameters().length > 0;
+    }
+
+    public boolean isGeneric() {
+        return hasTypeParameters();
     }
 
     public boolean hasSuperClass() {
@@ -106,7 +111,7 @@ public abstract class ClassSymbol extends Symbol implements Type {
             sb.append(">");
         }
 
-        if (false) { // TODO
+        if (false) { // TODO only an issue for self-referential type parameters like Enum
             if (hasSuperClass()) {
                 sb.append(" extends ");
                 sb.append(getSuperClass().getTypeName());

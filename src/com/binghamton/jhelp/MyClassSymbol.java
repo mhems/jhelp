@@ -9,6 +9,7 @@ public class MyClassSymbol extends ClassSymbol {
     private Type superClass = null;
     private Type[] implementees = {};
     private ClassSymbol declarer;
+    private ClassSymbol[] innerClasses = {};
     private VariableSymbol[] fields = {};
     private MethodSymbol[] methods = {};
     private ConstructorSymbol[] ctors = {};
@@ -99,8 +100,15 @@ public class MyClassSymbol extends ClassSymbol {
     public TypeVariable[] getTypeParameters() { return params; }
     public boolean isAnonymous() { return anonymous; }
     public void setAnonymous(boolean anonymous) { this.anonymous = anonymous; }
-    public boolean isInnerClass() { return inner; }
-    public void setInnerClass(boolean inner) { this.inner = inner; }
+    public boolean isInnerClass() { return innerClasses.length > 0; }
+
+    public ClassSymbol[] getInnerClasses() {
+        return innerClasses;
+    }
+
+    public void setInnerClasses(ClassSymbol[] classes) {
+        this.innerClasses = classes;
+    }
 
     public void setSuperClass(Type type) {
         superClass = type;

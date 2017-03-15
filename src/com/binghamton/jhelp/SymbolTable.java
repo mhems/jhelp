@@ -47,6 +47,7 @@ public class SymbolTable<T extends Symbol> {
     public boolean put(T symbol) {
         if (inScope(symbol.getName())) {
             // TODO error notification? or up to caller?
+            System.err.println("table put failed - duplicate");
             return false;
         }
         table.peekFirst().put(symbol.getName(), symbol);

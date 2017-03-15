@@ -9,11 +9,13 @@ public class ParameterizedType implements Type {
     private Type[] params;
 
     public ParameterizedType(Type wrapped, Type parameter) {
+        if (wrapped == null) throw new IllegalArgumentException();
         this.wrapped = wrapped;
         this.params = new Type[]{parameter};
     }
 
     public ParameterizedType(Type wrapped, Type[] parameters) {
+        if (wrapped == null) throw new IllegalArgumentException();
         this.wrapped = wrapped;
         this.params = parameters;
     }
@@ -37,7 +39,7 @@ public class ParameterizedType implements Type {
     }
 
     public String getTypeName() {
-        StringBuilder sb = new StringBuilder(wrapped.getName());
+        StringBuilder sb = new StringBuilder(wrapped.getTypeName());
         sb.append("<");
         if (params.length > 0) {
             sb.append(StringUtils.join(", ", params, t -> t.getTypeName()));
@@ -65,5 +67,9 @@ public class ParameterizedType implements Type {
 
     public int hashCode() {
         return wrapped.hashCode() ^ params.length;
+    }
+
+    public Type erase() {
+        return wrapped.erase();
     }
 }

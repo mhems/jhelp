@@ -15,6 +15,7 @@ public abstract class BodyDeclaration extends Declaration {
     protected List<VariableDeclaration> fields = new ArrayList<>();
     protected List<ConcreteBodyDeclaration> innerBodies = new ArrayList<>();
     protected List<AbstractBodyDeclaration> innerInterfaces = new ArrayList<>();
+    protected boolean inner = false;
 
     /**
      * Construct an empty body declaration
@@ -35,6 +36,14 @@ public abstract class BodyDeclaration extends Declaration {
                            List<Modifier> modifiers,
                            List<Annotation> annotations) {
         super(name, keyword, modifiers, annotations);
+    }
+
+    public boolean isInnerDeclaration() {
+        return inner;
+    }
+
+    public void setInnerDeclaration(boolean inner) {
+        this.inner = inner;
     }
 
     /**

@@ -10,6 +10,10 @@ public interface Type {
     String getName();
     String getTypeName();
 
+    default Type erase() {
+        return this;
+    }
+
     default String repr() {
         return getTypeName();
     }
