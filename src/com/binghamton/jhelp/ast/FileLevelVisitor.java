@@ -17,13 +17,15 @@ import com.binghamton.jhelp.ReflectedClassSymbol;
 import com.binghamton.jhelp.Symbol;
 
 /**
- * The package (highest) level Visitor for visiting packages and their top level
- * declarations.
+ * The file (highest) level Visitor for visiting packages, imports, and
+ * symbol names.
  *
  * This visitor is responsible for:
  * - establishing the package hierarchy
  * - importing establised symbols as necessary into the proper bodies
  * - adding bodies' names to the class symbol table
+ *
+ * This visitor does not visit declarations, just their names.
  *
  * This visitor detects the following errors:
  * - warning for use of default package (TODO if configured)
@@ -31,7 +33,7 @@ import com.binghamton.jhelp.Symbol;
  * - a file does not contain a body with same name as file
  * - more than one public body per file
  */
-public class PackageLevelVisitor extends EmptyVisitor {
+public class FileLevelVisitor extends EmptyVisitor {
     private ImportManager importer = new ImportManager();
     private Set<String> bodyNames = new HashSet<>();
     private Set<String> simpleImportNames = new HashSet<>();
@@ -48,12 +50,12 @@ public class PackageLevelVisitor extends EmptyVisitor {
         }
     }
 
-    public PackageLevelVisitor(Program program) {
+    public FileLevelVisitor(Program program) {
         this.program = program;
         visitAll();
     }
 
-    public PackageLevelVisitor(Program program, String filename) {
+    public FileLevelVisitor(Program program, String filename) {
         this.program = program;
 
         visitAll();

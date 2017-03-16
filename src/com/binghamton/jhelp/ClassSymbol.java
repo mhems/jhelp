@@ -58,6 +58,17 @@ public abstract class ClassSymbol extends Symbol implements Type {
         return null;
     }
 
+    public TypeVariable getTypeVariableInScope(String name) {
+	TypeVariable local = getTypeVariable(name);
+	if (local == null) {
+	    ClassSymbol enc = getDeclaringClass();
+	    if (enc != null) {
+		return enc.getTypeVariableInScope(name);
+	    }
+	}
+	return local;
+    }
+
     public abstract boolean isAnonymous();
     public abstract ClassSymbol[] getInnerClasses();
     public abstract boolean isInnerClass();

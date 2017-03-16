@@ -16,7 +16,7 @@ import com.binghamton.jhelp.VariableSymbol;
  * The body level Visitor for visiting the member declarations contained within
  * body declarations
  */
-public class BodyLevelVisitor extends TopLevelVisitor {
+public class BodyLevelVisitor extends DeclarationLevelVisitor {
 
     public BodyLevelVisitor(Program program) {
         super(program);

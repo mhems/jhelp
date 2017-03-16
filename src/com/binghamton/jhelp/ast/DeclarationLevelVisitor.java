@@ -20,11 +20,11 @@ import com.binghamton.jhelp.WildcardType;
  * The top level Visitor for visiting top-level declarations and adding them to
  * the symbol table
  */
-public class TopLevelVisitor extends PackageLevelVisitor {
+public class DeclarationLevelVisitor extends FileLevelVisitor {
 
     protected MyClassSymbol currentClass;
 
-    public TopLevelVisitor(Program program) {
+    public DeclarationLevelVisitor(Program program) {
         super(program);
     }
 
