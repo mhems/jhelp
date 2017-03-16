@@ -11,7 +11,7 @@ public abstract class JHelpError {
         return String.format("from %s on line %d, column %d",
                              token.getTokenSource().getSourceName(),
                              token.getLine(),
-                             token.getStartIndex());
+                             token.getCharPositionInLine());
     }
 
     public abstract String getMessage();

@@ -24,6 +24,10 @@ public class WildcardType implements Type {
         return ret;
     }
 
+    public ClassSymbol getClassSymbol() {
+        return bound.getClassSymbol();
+    }
+
     public String getTypeName() {
         String ret = "?";
         ret += " " + (upper ? "extends" : "super") + " ";

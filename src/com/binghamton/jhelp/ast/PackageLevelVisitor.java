@@ -1,6 +1,7 @@
 package com.binghamton.jhelp.ast;
 
 import java.io.File;
+import java.util.List;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -31,18 +32,31 @@ import com.binghamton.jhelp.Symbol;
  * - more than one public body per file
  */
 public class PackageLevelVisitor extends EmptyVisitor {
-    private Package pkg = Package.DEFAULT_PACKAGE;
     private ImportManager importer = new ImportManager();
     private Set<String> bodyNames = new HashSet<>();
     private Set<String> simpleImportNames = new HashSet<>();
-    private Program program;
     private String filename;
+    protected Package pkg = Package.DEFAULT_PACKAGE;
+    protected Program program;
+
+    protected void visitAll() {
+        for (CompilationUnit unit : program.getCompilationUnits()) {
+            filename = new File(unit.getFilename()).getName();
+            filename = filename.substring(0,
+                                          filename.length() - ".java".length());
+            unit.accept(this);
+        }
+    }
+
+    public PackageLevelVisitor(Program program) {
+        this.program = program;
+        visitAll();
+    }
 
     public PackageLevelVisitor(Program program, String filename) {
         this.program = program;
-        this.filename = new File(filename).getName();
-        this.filename = this.filename.substring(0,
-                                                this.filename.length() - ".java".length());
+
+        visitAll();
     }
 
     /**
@@ -79,8 +93,11 @@ public class PackageLevelVisitor extends EmptyVisitor {
         }
 
         if (!ast.isInnerDeclaration()) {
-            pkg.addClass(sym);
-            bodyNames.add(ast.getName().getText());
+            if (!pkg.addClass(sym)) {
+                System.err.println("duplicate declaration of body");
+            } else {
+                bodyNames.add(ast.getName().getText());
+            }
         }
 
         ast.setSymbol(sym);
@@ -133,6 +150,9 @@ public class PackageLevelVisitor extends EmptyVisitor {
             System.err.printf("file '%s.java' must declare a body with name of this file\n",
                               filename);
         }
+
+
+
     }
 
     /**
@@ -164,18 +184,24 @@ public class PackageLevelVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(PackageStatement ast) {
-        Package parent = null;
-        for (Token token : ast.getIdentifiers()) {
-            pkg = program.getPackage(token.getText());
-            if (pkg == null) {
-                if (parent != null) {
-                    pkg = parent.makeChildPackage(token.getText());
-                } else {
-                    pkg = new Package(token.getText());
-                    program.addPackage(pkg);
-                }
-            }
-            parent = pkg;
+        List<Token> parts = ast.getIdentifiers();
+        Token token = parts.get(0);
+        Package pkg = program.getPackage(token.getText());
+        Package sub;
+        if (pkg == null) {
+            pkg = new Package(token.getText());
+            program.addPackage(pkg);
         }
+
+        for (int i = 1; i < parts.size(); i++) {
+            token = parts.get(i);
+            sub = pkg.getSubPackage(token.getText());
+            if (sub == null) {
+                sub = pkg.makeChildPackage(token.getText());
+            }
+            pkg = sub;
+        }
+
+        this.pkg = pkg;
     }
 }

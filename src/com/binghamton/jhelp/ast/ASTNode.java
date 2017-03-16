@@ -124,11 +124,15 @@ public abstract class ASTNode implements Visitable, Comparable<ASTNode> {
      * @param last the last token of this ASTNode
      */
     public void setLastToken(Token last) {
-        if (!(last instanceof MyToken)) {
+        if (last == null) {
+            this.last = first;
+            singular = true;
+        } else if (!(last instanceof MyToken)) {
             throw new IllegalArgumentException("AST Node tokens must be MyTokens");
+        } else {
+            this.last = (MyToken)last;
+            setSingular();
         }
-        this.last = (MyToken)last;
-        setSingular();
     }
 
     /**

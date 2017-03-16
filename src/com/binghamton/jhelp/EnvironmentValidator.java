@@ -1,5 +1,6 @@
 package com.binghamton.jhelp;
 
+import java.io.File;
 import java.io.InputStream;
 import java.util.List;
 
@@ -17,10 +18,10 @@ public class EnvironmentValidator implements Validator {
 
     /**
      * Validates the user's environment
-     * @param filenames unused
+     * @param files unused
      * @return a List of JHelpErrors, if any, that occured during validation
      */
-    public List<JHelpError> validate(String[] filenames) {
+    public List<JHelpError> validate(File[] files) {
         List<JHelpError> errors = Validator.buildErrors();
 
         String version = System.getProperty("java.specification.version");

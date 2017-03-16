@@ -58,8 +58,8 @@ public class Package {
         return qname;
     }
 
-    public void addClass(ClassSymbol cls) {
-        classes.put(cls);
+    public boolean addClass(ClassSymbol cls) {
+        return classes.put(cls);
     }
 
     public AnnotationSymbol[] getAnnotations() {
@@ -84,6 +84,15 @@ public class Package {
 
     public boolean hasSubPackages() {
         return children.size() > 0;
+    }
+
+    public Package getSubPackage(String name) {
+        for (Package p : children) {
+            if (p.getName().equals(name)) {
+                return p;
+            }
+        }
+        return null;
     }
 
     /**

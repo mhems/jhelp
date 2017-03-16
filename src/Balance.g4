@@ -28,37 +28,7 @@
  *  THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-grammar Balance;
-
-file
-    : (punctuation)* EOF
-    ;
-
-punctuation
-    : OPEN
-    | CLOSE
-    ;
-
-OPEN
-    : LPAREN
-    | LBRACE
-    | LBRACK
-    ;
-
-CLOSE
-    : RPAREN
-    | RBRACE
-    | RBRACK
-    ;
-
-// §3.11 Separators
-
-LPAREN : '(';
-RPAREN : ')';
-LBRACE : '{';
-RBRACE : '}';
-LBRACK : '[';
-RBRACK : ']';
+lexer grammar Balance;
 
 // §3.10.1 Integer Literals
 
@@ -127,6 +97,15 @@ UnicodeEscape
     :   '\\' 'u' HexDigit HexDigit HexDigit HexDigit
     ;
 
+// §3.11 Separators
+
+LPAREN : '(';
+RPAREN : ')';
+LBRACE : '{';
+RBRACE : '}';
+LBRACK : '[';
+RBRACK : ']';
+
 //
 // Whitespace and comments
 //
@@ -141,6 +120,3 @@ COMMENT
 LINE_COMMENT
     :   '//' ~[\r\n]* -> skip
     ;
-
-ELSE : ~('('|')'|'['|']'|'{'|'}')+ -> skip
-     ;

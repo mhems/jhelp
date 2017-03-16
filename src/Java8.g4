@@ -151,7 +151,7 @@ referenceType returns [Expression ret]
 
 classOrInterfaceType returns [Expression ret]
     :   co = classType_lfno_classOrInterfaceType {$ret = $co.ret;}
-        (
+        (   '.'
             c = classType_lfno_classOrInterfaceType
             {$ret = new AccessExpression($ret, $c.ret);}
         )*

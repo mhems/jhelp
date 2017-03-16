@@ -23,7 +23,8 @@ public class ImportManager {
             getOrImport("java.lang.Enum");
             getOrImport("java.lang.annotation.Annotation");
         } catch (ClassNotFoundException e) {
-            System.err.println("FATAL ERROR"); // TODO convert to error
+            System.err.println("FATAL ERROR");
+            e.printStackTrace();
         }
     }
 

@@ -21,6 +21,7 @@ import com.binghamton.jhelp.error.JHelpError;
 public class JHelpRunner {
     public static final FileFilter JAVA_FILTER = pathname -> pathname.getName().endsWith(".java");
     private final String[] args;
+    private File[] files;
     private final boolean profiling = true;
     private List<Validator> validators = new ArrayList<>();
     private List<JHelpError> errors = new ArrayList<>();
@@ -30,7 +31,13 @@ public class JHelpRunner {
      * @param args the application arguments
      */
     public JHelpRunner(String[] args) {
-        this.args = expandFiles(args);
+        this.args = args;
+        files = new File[args.length];
+        for (int i = 0; i < files.length; i++) {
+            files[i] = new File(args[i]);
+        }
+        files = expandFiles(files).toArray(new File[files.length]);
+        System.out.println(java.util.Arrays.toString(files));
     }
 
     /**
@@ -51,7 +58,7 @@ public class JHelpRunner {
         int i = 1;
         for (Validator v : validators) {
             start = System.nanoTime();
-            errs = v.validate(args);
+            errs = v.validate(files);
             stop = System.nanoTime();
             if (profiling) {
                 System.out.printf("validator %d took '%f' ms\n", i, (stop - start)/1e6);
@@ -78,23 +85,15 @@ public class JHelpRunner {
         return num - 1;
     }
 
-    private static String[] expandFiles(String[] filenames) {
-        List<String> names = new ArrayList<>();
-        for (String name : filenames) {
-            names.addAll(Arrays.asList(getJavaFiles(new File(name))));
-        }
-        return names.toArray(new String[0]);
-    }
-
-    private static String[] getJavaFiles(File file) {
-        if (file.isDirectory()) {
-            List<String> filenames = new ArrayList<>();
-            for (File f : file.listFiles(JAVA_FILTER)) {
-                filenames.addAll(Arrays.asList(getJavaFiles(f)));
+    private static List<File> expandFiles(File[] files) {
+        List<File> ret = new ArrayList<>();
+        for (File file : files) {
+            if (file.isDirectory()) {
+                ret.addAll(expandFiles(file.listFiles()));
+            } else if (file.getName().endsWith(".java")) {
+                ret.add(file);
             }
-            return filenames.toArray(new String[0]);
-        } else {
-            return new String[]{file.getAbsolutePath()};
         }
+        return ret;
     }
 }

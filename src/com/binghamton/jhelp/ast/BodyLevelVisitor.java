@@ -2,35 +2,16 @@ package com.binghamton.jhelp.ast;
 
 import com.binghamton.jhelp.Package;
 import com.binghamton.jhelp.Program;
+import com.binghamton.jhelp.MyClassSymbol;
 
 /**
  * The body level Visitor for visiting the member declarations contained within
  * body declarations
  */
-public class BodyLevelVisitor extends EmptyVisitor {
-
-    private Package pkg = Package.DEFAULT_PACKAGE;
-    private Program program;
+public class BodyLevelVisitor extends TopLevelVisitor {
 
     public BodyLevelVisitor(Program program) {
-        this.program = program;
-    }
-
-    /**
-     * Visit a Annotation node
-     * @param ast the AST node being visited
-     */
-    public void visit(Annotation ast) {
-        System.out.printf("encountered annotation '%s'\n", ast.getTypeExpression());
-    }
-
-    /**
-     * Visit a AnnotationDeclaration node
-     * @param ast the AST node being visited
-     */
-    public void visit(AnnotationDeclaration ast) {
-        System.out.printf("in annotation declaration '%s'\n",
-                          ast.getName().getText());
+        super(program);
     }
 
     /**
@@ -38,6 +19,8 @@ public class BodyLevelVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(BodyDeclaration ast) {
+        currentClass = (MyClassSymbol)ast.getSymbol();
+
         for (VariableDeclaration v : ast.getFields()) {
             v.accept(this);
         }
@@ -50,32 +33,12 @@ public class BodyLevelVisitor extends EmptyVisitor {
     }
 
     /**
-     * Visit a ClassDeclaration node
-     * @param ast the AST node being visited
-     */
-    public void visit(ClassDeclaration ast) {
-        System.out.println("in class " + ast.getName().getText());
-        if (ast.hasSuperClass()) {
-            ast.getSuperClass().accept(this);
-        }
-    }
-
-    /**
-     * Visit a CompilationUnit node
-     * @param ast the AST node being visited
-     */
-    public void visit(CompilationUnit ast) {
-
-        for (BodyDeclaration decl : ast.getBodyDeclarations()) {
-            decl.accept(this);
-        }
-    }
-
-    /**
      * Visit a ConcreteBodyDeclaration node
      * @param ast the AST node being visited
      */
     public void visit(ConcreteBodyDeclaration ast) {
+        // does it have initializers?
+
         for (MethodDeclaration m : ast.getConstructors()) {
             m.accept(this);
         }
@@ -85,31 +48,11 @@ public class BodyLevelVisitor extends EmptyVisitor {
     }
 
     /**
-     * Visit a Declaration node
-     * @param ast the AST node being visited
-     */
-    public void visit(Declaration ast) {
-        System.out.printf("in declaration '%s %s'\n",
-                          ast.getModifiers().getText(),
-                          ast.getName().getText());
-    }
-
-    /**
-     * Visit a Dimension node
-     * @param ast the AST node being visited
-     */
-    public void visit(Dimension ast) {
-        for (Annotation a : ast.getAnnotations()) {
-            a.accept(this);
-        }
-    }
-
-    /**
      * Visit a EnumConstant node
      * @param ast the AST node being visited
      */
     public void visit(EnumConstant ast) {
-        System.out.println("enum member " + ast.getName().getText());
+
     }
 
     /**
@@ -117,18 +60,9 @@ public class BodyLevelVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(EnumDeclaration ast) {
-        System.out.printf("in enum '%s'\n", ast.getName().getText());
         for (EnumConstant c : ast.getConstants()) {
             c.accept(this);
         }
-    }
-
-    /**
-     * Visit a IdentifierExpression node
-     * @param ast the AST node being visited
-     */
-    public void visit(IdentifierExpression ast) {
-        System.out.println("id expression named " + ast.getText());
     }
 
     /**
@@ -136,7 +70,6 @@ public class BodyLevelVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(InterfaceDeclaration ast) {
-        System.out.printf("in interface '%s'\n", ast.getName().getText());
         for (MethodDeclaration m : ast.getMethods()) {
             m.accept(this);
         }
@@ -174,23 +107,7 @@ public class BodyLevelVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(PackageStatement ast) {
-        System.out.println("in package " + ast.getText());
-    }
-
-    /**
-     * Visit a TypeArgument node
-     * @param ast the AST node being visited
-     */
-    public void visit(TypeArgument ast) {
-        System.out.println("type argument " + ast.getText());
-    }
-
-    /**
-     * Visit a TypeParameter node
-     * @param ast the AST node being visited
-     */
-    public void visit(TypeParameter ast) {
-        System.out.println("type parameter " + ast.getText());
+        pkg = program.getPackage(ast.getName());
     }
 
     /**

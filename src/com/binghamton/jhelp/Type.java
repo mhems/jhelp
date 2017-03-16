@@ -9,6 +9,8 @@ public interface Type {
     void setAnnotations(AnnotationSymbol[] annotations);
     String getName();
     String getTypeName();
+    ClassSymbol getClassSymbol();
+
 
     default Type erase() {
         return this;

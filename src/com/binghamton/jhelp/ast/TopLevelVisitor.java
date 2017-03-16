@@ -1,11 +1,14 @@
 package com.binghamton.jhelp.ast;
 
 import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.binghamton.jhelp.AnnotationSymbol;
 import com.binghamton.jhelp.ArrayType;
 import com.binghamton.jhelp.ClassSymbol;
 import com.binghamton.jhelp.MyClassSymbol;
+import com.binghamton.jhelp.Modifier;
 import com.binghamton.jhelp.Package;
 import com.binghamton.jhelp.ParameterizedType;
 import com.binghamton.jhelp.Program;
@@ -17,14 +20,12 @@ import com.binghamton.jhelp.WildcardType;
  * The top level Visitor for visiting top-level declarations and adding them to
  * the symbol table
  */
-public class TopLevelVisitor extends EmptyVisitor {
+public class TopLevelVisitor extends PackageLevelVisitor {
 
-    private Package pkg = Package.DEFAULT_PACKAGE;
-    private Program program;
-    private MyClassSymbol currentClass;
+    protected MyClassSymbol currentClass;
 
     public TopLevelVisitor(Program program) {
-        this.program = program;
+        super(program);
     }
 
     /**
@@ -35,19 +36,8 @@ public class TopLevelVisitor extends EmptyVisitor {
         ast.getLHS().accept(this);
 
         Type parent = ast.getLHS().getType();
-        ClassSymbol sym;
-        if (parent instanceof ParameterizedType) {
-            sym = (ClassSymbol)((ParameterizedType)parent).getWrappedType();
-        } else if (parent instanceof ClassSymbol) {
-            sym = (ClassSymbol)parent;
-        } else {
-            System.err.println("unknown lhs type: " + ast.getLHS().getText());
-            return;
-        }
-
+        ClassSymbol sym = parent.getClassSymbol();
         Expression rhs = ast.getRHS();
-        rhs.accept(this);
-
         if (!(rhs instanceof IdentifierExpression)) {
             System.err.println("unknown rhs type: " + ast.getRHS().getText());
             return;
@@ -59,8 +49,6 @@ public class TopLevelVisitor extends EmptyVisitor {
                 break;
             }
         }
-
-        System.out.println("access expr '" + ast.getText() + "' resolved to " + ast.getType());
     }
 
     /**
@@ -79,18 +67,49 @@ public class TopLevelVisitor extends EmptyVisitor {
     }
 
     /**
+     * Visit a BodyDeclaration node
+     * @param ast the AST node being visited
+     */
+    public void visit(BodyDeclaration ast) {
+        currentClass = (MyClassSymbol)ast.getSymbol();
+
+        ClassSymbol enclosingSym = currentClass.getDeclaringClass();
+        while (enclosingSym != null) {
+            if (enclosingSym.getName().equals(currentClass.getName())) {
+                System.err.println("inner body cannot have same name as one of its enclosing classes");
+                break;
+            }
+            enclosingSym = enclosingSym.getDeclaringClass();
+        }
+
+        for (ConcreteBodyDeclaration c : ast.getInnerBodies()) {
+            c.accept(this);
+        }
+        for (AbstractBodyDeclaration a : ast.getInnerInterfaces()) {
+            a.accept(this);
+        }
+    }
+
+    /**
      * Visit a ClassDeclaration node
      * @param ast the AST node being visited
      */
     public void visit(ClassDeclaration ast) {
-        MyClassSymbol sym = (MyClassSymbol)ast.getSymbol();
-        currentClass = sym;
         if (ast.hasTypeParameters()) {
-            sym.setTypeParameters(makeTypeParameters(ast.getTypeParameters()));
+            currentClass.setTypeParameters(makeTypeParameters(ast.getTypeParameters()));
         }
         if (ast.hasSuperClass()) {
             ast.getSuperClass().accept(this);
-            sym.setSuperClass(ast.getSuperClass().getType());
+            ClassSymbol superCls = ast.getSuperClass().getType().getClassSymbol();
+            if (superCls.isEnum()) {
+                System.err.println("cannot subclass java.lang.Enum");
+            } else if (superCls.isInterfaceLike()) {
+                System.err.println("cannot subclass interface or annotation");
+            } else if (superCls.getModifiers().contains(Modifier.FINAL)) {
+                System.err.println("cannot subclass a final class");
+            } else {
+                currentClass.setSuperClass(ast.getSuperClass().getType());
+            }
         }
     }
 
@@ -114,9 +133,35 @@ public class TopLevelVisitor extends EmptyVisitor {
      */
     public void visit(ConcreteBodyDeclaration ast) {
         if (ast.hasSuperInterfaces()) {
-            MyClassSymbol sym = (MyClassSymbol)ast.getSymbol();
-            currentClass = sym;
-            sym.setInterfaces(makeInterfaces(ast.getSuperInterfaces()));
+            currentClass.setInterfaces(makeInterfaces(ast.getSuperInterfaces()));
+        }
+    }
+
+    /**
+     * Visit a Dimension node
+     * @param ast the AST node being visited
+     */
+    public void visit(Dimension ast) {
+        for (Annotation a : ast.getAnnotations()) {
+            a.accept(this);
+        }
+    }
+
+    /**
+     * Visit a EnumDeclaration node
+     * @param ast the AST node being visited
+     */
+    public void visit(EnumDeclaration ast) {
+        currentClass.getModifiers().addModifier(Modifier.STATIC);
+        boolean isFinal = true;
+        for (EnumConstant c : ast.getConstants()) {
+            if (!c.isEmpty()) {
+                isFinal = false;
+                break;
+            }
+        }
+        if (isFinal) {
+            currentClass.getModifiers().addModifier(Modifier.FINAL);
         }
     }
 
@@ -134,7 +179,12 @@ public class TopLevelVisitor extends EmptyVisitor {
             try {
                 ast.setType(currentClass.getImportManager().importSymbol(id));
             } catch (ClassNotFoundException e) {
-                System.err.println("id '" + id + "' does not name top-level class nor imported class");
+                TypeVariable var = currentClass.getTypeVariable(id);
+                if (var != null) {
+                    ast.setType(var);
+                } else {
+                    System.err.println("unknown symbol '" + id + "'");
+                }
             }
         }
     }
@@ -144,13 +194,11 @@ public class TopLevelVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(InterfaceDeclaration ast) {
-        MyClassSymbol sym = (MyClassSymbol)ast.getSymbol();
-        currentClass = sym;
         if (ast.hasTypeParameters()) {
-            sym.setTypeParameters(makeTypeParameters(ast.getTypeParameters()));
+            currentClass.setTypeParameters(makeTypeParameters(ast.getTypeParameters()));
         }
         if (ast.hasSuperInterfaces()) {
-            sym.setInterfaces(makeInterfaces(ast.getSuperInterfaces()));
+            currentClass.setInterfaces(makeInterfaces(ast.getSuperInterfaces()));
         }
     }
 
@@ -238,10 +286,17 @@ public class TopLevelVisitor extends EmptyVisitor {
     }
 
     private Type[] makeInterfaces(List<Expression> interfaces) {
+        Set<ClassSymbol> set = new HashSet<>();
         Type[] ret = new Type[interfaces.size()];
         for (int i = 0; i < ret.length; i++) {
             interfaces.get(i).accept(this);
             ret[i] = interfaces.get(i).getType();
+            if (ret[i].getClassSymbol().isClassLike()) {
+                System.err.println("cannot implement a class or enum");
+            }
+            if (!set.add(ret[i].getClassSymbol())) {
+                System.err.println("cannot implement the same interface twice");
+            }
         }
         return ret;
     }

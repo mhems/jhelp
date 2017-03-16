@@ -76,7 +76,7 @@ public class Annotation extends Expression {
         if (isSingleElement()) {
             return nameValueMap.get(null);
         }
-        throw new RuntimeException(); // TODO
+        return null;
     }
 
     /**
@@ -84,10 +84,7 @@ public class Annotation extends Expression {
      * @return the mapping from argument name to value
      */
     public Map<Token, Expression> getArguments() {
-        if (isNormal()) {
-            return nameValueMap;
-        }
-        throw new RuntimeException(); // TODO
+        return nameValueMap;
     }
 
     /**
@@ -105,10 +102,7 @@ public class Annotation extends Expression {
      * @return the value of the argument with name `name`
      */
     public Expression getValue(Token name) {
-        if (isNormal()) {
-            return nameValueMap.get(name);
-        }
-        throw new RuntimeException(); // TODO
+        return nameValueMap.get(name);
     }
 
     /**

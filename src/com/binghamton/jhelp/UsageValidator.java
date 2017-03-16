@@ -20,13 +20,13 @@ public class UsageValidator implements Validator {
 
     /**
      * Validates CLI input
-     * @param filenames the filenames to validate
+     * @param files the files to validate
      * @return a List of JHelpErrors, if any, that occured during validation
      */
-    public List<JHelpError> validate(String[] filenames) {
+    public List<JHelpError> validate(File[] files) {
         List<JHelpError> errors = Validator.buildErrors();
-        File cur;
-        for (String filename : filenames) {
+        for (File file : files) {
+            final String filename = file.getAbsolutePath();
             final Matcher matcher = WHITESPACE.matcher(filename);
             if (matcher.find()) {
                 errors.add(new InvalidUsageError(){
@@ -39,8 +39,7 @@ public class UsageValidator implements Validator {
                        }
                     });
             }
-            cur = new File(filename);
-            if (!cur.exists() || !cur.isFile()) {
+            if (!file.exists() || !file.isFile()) {
                 errors.add(new InvalidUsageError(){
                        @Override
                        public String getMessage() {

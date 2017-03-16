@@ -1,14 +1,26 @@
 package com.binghamton.jhelp;
 
 import java.util.ArrayList;
-import java.util.List;;
+import java.util.List;
+
+import com.binghamton.jhelp.ast.CompilationUnit;
 
 public class Program {
     private List<Package> packages = new ArrayList<>();
+    private List<CompilationUnit> units = new ArrayList<>();
 
         {
             packages.add(Package.DEFAULT_PACKAGE);
         }
+
+    public void addCompilationUnit(CompilationUnit unit) {
+        units.add(unit);
+    }
+
+    public List<CompilationUnit> getCompilationUnits() {
+        return units;
+    }
+
 
     public boolean hasPackage(String name) {
         for (Package pkg : packages) {

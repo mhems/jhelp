@@ -75,6 +75,14 @@ public class MyToken extends CommonToken {
         return stream.getText(this, stop);
     }
 
+    public static String format(Token token) {
+        return String.format("line %d, col %d - '%s' (channel %d)",
+                             token.getLine(),
+                             token.getCharPositionInLine(),
+                             token.getText(),
+                             token.getChannel());
+    }
+
     @Override
     public int hashCode() {
         return Integer.hashCode(type) ^

@@ -41,11 +41,23 @@ public abstract class ClassSymbol extends Symbol implements Type {
     public abstract ConstructorSymbol[] getConstructors();
     public abstract VariableSymbol[] getFields();
     public abstract ClassSymbol getDeclaringClass();
+    public boolean isClassLike() { return isEnum() || isClass(); }
     public abstract boolean isEnum();
     public abstract boolean isClass();
+    public boolean isInterfaceLike() { return isInterface() || isAnnotation(); }
     public abstract boolean isInterface();
     public abstract boolean isAnnotation();
     public abstract TypeVariable[] getTypeParameters();
+
+    public TypeVariable getTypeVariable(String name) {
+        for (TypeVariable var : getTypeParameters()) {
+            if (var.getName().equals(name)) {
+                return var;
+            }
+        }
+        return null;
+    }
+
     public abstract boolean isAnonymous();
     public abstract ClassSymbol[] getInnerClasses();
     public abstract boolean isInnerClass();
@@ -132,6 +144,10 @@ public abstract class ClassSymbol extends Symbol implements Type {
         return sb.toString();
     }
 
+    public ClassSymbol getClassSymbol() {
+        return this;
+    }
+
     public String toString() {
         StringBuilder sb = new StringBuilder();
         if (hasModifiers()) {
@@ -149,6 +165,25 @@ public abstract class ClassSymbol extends Symbol implements Type {
         }
         sb.append(" ");
         sb.append(getTypeName());
+        return sb.toString();
+    }
+
+    public String repr() {
+        StringBuilder sb = new StringBuilder(this.toString());
+        sb.append("\n");
+        for (VariableSymbol field : getFields()) {
+            sb.append("field: ");
+            sb.append(field.repr());
+            sb.append("\n");
+        }
+        for (CallableSymbol sym : getConstructors()) {
+            sb.append(sym.repr());
+            sb.append("\n");
+        }
+        for (CallableSymbol sym : getMethods()) {
+            sb.append(sym.repr());
+            sb.append("\n");
+        }
         return sb.toString();
     }
 }

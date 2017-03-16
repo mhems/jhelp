@@ -76,6 +76,10 @@ public class PrimitiveType implements Type {
         this.annotations = annotations;
     }
 
+    public ClassSymbol getClassSymbol() {
+        return box();
+    }
+
     public ClassSymbol box() {
         return ImportManager.get("java.lang." + primitive.classname);
     }

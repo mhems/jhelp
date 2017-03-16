@@ -6,6 +6,7 @@ import java.util.List;
  * A class representing a Java compilation unit (file)
  */
 public class CompilationUnit extends ASTNode {
+    private String filename;
     private PackageStatement pkg;
     private List<ImportStatement> imports;
     private List<BodyDeclaration> bodies;
@@ -23,6 +24,14 @@ public class CompilationUnit extends ASTNode {
         this.pkg = pkg;
         this.imports = imports;
         this.bodies = bodies;
+    }
+
+    public void setFilename(String name) {
+        this.filename = name;
+    }
+
+    public String getFilename() {
+        return filename;
     }
 
     /**

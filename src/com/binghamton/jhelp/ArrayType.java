@@ -66,4 +66,8 @@ public class ArrayType implements Type {
     public Type erase() {
         return base.erase();
     }
+
+    public ClassSymbol getClassSymbol() {
+        return base.getClassSymbol();
+    }
 }

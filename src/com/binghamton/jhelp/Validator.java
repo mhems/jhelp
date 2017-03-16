@@ -1,5 +1,6 @@
 package com.binghamton.jhelp;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,11 +26,11 @@ public interface Validator {
     }
 
     /**
-     * Validates the filenames or their contents on some criterion
-     * @param filenames the names of the files to validate
+     * Validates the files on some criterion
+     * @param files the  the files to validate
      * @return a List of JHelpErrors, if any, that occured during validation
      */
-    List<JHelpError> validate(String[] filenames);
+    List<JHelpError> validate(File[] files);
 
     /**
      * Signifies if any errors this Validator produces are fatal

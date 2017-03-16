@@ -31,6 +31,10 @@ public class TypeVariable implements Type {
         this.bounds = bounds;
     }
 
+    public ClassSymbol getClassSymbol() {
+        return bounds[0].getClassSymbol(); // TODO lub
+    }
+
     public String getName() {
         return name;
     }

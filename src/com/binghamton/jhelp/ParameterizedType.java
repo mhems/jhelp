@@ -5,6 +5,7 @@ import java.util.Arrays;
 import com.binghamton.jhelp.util.StringUtils;
 
 public class ParameterizedType implements Type {
+    private AnnotationSymbol[] annotations = {};
     private Type wrapped;
     private Type[] params;
 
@@ -31,11 +32,11 @@ public class ParameterizedType implements Type {
     }
 
     public AnnotationSymbol[] getAnnotations() {
-        return wrapped.getAnnotations(); // TODO correct or return empty array?
+        return annotations;
     }
 
     public void setAnnotations(AnnotationSymbol[] annotations) {
-        wrapped.setAnnotations(annotations); // TODO correct or no-op?
+        this.annotations = annotations;
     }
 
     public String getTypeName() {
@@ -46,6 +47,10 @@ public class ParameterizedType implements Type {
         }
         sb.append(">");
         return sb.toString();
+    }
+
+    public ClassSymbol getClassSymbol() {
+        return wrapped.getClassSymbol();
     }
 
     public Type getWrappedType() {

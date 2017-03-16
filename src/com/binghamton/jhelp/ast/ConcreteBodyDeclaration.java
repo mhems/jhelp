@@ -138,6 +138,16 @@ public abstract class ConcreteBodyDeclaration extends BodyDeclaration {
         staticInitializers.add(init);
     }
 
+    public boolean isEmpty() {
+        return getFields().isEmpty() &&
+            getInnerBodies().isEmpty() &&
+            getInnerInterfaces().isEmpty() &&
+            getStaticInitializers().isEmpty() &&
+            getInstanceInitializers().isEmpty() &&
+            getMethods().isEmpty() &&
+            getConstructors().isEmpty();
+    }
+
     /**
      * Double dispatch this class on parameter
      * @param v the visitor to accept
