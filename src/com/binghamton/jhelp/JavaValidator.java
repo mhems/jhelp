@@ -44,7 +44,6 @@ public class JavaValidator implements Validator {
         try {
             Program program = new Program();
             for (File file : files) {
-                System.out.println("validating file " + file);
                 input = new ANTLRFileStream(file.getAbsolutePath());
                 lexer = new Java8Lexer(input);
                 stream = new CommonTokenStream(lexer);
@@ -63,24 +62,25 @@ public class JavaValidator implements Validator {
                     program.addCompilationUnit(cu);
                 }
             }
-                    System.out.println("---------- PACKAGE ----------");
-                    visitor = new PackageLevelVisitor(program);
+            System.out.println("---------- PACKAGE ----------");
+            visitor = new PackageLevelVisitor(program);
 
-                    System.out.println("---------- TOP ----------");
-                    visitor = new TopLevelVisitor(program);
+            System.out.println("---------- TOP ----------");
+            visitor = new TopLevelVisitor(program);
 
-                    // System.out.println("---------- BODY ----------");
-                    // visitor = new BodyLevelVisitor(program);
+            System.out.println("---------- BODY ----------");
+            visitor = new BodyLevelVisitor(program);
 
-                    // System.out.println("---------- CODE ----------");
-                    // visitor = new CodeLevelVisitor(program);
+            // System.out.println("---------- CODE ----------");
+            // visitor = new CodeLevelVisitor(program);
 
-                    System.out.println(">>>>>>>>>>>>>>>>>>>>");
-                    for (Package p : program.getPackages()) {
-                        System.out.println(p.repr());
-                        System.out.println();
-                    }
-                    System.out.println("<<<<<<<<<<<<<<<<<<<<");
+            System.out.println(">>>>>>>>>>>>>>>>>>>>");
+            for (Package p : program.getPackages()) {
+                System.out.println(p.repr());
+                System.out.println();
+            }
+            System.out.println("<<<<<<<<<<<<<<<<<<<<");
+
         } catch (IOException e) {
             errors.add(new ExceptionError(e));
         }

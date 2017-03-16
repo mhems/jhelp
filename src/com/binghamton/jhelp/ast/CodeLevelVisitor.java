@@ -7,13 +7,10 @@ import com.binghamton.jhelp.Program;
  * The code (lowest) level Visitor for visiting each line of code contained
  * within all declarations.
  */
-public class  CodeLevelVisitor extends EmptyVisitor {
-
-    private Package pkg = Package.DEFAULT_PACKAGE;
-    private Program program;
+public class CodeLevelVisitor extends BodyLevelVisitor {
 
     public CodeLevelVisitor(Program program) {
-        this.program = program;
+        super(program);
     }
 
 }

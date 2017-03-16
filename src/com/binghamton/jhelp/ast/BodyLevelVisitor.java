@@ -1,8 +1,16 @@
 package com.binghamton.jhelp.ast;
 
+import java.util.List;
+
+import com.binghamton.jhelp.ConstructorSymbol;
+import com.binghamton.jhelp.MethodSymbol;
+import com.binghamton.jhelp.MyMethodSymbol;
+import com.binghamton.jhelp.MyConstructorSymbol;
+import com.binghamton.jhelp.MyClassSymbol;
+import com.binghamton.jhelp.MyVariableSymbol;
 import com.binghamton.jhelp.Package;
 import com.binghamton.jhelp.Program;
-import com.binghamton.jhelp.MyClassSymbol;
+import com.binghamton.jhelp.VariableSymbol;
 
 /**
  * The body level Visitor for visiting the member declarations contained within
@@ -21,9 +29,18 @@ public class BodyLevelVisitor extends TopLevelVisitor {
     public void visit(BodyDeclaration ast) {
         currentClass = (MyClassSymbol)ast.getSymbol();
 
+        VariableSymbol[] fields = new VariableSymbol[ast.getFields().size()];
+        int pos = 0;
+        MyVariableSymbol cur;
         for (VariableDeclaration v : ast.getFields()) {
             v.accept(this);
+            cur = (MyVariableSymbol)v.getSymbol();
+            fields[pos] = cur;
+            cur.setDeclaringClass(currentClass);
+            ++pos;
         }
+        currentClass.setFields(fields);
+
         for (ConcreteBodyDeclaration c : ast.getInnerBodies()) {
             c.accept(this);
         }
@@ -37,22 +54,20 @@ public class BodyLevelVisitor extends TopLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(ConcreteBodyDeclaration ast) {
-        // does it have initializers?
+        // TODO does it have initializers?
 
+        ConstructorSymbol[] ctors = new ConstructorSymbol[ast.getConstructors().size()];
+        int pos = 0;
+        MyConstructorSymbol cur;
         for (MethodDeclaration m : ast.getConstructors()) {
             m.accept(this);
+            cur = (MyConstructorSymbol)m.getSymbol();
+            ctors[pos] = cur;
+            cur.setDeclaringClass(currentClass);
+            ++pos;
         }
-        for (MethodDeclaration m : ast.getMethods()) {
-            m.accept(this);
-        }
-    }
 
-    /**
-     * Visit a EnumConstant node
-     * @param ast the AST node being visited
-     */
-    public void visit(EnumConstant ast) {
-
+        currentClass.setMethods(makeMethods(ast.getMethods()));
     }
 
     /**
@@ -70,9 +85,7 @@ public class BodyLevelVisitor extends TopLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(InterfaceDeclaration ast) {
-        for (MethodDeclaration m : ast.getMethods()) {
-            m.accept(this);
-        }
+        currentClass.setMethods(makeMethods(ast.getMethods()));
     }
 
     /**
@@ -80,6 +93,7 @@ public class BodyLevelVisitor extends TopLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(MethodDeclaration ast) {
+        // TODO
         System.out.printf("method '%s'\n", ast.getName().getText());
         System.out.println("  returns ");
         ast.getReturnTypeExpression().accept(this);
@@ -115,8 +129,23 @@ public class BodyLevelVisitor extends TopLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(VariableDeclaration ast) {
+        // TODO
         System.out.printf("declaring variable '%s':\n",
                           ast.getName().getText());
         ast.getExpression().accept(this);
+    }
+
+    private MethodSymbol[] makeMethods(List<MethodDeclaration> methods) {
+        MethodSymbol[] ret = new MethodSymbol[methods.size()];
+        int pos = 0;
+        MyMethodSymbol cur;
+        for (MethodDeclaration m : methods) {
+            m.accept(this);
+            cur = (MyMethodSymbol)m.getSymbol();
+            ret[pos] = cur;
+            cur.setDeclaringClass(currentClass);
+            ++pos;
+        }
+        return ret;
     }
 }
