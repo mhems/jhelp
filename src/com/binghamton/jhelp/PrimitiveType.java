@@ -24,12 +24,21 @@ public class PrimitiveType extends Type {
     public static final PrimitiveType VOID    = new PrimitiveType(Primitive.VOID);
 
     private static final Map<String, Primitive> PRIMITIVE_MAP = new HashMap<>();
+    // key is a subtype of value
+    private static final Map<PrimitiveType, PrimitiveType> SUBTYPE_MAP = new HashMap<>();
     public static final Map<String, PrimitiveType> UNBOX_MAP = new HashMap<>();
 
     static {
         for (Primitive p : Primitive.values()) {
             PRIMITIVE_MAP.put(p.name, p);
         }
+
+        SUBTYPE_MAP.put(FLOAT, DOUBLE);
+        SUBTYPE_MAP.put(LONG, FLOAT);
+        SUBTYPE_MAP.put(INT, LONG);
+        SUBTYPE_MAP.put(CHAR, INT);
+        SUBTYPE_MAP.put(SHORT, INT);
+        SUBTYPE_MAP.put(BYTE, SHORT);
 
         UNBOX_MAP.put("boolean", BOOLEAN);
         UNBOX_MAP.put("byte", BYTE);
@@ -56,9 +65,7 @@ public class PrimitiveType extends Type {
 
     public boolean equals(Object other) {
         if (other instanceof PrimitiveType) {
-            PrimitiveType type = (PrimitiveType)other;
-            return primitive == type.primitive &&
-                Arrays.equals(annotations, type.annotations);
+            return primitive == ((PrimitiveType)other).primitive;
         }
         return false;
     }
@@ -84,7 +91,17 @@ public class PrimitiveType extends Type {
     }
 
     public ClassSymbol getDeclaringClass() {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("a primitive has no declaring class");
+    }
+
+    @Override
+    public boolean isSuperTypeOf(Type other) {
+        if (other instanceof PrimitiveType) {
+            PrimitiveType otherP = (PrimitiveType)other;
+            PrimitiveType superType = SUBTYPE_MAP.get(otherP);
+            return superType != null && this.primitive == superType.primitive;
+        }
+        return false;
     }
 
     private enum Primitive {

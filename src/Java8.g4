@@ -819,15 +819,17 @@ enumConstantList [EnumDeclaration ret]
 enumConstant [EnumDeclaration ret]
     locals [List<Annotation> ans = new ArrayList<>(),
             EnumConstant cons,
-            List<Expression> args = new ArrayList<>()]
+            List<Expression> args = new ArrayList<>(),
+            ConcreteBodyDeclaration body]
     :   (an = annotation {$ans.add($an.ret);})*
         id = Identifier
         ('(' (a = argumentList {$args = $a.ret;})? ')')?
         {
             $cons = new EnumConstant($id, $ans, $args);
+            $body = $cons.getBody();
             $ret.addConstant($cons);
         }
-        (classBody[$cons])?
+        (classBody[$body])?
     ;
 
 enumBodyDeclarations [EnumDeclaration ret]

@@ -13,6 +13,8 @@ public abstract class MethodSymbol extends Symbol {
             kind = SymbolKind.METHOD;
         }
 
+    private MethodType type;
+
     /**
      * Constructs a new named method symbol
      * @param id the name of the method
@@ -42,6 +44,10 @@ public abstract class MethodSymbol extends Symbol {
      */
     public abstract Type[] getParameterTypes();
 
+    public int numParameters() {
+        return getParameterTypes().length;
+    }
+
     public abstract Type[] getExceptionTypes();
 
     public abstract TypeVariable[] getTypeParameters();
@@ -51,43 +57,16 @@ public abstract class MethodSymbol extends Symbol {
     }
 
     public boolean equals(Object other) {
-        if (other instanceof MethodSymbol) {
-            MethodSymbol sym = (MethodSymbol)other;
-            return getName().equals(sym.getName()) &&
-                getDeclaringClass().equals(sym.getDeclaringClass()) &&
-                Arrays.equals(getParameterTypes(),
-                              sym.getParameterTypes());
-        }
-        return false;
+        return other instanceof MethodSymbol &&
+            type.equals(((MethodSymbol)other).type);
     }
 
     public int hashCode() {
-        return getName().hashCode() ^
-            getDeclaringClass().hashCode() ^
-            getParameterTypes().length;
+        return type.hashCode();
     }
 
     public abstract Type getReturnType();
     public abstract boolean isConstructor();
-
-    public String getTypeName() {
-        StringBuilder sb = new StringBuilder();
-        if (hasTypeParameters()) {
-            sb.append("<");
-            sb.append(StringUtils.join(", ",
-                                       getTypeParameters(),
-                                       t -> t.getTypeName()));
-            sb.append(">");
-        }
-        sb.append("(");
-        sb.append(StringUtils.join(", ",
-                                   getParameterTypes(),
-                                   t -> t.getTypeName()));
-        sb.append(")");
-        sb.append(" -> ");
-        sb.append(getReturnType().getTypeName());
-        return sb.toString();
-    }
 
     public String toString() {
         StringBuilder sb = new StringBuilder(getModifiers().toString());
@@ -97,19 +76,7 @@ public abstract class MethodSymbol extends Symbol {
             sb.append(getReturnType().getTypeName());
             sb.append(" ");
         }
-        if (hasTypeParameters()) {
-            sb.append("<");
-            sb.append(StringUtils.join(", ",
-                                       getTypeParameters(),
-                                       t -> t.getTypeName()));
-            sb.append(">");
-        }
-        sb.append(getName());
-        sb.append("(");
-        sb.append(StringUtils.join(", ",
-                                   getParameterTypes(),
-                                   t -> t.getTypeName()));
-        sb.append(")");
+        sb.append(type.toString());
         if (getExceptionTypes().length > 0) {
             sb.append(" throws ");
             sb.append(StringUtils.join(", ",
@@ -117,5 +84,13 @@ public abstract class MethodSymbol extends Symbol {
                                        t -> t.getTypeName()));
         }
         return sb.toString();
+    }
+
+    public void constructType() {
+        type = MethodType.fromMethod(this);
+    }
+
+    public MethodType getType() {
+        return type;
     }
 }

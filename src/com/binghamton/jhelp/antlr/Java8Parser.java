@@ -6236,6 +6236,7 @@ public class Java8Parser extends Parser {
 		public List<Annotation> ans = new ArrayList<>();
 		public EnumConstant cons;
 		public List<Expression> args = new ArrayList<>();
+		public ConcreteBodyDeclaration body;
 		public AnnotationContext an;
 		public Token id;
 		public ArgumentListContext a;
@@ -6309,6 +6310,7 @@ public class Java8Parser extends Parser {
 
 
 			            ((EnumConstantContext)_localctx).cons =  new EnumConstant(((EnumConstantContext)_localctx).id, _localctx.ans, _localctx.args);
+			            ((EnumConstantContext)_localctx).body =  _localctx.cons.getBody();
 			            _localctx.ret.addConstant(_localctx.cons);
 			        
 			setState(1586);
@@ -6317,7 +6319,7 @@ public class Java8Parser extends Parser {
 			if (_la==LBRACE) {
 				{
 				setState(1585);
-				classBody(_localctx.cons);
+				classBody(_localctx.body);
 				}
 			}
 

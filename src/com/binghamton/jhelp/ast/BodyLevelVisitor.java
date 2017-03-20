@@ -44,15 +44,12 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(BodyDeclaration ast) {
-        if (!(ast instanceof EnumConstant)) { // TODO correct?
-            currentClass = ast.getSymbol();
-        }
+        currentClass = ast.getSymbol();
 
         MyVariableSymbol cur;
         for (VariableDeclaration v : ast.getFields()) {
             v.accept(this);
             cur = v.getSymbol();
-            cur.setDeclaringClass(currentClass);
             currentClass.addField(cur);
         }
     }
@@ -82,9 +79,9 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
                                                     new Modifiers(Modifier.PUBLIC,
                                                                   Modifier.STATIC,
                                                                   Modifier.FINAL));
-        ast.setSymbol(var);
         var.setDeclaringClass(currentClass);
         var.setType(currentClass);
+        ast.setSymbol(var);
     }
 
     /**
@@ -98,6 +95,7 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
                 System.err.println("enum cannot have two members with same name");
             }
             c.accept(this);
+            currentClass.addField(c.getSymbol());
         }
         visitInnerBodies(ast);
     }
@@ -168,6 +166,7 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
             }
         }
         method.setParameterTypes(paramTypes);
+        method.constructType();
 
         Type[] excTypes = new Type[ast.getExceptions().size()];
         pos = 0;
@@ -241,13 +240,6 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
             var.getModifiers().addModifier(Modifier.STATIC);
             var.getModifiers().addModifier(Modifier.FINAL);
             var.setAccessLevel(Symbol.AccessLevel.PUBLIC);
-        }
-
-        for (VariableSymbol field : currentClass.getFields()) {
-            if (field.getName().equals(ast.getName().getText())) {
-                System.err.println("field already exists");
-                return;
-            }
         }
     }
 

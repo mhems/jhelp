@@ -6,12 +6,14 @@ import java.util.List;
 import org.antlr.v4.runtime.Token;
 
 import com.binghamton.jhelp.Modifier;
+import com.binghamton.jhelp.MyVariableSymbol;
 
 /**
  * A class representing a constant in a Java enum
  */
-public class EnumConstant extends ConcreteBodyDeclaration {
+public class EnumConstant extends Declaration {
     private List<Expression> arguments;
+    private ConcreteBodyDeclaration body = new ClassDeclaration();
 
     /**
      * Construct an enum constant
@@ -22,9 +24,20 @@ public class EnumConstant extends ConcreteBodyDeclaration {
     public EnumConstant(Token name,
                         List<Annotation> annotations,
                         List<Expression> arguments) {
-        super(name, name, new ArrayList<Modifier>(),
-              annotations, new ArrayList<>());
+        super(name, name, new ArrayList<Modifier>(), annotations);
         this.arguments = arguments;
+    }
+
+    public ConcreteBodyDeclaration getBody() {
+        return body;
+    }
+
+    public MyVariableSymbol getSymbol() {
+        return (MyVariableSymbol)sym;
+    }
+
+    public boolean isEmpty() {
+        return body.isEmpty();
     }
 
     /**
