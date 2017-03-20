@@ -62,10 +62,11 @@ public class JavaValidator implements Validator {
                     program.addCompilationUnit(cu);
                 }
             }
-            System.out.println("---------- PACKAGE ----------");
+            System.out.println("---------- FILE ----------");
             visitor = new FileLevelVisitor(program);
+            // System.out.println(program.getPackage("foo.bar.baz").repr());
 
-            System.out.println("---------- TOP ----------");
+            System.out.println("---------- DECLARATION ----------");
             visitor = new DeclarationLevelVisitor(program);
 
             System.out.println("---------- BODY ----------");

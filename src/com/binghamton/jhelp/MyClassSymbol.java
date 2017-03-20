@@ -3,18 +3,9 @@ package com.binghamton.jhelp;
 import org.antlr.v4.runtime.Token;
 
 public class MyClassSymbol extends ClassSymbol {
-    public enum ClassKind {CLASS, INTERFACE, ENUM, ANNOTATION};
-
     private ClassKind classKind;
     private Type superClass = null;
-    private Type[] implementees = {};
     private ClassSymbol declarer;
-    private ClassSymbol[] innerClasses = {};
-    private VariableSymbol[] fields = {};
-    private MethodSymbol[] methods = {};
-    private ConstructorSymbol[] ctors = {};
-    private TypeVariable[] params = {};
-    private ImportManager importer;
     private boolean anonymous = false;
     private boolean inner = false;
     private Package pkg = Package.DEFAULT_PACKAGE;
@@ -34,84 +25,107 @@ public class MyClassSymbol extends ClassSymbol {
         return token;
     }
 
-    public ClassSymbol getDeclaringClass() {
-        return declarer;
+    public void enterMethodScope(TypeVariable[] vars) {
+        params.enterScope();
+        params.putAll(vars);
+    }
+
+    public void exitMethodScope() {
+        params.exitScope();
+    }
+
+    public boolean isEnum() { return classKind == ClassKind.ENUM; }
+
+    public boolean isClass() { return classKind == ClassKind.CLASS; }
+
+    public boolean isInterface() { return classKind == ClassKind.INTERFACE; }
+
+    public boolean isAnnotation() { return classKind == ClassKind.ANNOTATION; }
+
+    public boolean isAnonymous() { return anonymous; }
+
+    public void setAnonymous(boolean anonymous) { this.anonymous = anonymous; }
+
+    public boolean isInnerClass() { return inner; }
+
+    public Type getType(String name) {
+        Type ret = null;
+        ret = params.get(name);
+        if (ret == null) {
+            ret = innerClasses.get(name);
+            if (ret == null) {
+                if (declarer != null) {
+                    ret = ((MyClassSymbol)declarer).getType(name);
+                }
+                if (ret == null) {
+                    ret = pkg.getClassTable().get(name);
+                    if (ret == null) {
+                        ret = importedTypes.get(name);
+                    }
+                }
+            }
+        }
+        return ret;
+    }
+
+    public void setInnerClass(boolean inner) {
+        this.inner = inner;
+    }
+
+    public boolean addInterface(Type sym) {
+        if (!interfaces.put(sym)) {
+            System.err.println("class cannot implement same interface twice");
+            return false;
+        }
+        return true;
+    }
+
+    public boolean addMethod(MethodSymbol sym) {
+        if (!methods.put(sym)) {
+            System.err.println("class cannot declare same method twice");
+            return false;
+        }
+        return true;
+    }
+
+    public boolean addConstructor(MethodSymbol sym) {
+        if (!ctors.put(sym)) {
+            System.err.println("class cannot declare same constructor twice");
+            return false;
+        }
+        return true;
+    }
+
+    public boolean addField(VariableSymbol sym) {
+        if (!fields.put(sym)) {
+            System.err.println("class cannot declare same field twice");
+            return false;
+        }
+        return true;
+    }
+
+    public boolean addTypeParameter(TypeVariable sym) {
+        if (!params.put(sym)) {
+            System.err.println("class cannot declare same type variable twice");
+            return false;
+        }
+        return true;
+    }
+
+    public boolean addInnerClass(MyClassSymbol sym) {
+        if (!innerClasses.put(sym)) {
+            System.err.println("class cannot declare same inner class twice");
+            return false;
+        }
+        return true;
+    }
+
+    public void setSuperClass(Type cls) {
+        this.superClass = cls;
     }
 
     public void setDeclaringClass(ClassSymbol cls) {
         declarer = cls;
-    }
-
-    public Type[] getInterfaces() {
-        return implementees;
-    }
-
-    public MethodSymbol[] getMethods() {
-        return methods;
-    }
-    public ConstructorSymbol[] getConstructors() {
-        return ctors;
-    }
-
-    public VariableSymbol[] getFields() {
-        return fields;
-    }
-
-    public void setInterfaces(Type[] interfaces) {
-        implementees = interfaces;
-    }
-
-    public void setMethods(MethodSymbol[] syms) {
-        methods = syms;
-    }
-    public void setConstructors(ConstructorSymbol[] syms) {
-        ctors = syms;
-    }
-
-    public void setFields(VariableSymbol[] syms) {
-        fields = syms;
-    }
-
-    public ClassKind getClassKind() {
-        return classKind;
-    }
-
-    public void setClassKind(ClassKind kind) {
-        classKind = kind;
-    }
-
-    public ImportManager getImportManager() {
-        return importer;
-    }
-
-    public void setImportManager(ImportManager importer) {
-        this.importer = importer;
-    }
-
-    public void setTypeParameters(TypeVariable[] params) {
-        this.params = params;
-    }
-
-    public boolean isEnum() { return classKind == ClassKind.ENUM; }
-    public boolean isClass() { return classKind == ClassKind.CLASS; }
-    public boolean isInterface() { return classKind == ClassKind.INTERFACE; }
-    public boolean isAnnotation() { return classKind == ClassKind.ANNOTATION; }
-    public Type getSuperClass() { return superClass; }
-    public TypeVariable[] getTypeParameters() { return params; }
-    public boolean isAnonymous() { return anonymous; }
-    public void setAnonymous(boolean anonymous) { this.anonymous = anonymous; }
-    public boolean isInnerClass() { return innerClasses.length > 0; }
-
-    public ClassSymbol[] getInnerClasses() {
-        return innerClasses;
-    }
-
-    public void setInnerClasses(ClassSymbol[] classes) {
-        this.innerClasses = classes;
-    }
-
-    public void setSuperClass(Type type) {
-        superClass = type;
     }
 
     public void setSuperClassForEnum() {
@@ -153,7 +167,7 @@ public class MyClassSymbol extends ClassSymbol {
             sb.append(getPackage().getQualifiedName());
             sb.append(".");
         }
-        sb.append(super.getQualifiedName());
+        sb.append(getQualifiedClassName());
         return sb.toString();
     }
 }

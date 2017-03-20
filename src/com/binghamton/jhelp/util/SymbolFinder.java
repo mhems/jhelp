@@ -15,6 +15,12 @@ import java.util.jar.JarFile;
  * A utility class to search for Java classes within a jar file.
  */
 public class SymbolFinder {
+    public static final SymbolFinder EMPTY_FINDER = new SymbolFinder() {
+            public List<String> search(String name) {
+                return EMPTY;
+            }
+        };
+    private static final List<String> EMPTY = new ArrayList<>();
     private static final String EXT = ".class";
     private JarFile rt_jar;
     private Map<String, List<String>> cache = new HashMap<>();
@@ -58,5 +64,9 @@ public class SymbolFinder {
      */
     public List<String> search(String name) {
         return cache.get(name);
+    }
+
+    private SymbolFinder() {
+
     }
 }

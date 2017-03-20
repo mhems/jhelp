@@ -8,11 +8,29 @@ import com.binghamton.jhelp.util.StringUtils;
 /**
  * A base class representing a Java class and its members
  */
-public abstract class ClassSymbol extends Symbol implements Type {
+public abstract class ClassSymbol extends Type {
+    public enum ClassKind {CLASS, INTERFACE, ENUM, ANNOTATION};
 
         {
             kind = SymbolKind.CLASS;
         }
+
+    protected ClassKind classKind;
+    protected Type superClass = null;
+    protected ClassSymbol declarer;
+
+    // this holds type variables, classes, imports, and links to
+    // links to parent class' type symbol table
+    // links to package symbols
+    // eventually links to root importer representing java.lang.* and primitive types
+    // protected SymbolTable<ClassSymbol> types = new SymbolTable<>();
+    protected SymbolTable<ClassSymbol> importedTypes = new SymbolTable<>();
+    protected SymbolTable<Type> interfaces = new SymbolTable<>();
+    protected SymbolTable<ClassSymbol> innerClasses = new SymbolTable<>();
+    protected SymbolTable<VariableSymbol> fields = new SymbolTable<>();
+    protected SymbolTable<MethodSymbol> methods = new SymbolTable<>();
+    protected SymbolTable<MethodSymbol> ctors = new SymbolTable<>();
+    protected SymbolTable<TypeVariable> params = new SymbolTable<>();
 
     /**
      * Construct a new ClassSymbol
@@ -35,42 +53,85 @@ public abstract class ClassSymbol extends Symbol implements Type {
         super(name, modifiers);
     }
 
-    public abstract Type[] getInterfaces();
-    public abstract Type getSuperClass();
-    public abstract MethodSymbol[] getMethods();
-    public abstract ConstructorSymbol[] getConstructors();
-    public abstract VariableSymbol[] getFields();
-    public abstract ClassSymbol getDeclaringClass();
+    public Type getSuperClass() {
+        return superClass;
+    }
+
+    public ClassSymbol getDeclaringClass() {
+        return declarer;
+    }
+
+    public Type[] getInterfaces() {
+        return interfaces.toArray(new Type[interfaces.size()]);
+    }
+
+    public MethodSymbol[] getMethods() {
+        return methods.toArray(new MethodSymbol[methods.size()]);
+    }
+
+    public MethodSymbol[] getConstructors() {
+        return ctors.toArray(new MethodSymbol[ctors.size()]);
+    }
+
+    public VariableSymbol[] getFields() {
+        return fields.toArray(new VariableSymbol[fields.size()]);
+    }
+
+    public TypeVariable[] getTypeParameters() {
+        return params.toArray(new TypeVariable[params.size()]);
+    }
+
+    public ClassSymbol[] getInnerClasses() {
+        return innerClasses.toArray(new ClassSymbol[innerClasses.size()]);
+    }
+
+    public ClassKind getClassKind() {
+        return classKind;
+    }
+
+    public void setClassKind(ClassKind kind) {
+        classKind = kind;
+    }
+
+    public void setImportedTypes(SymbolTable<ClassSymbol> table) {
+        importedTypes = table;
+    }
+
+    public Type getInterface(String name) {
+        return interfaces.get(name);
+    }
+
+    public ClassSymbol getInnerClass(String name) {
+        return innerClasses.get(name);
+    }
+
+    public VariableSymbol getField(String name) {
+        return fields.get(name);
+    }
+
+    public List<MethodSymbol> getMethods(String name) {
+        return null; // TODO
+    }
+
+    public MethodSymbol getMethod(String name, Type... paramTypes) {
+        return null; // TODO
+    }
+
+    public MethodSymbol getConstructor(Type... paramTypes) {
+        return null; // TODO
+    }
+
+    public TypeVariable getTypeParameter(String name) {
+        return params.get(name);
+    }
+
     public boolean isClassLike() { return isEnum() || isClass(); }
     public abstract boolean isEnum();
     public abstract boolean isClass();
     public boolean isInterfaceLike() { return isInterface() || isAnnotation(); }
     public abstract boolean isInterface();
     public abstract boolean isAnnotation();
-    public abstract TypeVariable[] getTypeParameters();
-
-    public TypeVariable getTypeVariable(String name) {
-        for (TypeVariable var : getTypeParameters()) {
-            if (var.getName().equals(name)) {
-                return var;
-            }
-        }
-        return null;
-    }
-
-    public TypeVariable getTypeVariableInScope(String name) {
-	TypeVariable local = getTypeVariable(name);
-	if (local == null) {
-	    ClassSymbol enc = getDeclaringClass();
-	    if (enc != null) {
-		return enc.getTypeVariableInScope(name);
-	    }
-	}
-	return local;
-    }
-
     public abstract boolean isAnonymous();
-    public abstract ClassSymbol[] getInnerClasses();
     public abstract boolean isInnerClass();
     public abstract boolean isBoxed();
     public abstract PrimitiveType unbox();
@@ -90,7 +151,7 @@ public abstract class ClassSymbol extends Symbol implements Type {
     }
 
     public boolean hasTypeParameters() {
-        return getTypeParameters().length > 0;
+        return params.size() > 0;
     }
 
     public boolean isGeneric() {
@@ -102,10 +163,12 @@ public abstract class ClassSymbol extends Symbol implements Type {
     }
 
     public boolean hasInterfaces() {
-        return getInterfaces().length > 0;
+        return interfaces.size() > 0;
     }
 
-    public String getQualifiedName() {
+    public abstract String getQualifiedName();
+
+    protected String getQualifiedClassName() {
         StringBuilder sb = new StringBuilder();
         {
             List<String> names = new ArrayList<>();
@@ -122,6 +185,10 @@ public abstract class ClassSymbol extends Symbol implements Type {
 
         sb.append(getName());
         return sb.toString();
+    }
+
+    public String getName() {
+        return name;
     }
 
     public String getTypeName() {
@@ -187,11 +254,11 @@ public abstract class ClassSymbol extends Symbol implements Type {
             sb.append(field.repr());
             sb.append("\n");
         }
-        for (CallableSymbol sym : getConstructors()) {
+        for (MethodSymbol sym : getConstructors()) {
             sb.append(sym.repr());
             sb.append("\n");
         }
-        for (CallableSymbol sym : getMethods()) {
+        for (MethodSymbol sym : getMethods()) {
             sb.append(sym.repr());
             sb.append("\n");
         }

@@ -49,6 +49,12 @@ public class ImportStatement extends Statement {
         return nameExpr.getText();
     }
 
+    public String getRightmostIdentifier() {
+        String name = getImportName();
+        return name.substring(name.indexOf('.') + 1);
+    }
+
+
     /**
      * Determines if this import is static
      * @return true iff this import is static

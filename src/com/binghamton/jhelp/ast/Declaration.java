@@ -13,7 +13,7 @@ import com.binghamton.jhelp.Symbol;
  */
 public abstract class Declaration extends Statement {
     protected Token name;
-    protected Modifiers modifiers = new Modifiers();
+    protected Modifiers modifiers = Modifiers.NO_MODIFIERS;
     protected Annotation[] annotations = {};
     protected Symbol sym;
 
@@ -60,9 +60,7 @@ public abstract class Declaration extends Statement {
         this.annotations = annotations.toArray(this.annotations);
     }
 
-    public Symbol getSymbol() {
-        return sym;
-    }
+    public abstract Symbol getSymbol();
 
     public void setSymbol(Symbol sym) {
         this.sym = sym;

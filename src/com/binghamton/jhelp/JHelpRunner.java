@@ -37,7 +37,6 @@ public class JHelpRunner {
             files[i] = new File(args[i]);
         }
         files = expandFiles(files).toArray(new File[files.length]);
-        System.out.println(java.util.Arrays.toString(files));
     }
 
     /**

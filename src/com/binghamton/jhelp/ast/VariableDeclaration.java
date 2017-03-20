@@ -6,13 +6,13 @@ import java.util.List;
 import org.antlr.v4.runtime.Token;
 
 import com.binghamton.jhelp.Modifier;
+import com.binghamton.jhelp.MyVariableSymbol;
 
 /**
  * A class representing a Java variable declaration
  */
 public class VariableDeclaration extends Declaration {
     private Expression expr;
-    private Token name;
     private Expression initializer;
     private boolean receiver = false;
     private Token ellipsis;
@@ -89,7 +89,6 @@ public class VariableDeclaration extends Declaration {
               expr.isNil() ? name : expr.getFirstToken(),
               modifiers,
               annotations);
-        this.name = name;
         this.expr = expr;
         this.initializer = initializer;
     }
@@ -145,6 +144,10 @@ public class VariableDeclaration extends Declaration {
 
     public boolean isVariadic() {
         return ellipsis != null;
+    }
+
+    public MyVariableSymbol getSymbol() {
+        return (MyVariableSymbol)sym;
     }
 
     /**

@@ -6,6 +6,7 @@ import java.util.List;
 import org.antlr.v4.runtime.Token;
 
 import com.binghamton.jhelp.Modifier;
+import com.binghamton.jhelp.MyMethodSymbol;
 
 /**
  * A class representing the declaration of a Java method
@@ -17,6 +18,7 @@ public class MethodDeclaration extends Declaration {
     private List<TypeParameter> typeParams = new ArrayList<>();
     private Block body = new NilBlock();
     private Annotation[] returnTypeAnnotations = {};
+    private boolean constructor = false;
 
     /**
      * Construct a method declaration
@@ -33,7 +35,7 @@ public class MethodDeclaration extends Declaration {
      * @param returnTypeExpr this method's return type
      */
     public void setReturnType(Expression returnTypeExpr) {
-        this.returnType = returnType;
+        this.returnType = returnTypeExpr;
     }
 
     /**
@@ -122,6 +124,18 @@ public class MethodDeclaration extends Declaration {
      */
     public Block getBody() {
         return body;
+    }
+
+    public MyMethodSymbol getSymbol() {
+        return (MyMethodSymbol)sym;
+    }
+
+    public boolean isConstructor() {
+        return constructor;
+    }
+
+    public void setConstructor(boolean constructor) {
+        this.constructor = constructor;
     }
 
     /**

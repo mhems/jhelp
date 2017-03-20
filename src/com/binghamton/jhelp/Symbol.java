@@ -2,37 +2,44 @@ package com.binghamton.jhelp;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedType;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.GenericDeclaration;
-import java.lang.reflect.Method;
 
 /**
  * A class representing the abstract notion of a Java symbol
  * Java symbols include classes, enums, interfaces, methods, and variables
  */
 public abstract class Symbol {
-    public static enum SymbolKind {CLASS, CONSTRUCTOR, METHOD, VARIABLE};
+    public static enum SymbolKind {CLASS, CONSTRUCTOR, METHOD, TYPE, VARIABLE};
     public static enum AccessLevel {PUBLIC, PROTECTED, PACKAGE_PRIVATE, PRIVATE};
 
-    protected static final ClassSymbol[] CLASS_ARRAY = null;
-    protected static final MethodSymbol[] METHOD_ARRAY = null;
-    protected static final ConstructorSymbol[] CONSTRUCTOR_ARRAY = null;
-    protected static final VariableSymbol[] VARIABLE_ARRAY = null;
-
     protected SymbolKind kind;
-    private String name;
+    protected String name;
+    protected AnnotationSymbol[] annotations = {};
     private AccessLevel access;
-    private Modifiers modifiers;
-    private AnnotationSymbol[] annotations;
+    private Modifiers modifiers ;
+
+    public Symbol() {
+        modifiers = Modifiers.NO_MODIFIERS;
+    }
 
     /**
      * Construct a named Symbol with default access and no modifiers
      * @param name the name of the symbol
      */
     public Symbol(String name) {
-        this(name, new Modifiers());
+        this(name, Modifiers.NO_MODIFIERS);
+    }
+
+    public Symbol(String name, AnnotationSymbol[] annotations) {
+        this.name = name;
+        this.annotations = annotations;
+        modifiers = Modifiers.NO_MODIFIERS;
+    }
+
+    public Symbol(AnnotationSymbol[] annotations) {
+        this.annotations = annotations;
+        modifiers = Modifiers.NO_MODIFIERS;
     }
 
     public Symbol(String name, int modifiers) {
@@ -146,42 +153,12 @@ public abstract class Symbol {
         return modifiers.getModifiers().size();
     }
 
+    public abstract ClassSymbol getDeclaringClass();
+
     protected static AnnotationSymbol[] fromAnnotations(Annotation[] annotations) {
         AnnotationSymbol[] syms = new AnnotationSymbol[annotations.length];
         for (int i = 0; i < syms.length; i++) {
             syms[i] = new AnnotationSymbol(annotations[i]);
-        }
-        return syms;
-    }
-
-    protected static ClassSymbol[] fromClasses(Class<?>[] classes) {
-        ClassSymbol[] syms = new ClassSymbol[classes.length];
-        for (int i = 0; i < syms.length; i++) {
-            syms[i] = ReflectedClassSymbol.get(classes[i]);
-        }
-        return syms;
-    }
-
-    protected static MethodSymbol[] fromMethods(Method[] methods) {
-        MethodSymbol[] syms = new MethodSymbol[methods.length];
-        for (int i = 0; i < syms.length; i++) {
-            syms[i] = new ReflectedMethodSymbol(methods[i]);
-        }
-        return syms;
-    }
-
-    protected static ConstructorSymbol[] fromConstructors(Constructor<?>[] ctors) {
-        ConstructorSymbol[] syms = new ConstructorSymbol[ctors.length];
-        for (int i = 0; i < syms.length; i++) {
-            syms[i] = new ReflectedConstructorSymbol(ctors[i]);
-        }
-        return syms;
-    }
-
-    protected static VariableSymbol[] fromFields(Field[] fields) {
-        VariableSymbol[] syms = new VariableSymbol[fields.length];
-        for (int i = 0; i < syms.length; i++) {
-            syms[i] = new ReflectedVariableSymbol(fields[i]);
         }
         return syms;
     }
@@ -217,7 +194,6 @@ public abstract class Symbol {
             java.lang.reflect.ParameterizedType ref = (java.lang.reflect.ParameterizedType)type;
             ret = new ParameterizedType(fromType(ref.getRawType()),
                                         fromTypes(ref.getActualTypeArguments()));
-
         } else if (type instanceof java.lang.reflect.TypeVariable<?>) {
             ret = fromTypeVariable((java.lang.reflect.TypeVariable<?>)type);
         } else if (type instanceof java.lang.reflect.WildcardType) {

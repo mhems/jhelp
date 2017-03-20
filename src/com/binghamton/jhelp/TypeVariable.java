@@ -11,14 +11,11 @@ import com.binghamton.jhelp.util.StringUtils;
 /**
  * A class representing a Java type variable
  */
-public class TypeVariable implements Type {
-    private AnnotationSymbol[] annotations = {};
-    private String name;
+public class TypeVariable extends Type {
     private Type[] bounds = {};
 
     public TypeVariable(String name) {
-        this.name = name;
-        this.bounds = new Type[]{ImportManager.get("java.lang.Object")};
+        this(name, new Type[]{ImportManager.get("java.lang.Object")});
     }
 
     /**
@@ -27,7 +24,7 @@ public class TypeVariable implements Type {
      * @param bounds the bounds of this type
      */
     public TypeVariable(String name, Type[] bounds) {
-        this.name = name;
+        super(name);
         this.bounds = bounds;
     }
 
@@ -35,16 +32,12 @@ public class TypeVariable implements Type {
         return bounds[0].getClassSymbol(); // TODO lub
     }
 
+    public ClassSymbol getDeclaringClass() {
+        throw new UnsupportedOperationException();
+    }
+
     public String getName() {
         return name;
-    }
-
-    public AnnotationSymbol[] getAnnotations() {
-        return annotations;
-    }
-
-    public void setAnnotations(AnnotationSymbol[] annotations) {
-        this.annotations = annotations;
     }
 
     public String getTypeName() {
@@ -62,6 +55,10 @@ public class TypeVariable implements Type {
 
     public Type[] getBounds() {
         return bounds;
+    }
+
+    public void setBounds(Type[] bounds) {
+        this.bounds = bounds;
     }
 
     public boolean equals(Object other) {

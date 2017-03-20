@@ -23,8 +23,4 @@ public class ReflectedVariableSymbol extends VariableSymbol {
     public ClassSymbol getDeclaringClass() {
         return ReflectedClassSymbol.get(field.getDeclaringClass());
     }
-
-    public CallableSymbol getDeclaringCallable() {
-        return null;
-    }
 }

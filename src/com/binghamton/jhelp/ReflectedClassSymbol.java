@@ -1,24 +1,20 @@
 package com.binghamton.jhelp;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+
 public class ReflectedClassSymbol extends ClassSymbol {
     private Class<? extends Object> cls;
-    private ClassSymbol declarer;
-    private ClassSymbol[] inners;
-    private Type superClass;
-    private Type[] interfaces;
-    private MethodSymbol[] methods;
-    private ConstructorSymbol[] ctors;
-    private VariableSymbol[] fields;
-    private TypeVariable[] params;
 
     public static ReflectedClassSymbol get(Class<?> cls) {
-        ReflectedClassSymbol ret = null;
+        ReflectedClassSymbol sym = null;
         try {
-            ret = ImportManager.getOrImport(cls.getName());
-        } catch(ClassNotFoundException e) {
-            System.err.println("FATAL ERROR - could not import " + cls.getName());
+            sym = ImportManager.getOrImport(cls.getName());
+        } catch (ClassNotFoundException e) {
+            System.err.println("could not retrieve existing class " + cls.getName());
         }
-        return ret;
+        return sym;
     }
 
     public ReflectedClassSymbol(Class<? extends Object> cls) {
@@ -31,44 +27,22 @@ public class ReflectedClassSymbol extends ClassSymbol {
             declarer = get(cls.getDeclaringClass());
         }
         if (cls.getAnnotatedSuperclass() != null) {
-
             superClass = fromType(cls.getAnnotatedSuperclass());
         }
-        interfaces = fromTypes(cls.getAnnotatedInterfaces());
-        inners = fromClasses(cls.getDeclaredClasses());
-        methods = fromMethods(cls.getMethods());
-        ctors = fromConstructors(cls.getConstructors());
-        fields = fromFields(cls.getFields());
-        params = fromTypeParameters(cls.getTypeParameters());
-    }
-
-    @Override
-    public Type getSuperClass() {
-        return superClass;
-    }
-
-    public ClassSymbol getDeclaringClass() {
-        return declarer;
-    }
-
-    public ClassSymbol[] getInnerClasses() {
-        return inners;
-    }
-
-    public Type[] getInterfaces() {
-        return interfaces;
-    }
-
-    public MethodSymbol[] getMethods() {
-        return methods;
-    }
-
-    public ConstructorSymbol[] getConstructors() {
-        return ctors;
-    }
-
-    public VariableSymbol[] getFields() {
-        return fields;
+        interfaces.putAll(fromTypes(cls.getAnnotatedInterfaces()));
+        params.putAll(fromTypeParameters(cls.getTypeParameters()));
+        for (Class<?> cur : cls.getDeclaredClasses()) {
+            innerClasses.put(ReflectedClassSymbol.get(cur));
+        }
+        for (Method cur : cls.getMethods()) {
+            methods.put(new ReflectedMethodSymbol(cur));
+        }
+        for (Constructor<?> cur : cls.getConstructors()) {
+            ctors.put(new ReflectedMethodSymbol(cur));
+        }
+        for (Field cur : cls.getFields()) {
+            fields.put(new ReflectedVariableSymbol(cur));
+        }
     }
 
     public boolean isEnum() {
@@ -84,10 +58,6 @@ public class ReflectedClassSymbol extends ClassSymbol {
 
     public boolean isAnnotation() {
         return cls.isAnnotation();
-    }
-
-    public TypeVariable[] getTypeParameters() {
-        return params;
     }
 
     public boolean isAnonymous() {
@@ -119,11 +89,12 @@ public class ReflectedClassSymbol extends ClassSymbol {
 
     public String getQualifiedName() {
         StringBuilder sb = new StringBuilder();
-        if (getPackage() != null) {
-            sb.append(getPackage().getName());
+        String pkgName = getPackageName();
+        if (pkgName.length() > 0) {
+            sb.append(pkgName);
             sb.append(".");
         }
-        sb.append(super.getQualifiedName());
+        sb.append(getQualifiedClassName());
         return sb.toString();
     }
 }

@@ -37,10 +37,6 @@ public abstract class VariableSymbol extends Symbol {
         varKind = kind;
     }
 
-    public abstract ClassSymbol getDeclaringClass();
-
-    public abstract CallableSymbol getDeclaringCallable();
-
     public String toString() {
         StringBuilder sb = new StringBuilder(getModifiers().toString());
         sb.append(" ");

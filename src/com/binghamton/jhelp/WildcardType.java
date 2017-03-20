@@ -2,8 +2,7 @@ package com.binghamton.jhelp;
 
 import java.util.Arrays;
 
-public class WildcardType implements Type {
-    private AnnotationSymbol[] annotations;
+public class WildcardType extends Type {
     private boolean upper;
     private Type bound;
 
@@ -28,19 +27,15 @@ public class WildcardType implements Type {
         return bound.getClassSymbol();
     }
 
+    public ClassSymbol getDeclaringClass() {
+        throw new UnsupportedOperationException();
+    }
+
     public String getTypeName() {
         String ret = "?";
         ret += " " + (upper ? "extends" : "super") + " ";
         ret += bound.getTypeName();
         return ret;
-    }
-
-    public AnnotationSymbol[] getAnnotations() {
-        return annotations;
-    }
-
-    public void setAnnotations(AnnotationSymbol[] annotations) {
-        this.annotations = annotations;
     }
 
     public boolean isUpperBounded() {

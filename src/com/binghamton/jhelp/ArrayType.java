@@ -9,8 +9,7 @@ import org.antlr.v4.runtime.Token;
 /**
  * Class representing an array type
  */
-public class ArrayType implements Type {
-    private AnnotationSymbol[] annotations;
+public class ArrayType extends Type {
     private Type base;
 
     /**
@@ -22,8 +21,8 @@ public class ArrayType implements Type {
     }
 
     public ArrayType(Type base, AnnotationSymbol[] annotations) {
+        super(annotations);
         this.base = base;
-        this.annotations = annotations;
     }
 
     public Type getBaseType() {
@@ -32,18 +31,6 @@ public class ArrayType implements Type {
 
     public String getTypeName() {
         return base.getTypeName() + "[]";
-    }
-
-    public String getName() {
-        return getTypeName();
-    }
-
-    public AnnotationSymbol[] getAnnotations() {
-        return annotations;
-    }
-
-    public void setAnnotations(AnnotationSymbol[] annotations) {
-        this.annotations = annotations;
     }
 
     public int rank() {
@@ -69,5 +56,9 @@ public class ArrayType implements Type {
 
     public ClassSymbol getClassSymbol() {
         return base.getClassSymbol();
+    }
+
+    public ClassSymbol getDeclaringClass() {
+        return base.getDeclaringClass();
     }
 }

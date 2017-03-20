@@ -11,7 +11,7 @@ import org.antlr.v4.runtime.Token;
 /**
  * Class representing valid Java primitive types
  */
-public class PrimitiveType implements Type {
+public class PrimitiveType extends Type {
 
     public static final PrimitiveType BOOLEAN = new PrimitiveType(Primitive.BOOLEAN);
     public static final PrimitiveType BYTE    = new PrimitiveType(Primitive.BYTE);
@@ -44,7 +44,6 @@ public class PrimitiveType implements Type {
 
     private Primitive primitive;
     private Token token;
-    private AnnotationSymbol[] annotations = {};
 
     /**
      * Construct a new primitive type
@@ -53,10 +52,6 @@ public class PrimitiveType implements Type {
     public PrimitiveType(Token primitive) {
         this.token = primitive;
         this.primitive = PRIMITIVE_MAP.get(token.getText());
-    }
-
-    public AnnotationSymbol[] getAnnotations() {
-        return annotations;
     }
 
     public boolean equals(Object other) {
@@ -70,10 +65,6 @@ public class PrimitiveType implements Type {
 
     public int hashCode() {
         return primitive.hashCode();
-    }
-
-    public void setAnnotations(AnnotationSymbol[] annotations) {
-        this.annotations = annotations;
     }
 
     public ClassSymbol getClassSymbol() {
@@ -90,6 +81,10 @@ public class PrimitiveType implements Type {
 
     public String getTypeName() {
         return getName();
+    }
+
+    public ClassSymbol getDeclaringClass() {
+        throw new UnsupportedOperationException();
     }
 
     private enum Primitive {

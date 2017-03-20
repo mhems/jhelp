@@ -1,15 +1,24 @@
 package com.binghamton.jhelp.ast;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
-import com.binghamton.jhelp.ConstructorSymbol;
+import com.binghamton.jhelp.antlr.MyToken;
+import com.binghamton.jhelp.ArrayType;
+import com.binghamton.jhelp.Modifier;
+import com.binghamton.jhelp.Modifiers;
 import com.binghamton.jhelp.MethodSymbol;
 import com.binghamton.jhelp.MyMethodSymbol;
-import com.binghamton.jhelp.MyConstructorSymbol;
 import com.binghamton.jhelp.MyClassSymbol;
 import com.binghamton.jhelp.MyVariableSymbol;
 import com.binghamton.jhelp.Package;
+import com.binghamton.jhelp.PrimitiveType;
 import com.binghamton.jhelp.Program;
+import com.binghamton.jhelp.Symbol;
+import com.binghamton.jhelp.Type;
+import com.binghamton.jhelp.TypeVariable;
 import com.binghamton.jhelp.VariableSymbol;
 
 /**
@@ -17,6 +26,14 @@ import com.binghamton.jhelp.VariableSymbol;
  * body declarations
  */
 public class BodyLevelVisitor extends DeclarationLevelVisitor {
+
+    private static final Modifier[] FORBIDDEN = {Modifier.PRIVATE,
+                                                 Modifier.STATIC,
+                                                 Modifier.FINAL,
+                                                 Modifier.NATIVE,
+                                                 Modifier.STRICT_FP,
+                                                 Modifier.SYNCHRONIZED};
+    private MethodSymbol currentMethod;
 
     public BodyLevelVisitor(Program program) {
         super(program);
@@ -27,25 +44,16 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(BodyDeclaration ast) {
-        currentClass = (MyClassSymbol)ast.getSymbol();
+        if (!(ast instanceof EnumConstant)) { // TODO correct?
+            currentClass = ast.getSymbol();
+        }
 
-        VariableSymbol[] fields = new VariableSymbol[ast.getFields().size()];
-        int pos = 0;
         MyVariableSymbol cur;
         for (VariableDeclaration v : ast.getFields()) {
             v.accept(this);
-            cur = (MyVariableSymbol)v.getSymbol();
-            fields[pos] = cur;
+            cur = v.getSymbol();
             cur.setDeclaringClass(currentClass);
-            ++pos;
-        }
-        currentClass.setFields(fields);
-
-        for (ConcreteBodyDeclaration c : ast.getInnerBodies()) {
-            c.accept(this);
-        }
-        for (AbstractBodyDeclaration a : ast.getInnerInterfaces()) {
-            a.accept(this);
+            currentClass.addField(cur);
         }
     }
 
@@ -54,20 +62,29 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(ConcreteBodyDeclaration ast) {
-        // TODO does it have initializers?
+        addMethods(ast.getMethods());
+    }
 
-        ConstructorSymbol[] ctors = new ConstructorSymbol[ast.getConstructors().size()];
-        int pos = 0;
-        MyConstructorSymbol cur;
-        for (MethodDeclaration m : ast.getConstructors()) {
-            m.accept(this);
-            cur = (MyConstructorSymbol)m.getSymbol();
-            ctors[pos] = cur;
-            cur.setDeclaringClass(currentClass);
-            ++pos;
-        }
+    /**
+     * Visit a ClassDeclaration node
+     * @param ast the AST node being visited
+     */
+    public void visit(ClassDeclaration ast) {
+        visitInnerBodies(ast);
+    }
 
-        currentClass.setMethods(makeMethods(ast.getMethods()));
+    /**
+     * Visit a EnumConstant node
+     * @param ast the AST node being visited
+     */
+    public void visit(EnumConstant ast) {
+        MyVariableSymbol var = new MyVariableSymbol(ast.getName(),
+                                                    new Modifiers(Modifier.PUBLIC,
+                                                                  Modifier.STATIC,
+                                                                  Modifier.FINAL));
+        ast.setSymbol(var);
+        var.setDeclaringClass(currentClass);
+        var.setType(currentClass);
     }
 
     /**
@@ -75,9 +92,14 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(EnumDeclaration ast) {
+        Set<String> memberNames = new HashSet<>();
         for (EnumConstant c : ast.getConstants()) {
+            if (!memberNames.add(c.getName().getText())) {
+                System.err.println("enum cannot have two members with same name");
+            }
             c.accept(this);
         }
+        visitInnerBodies(ast);
     }
 
     /**
@@ -85,7 +107,18 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(InterfaceDeclaration ast) {
-        currentClass.setMethods(makeMethods(ast.getMethods()));
+        addMethods(ast.getMethods());
+        visitInnerBodies(ast);
+    }
+
+    /**
+     * Visit a KeywordExpression node
+     * @param ast the AST node being visited
+     */
+    public void visit(KeywordExpression ast) {
+        Type type = PrimitiveType.UNBOX_MAP.get(ast.getIdentifier().getText());
+        type.setAnnotations(makeAnnotations(ast.getAnnotations()));
+        ast.setType(type);
     }
 
     /**
@@ -93,26 +126,65 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(MethodDeclaration ast) {
-        // TODO
-        System.out.printf("method '%s'\n", ast.getName().getText());
-        System.out.println("  returns ");
-        ast.getReturnTypeExpression().accept(this);
+        MyMethodSymbol method = new MyMethodSymbol(ast.getName(), ast.getModifiers());
+        int pos;
+        ast.setSymbol(method);
+        method.setDeclaringClass(currentClass);
+
+        Modifiers mods = method.getModifiers();
+        if (mods.contains(Modifier.ABSTRACT)) {
+            for (Modifier bad : FORBIDDEN) {
+                if (mods.contains(bad)) {
+                    System.err.println("method cannot both be abstract and " + bad);
+                }
+            }
+            if (!ast.getBody().isNil()) {
+                System.err.println("an abstract method must have no body");
+            }
+        }
+
+        if (currentClass.isClassLike()) {
+            if (ast.getBody().isNil() && !mods.contains(Modifier.ABSTRACT)) {
+                System.err.println("a method with no body must be abstract");
+            }
+        }
+
         if (ast.hasTypeParameters()) {
-            System.out.println("type params:");
-            for (TypeParameter tp : ast.getTypeParameters()) {
-                tp.accept(this);
-            }
+            TypeVariable[] typeParams = makeTypeParameters(ast.getTypeParameters());
+            method.setTypeParameters(typeParams);
+            currentClass.enterMethodScope(typeParams);
         }
-        System.out.println("parameters:");
+        Type[] paramTypes = new Type[ast.getParameters().size()];
+        pos = 0;
         for (VariableDeclaration v : ast.getParameters()) {
-            v.getExpression().accept(this);
-            System.out.println("is receiver ? " + v.isReceiverParameter());
-        }
-        if (ast.getExceptions().size() > 0) {
-            System.out.println("throws:");
-            for (Expression t : ast.getExceptions()) {
-                t.accept(this);
+            if (!v.isReceiverParameter()) {
+                v.accept(this);
+                paramTypes[pos] = v.getSymbol().getType();
+                if (v.isVariadic()) {
+                    method.setVariadic(true);
+                    paramTypes[pos] = new ArrayType(paramTypes[pos]);
+                }
+                ++pos;
             }
+        }
+        method.setParameterTypes(paramTypes);
+
+        Type[] excTypes = new Type[ast.getExceptions().size()];
+        pos = 0;
+        for (Expression ex : ast.getExceptions()) {
+            ex.accept(this);
+            excTypes[pos] = ex.getType();
+            ++pos;
+        }
+        method.setExceptionTypes(excTypes);
+
+        if (ast.isConstructor()) {
+            method.setConstructor(true);
+            method.setReturnType(currentClass);
+        } else {
+            Expression ret = ast.getReturnTypeExpression();
+            ret.accept(this);
+            method.setReturnType(ret.getType());
         }
     }
 
@@ -125,27 +197,71 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
     }
 
     /**
+     * Visit a TypeParameter node
+     * @param ast the AST node being visited
+     */
+    public void visit(TypeParameter ast) {
+        String name = ast.getName();
+        TypeVariable type;
+        if (ast.hasSuperTypes()) {
+            Type[] bounds = new Type[ast.getSuperTypes().size()];
+            int pos = 0;
+            for (Expression rt : ast.getSuperTypes()) {
+                rt.accept(this);
+                bounds[pos] = rt.getType();
+                ++pos;
+            }
+            type = new TypeVariable(name, bounds);
+        } else {
+            type = new TypeVariable(name);
+        }
+        type.setAnnotations(makeAnnotations(ast.getAnnotations()));
+        ast.setType(type);
+    }
+
+    /**
      * Visit a VariableDeclaration node
      * @param ast the AST node being visited
      */
     public void visit(VariableDeclaration ast) {
-        // TODO
-        System.out.printf("declaring variable '%s':\n",
-                          ast.getName().getText());
+        MyVariableSymbol var = new MyVariableSymbol(ast.getName(),
+                                                    ast.getModifiers());
+        ast.setSymbol(var);
+        var.setDeclaringClass(currentClass);
         ast.getExpression().accept(this);
+        var.setType(ast.getExpression().getType());
+
+        if (var.getModifiers().contains(Modifier.FINAL) &&
+            var.getModifiers().contains(Modifier.VOLATILE)) {
+            System.err.println("field cannot both be final and volatile");
+        }
+
+        if (currentClass.isInterfaceLike()) {
+            var.getModifiers().addModifier(Modifier.PUBLIC);
+            var.getModifiers().addModifier(Modifier.STATIC);
+            var.getModifiers().addModifier(Modifier.FINAL);
+            var.setAccessLevel(Symbol.AccessLevel.PUBLIC);
+        }
+
+        for (VariableSymbol field : currentClass.getFields()) {
+            if (field.getName().equals(ast.getName().getText())) {
+                System.err.println("field already exists");
+                return;
+            }
+        }
     }
 
-    private MethodSymbol[] makeMethods(List<MethodDeclaration> methods) {
-        MethodSymbol[] ret = new MethodSymbol[methods.size()];
-        int pos = 0;
+    private void addMethods(List<MethodDeclaration> methods) {
         MyMethodSymbol cur;
         for (MethodDeclaration m : methods) {
             m.accept(this);
-            cur = (MyMethodSymbol)m.getSymbol();
-            ret[pos] = cur;
+            cur = m.getSymbol();
             cur.setDeclaringClass(currentClass);
-            ++pos;
+            if (cur.isConstructor()) {
+                currentClass.addConstructor(cur);
+            } else {
+                currentClass.addMethod(cur);
+            }
         }
-        return ret;
     }
 }

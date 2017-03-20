@@ -9,12 +9,18 @@ import org.antlr.v4.runtime.Token;
 
 import com.binghamton.jhelp.ClassSymbol;
 import com.binghamton.jhelp.ImportManager;
+import com.binghamton.jhelp.ImportingSymbolTable;
 import com.binghamton.jhelp.Modifier;
+import com.binghamton.jhelp.MethodSymbol;
 import com.binghamton.jhelp.MyClassSymbol;
 import com.binghamton.jhelp.Package;
 import com.binghamton.jhelp.Program;
 import com.binghamton.jhelp.ReflectedClassSymbol;
 import com.binghamton.jhelp.Symbol;
+import com.binghamton.jhelp.SymbolTable;
+import com.binghamton.jhelp.Type;
+import com.binghamton.jhelp.TypeVariable;
+import com.binghamton.jhelp.VariableSymbol;
 
 /**
  * The file (highest) level Visitor for visiting packages, imports, and
@@ -34,12 +40,14 @@ import com.binghamton.jhelp.Symbol;
  * - more than one public body per file
  */
 public class FileLevelVisitor extends EmptyVisitor {
-    private ImportManager importer = new ImportManager();
-    private Set<String> bodyNames = new HashSet<>();
-    private Set<String> simpleImportNames = new HashSet<>();
     private String filename;
-    protected Package pkg = Package.DEFAULT_PACKAGE;
+    private ImportingSymbolTable importedClasses;
+    private SymbolTable<MethodSymbol> importedMethods;
+    private SymbolTable<VariableSymbol> importedFields;
+
+    protected Package pkg;
     protected Program program;
+    protected MyClassSymbol currentClass;
 
     protected void visitAll() {
         for (CompilationUnit unit : program.getCompilationUnits()) {
@@ -62,6 +70,15 @@ public class FileLevelVisitor extends EmptyVisitor {
     }
 
     /**
+     * Visit a AnnotationDeclaration node
+     * @param ast the AST node being visited
+     */
+    public void visit(AnnotationDeclaration ast) {
+        ast.getSymbol().setClassKind(MyClassSymbol.ClassKind.ANNOTATION);
+        ast.getSymbol().setSuperClassForAnnotation();
+    }
+
+    /**
      * Visit a BodyDeclaration node
      * @param ast the AST node being visited
      */
@@ -79,53 +96,57 @@ public class FileLevelVisitor extends EmptyVisitor {
         }
 
         MyClassSymbol sym = new MyClassSymbol(ast.getName(), ast.getModifiers());
-        sym.setPackage(pkg);
-        sym.setImportManager(importer);
-        if (ast instanceof AnnotationDeclaration) {
-            sym.setClassKind(MyClassSymbol.ClassKind.ANNOTATION);
-            sym.setSuperClassForAnnotation();
-        } else if (ast instanceof ClassDeclaration) {
-            sym.setClassKind(MyClassSymbol.ClassKind.CLASS);
-            sym.setSuperClassForClass();
-        } else if (ast instanceof EnumDeclaration) {
-            sym.setClassKind(MyClassSymbol.ClassKind.ENUM);
-            sym.setSuperClassForEnum();
-        } else if (ast instanceof InterfaceDeclaration) {
-            sym.setClassKind(MyClassSymbol.ClassKind.INTERFACE);
-        }
+        currentClass = sym;
+        currentClass.setPackage(pkg);
+        ast.setSymbol(sym);
 
         if (!ast.isInnerDeclaration()) {
-            if (!pkg.addClass(sym)) {
+            if (!pkg.addClass(currentClass)) {
                 System.err.println("duplicate declaration of body");
-            } else {
-                bodyNames.add(ast.getName().getText());
             }
         }
-
-        ast.setSymbol(sym);
 
         MyClassSymbol[] innerSyms = new MyClassSymbol[ast.getInnerBodies().size() +
                                                       ast.getInnerInterfaces().size()];
         int pos = 0;
         MyClassSymbol cur;
         for (ConcreteBodyDeclaration c : ast.getInnerBodies()) {
+            currentClass = sym;
             c.setInnerDeclaration(true);
             c.accept(this);
-            cur = (MyClassSymbol)c.getSymbol();
+            cur = c.getSymbol();
             cur.setDeclaringClass(sym);
+            cur.setInnerClass(true);
+            sym.addInnerClass(cur);
             innerSyms[pos] = cur;
             ++pos;
         }
         for (AbstractBodyDeclaration a : ast.getInnerInterfaces()) {
+            currentClass = sym;
             a.setInnerDeclaration(true);
             a.accept(this);
-            cur = (MyClassSymbol)a.getSymbol();
+            cur = a.getSymbol();
             cur.setDeclaringClass(sym);
+            cur.setInnerClass(true);
+            sym.addInnerClass(cur);
             innerSyms[pos] = cur;
             ++pos;
         }
-        if (pos > 0) {
-            sym.setInnerClasses(innerSyms);
+        currentClass = sym;
+    }
+
+    /**
+     * Visit a ClassDeclaration node
+     * @param ast the AST node being visited
+     */
+    public void visit(ClassDeclaration ast) {
+        ast.getSymbol().setClassKind(MyClassSymbol.ClassKind.CLASS);
+        ast.getSymbol().setSuperClassForClass();
+
+        if (ast.hasTypeParameters()) {
+            for (TypeVariable var : makeTypeParameters(ast.getTypeParameters())) {
+                currentClass.addTypeParameter(var);
+            }
         }
     }
 
@@ -134,10 +155,21 @@ public class FileLevelVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(CompilationUnit ast) {
+        pkg = Package.DEFAULT_PACKAGE;
+        importedClasses = new ImportingSymbolTable();
+        importedMethods = new SymbolTable<>();
+        importedFields = new SymbolTable<>();
+
         if (ast.hasPackage()) {
             ast.getPackage().accept(this);
         }
 
+        for (BodyDeclaration decl : ast.getBodyDeclarations()) {
+            decl.accept(this);
+            decl.getSymbol().setImportedTypes(importedClasses);
+        }
+
+        // visit import stmts after classes to check naming conflicts
         if (ast.getImports().size() > 0) {
             for (ImportStatement s : ast.getImports()) {
                 s.accept(this);
@@ -145,16 +177,19 @@ public class FileLevelVisitor extends EmptyVisitor {
             pkg.getClassTable().enterScope();
         }
 
-        for (BodyDeclaration decl : ast.getBodyDeclarations()) {
-            decl.accept(this);
-        }
-        if (!bodyNames.contains(filename)) {
+        if (pkg.getClassTable().get(filename) == null) {
             System.err.printf("file '%s.java' must declare a body with name of this file\n",
                               filename);
         }
+    }
 
-
-
+    /**
+     * Visit a EnumDeclaration node
+     * @param ast the AST node being visited
+     */
+    public void visit(EnumDeclaration ast) {
+        ast.getSymbol().setClassKind(MyClassSymbol.ClassKind.ENUM);
+        ast.getSymbol().setSuperClassForEnum();
     }
 
     /**
@@ -162,21 +197,65 @@ public class FileLevelVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(ImportStatement ast) {
-        // TODO incomplete
-        if (ast.isDemand()) {
-            if (ast.isStatic()) {
-                importer.addOnDemandStaticPackage(ast.getImportName());
-            } else {
-                importer.addOnDemandPackage(ast.getImportName());
+        String name = ast.getImportName();
+        if (ast.isStatic()) {
+            int indexLastSep = name.indexOf('.');
+            String memberName = name.substring(indexLastSep + 1);
+            name = name.substring(0, indexLastSep);
+            ReflectedClassSymbol cls = null;
+            try {
+                cls = ImportManager.getOrImport(name);
+            } catch(ClassNotFoundException e) {
+                System.err.println("static import must name existing class");
+            }
+            if (cls != null) {
+                ClassSymbol[] inners = cls.getInnerClasses();
+                MethodSymbol[] methods = cls.getMethods();
+                VariableSymbol[] fields = cls.getFields();
+                if (ast.isDemand()) { // static import on demand
+                    importedClasses.importStaticMemberOnDemand(inners);
+                    importedMethods.importStaticMemberOnDemand(methods);
+                    importedFields.importStaticMemberOnDemand(fields);
+                } else { // single static import
+                    boolean added = false;
+                    if (importedClasses.importStaticMember(memberName, inners)) {
+                        added = true;
+                        if (pkg.getClassTable().has(memberName)) {
+                            System.err.println("cannot import something with same name as class you've made");
+                        }
+                    }
+                    added |= importedMethods.importStaticMember(memberName,
+                                                                methods);
+                    added |= importedFields.importStaticMember(memberName,
+                                                               fields);
+                    if (!added) {
+                        System.err.println(ast.getText() + " must import at least one member");
+                    }
+                }
             }
         } else {
-            // if (!simpleImportNames.add(ast.getImportName())) {
-            //     System.err.printf("cannot import same simple type");
-            // }
-            try {
-                pkg.getClassTable().put(importer.importSymbol(ast.getImportName()));
-            } catch (ClassNotFoundException e) {
-                System.err.printf("class '%s' not found\n", ast.getImportName());
+            if (ast.isDemand()) { // type import on demand
+                importedClasses.importTypesOnDemand(name);
+            } else { // single type import
+                if (pkg.getClassTable().has(name)) {
+                    System.err.println("cannot import something with same name as class you've made");
+                } else {
+                    importedClasses.importType(name);
+                }
+            }
+        }
+    }
+
+    /**
+     * Visit a InterfaceDeclaration node
+     * @param ast the AST node being visited
+     */
+    public void visit(InterfaceDeclaration ast) {
+        ast.getSymbol().setClassKind(MyClassSymbol.ClassKind.INTERFACE);
+
+        if (ast.hasTypeParameters()) {
+            for (TypeVariable var : makeTypeParameters(ast.getTypeParameters())) {
+                currentClass.addTypeParameter(var);
             }
         }
     }
@@ -205,5 +284,24 @@ public class FileLevelVisitor extends EmptyVisitor {
         }
 
         this.pkg = pkg;
+    }
+
+    /**
+     * Visit a TypeParameter node
+     * @param ast the AST node being visited
+     */
+    public void visit(TypeParameter ast) {
+        String name = ast.getName();
+        TypeVariable type = new TypeVariable(name);
+        ast.setType(type);
+    }
+
+    protected TypeVariable[] makeTypeParameters(List<TypeParameter> params) {
+        TypeVariable[] ret = new TypeVariable[params.size()];
+        for (int i = 0; i < ret.length; i++) {
+            params.get(i).accept(this);
+            ret[i] = params.get(i).getType();
+        }
+        return ret;
     }
 }

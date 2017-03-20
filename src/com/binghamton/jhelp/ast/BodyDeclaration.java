@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import org.antlr.v4.runtime.Token;
 
 import com.binghamton.jhelp.Modifier;
+import com.binghamton.jhelp.MyClassSymbol;
 
 /**
  * An abstract class representing a structure declaration.
@@ -116,6 +117,10 @@ public abstract class BodyDeclaration extends Declaration {
      */
     public int numInnerInterfaces() {
         return innerInterfaces.size();
+    }
+
+    public MyClassSymbol getSymbol() {
+        return (MyClassSymbol)sym;
     }
 
     /**

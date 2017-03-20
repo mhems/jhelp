@@ -12,6 +12,7 @@ import com.binghamton.jhelp.Modifier;
 import com.binghamton.jhelp.Package;
 import com.binghamton.jhelp.ParameterizedType;
 import com.binghamton.jhelp.Program;
+import com.binghamton.jhelp.PrimitiveType;
 import com.binghamton.jhelp.Type;
 import com.binghamton.jhelp.TypeVariable;
 import com.binghamton.jhelp.WildcardType;
@@ -21,8 +22,6 @@ import com.binghamton.jhelp.WildcardType;
  * the symbol table
  */
 public class DeclarationLevelVisitor extends FileLevelVisitor {
-
-    protected MyClassSymbol currentClass;
 
     public DeclarationLevelVisitor(Program program) {
         super(program);
@@ -35,20 +34,33 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
     public void visit(AccessExpression ast) {
         ast.getLHS().accept(this);
 
-        Type parent = ast.getLHS().getType();
-        ClassSymbol sym = parent.getClassSymbol();
+        ClassSymbol sym = ast.getLHS().getType().getClassSymbol();
         Expression rhs = ast.getRHS();
         if (!(rhs instanceof IdentifierExpression)) {
             System.err.println("unknown rhs type: " + ast.getRHS().getText());
             return;
         }
 
+        Type type = null;
         for (ClassSymbol inner : sym.getInnerClasses()) {
             if (inner.getName().equals(rhs.getText())) {
-                ast.setType(inner);
+                type = inner;
                 break;
             }
         }
+        if (type != null) {
+            ast.setType(type);
+        } else {
+            System.err.println("unknown identifier: " + ast.getRHS().getText());
+        }
+    }
+
+    /**
+     * Visit a AnnotationDeclaration node
+     * @param ast the AST node being visited
+     */
+    public void visit(AnnotationDeclaration ast) {
+        visitInnerBodies(ast);
     }
 
     /**
@@ -71,8 +83,7 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(BodyDeclaration ast) {
-        currentClass = (MyClassSymbol)ast.getSymbol();
-
+        currentClass = ast.getSymbol();
         ClassSymbol enclosingSym = currentClass.getDeclaringClass();
         while (enclosingSym != null) {
             if (enclosingSym.getName().equals(currentClass.getName())) {
@@ -80,13 +91,6 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
                 break;
             }
             enclosingSym = enclosingSym.getDeclaringClass();
-        }
-
-        for (ConcreteBodyDeclaration c : ast.getInnerBodies()) {
-            c.accept(this);
-        }
-        for (AbstractBodyDeclaration a : ast.getInnerInterfaces()) {
-            a.accept(this);
         }
     }
 
@@ -96,8 +100,11 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
      */
     public void visit(ClassDeclaration ast) {
         if (ast.hasTypeParameters()) {
-            currentClass.setTypeParameters(makeTypeParameters(ast.getTypeParameters()));
+            for (TypeParameter p : ast.getTypeParameters()) {
+                p.accept(this);
+            }
         }
+
         if (ast.hasSuperClass()) {
             ast.getSuperClass().accept(this);
             ClassSymbol superCls = ast.getSuperClass().getType().getClassSymbol();
@@ -111,6 +118,7 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
                 currentClass.setSuperClass(ast.getSuperClass().getType());
             }
         }
+        visitInnerBodies(ast);
     }
 
     /**
@@ -133,7 +141,7 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
      */
     public void visit(ConcreteBodyDeclaration ast) {
         if (ast.hasSuperInterfaces()) {
-            currentClass.setInterfaces(makeInterfaces(ast.getSuperInterfaces()));
+            addInterfaces(ast.getSuperInterfaces());
         }
     }
 
@@ -157,12 +165,12 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         for (EnumConstant c : ast.getConstants()) {
             if (!c.isEmpty()) {
                 isFinal = false;
-                break;
             }
         }
         if (isFinal) {
             currentClass.getModifiers().addModifier(Modifier.FINAL);
         }
+        visitInnerBodies(ast);
     }
 
     /**
@@ -171,21 +179,15 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
      */
     public void visit(IdentifierExpression ast) {
         String id = ast.getIdentifier().getText();
-        AnnotationSymbol[] anns = makeAnnotations(ast.getAnnotations());
-        ClassSymbol sym = pkg.getClassTable().get(id);
-        if (sym != null) {
-            ast.setType(sym);
+        Type type = currentClass.getType(id);
+        if (type == null) {
+            type = PrimitiveType.UNBOX_MAP.get(id);
+        }
+        if (type != null) {
+            type.setAnnotations(makeAnnotations(ast.getAnnotations()));
+            ast.setType(type);
         } else {
-            try {
-                ast.setType(currentClass.getImportManager().importSymbol(id));
-            } catch (ClassNotFoundException e) {
-                TypeVariable var = currentClass.getTypeVariable(id);
-                if (var != null) {
-                    ast.setType(var);
-                } else {
-                    System.err.println("unknown symbol '" + id + "'");
-                }
-            }
+            System.err.println("unknown symbol '" + id + "'");
         }
     }
 
@@ -195,11 +197,15 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
      */
     public void visit(InterfaceDeclaration ast) {
         if (ast.hasTypeParameters()) {
-            currentClass.setTypeParameters(makeTypeParameters(ast.getTypeParameters()));
+            for (TypeParameter p : ast.getTypeParameters()) {
+                p.accept(this);
+            }
         }
+
         if (ast.hasSuperInterfaces()) {
-            currentClass.setInterfaces(makeInterfaces(ast.getSuperInterfaces()));
+            addInterfaces(ast.getSuperInterfaces());
         }
+        visitInnerBodies(ast);
     }
 
     /**
@@ -258,8 +264,7 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(TypeParameter ast) {
-        String name = ast.getName();
-        TypeVariable type;
+        TypeVariable type = ast.getType();
         if (ast.hasSuperTypes()) {
             Type[] bounds = new Type[ast.getSuperTypes().size()];
             int pos = 0;
@@ -268,40 +273,38 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
                 bounds[pos] = rt.getType();
                 ++pos;
             }
-            type = new TypeVariable(name, bounds);
-        } else {
-            type = new TypeVariable(name);
+            type.setBounds(bounds);
         }
         type.setAnnotations(makeAnnotations(ast.getAnnotations()));
-        ast.setType(type);
     }
 
-    private TypeVariable[] makeTypeParameters(List<TypeParameter> params) {
-        TypeVariable[] ret = new TypeVariable[params.size()];
-        for (int i = 0; i < ret.length; i++) {
-            params.get(i).accept(this);
-            ret[i] = (TypeVariable)params.get(i).getType();
+    protected void visitInnerBodies(BodyDeclaration ast) {
+        MyClassSymbol tmp = currentClass;
+        for (ConcreteBodyDeclaration c : ast.getInnerBodies()) {
+            currentClass = tmp;
+            c.accept(this);
         }
-        return ret;
+        for (AbstractBodyDeclaration a : ast.getInnerInterfaces()) {
+            currentClass = tmp;
+            a.accept(this);
+        }
+        currentClass = tmp;
     }
 
-    private Type[] makeInterfaces(List<Expression> interfaces) {
-        Set<ClassSymbol> set = new HashSet<>();
-        Type[] ret = new Type[interfaces.size()];
-        for (int i = 0; i < ret.length; i++) {
-            interfaces.get(i).accept(this);
-            ret[i] = interfaces.get(i).getType();
-            if (ret[i].getClassSymbol().isClassLike()) {
+    private void addInterfaces(List<Expression> interfaces) {
+        Type cur;
+        for (Expression expr : interfaces) {
+            expr.accept(this);
+            cur = expr.getType();
+            if (cur.getClassSymbol().isClassLike()) {
                 System.err.println("cannot implement a class or enum");
-            }
-            if (!set.add(ret[i].getClassSymbol())) {
-                System.err.println("cannot implement the same interface twice");
+            } else {
+                currentClass.addInterface(cur);
             }
         }
-        return ret;
     }
 
-    private AnnotationSymbol[] makeAnnotations(Annotation[] annotations) {
+    protected AnnotationSymbol[] makeAnnotations(Annotation[] annotations) {
         AnnotationSymbol[] ret = new AnnotationSymbol[annotations.length];
         for (int i = 0; i < ret.length; i++) {
             annotations[i].accept(this);

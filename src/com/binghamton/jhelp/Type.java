@@ -1,32 +1,65 @@
 package com.binghamton.jhelp;
 
 /**
- * An interface representing a Java type
+ * A base class representing a Java type
  */
-public interface Type {
+public abstract class Type extends Symbol {
 
-    AnnotationSymbol[] getAnnotations();
-    void setAnnotations(AnnotationSymbol[] annotations);
-    String getName();
-    String getTypeName();
-    ClassSymbol getClassSymbol();
+        {
+            kind = SymbolKind.TYPE;
+        }
 
 
-    default Type erase() {
+    public abstract String getTypeName();
+    public abstract ClassSymbol getClassSymbol();
+
+    public Type() {
+
+    }
+
+    public Type(String name) {
+        super(name);
+    }
+
+    public Type(String name, AnnotationSymbol[] annotations) {
+        super(name, annotations);
+    }
+
+    public Type(AnnotationSymbol[] annotations) {
+        super(annotations);
+    }
+
+    public Type(String name, int modifiers) {
+        super(name, modifiers);
+    }
+
+    public Type(String name, Modifiers modifiers) {
+        super(name, modifiers);
+    }
+
+    public Type erase() {
         return this;
     }
 
-    default String repr() {
+    public String repr() {
         return getTypeName();
     }
 
-    default int rank() {
+    public int rank() {
         return 0;
     }
 
+    public String getName() {
+        return getTypeName();
+    }
+
+    public String toString() {
+        return getTypeName();
+    }
+
     // For now, until type checking
-    default boolean isEquivalentTo(Type other) { return true; }
-    default boolean isAssignableTo(Type other) { return true; }
-    default boolean isSubTypeOf(Type other) { return true; }
-    default boolean isSuperTypeOf(Type other) { return true; }
+    public boolean isEquivalentTo(Type other) { return true; }
+    public boolean isAssignableTo(Type other) { return true; }
+    public boolean isSubTypeOf(Type other) { return true; }
+    public boolean isSuperTypeOf(Type other) { return true; }
 }

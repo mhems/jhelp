@@ -439,7 +439,7 @@ public class Java8Parser extends Parser {
 	}
 
 	public static class PrimitiveTypeContext extends ParserRuleContext {
-		public IdentifierExpression ret;
+		public KeywordExpression ret;
 		public List<Annotation> anns = new ArrayList<>();
 		public AnnotationContext a;
 		public NumericTypeContext n;
@@ -5559,6 +5559,7 @@ public class Java8Parser extends Parser {
 			}
 			checkModifiers(_localctx.mods);
 			((ConstructorDeclarationContext)_localctx).ret =  new MethodDeclaration(_localctx.mods, _localctx.ans);
+			         _localctx.ret.setConstructor(true);
 			setState(1409);
 			constructorDeclarator(_localctx.ret);
 			setState(1413);

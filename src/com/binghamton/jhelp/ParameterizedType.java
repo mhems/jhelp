@@ -4,19 +4,16 @@ import java.util.Arrays;
 
 import com.binghamton.jhelp.util.StringUtils;
 
-public class ParameterizedType implements Type {
-    private AnnotationSymbol[] annotations = {};
+public class ParameterizedType extends Type {
     private Type wrapped;
     private Type[] params;
 
     public ParameterizedType(Type wrapped, Type parameter) {
-        if (wrapped == null) throw new IllegalArgumentException();
         this.wrapped = wrapped;
         this.params = new Type[]{parameter};
     }
 
     public ParameterizedType(Type wrapped, Type[] parameters) {
-        if (wrapped == null) throw new IllegalArgumentException();
         this.wrapped = wrapped;
         this.params = parameters;
     }
@@ -31,14 +28,6 @@ public class ParameterizedType implements Type {
         return sb.toString();
     }
 
-    public AnnotationSymbol[] getAnnotations() {
-        return annotations;
-    }
-
-    public void setAnnotations(AnnotationSymbol[] annotations) {
-        this.annotations = annotations;
-    }
-
     public String getTypeName() {
         StringBuilder sb = new StringBuilder(wrapped.getTypeName());
         sb.append("<");
@@ -51,6 +40,10 @@ public class ParameterizedType implements Type {
 
     public ClassSymbol getClassSymbol() {
         return wrapped.getClassSymbol();
+    }
+
+    public ClassSymbol getDeclaringClass() {
+        return wrapped.getDeclaringClass();
     }
 
     public Type getWrappedType() {

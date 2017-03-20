@@ -140,12 +140,12 @@ public class Package {
         sb.append("\n");
         sb.append("declares:\n");
         sb.append(classes.repr());
-        sb.append("\n");
-        sb.append("has children: ");
-        for (Package cp : children) {
-            sb.append("  ");
-            sb.append(cp.repr());
-            sb.append("\n");
+        if (hasSubPackages()) {
+            sb.append("\nhas children: \n");
+            for (Package cp : children) {
+                sb.append(cp.repr());
+                sb.append("\n");
+            }
         }
         return sb.toString();
     }

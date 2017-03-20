@@ -117,7 +117,7 @@ type_ returns [Expression ret]
     |   r = referenceType {$ret = $r.ret;}
     ;
 
-primitiveType returns [IdentifierExpression ret]
+primitiveType returns [KeywordExpression ret]
     locals [List<Annotation> anns = new ArrayList<>()]
     :   (a = annotation {$anns.add($a.ret);})* n = numericType
         {$ret = new KeywordExpression($n.ret, $anns);}
@@ -740,7 +740,8 @@ constructorDeclaration returns [MethodDeclaration ret]
             (a = annotation {$ans.add($a.ret);})
         )*
         {checkModifiers($mods);}
-        {$ret = new MethodDeclaration($mods, $ans);}
+        {$ret = new MethodDeclaration($mods, $ans);
+         $ret.setConstructor(true);}
         constructorDeclarator[$ret]
         (t = throws_ {$ret.setExceptions($t.ret);})?
         b = constructorBody {$ret.setBody($b.ret);}

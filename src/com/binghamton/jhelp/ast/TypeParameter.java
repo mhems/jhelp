@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.Type;
+import com.binghamton.jhelp.TypeVariable;
 
 /**
  * A class representing a Java type parameter
@@ -13,7 +13,7 @@ import com.binghamton.jhelp.Type;
 public class TypeParameter extends ASTNode {
     private Token name;
     private List<Expression> superTypes = new ArrayList<>();
-    private Type type;
+    private TypeVariable type;
     private Annotation[] annotations;
 
     /**
@@ -107,11 +107,11 @@ public class TypeParameter extends ASTNode {
         v.visit(this);
     }
 
-    public Type getType() {
+    public TypeVariable getType() {
         return type;
     }
 
-    public void setType(Type type) {
+    public void setType(TypeVariable type) {
         this.type = type;
     }
 }

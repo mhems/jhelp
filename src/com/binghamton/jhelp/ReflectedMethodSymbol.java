@@ -1,9 +1,12 @@
 package com.binghamton.jhelp;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
 public class ReflectedMethodSymbol extends MethodSymbol {
     private Method method;
+    private Constructor<?> ctor;
+    private boolean constructor;
     private Type returnType;
     private TypeVariable[] params;
     private Type[] argTypes;
@@ -12,10 +15,21 @@ public class ReflectedMethodSymbol extends MethodSymbol {
     public ReflectedMethodSymbol(Method method) {
         super(method.getName(), method.getModifiers());
         this.method = method;
+        this.constructor = false;
         returnType = fromType(method.getAnnotatedReturnType());
         params = fromTypeParameters(method.getTypeParameters());
         argTypes = fromTypes(method.getAnnotatedParameterTypes());
         exceptions = fromTypes(method.getAnnotatedExceptionTypes());
+    }
+
+    public ReflectedMethodSymbol(Constructor<?> ctor) {
+        super(ctor.getName(), ctor.getModifiers());
+        this.ctor = ctor;
+        this.constructor = true;
+        returnType = ReflectedClassSymbol.get(ctor.getDeclaringClass());
+        params = fromTypeParameters(ctor.getTypeParameters());
+        argTypes = fromTypes(ctor.getAnnotatedParameterTypes());
+        exceptions = fromTypes(ctor.getAnnotatedExceptionTypes());
     }
 
     public Type getReturnType() {
@@ -40,5 +54,13 @@ public class ReflectedMethodSymbol extends MethodSymbol {
 
     public ClassSymbol getDeclaringClass() {
         return ReflectedClassSymbol.get(method.getDeclaringClass());
+    }
+
+    public boolean isVariadic() {
+        return method.isVarArgs();
+    }
+
+    public boolean isConstructor() {
+        return constructor;
     }
 }

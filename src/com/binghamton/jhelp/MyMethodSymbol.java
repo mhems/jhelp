@@ -4,12 +4,13 @@ import org.antlr.v4.runtime.Token;
 
 public class MyMethodSymbol extends MethodSymbol {
     private ClassSymbol owner;
-    private Type returnType;
-    private VariableSymbol[] params = {};
     private Type[] paramTypes = {};
     private TypeVariable[] typeVars = {};
     private Type[] exceptions = {};
     private Token token;
+    private boolean variadic = false;
+    private Type returnType;
+    private boolean constructor = false;
 
     public MyMethodSymbol(Token token) {
         super(token.getText());
@@ -37,10 +38,6 @@ public class MyMethodSymbol extends MethodSymbol {
         return returnType;
     }
 
-    public VariableSymbol[] getParameters() {
-        return params;
-    }
-
     public Type[] getParameterTypes() {
         return paramTypes;
     }
@@ -53,12 +50,8 @@ public class MyMethodSymbol extends MethodSymbol {
         return typeVars;
     }
 
-    public void setParameters(VariableSymbol[] syms) {
-        params = syms;
-        paramTypes = new Type[syms.length];
-        for (int i = 0; i < paramTypes.length; i++) {
-            paramTypes[i] = syms[i].getType();
-        }
+    public void setParameterTypes(Type[] types) {
+        paramTypes = types;
     }
 
     public void setExceptionTypes(Type[] types) {
@@ -75,5 +68,21 @@ public class MyMethodSymbol extends MethodSymbol {
 
     public void setDeclaringClass(ClassSymbol sym) {
         owner = sym;
+    }
+
+    public boolean isVariadic() {
+        return variadic;
+    }
+
+    public void setVariadic(boolean variadic) {
+        this.variadic = variadic;
+    }
+
+    public boolean isConstructor() {
+        return constructor;
+    }
+
+    public void setConstructor(boolean constructor) {
+        this.constructor = constructor;
     }
 }
