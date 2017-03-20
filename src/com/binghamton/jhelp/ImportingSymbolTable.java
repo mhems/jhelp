@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public class ImportingSymbolTable extends SymbolTable<ClassSymbol> {
+public class ImportingSymbolTable extends NamedSymbolTable<ClassSymbol> {
     private static final ImportingSymbolTable ROOT = new ImportingSymbolTable();
 
     static {

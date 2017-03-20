@@ -14,7 +14,7 @@ public class Package {
         };
 
     private String name;
-    private SymbolTable<ClassSymbol> classes = new SymbolTable<>();
+    private NamedSymbolTable<ClassSymbol> classes = new NamedSymbolTable<>();
     private Package parent;
     private List<Package> children = new ArrayList<>();
     private AnnotationSymbol[] annotations = {};
@@ -70,7 +70,7 @@ public class Package {
         this.annotations = annotations;
     }
 
-    public SymbolTable<ClassSymbol> getClassTable() {
+    public NamedSymbolTable<ClassSymbol> getClassTable() {
         return classes;
     }
 

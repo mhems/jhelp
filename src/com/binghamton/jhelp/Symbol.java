@@ -209,6 +209,8 @@ public abstract class Symbol {
             Class<?> cls = (Class<?>)type;
             if (cls.isPrimitive()) {
                 ret = PrimitiveType.UNBOX_MAP.get(cls.getName());
+            } else if (cls.isArray()) {
+                ret = new ArrayType(fromType(cls.getComponentType()));
             } else {
                 ret = ReflectedClassSymbol.get((Class<?>)type);
             }

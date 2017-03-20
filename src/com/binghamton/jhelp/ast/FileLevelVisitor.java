@@ -10,6 +10,8 @@ import org.antlr.v4.runtime.Token;
 import com.binghamton.jhelp.ClassSymbol;
 import com.binghamton.jhelp.ImportManager;
 import com.binghamton.jhelp.ImportingSymbolTable;
+import com.binghamton.jhelp.NamedSymbolTable;
+import com.binghamton.jhelp.MethodSymbolTable;
 import com.binghamton.jhelp.Modifier;
 import com.binghamton.jhelp.MethodSymbol;
 import com.binghamton.jhelp.MyClassSymbol;
@@ -42,8 +44,8 @@ import com.binghamton.jhelp.VariableSymbol;
 public class FileLevelVisitor extends EmptyVisitor {
     private String filename;
     private ImportingSymbolTable importedClasses;
-    private SymbolTable<MethodSymbol> importedMethods;
-    private SymbolTable<VariableSymbol> importedFields;
+    private MethodSymbolTable importedMethods;
+    private NamedSymbolTable<VariableSymbol> importedFields;
 
     protected Package pkg;
     protected Program program;
@@ -157,8 +159,8 @@ public class FileLevelVisitor extends EmptyVisitor {
     public void visit(CompilationUnit ast) {
         pkg = Package.DEFAULT_PACKAGE;
         importedClasses = new ImportingSymbolTable();
-        importedMethods = new SymbolTable<>();
-        importedFields = new SymbolTable<>();
+        importedMethods = new MethodSymbolTable();
+        importedFields = new NamedSymbolTable<>();
 
         if (ast.hasPackage()) {
             ast.getPackage().accept(this);

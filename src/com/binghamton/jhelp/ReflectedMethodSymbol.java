@@ -1,11 +1,13 @@
 package com.binghamton.jhelp;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 
 public class ReflectedMethodSymbol extends MethodSymbol {
     private Method method;
     private Constructor<?> ctor;
+    private Executable exe;
     private boolean constructor;
     private Type returnType;
     private TypeVariable[] params;
@@ -16,20 +18,24 @@ public class ReflectedMethodSymbol extends MethodSymbol {
         super(method.getName(), method.getModifiers());
         this.method = method;
         this.constructor = false;
+        exe = this.method;
         returnType = fromType(method.getAnnotatedReturnType());
         params = fromTypeParameters(method.getTypeParameters());
         argTypes = fromTypes(method.getAnnotatedParameterTypes());
         exceptions = fromTypes(method.getAnnotatedExceptionTypes());
+        constructType();
     }
 
     public ReflectedMethodSymbol(Constructor<?> ctor) {
         super(ctor.getName(), ctor.getModifiers());
         this.ctor = ctor;
         this.constructor = true;
+        exe = this.ctor;
         returnType = ReflectedClassSymbol.get(ctor.getDeclaringClass());
         params = fromTypeParameters(ctor.getTypeParameters());
         argTypes = fromTypes(ctor.getAnnotatedParameterTypes());
         exceptions = fromTypes(ctor.getAnnotatedExceptionTypes());
+        constructType();
     }
 
     public Type getReturnType() {
@@ -41,7 +47,7 @@ public class ReflectedMethodSymbol extends MethodSymbol {
      * @return the formal parameters of this method
      */
     public Type[] getParameterTypes() {
-        return params;
+        return argTypes;
     }
 
     public Type[] getExceptionTypes() {
@@ -53,7 +59,7 @@ public class ReflectedMethodSymbol extends MethodSymbol {
     }
 
     public ClassSymbol getDeclaringClass() {
-        return ReflectedClassSymbol.get(method.getDeclaringClass());
+        return ReflectedClassSymbol.get(exe.getDeclaringClass());
     }
 
     public boolean isVariadic() {

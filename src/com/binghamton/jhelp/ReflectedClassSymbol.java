@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 
 public class ReflectedClassSymbol extends ClassSymbol {
     private Class<? extends Object> cls;
+    private String pkgName;
 
     public static ReflectedClassSymbol get(Class<?> cls) {
         ReflectedClassSymbol sym = null;
@@ -20,6 +21,8 @@ public class ReflectedClassSymbol extends ClassSymbol {
     public ReflectedClassSymbol(Class<? extends Object> cls) {
         super(cls.getSimpleName(), cls.getModifiers());
         this.cls = cls;
+        String name = cls.getName();
+        pkgName = name.substring(0, name.lastIndexOf('.'));
     }
 
     public void init() {
@@ -34,13 +37,17 @@ public class ReflectedClassSymbol extends ClassSymbol {
         for (Class<?> cur : cls.getDeclaredClasses()) {
             innerClasses.put(ReflectedClassSymbol.get(cur));
         }
-        for (Method cur : cls.getMethods()) {
-            methods.put(new ReflectedMethodSymbol(cur));
+        for (Method cur : cls.getDeclaredMethods()) {
+            if (!cur.isSynthetic() && !cur.isBridge()) {
+                methods.put(new ReflectedMethodSymbol(cur));
+            }
         }
-        for (Constructor<?> cur : cls.getConstructors()) {
-            ctors.put(new ReflectedMethodSymbol(cur));
+        for (Constructor<?> cur : cls.getDeclaredConstructors()) {
+            if (!cur.isSynthetic()) {
+                ctors.put(new ReflectedMethodSymbol(cur));
+            }
         }
-        for (Field cur : cls.getFields()) {
+        for (Field cur : cls.getDeclaredFields()) {
             fields.put(new ReflectedVariableSymbol(cur));
         }
     }
@@ -69,7 +76,7 @@ public class ReflectedClassSymbol extends ClassSymbol {
     }
 
     public String getPackageName() {
-        return cls.getPackage().getName();
+        return pkgName;
     }
 
     public Package getPackage() {

@@ -19,18 +19,13 @@ public abstract class ClassSymbol extends Type {
     protected Type superClass = null;
     protected ClassSymbol declarer;
 
-    // this holds type variables, classes, imports, and links to
-    // links to parent class' type symbol table
-    // links to package symbols
-    // eventually links to root importer representing java.lang.* and primitive types
-    // protected SymbolTable<ClassSymbol> types = new SymbolTable<>();
-    protected SymbolTable<ClassSymbol> importedTypes = new SymbolTable<>();
-    protected SymbolTable<Type> interfaces = new SymbolTable<>();
-    protected SymbolTable<ClassSymbol> innerClasses = new SymbolTable<>();
-    protected SymbolTable<VariableSymbol> fields = new SymbolTable<>();
-    protected SymbolTable<MethodSymbol> methods = new SymbolTable<>();
-    protected SymbolTable<MethodSymbol> ctors = new SymbolTable<>();
-    protected SymbolTable<TypeVariable> params = new SymbolTable<>();
+    protected ImportingSymbolTable importedTypes = new ImportingSymbolTable();
+    protected NamedSymbolTable<Type> interfaces = new NamedSymbolTable<>();
+    protected NamedSymbolTable<ClassSymbol> innerClasses = new NamedSymbolTable<>();
+    protected NamedSymbolTable<VariableSymbol> fields = new NamedSymbolTable<>();
+    protected MethodSymbolTable methods = new MethodSymbolTable();
+    protected MethodSymbolTable ctors = new MethodSymbolTable();
+    protected NamedSymbolTable<TypeVariable> params = new NamedSymbolTable<>();
 
     /**
      * Construct a new ClassSymbol
@@ -93,7 +88,7 @@ public abstract class ClassSymbol extends Type {
         classKind = kind;
     }
 
-    public void setImportedTypes(SymbolTable<ClassSymbol> table) {
+    public void setImportedTypes(ImportingSymbolTable table) {
         importedTypes = table;
     }
 
