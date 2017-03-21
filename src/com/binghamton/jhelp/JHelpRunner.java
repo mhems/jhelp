@@ -36,7 +36,7 @@ public class JHelpRunner {
         for (int i = 0; i < files.length; i++) {
             files[i] = new File(args[i]);
         }
-        files = expandFiles(files).toArray(new File[files.length]);
+        files = expandFiles(files).toArray(new File[0]);
     }
 
     /**
@@ -87,10 +87,12 @@ public class JHelpRunner {
     private static List<File> expandFiles(File[] files) {
         List<File> ret = new ArrayList<>();
         for (File file : files) {
-            if (file.isDirectory()) {
-                ret.addAll(expandFiles(file.listFiles()));
-            } else if (file.getName().endsWith(".java")) {
-                ret.add(file);
+            if (file.exists()) {
+                if (file.isDirectory()) {
+                    ret.addAll(expandFiles(file.listFiles()));
+                } else if (file.getName().endsWith(".java")) {
+                    ret.add(file);
+                }
             }
         }
         return ret;

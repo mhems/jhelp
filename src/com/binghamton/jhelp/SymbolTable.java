@@ -44,9 +44,9 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
     }
 
     /**
-     * Looks for the Symbol with name `name` in this SymbolTable.
-     * @param name the name of the Symbol to retrieve
-     * @return the Symbol whose name is `name` if one exists,
+     * Looks for a Symbol by key in this SymbolTable.
+     * @param key the key to use to retrieve the Symbol
+     * @return the Symbol represented by the key, if one exists,
      *         otherwise null
      */
     public V get(K key) {
@@ -77,7 +77,6 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
     public boolean put(V symbol) {
         K key = valueToKey.apply(symbol);
         if (isDeclaredInCurrentScope(key)) {
-            // System.out.println(repr());
             System.err.println("table put failed (class " + symbol.getDeclaringClass().getName() + ") - " + symbol.getName() + " already exists in current scope");
             return false;
         }
@@ -95,7 +94,7 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
 
     /**
      * Determines if a Symbol exists anywhere in this SymbolTable.
-     * @param name the name of the Symbol to search for
+     * @param key the key of the Symbol to search for
      * @return true iff the Symbol exists at any scope in this SymbolTable,
      *         false otherwise
      */
@@ -105,7 +104,7 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
 
     /**
      * Determines if a Symbol exists in current scope in this SymbolTable.
-     * @param name the name of the Symbol to search for
+     * @param key the key of the Symbol to search for
      * @return true iff the Symbol exists in current scope in this SymbolTable,
      *         false otherwise
      */
@@ -210,7 +209,7 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
     public boolean importStaticMember(String memberName, V[] members) {
         boolean added = false;
         for (V member : members) {
-            if (member.getModifiers().contains(Modifier.STATIC) &&
+            if (member.hasModifier(Modifier.STATIC) &&
                 member.getName().equals(memberName)) {
                 added = true;
                 if (!put(member)) {
@@ -224,7 +223,7 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
 
     public boolean importStaticMemberOnDemand(V[] members) {
         for (V member : members) {
-            if (member.getModifiers().contains(Modifier.STATIC)) {
+            if (member.hasModifier(Modifier.STATIC)) {
                 if (!put(member)) {
                     System.err.println("cannot import two members with same name");
                     return false;

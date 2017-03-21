@@ -7349,7 +7349,7 @@ public class Java8Parser extends Parser {
 				{
 				setState(1751);
 				((AnnotationTypeMemberDeclarationContext)_localctx).a = annotationTypeElementDeclaration();
-				_localctx.ret.addField(((AnnotationTypeMemberDeclarationContext)_localctx).a.ret);
+				_localctx.ret.addMethod(((AnnotationTypeMemberDeclarationContext)_localctx).a.ret);
 				}
 				break;
 			case 2:
@@ -7396,7 +7396,7 @@ public class Java8Parser extends Parser {
 	}
 
 	public static class AnnotationTypeElementDeclarationContext extends ParserRuleContext {
-		public VariableDeclaration ret;
+		public MethodDeclaration ret;
 		public List<Modifier> mods = new ArrayList<>();
 		public List<Dimension> ls = new ArrayList<>();
 		public Expression expr = new NilExpression();
@@ -7516,8 +7516,10 @@ public class Java8Parser extends Parser {
 			            if (_localctx.ls.size() > 0) {
 			                ((AnnotationTypeElementDeclarationContext)_localctx).type =  new ArrayTypeExpression(_localctx.type, _localctx.ls);
 			            }
-			            ((AnnotationTypeElementDeclarationContext)_localctx).ret =  new VariableDeclaration(((AnnotationTypeElementDeclarationContext)_localctx).id, _localctx.type,
-			                                           _localctx.mods, _localctx.ans, _localctx.expr);
+			            ((AnnotationTypeElementDeclarationContext)_localctx).ret =  new MethodDeclaration(_localctx.mods, _localctx.ans);
+			            _localctx.ret.setName(((AnnotationTypeElementDeclarationContext)_localctx).id);
+			            _localctx.ret.setReturnType(_localctx.type);
+			            _localctx.ret.setBody(new Block(_localctx.expr));
 			        
 			}
 		}

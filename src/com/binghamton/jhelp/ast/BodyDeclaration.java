@@ -14,6 +14,7 @@ import com.binghamton.jhelp.MyClassSymbol;
  */
 public abstract class BodyDeclaration extends Declaration {
     protected List<VariableDeclaration> fields = new ArrayList<>();
+    protected List<MethodDeclaration> methods = new ArrayList<>();
     protected List<ConcreteBodyDeclaration> innerBodies = new ArrayList<>();
     protected List<AbstractBodyDeclaration> innerInterfaces = new ArrayList<>();
     protected boolean inner = false;
@@ -69,6 +70,30 @@ public abstract class BodyDeclaration extends Declaration {
      */
     public List<AbstractBodyDeclaration> getInnerInterfaces() {
         return innerInterfaces;
+    }
+
+    /**
+     * Gets the methods of this declaration
+     * @return the methods of this declaration
+     */
+    public List<MethodDeclaration> getMethods() {
+        return methods;
+    }
+
+    /**
+     * Adds a method declaration to this body
+     * @param decl the declaration to add
+     */
+    public void addMethod(MethodDeclaration decl) {
+        methods.add(decl);
+    }
+
+    /**
+     * Gets the number of methods declared in this body
+     * @return the number of methods declared in this body
+     */
+    public int numMethods() {
+        return methods.size();
     }
 
     /**

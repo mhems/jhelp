@@ -25,9 +25,26 @@ public class UsageValidator implements Validator {
      */
     public List<JHelpError> validate(File[] files) {
         List<JHelpError> errors = Validator.buildErrors();
+        if (files.length == 0) {
+            errors.add(new InvalidUsageError() {
+                    public String getMessage() {
+                        return "must compile at least one file";
+                    }
+                });
+        }
         for (File file : files) {
             final String filename = file.getAbsolutePath();
             final Matcher matcher = WHITESPACE.matcher(filename);
+            if (!file.exists() || !file.isFile()) {
+                errors.add(new InvalidUsageError(){
+                       @Override
+                       public String getMessage() {
+                           return String.format("The filename '%s' must name an existing file",
+                                                filename);
+                       }
+                    });
+            }
+
             if (matcher.find()) {
                 errors.add(new InvalidUsageError(){
                        @Override
@@ -36,15 +53,6 @@ public class UsageValidator implements Validator {
                                                 filename,
                                                 matcher.start(),
                                                 matcher.end() - 1);
-                       }
-                    });
-            }
-            if (!file.exists() || !file.isFile()) {
-                errors.add(new InvalidUsageError(){
-                       @Override
-                       public String getMessage() {
-                           return String.format("The filename '%s' must name an existing file",
-                                                filename);
                        }
                     });
             }

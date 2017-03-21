@@ -7,8 +7,10 @@ import java.util.Set;
 import com.binghamton.jhelp.AnnotationSymbol;
 import com.binghamton.jhelp.ArrayType;
 import com.binghamton.jhelp.ClassSymbol;
+import com.binghamton.jhelp.ImportManager;
 import com.binghamton.jhelp.MyClassSymbol;
 import com.binghamton.jhelp.Modifier;
+import com.binghamton.jhelp.ReflectedClassSymbol;
 import com.binghamton.jhelp.Package;
 import com.binghamton.jhelp.ParameterizedType;
 import com.binghamton.jhelp.Program;
@@ -22,6 +24,8 @@ import com.binghamton.jhelp.WildcardType;
  * the symbol table
  */
 public class DeclarationLevelVisitor extends FileLevelVisitor {
+
+    private static final ReflectedClassSymbol ENUM_CLASS = ImportManager.get("java.lang.Enum");
 
     public DeclarationLevelVisitor(Program program) {
         super(program);
@@ -108,12 +112,12 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         if (ast.hasSuperClass()) {
             ast.getSuperClass().accept(this);
             ClassSymbol superCls = ast.getSuperClass().getType().getClassSymbol();
-            if (superCls.isEnum()) {
-                System.err.println("cannot subclass java.lang.Enum");
+            if (superCls.equals(ENUM_CLASS)) {
+                System.err.println("cannot directly subclass java.lang.Enum");
             } else if (superCls.isInterfaceLike()) {
                 System.err.println("cannot subclass interface or annotation");
-            } else if (superCls.getModifiers().contains(Modifier.FINAL)) {
-                System.err.println("cannot subclass a final class");
+            } else if (superCls.hasModifier(Modifier.FINAL)) {
+                System.err.println("cannot subclass a final class or simple enum");
             } else {
                 currentClass.setSuperClass(ast.getSuperClass().getType());
             }
@@ -160,7 +164,7 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(EnumDeclaration ast) {
-        currentClass.getModifiers().addModifier(Modifier.STATIC);
+        currentClass.addModifier(Modifier.STATIC);
         boolean isFinal = true;
         for (EnumConstant c : ast.getConstants()) {
             if (!c.isEmpty()) {
@@ -168,7 +172,7 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
             }
         }
         if (isFinal) {
-            currentClass.getModifiers().addModifier(Modifier.FINAL);
+            currentClass.addModifier(Modifier.FINAL);
         }
         visitInnerBodies(ast);
     }

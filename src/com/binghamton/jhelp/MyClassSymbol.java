@@ -2,9 +2,11 @@ package com.binghamton.jhelp;
 
 import org.antlr.v4.runtime.Token;
 
+import com.binghamton.jhelp.antlr.MyToken;
+
 public class MyClassSymbol extends ClassSymbol {
+    private static final Type[] STRING_PARAM = {ImportManager.get("java.lang.String")};
     private ClassKind classKind;
-    private Type superClass = null;
     private ClassSymbol declarer;
     private boolean anonymous = false;
     private boolean inner = false;
@@ -121,7 +123,7 @@ public class MyClassSymbol extends ClassSymbol {
     }
 
     public void setSuperClass(Type cls) {
-        this.superClass = cls;
+        superClass = cls;
     }
 
     public void setDeclaringClass(ClassSymbol cls) {
@@ -131,6 +133,19 @@ public class MyClassSymbol extends ClassSymbol {
     public void setSuperClassForEnum() {
         superClass = new ParameterizedType(ImportManager.get("java.lang.Enum"),
                                            this);
+        MyMethodSymbol values = new MyMethodSymbol(new MyToken(0, "values"),
+                                                   new Modifiers(Modifier.PUBLIC,
+                                                                 Modifier.STATIC));
+        values.setReturnType(new ArrayType(this));
+        values.constructType();
+        addMethod(values);
+        MyMethodSymbol valueOf = new MyMethodSymbol(new MyToken(0, "valueOf"),
+                                                    new Modifiers(Modifier.PUBLIC,
+                                                                  Modifier.STATIC));
+        valueOf.setReturnType(this);
+        valueOf.setParameterTypes(STRING_PARAM);
+        valueOf.constructType();
+        addMethod(valueOf);
     }
 
     public void setSuperClassForAnnotation() {

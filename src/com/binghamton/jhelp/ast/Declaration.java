@@ -66,6 +66,10 @@ public abstract class Declaration extends Statement {
         this.sym = sym;
     }
 
+    public boolean isAnonymous() {
+        return name == null;
+    }
+
     /**
      * Gets the name of this declaration
      * @return the name of this declaration

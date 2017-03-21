@@ -50,6 +50,10 @@ public abstract class MethodSymbol extends Symbol {
 
     public abstract Type[] getExceptionTypes();
 
+    public boolean hasExceptions() {
+        return getExceptionTypes().length > 0;
+    }
+
     public abstract TypeVariable[] getTypeParameters();
 
     public boolean hasTypeParameters() {
@@ -92,5 +96,31 @@ public abstract class MethodSymbol extends Symbol {
 
     public MethodType getType() {
         return type;
+    }
+
+    public boolean returnTypeSubstitutable(MethodSymbol other) {
+        Type retType = getReturnType();
+        Type otherRetType = other.getReturnType();
+        if (retType.equals(otherRetType)) {
+            return true;
+        }
+        // TODO incomplete
+        return false;
+    }
+
+    public boolean isOverrider() {
+        // TODO
+        // if shadows -> true
+        return false;
+    }
+
+    public boolean isImplementer() {
+        // TODO
+        return false;
+    }
+
+    public boolean isOverloaded() {
+        // TODO
+        return false;
     }
 }

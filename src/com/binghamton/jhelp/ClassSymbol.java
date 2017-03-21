@@ -105,15 +105,21 @@ public abstract class ClassSymbol extends Type {
     }
 
     public List<MethodSymbol> getMethods(String name) {
-        return null; // TODO
+        List<MethodSymbol> ret = new ArrayList<>();
+        for (MethodSymbol method : methods) {
+            if (method.getName().equals(name)) {
+                ret.add(method);
+            }
+        }
+        return ret;
     }
 
     public MethodSymbol getMethod(String name, Type... paramTypes) {
-        return null; // TODO
+        return methods.get(MethodType.fromParameters(name, paramTypes));
     }
 
     public MethodSymbol getConstructor(Type... paramTypes) {
-        return null; // TODO
+        return methods.get(MethodType.fromParameters(getName(), paramTypes));
     }
 
     public TypeVariable getTypeParameter(String name) {
@@ -196,10 +202,10 @@ public abstract class ClassSymbol extends Type {
             sb.append(">");
         }
 
-        if (false) { // TODO only an issue for self-referential type parameters like Enum
+        if (true) { // TODO only an issue for self-referential type parameters like Enum
             if (hasSuperClass()) {
                 sb.append(" extends ");
-                sb.append(getSuperClass().getTypeName());
+                sb.append(getSuperClass().getName());
             }
 
             if (hasInterfaces()) {
@@ -210,7 +216,7 @@ public abstract class ClassSymbol extends Type {
                 }
                 sb.append(StringUtils.join(", ",
                                            getInterfaces(),
-                                           c -> c.getTypeName()));
+                                           c -> c.getName()));
             }
         }
 

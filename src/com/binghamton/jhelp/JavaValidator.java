@@ -64,10 +64,11 @@ public class JavaValidator implements Validator {
             }
             System.out.println("---------- FILE ----------");
             visitor = new FileLevelVisitor(program);
-            // System.out.println(program.getPackage("foo.bar.baz").repr());
+            System.out.println(program.getPackage("foo.bar.baz").repr());
 
             System.out.println("---------- DECLARATION ----------");
             visitor = new DeclarationLevelVisitor(program);
+            System.out.println(program.getPackage("foo.bar.baz").repr());
 
             System.out.println("---------- BODY ----------");
             visitor = new BodyLevelVisitor(program);

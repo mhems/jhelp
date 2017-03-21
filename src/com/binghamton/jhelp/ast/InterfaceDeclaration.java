@@ -12,7 +12,6 @@ import com.binghamton.jhelp.Modifier;
  */
 public class InterfaceDeclaration extends AbstractBodyDeclaration {
     private List<Expression> implementees = new ArrayList<>();
-    private List<MethodDeclaration> methods = new ArrayList<>();
     private List<TypeParameter> typeParams = new ArrayList<>();
 
     /**
@@ -81,30 +80,6 @@ public class InterfaceDeclaration extends AbstractBodyDeclaration {
      */
     public List<Expression> getSuperInterfaces() {
         return implementees;
-    }
-
-    /**
-     * Gets the methods of this declaration
-     * @return the methods of this declaration
-     */
-    public List<MethodDeclaration> getMethods() {
-        return methods;
-    }
-
-    /**
-     * Adds a method declaration to this body
-     * @param decl the declaration to add
-     */
-    public void addMethod(MethodDeclaration decl) {
-        methods.add(decl);
-    }
-
-    /**
-     * Gets the number of methods declared in this body
-     * @return the number of methods declared in this body
-     */
-    public int numMethods() {
-        return methods.size();
     }
 
     /**

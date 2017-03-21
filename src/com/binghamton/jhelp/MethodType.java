@@ -6,8 +6,8 @@ import com.binghamton.jhelp.util.StringUtils;
 
 public class MethodType extends Type {
     private ClassSymbol declarer;
-    private Type[] typeParams;
-    private Type[] paramTypes;
+    private Type[] typeParams = {};
+    private Type[] paramTypes = {};
 
     private MethodType(String name) {
         super(name);
@@ -18,6 +18,12 @@ public class MethodType extends Type {
         declarer = method.getDeclaringClass();
         typeParams = method.getTypeParameters();
         paramTypes = method.getParameterTypes();
+    }
+
+    public static MethodType fromParameters(String name, Type[] paramTypes) {
+        MethodType type = new MethodType(name);
+        type.paramTypes = paramTypes;
+        return type;
     }
 
     public static MethodType fromMethod(MethodSymbol method) {
@@ -65,14 +71,15 @@ public class MethodType extends Type {
     }
 
     public int hashCode() {
-        return name.hashCode() ^ typeParams.length ^
-            paramTypes.length ^ declarer.hashCode();
+        return name.hashCode() ^
+            typeParams.length ^
+            paramTypes.length;
     }
 
     public boolean equals(Object other) {
         if (other instanceof MethodType) {
             MethodType otherT = (MethodType)other;
-            return declarer.equals(otherT.getDeclaringClass()) &&
+            return //declarer.equals(otherT.getDeclaringClass()) &&
                 this.isEquivalentTo(otherT);
         }
         return false;

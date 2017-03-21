@@ -945,14 +945,14 @@ annotationTypeBody [AnnotationDeclaration ret]
     ;
 
 annotationTypeMemberDeclaration [AnnotationDeclaration ret]
-    :   a = annotationTypeElementDeclaration {$ret.addField($a.ret);}
+    :   a = annotationTypeElementDeclaration {$ret.addMethod($a.ret);}
     |   constantDeclaration[$ret]
     |   cl = classDeclaration {$ret.addInnerBody($cl.ret);}
     |   i = interfaceDeclaration {$ret.addInnerInterface($i.ret);}
     |   ';'
     ;
 
-annotationTypeElementDeclaration returns [VariableDeclaration ret]
+annotationTypeElementDeclaration returns [MethodDeclaration ret]
     locals [List<Modifier> mods = new ArrayList<>(),
             List<Dimension> ls = new ArrayList<>(),
             Expression expr = new NilExpression(),
@@ -971,8 +971,10 @@ annotationTypeElementDeclaration returns [VariableDeclaration ret]
             if ($ls.size() > 0) {
                 $type = new ArrayTypeExpression($type, $ls);
             }
-            $ret = new VariableDeclaration($id, $type,
-                                           $mods, $ans, $expr);
+            $ret = new MethodDeclaration($mods, $ans);
+            $ret.setName($id);
+            $ret.setReturnType($type);
+            $ret.setBody(new Block($expr));
         }
     ;
 

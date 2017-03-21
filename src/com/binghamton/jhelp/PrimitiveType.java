@@ -24,8 +24,8 @@ public class PrimitiveType extends Type {
     public static final PrimitiveType VOID    = new PrimitiveType(Primitive.VOID);
 
     private static final Map<String, Primitive> PRIMITIVE_MAP = new HashMap<>();
-    // key is a subtype of value
     private static final Map<PrimitiveType, PrimitiveType> SUBTYPE_MAP = new HashMap<>();
+    private static final Map<PrimitiveType, List<PrimitiveType>> WIDENING_MAP = new HashMap<>();
     public static final Map<String, PrimitiveType> UNBOX_MAP = new HashMap<>();
 
     static {
@@ -49,6 +49,15 @@ public class PrimitiveType extends Type {
         UNBOX_MAP.put("float", FLOAT);
         UNBOX_MAP.put("double", DOUBLE);
         UNBOX_MAP.put("void", VOID);
+
+        WIDENING_MAP.put(BYTE, new ArrayList<>(Arrays.asList(SHORT, INT, LONG,
+                                                             FLOAT, DOUBLE)));
+        WIDENING_MAP.put(SHORT, new ArrayList<>(Arrays.asList(INT, LONG,
+                                                              FLOAT, DOUBLE)));
+        WIDENING_MAP.put(CHAR, WIDENING_MAP.get(SHORT));
+        WIDENING_MAP.put(INT, new ArrayList<>(Arrays.asList(LONG, FLOAT, DOUBLE)));
+        WIDENING_MAP.put(LONG, new ArrayList<>(Arrays.asList(FLOAT, DOUBLE)));
+        WIDENING_MAP.put(FLOAT, new ArrayList<>(Arrays.asList(DOUBLE)));
     }
 
     private Primitive primitive;
@@ -102,6 +111,10 @@ public class PrimitiveType extends Type {
             return superType != null && this.primitive == superType.primitive;
         }
         return false;
+    }
+
+    public boolean canWidenTo(PrimitiveType target) {
+        return WIDENING_MAP.get(this).contains(target);
     }
 
     private enum Primitive {
