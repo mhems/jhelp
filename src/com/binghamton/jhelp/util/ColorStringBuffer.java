@@ -5,21 +5,35 @@ package com.binghamton.jhelp.util;
  * formatting and coloring via terminal codes.
  */
 public class ColorStringBuffer {
-    public static enum Format { NORMAL, BOLD, DIM, UNDERSCORE, INVERSE };
-    public static enum Color { DEFAULT, BLACK, RED, GREEN, YELLOW, BLUE,
-                               MAGENTA, CYAN, LIGHT_GRAY, DARK_GRAY, LIGHT_RED,
-                               LIGHT_GREEN, LIGHT_YELLOW, LIGHT_BLUE,
-                               LIGHT_MAGENTA, LIGHT_CYAN, WHITE };
+    public static enum Format {
+        NORMAL(0), BOLD(1), DIM(2), UNDERSCORE(4), INVERSE(7);
+
+        private final static int DELTA = 20;
+        private final int code;
+        private final int resetCode;
+
+        private Format(int code) {
+            this.code = code;
+            this.resetCode = code + DELTA;
+        }
+    };
+    public static enum Color {
+        DEFAULT(39), BLACK(30), RED(31), GREEN(32), YELLOW(33), BLUE(34),
+        MAGENTA(35), CYAN(36), LIGHT_GRAY(37), DARK_GRAY(90), LIGHT_RED(91),
+        LIGHT_GREEN(92), LIGHT_YELLOW(93), LIGHT_BLUE(94), LIGHT_MAGENTA(95),
+        LIGHT_CYAN(96), WHITE(97);
+
+        private final static int DELTA = 10;
+        private final int fgCode;
+        private final int bgCode;
+
+        private Color(int fgCode) {
+            this.fgCode = fgCode;
+            this.bgCode = fgCode + DELTA;
+        }
+    };
+
     private final static char ESCAPE_CHAR = 27;
-    private final static int[] FORMAT_CODES = {0, 1, 2, 4, 7};
-    private final static int[] RESET_CODES = {0, 21, 22, 24, 27};
-    private final static int[] FOREGROUND_COLOR_CODES = {39, 30, 31, 32, 33, 34,
-                                                         35, 36, 37, 90, 91, 92,
-                                                         93, 94, 95, 96, 97};
-    private final static int[] BACKGROUND_COLOR_CODES = {49, 40, 41, 42, 43, 44,
-                                                         45, 46, 47, 100, 101,
-                                                         102, 103, 104, 105,
-                                                         106, 107};
 
     private StringBuffer buffer;
     private boolean allow;
@@ -56,7 +70,7 @@ public class ColorStringBuffer {
      * @param fmt the format to establish
      */
     public void setFormat(Format fmt) {
-        appendCode(FORMAT_CODES[fmt.ordinal()]);
+        appendCode(fmt.code);
     }
 
     /**
@@ -64,7 +78,7 @@ public class ColorStringBuffer {
      * @param fmt the format to reset
      */
     public void resetFormat(Format fmt) {
-        appendCode(RESET_CODES[fmt.ordinal()]);
+        appendCode(fmt.resetCode);
     }
 
     /**
@@ -81,7 +95,7 @@ public class ColorStringBuffer {
      * @param color the foreground color to establish
      */
     public void setForegroundColor(Color color) {
-        appendCode(FOREGROUND_COLOR_CODES[color.ordinal()]);
+        appendCode(color.fgCode);
     }
 
     /**
@@ -96,7 +110,7 @@ public class ColorStringBuffer {
      * @param color the background color to establish
      */
     public void setBackgroundColor(Color color) {
-        appendCode(BACKGROUND_COLOR_CODES[color.ordinal()]);
+        appendCode(color.bgCode);
     }
 
     /**
@@ -131,5 +145,64 @@ public class ColorStringBuffer {
      */
     public void append(String string) {
         buffer.append(string);
+    }
+
+    /**
+     * Appends formatted text to the buffer
+     * @param string the String to format and append
+     * @param format the format to format the String with.
+     *               Ignored if null.
+     */
+    public void append(String string, Format format) {
+        append(string, null, null, format);
+    }
+
+    /**
+     * Appends colored text to the buffer
+     * @param string the String to format and append
+     * @param foregroundColor the color to make the foreground of the String.
+     *                        Ignored if null.
+     * @param backgroundColor the color to make the background of the String.
+     *                        Ignored if null.
+     */
+    public void append(String string,
+                       Color foregroundColor,
+                       Color backgroundColor) {
+        append(string, foregroundColor, backgroundColor, null);
+    }
+
+    /**
+     * Appends colored and/or formatted text to the buffer
+     * @param string the String to format and append
+     * @param foregroundColor the color to make the foreground of the String.
+     *                        Ignored if null.
+     * @param backgroundColor the color to make the background of the String.
+     *                        Ignored if null.
+     * @param format the format to format the String with.
+     *                        Ignored if null.
+     */
+    public void append(String string,
+                       Color foregroundColor,
+                       Color backgroundColor,
+                       Format format) {
+        if (foregroundColor != null) {
+            setForegroundColor(foregroundColor);
+        }
+        if (backgroundColor != null) {
+            setBackgroundColor(backgroundColor);
+        }
+        if (format != null) {
+            setFormat(format);
+        }
+        append(string);
+        if (foregroundColor != null) {
+            resetForegroundColor();
+        }
+        if (backgroundColor != null) {
+            resetBackgroundColor();
+        }
+        if (format != null) {
+            resetFormat(format);
+        }
     }
 }
