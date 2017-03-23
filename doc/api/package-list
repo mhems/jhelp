@@ -1,3 +1,5 @@
 com.binghamton.jhelp
 com.binghamton.jhelp.antlr
 com.binghamton.jhelp.ast
+com.binghamton.jhelp.error
+com.binghamton.jhelp.util
