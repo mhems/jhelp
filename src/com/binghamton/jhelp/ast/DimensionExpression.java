@@ -4,14 +4,11 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.Annotation;
-import com.binghamton.jhelp.Annotations;
-
 /**
  * Class representing a dimension expression
  */
 public class DimensionExpression extends Expression {
-    private Annotations annotations;
+    private Annotation[] annotations = {};
     private Expression expr;
 
     /**
@@ -26,7 +23,7 @@ public class DimensionExpression extends Expression {
                                List<Annotation> annotations,
                                Expression expr) {
         super(first, last);
-        this.annotations = new Annotations(annotations);
+        this.annotations = annotations.toArray(this.annotations);
         this.expr = expr;
     }
 
@@ -34,7 +31,7 @@ public class DimensionExpression extends Expression {
      * Gets the annotations of this expression
      * @return the annotations of this expression
      */
-    public Annotations getAnnotations() {
+    public Annotation[] getAnnotations() {
         return annotations;
     }
 

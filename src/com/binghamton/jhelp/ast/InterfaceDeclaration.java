@@ -5,16 +5,13 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.ClassInterfaceType;
 import com.binghamton.jhelp.Modifier;
-import com.binghamton.jhelp.TypeParameter;
 
 /**
  * A class representing the declaration of a Java interface
  */
 public class InterfaceDeclaration extends AbstractBodyDeclaration {
-    private List<ClassInterfaceType> implementees = new ArrayList<>();
-    private List<MethodDeclaration> methods = new ArrayList<>();
+    private List<Expression> implementees = new ArrayList<>();
     private List<TypeParameter> typeParams = new ArrayList<>();
 
     /**
@@ -22,13 +19,15 @@ public class InterfaceDeclaration extends AbstractBodyDeclaration {
      * @param name the name of this declaration
      * @param keyword the keyword token of this declaration
      * @param modifiers the modifiers of this declaration
+     * @param annotations the annotations of this declaration
      * @param implementees the interfaces this declaration implements
      */
     public InterfaceDeclaration(Token name,
                                 Token keyword,
                                 List<Modifier> modifiers,
-                                List<ClassInterfaceType> implementees) {
-        this(name, keyword, modifiers, implementees, new ArrayList<>());
+                                List<Annotation> annotations,
+                                List<Expression> implementees) {
+        this(name, keyword, modifiers, annotations, implementees, new ArrayList<>());
     }
 
     /**
@@ -36,15 +35,17 @@ public class InterfaceDeclaration extends AbstractBodyDeclaration {
      * @param name the name of this declaration
      * @param keyword the keyword token of this declaration
      * @param modifiers the modifiers of this declaration
+     * @param annotations the annotations of this declaration
      * @param implementees the interfaces this declaration implements
      * @param typeParams the type parameters of this declaration
      */
     public InterfaceDeclaration(Token name,
                                 Token keyword,
                                 List<Modifier> modifiers,
-                                List<ClassInterfaceType> implementees,
+                                List<Annotation> annotations,
+                                List<Expression> implementees,
                                 List<TypeParameter> typeParams) {
-        super(name, keyword, modifiers);
+        super(name, keyword, modifiers, annotations);
         this.implementees = implementees;
         this.typeParams = typeParams;
     }
@@ -77,32 +78,8 @@ public class InterfaceDeclaration extends AbstractBodyDeclaration {
      * Gets the implemented interfaces of this declaration
      * @return the implemented interfaces of this declaration
      */
-    public List<ClassInterfaceType> getSuperInterfaces() {
+    public List<Expression> getSuperInterfaces() {
         return implementees;
-    }
-
-    /**
-     * Gets the methods of this declaration
-     * @return the methods of this declaration
-     */
-    public List<MethodDeclaration> getMethods() {
-        return methods;
-    }
-
-    /**
-     * Adds a method declaration to this body
-     * @param decl the declaration to add
-     */
-    public void addMethod(MethodDeclaration decl) {
-        methods.add(decl);
-    }
-
-    /**
-     * Gets the number of methods declared in this body
-     * @return the number of methods declared in this body
-     */
-    public int numMethods() {
-        return methods.size();
     }
 
     /**

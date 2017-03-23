@@ -1,96 +1,108 @@
 package com.binghamton.jhelp;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
 
-import com.binghamton.jhelp.ast.ASTVisitor;
+import com.binghamton.jhelp.util.StringUtils;
 
-/**
- * A class representing the type of a Java method
- */
 public class MethodType extends Type {
-    private List<TypeParameter> typeParams;
-    private Type returnType;
-    private List<Type> paramTypes;
+    private ClassSymbol declarer;
+    private Type[] typeParams = {};
+    private Type[] paramTypes = {};
 
-    /**
-     * Construct a simple method type
-     * @param returnType the return type of this method
-     * @param paramTypes the types of the parameters of this method
-     */
-    public MethodType(Type returnType, List<Type> paramTypes) {
-        this(returnType, paramTypes, new ArrayList<>());
+    private MethodType(String name) {
+        super(name);
     }
 
-    /**
-     * Construct a parameterized method type
-     * @param returnType the return type of this method
-     * @param paramTypes the types of the parameters of this method
-     * @param typeParams the type parameters of this method
-     */
-    public MethodType(Type returnType,
-                      List<Type> paramTypes,
-                      List<TypeParameter> typeParams) {
-        this.returnType = returnType;
-        this.paramTypes = paramTypes;
-        this.typeParams = typeParams;
+    private MethodType(MethodSymbol method) {
+        super(method.getName());
+        declarer = method.getDeclaringClass();
+        typeParams = method.getTypeParameters();
+        paramTypes = method.getParameterTypes();
     }
 
-    /**
-     * Gets the return type of this method type
-     * @return the return type of this method type
-     */
-    public Type getReturnType() {
-        return returnType;
+    public static MethodType fromParameters(String name, Type[] paramTypes) {
+        MethodType type = new MethodType(name);
+        type.paramTypes = paramTypes;
+        return type;
     }
 
-    /**
-     * Determines if this method returns a non-void type
-     * @return true iff this method returns a non-void type
-     */
-    public boolean returns() {
-        return ! returnType.getName().equals("void");
+    public static MethodType fromMethod(MethodSymbol method) {
+        return new MethodType(method);
     }
 
-    /**
-     * Gets the parameter types of this method
-     * @return the parameter types of this method
-     */
-    public List<Type> getParameterTypes() {
-        return paramTypes;
+    public ClassSymbol getClassSymbol() {
+        throw new UnsupportedOperationException("a method cannot be interpreted as a class");
     }
 
-    /**
-     * Determines if this method has parameter types
-     * @return true iff this method has parameter types
-     */
-    public boolean hasParameterTypes() {
-        return paramTypes.size() > 0;
+    public ClassSymbol getDeclaringClass() {
+        return declarer;
     }
 
-    /**
-     * Gets the type parameters of this method
-     * @return the type parameters of this method, if any
-     */
-    public List<TypeParameter> getTypeParameters() {
-        return typeParams;
+    public String getTypeName() {
+        StringBuilder sb = new StringBuilder(name);
+        if (typeParams.length > 0) {
+            sb.append("<");
+            sb.append(StringUtils.join(", ",
+                                       typeParams,
+                                       t -> t.getTypeName()));
+            sb.append(">");
+        }
+        sb.append("(");
+        sb.append(StringUtils.join(", ",
+                                   paramTypes,
+                                   t -> t.getTypeName()));
+        sb.append(")");
+        return sb.toString();
     }
 
-    /**
-     * Determines if this method has type parameters
-     * @return true iff this method has type parameters
-     */
-    public boolean hasTypeParameters() {
-        return typeParams.size() > 0;
+    public MethodType erase() {
+        MethodType erased = new MethodType(name);
+        erased.declarer = declarer;
+        erased.typeParams = new Type[0];
+        erased.paramTypes = new Type[paramTypes.length];
+        for (int i = 0; i < paramTypes.length; i++) {
+            erased.paramTypes[i] = paramTypes[i].erase();
+        }
+        return erased;
     }
 
-    /**
-     * Double dispatch super class and this class on parameter
-     * @param v the visitor to accept
-     */
-    @Override
-    public void accept(ASTVisitor v) {
-        super.accept(v);
-        v.visit(this);
+    public String getName() {
+        return name;
+    }
+
+    public int hashCode() {
+        return name.hashCode() ^
+            typeParams.length ^
+            paramTypes.length;
+    }
+
+    public boolean equals(Object other) {
+        if (other instanceof MethodType) {
+            MethodType otherT = (MethodType)other;
+            return //declarer.equals(otherT.getDeclaringClass()) &&
+                this.isEquivalentTo(otherT);
+        }
+        return false;
+    }
+
+    public boolean isEquivalentTo(Type other) {
+        if (other instanceof MethodType) {
+            return sameSignature((MethodType)other);
+        }
+        return false;
+    }
+
+    public boolean sameSignature(MethodType other) {
+        return name.equals(name) &&
+            Arrays.equals(typeParams, other.typeParams) &&
+            Arrays.equals(paramTypes, other.paramTypes);
+    }
+
+    public boolean sameSubsignature(MethodType other) {
+        return sameSignature(other) || sameSignature(other.erase());
+    }
+
+    public boolean overrideEquivalent(MethodType other) {
+        return this.sameSubsignature(other) || other.sameSubsignature(this);
     }
 }

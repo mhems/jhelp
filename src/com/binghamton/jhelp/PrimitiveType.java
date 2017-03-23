@@ -1,10 +1,12 @@
 package com.binghamton.jhelp;
 
+import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.antlr.v4.runtime.Token;
-
-import com.binghamton.jhelp.ast.ASTVisitor;
 
 /**
  * Class representing valid Java primitive types
@@ -21,47 +23,121 @@ public class PrimitiveType extends Type {
     public static final PrimitiveType DOUBLE  = new PrimitiveType(Primitive.DOUBLE);
     public static final PrimitiveType VOID    = new PrimitiveType(Primitive.VOID);
 
+    private static final Map<String, Primitive> PRIMITIVE_MAP = new HashMap<>();
+    private static final Map<PrimitiveType, PrimitiveType> SUBTYPE_MAP = new HashMap<>();
+    private static final Map<PrimitiveType, List<PrimitiveType>> WIDENING_MAP = new HashMap<>();
+    public static final Map<String, PrimitiveType> UNBOX_MAP = new HashMap<>();
+
+    static {
+        for (Primitive p : Primitive.values()) {
+            PRIMITIVE_MAP.put(p.name, p);
+        }
+
+        SUBTYPE_MAP.put(FLOAT, DOUBLE);
+        SUBTYPE_MAP.put(LONG, FLOAT);
+        SUBTYPE_MAP.put(INT, LONG);
+        SUBTYPE_MAP.put(CHAR, INT);
+        SUBTYPE_MAP.put(SHORT, INT);
+        SUBTYPE_MAP.put(BYTE, SHORT);
+
+        UNBOX_MAP.put("boolean", BOOLEAN);
+        UNBOX_MAP.put("byte", BYTE);
+        UNBOX_MAP.put("char", CHAR);
+        UNBOX_MAP.put("short", SHORT);
+        UNBOX_MAP.put("int", INT);
+        UNBOX_MAP.put("long", LONG);
+        UNBOX_MAP.put("float", FLOAT);
+        UNBOX_MAP.put("double", DOUBLE);
+        UNBOX_MAP.put("void", VOID);
+
+        WIDENING_MAP.put(BYTE, new ArrayList<>(Arrays.asList(SHORT, INT, LONG,
+                                                             FLOAT, DOUBLE)));
+        WIDENING_MAP.put(SHORT, new ArrayList<>(Arrays.asList(INT, LONG,
+                                                              FLOAT, DOUBLE)));
+        WIDENING_MAP.put(CHAR, WIDENING_MAP.get(SHORT));
+        WIDENING_MAP.put(INT, new ArrayList<>(Arrays.asList(LONG, FLOAT, DOUBLE)));
+        WIDENING_MAP.put(LONG, new ArrayList<>(Arrays.asList(FLOAT, DOUBLE)));
+        WIDENING_MAP.put(FLOAT, new ArrayList<>(Arrays.asList(DOUBLE)));
+    }
+
+    private Primitive primitive;
+    private Token token;
 
     /**
      * Construct a new primitive type
      * @param primitive the primitive Token
      */
     public PrimitiveType(Token primitive) {
-        super(primitive);
+        this.token = primitive;
+        this.primitive = PRIMITIVE_MAP.get(token.getText());
     }
 
-    /**
-     * Construct an annotated primitive type
-     * @param primitive the primitive Token
-     * @param annotations the annotations of this type
-     */
-    public PrimitiveType(Token primitive, List<Annotation> annotations) {
-        super(primitive, annotations);
+    public boolean equals(Object other) {
+        if (other instanceof PrimitiveType) {
+            return primitive == ((PrimitiveType)other).primitive;
+        }
+        return false;
     }
 
-    /**
-     * Double dispatch super class and this class on parameter
-     * @param v the visitor to accept
-     */
+    public int hashCode() {
+        return primitive.hashCode();
+    }
+
+    public ClassSymbol getClassSymbol() {
+        return box();
+    }
+
+    public ClassSymbol box() {
+        return ImportManager.get("java.lang." + primitive.classname);
+    }
+
+    public String getName() {
+        return primitive.name;
+    }
+
+    public String getTypeName() {
+        return getName();
+    }
+
+    public ClassSymbol getDeclaringClass() {
+        throw new UnsupportedOperationException("a primitive has no declaring class");
+    }
+
     @Override
-    public void accept(ASTVisitor v) {
-        super.accept(v);
-        v.visit(this);
+    public boolean isSuperTypeOf(Type other) {
+        if (other instanceof PrimitiveType) {
+            PrimitiveType otherP = (PrimitiveType)other;
+            PrimitiveType superType = SUBTYPE_MAP.get(otherP);
+            return superType != null && this.primitive == superType.primitive;
+        }
+        return false;
     }
 
-    public enum Primitive {
-        BOOLEAN,
-        BYTE,
-        CHAR,
-        SHORT,
-        INT,
-        LONG,
-        FLOAT,
-        DOUBLE,
-        VOID
+    public boolean canWidenTo(PrimitiveType target) {
+        return WIDENING_MAP.get(this).contains(target);
+    }
+
+    private enum Primitive {
+        BOOLEAN("boolean", "Boolean"),
+        BYTE("byte", "Byte"),
+        CHAR("char", "Character"),
+        SHORT("short", "Short"),
+        INT("int", "Integer"),
+        LONG("long", "Long"),
+        FLOAT("float", "Float"),
+        DOUBLE("double", "Double"),
+        VOID("void", "Void");
+
+        protected final String name;
+        protected final String classname;
+
+        Primitive(String name, String classname) {
+            this.name = name;
+            this.classname = classname;
+        }
     }
 
     private PrimitiveType(Primitive primitive) {
-        super(primitive.name());
+        this.primitive = primitive;
     }
 }

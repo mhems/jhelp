@@ -1,5 +1,6 @@
 package com.binghamton.jhelp.ast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.antlr.v4.runtime.Token;
@@ -10,26 +11,26 @@ import com.binghamton.jhelp.Type;
  * A class representing the construction of a new array
  */
 public class ArrayConstruction extends Expression {
-    private Type type;
-    private List<DimensionExpression> dimExprs;
+    private Expression expr;
+    private List<DimensionExpression> dimExprs = new ArrayList<>();
     private List<Dimension> dims;
     private ArrayInitializer initializer;
 
     /**
      * Constructs a new array construction expression
      * @param first the first token of this ASTNode
-     * @param type the type of the array elements
+     * @param expr the Expression yielding the type of the array elements
      * @param dimExprs the dimension expressions
      * @param dims the number of remaining dimensions
      */
     public ArrayConstruction(Token first,
-                             Type type,
+                             Expression expr,
                              List<DimensionExpression> dimExprs,
                              List<Dimension> dims) {
         super(first,
               dims.size() > 0 ? dims.get(dims.size()-1).getLastToken()
                               : dimExprs.get(dimExprs.size()-1).getLastToken());
-        this.type = type;
+        this.expr = expr;
         this.dimExprs = dimExprs;
         this.dims = dims;
     }
@@ -37,26 +38,22 @@ public class ArrayConstruction extends Expression {
     /**
      * Constructs a new array with initializer
      * @param first the first token of this ASTNode
-     * @param type the type of the array elements
+     * @param expr the Expression yielding the type of the array elements
      * @param dims the number of dimensions of this array
      * @param initializer the initializer of this array
      */
     public ArrayConstruction(Token first,
-                             Type type,
+                             Expression expr,
                              List<Dimension> dims,
                              ArrayInitializer initializer) {
         super(first, initializer.getLastToken());
-        this.type = type;
+        this.expr = expr;
         this.dims = dims;
         this.initializer = initializer;
     }
 
-    /**
-     * Gets the element type of this array
-     * @return the element type of this array
-     */
-    public Type getElementType() {
-        return type;
+    public Expression getElementTypeExpression() {
+        return expr;
     }
 
     /**

@@ -1,181 +1,268 @@
 package com.binghamton.jhelp;
 
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.ArrayList;
+import java.util.List;
 
-import com.binghamton.jhelp.ast.NilBlock;
-import com.binghamton.jhelp.ast.Block;
+import com.binghamton.jhelp.util.StringUtils;
 
 /**
- * A class representing a Java class and its members
+ * A base class representing a Java class and its members
  */
-public class ClassSymbol extends Symbol {
-    private ClassSymbol superClass; // TODO Object class
-    private Set<InterfaceSymbol> implementees = new TreeSet<>();
-    private Set<VariableSymbol> fields = new TreeSet<>();
-    private Set<MethodSymbol> methods = new TreeSet<>();
-    private Block staticInit = new NilBlock();
-    private Package pkg = Package.DEFAULT_PACKAGE;
+public abstract class ClassSymbol extends Type {
+    public enum ClassKind {CLASS, INTERFACE, ENUM, ANNOTATION};
+
+        {
+            kind = SymbolKind.CLASS;
+        }
+
+    protected ClassKind classKind;
+    protected Type superClass = null;
+    protected ClassSymbol declarer;
+
+    protected ImportingSymbolTable importedTypes = new ImportingSymbolTable();
+    protected NamedSymbolTable<Type> interfaces = new NamedSymbolTable<>();
+    protected NamedSymbolTable<ClassSymbol> innerClasses = new NamedSymbolTable<>();
+    protected NamedSymbolTable<VariableSymbol> fields = new NamedSymbolTable<>();
+    protected MethodSymbolTable methods = new MethodSymbolTable();
+    protected MethodSymbolTable ctors = new MethodSymbolTable();
+    protected NamedSymbolTable<TypeVariable> params = new NamedSymbolTable<>();
 
     /**
      * Construct a new ClassSymbol
-     * @param id the name of this class symbol
+     * @param name the name of this class symbol
      */
-    public ClassSymbol(String id) {
-        super(id);
+    public ClassSymbol(String name) {
+        super(name);
+    }
+
+    public ClassSymbol(String name, int modifiers) {
+        super(name, modifiers);
     }
 
     /**
-     * Gets this class's super class
-     * @return this class's super class
+     * Construct a new ClassSymbol with modifiers
+     * @param name the name of this ClassSymbol
+     * @param modifiers the modifiers of this ClassSymbol
      */
-    public ClassSymbol getSuperClass() {
+    public ClassSymbol(String name, Modifiers modifiers) {
+        super(name, modifiers);
+    }
+
+    public Type getSuperClass() {
         return superClass;
     }
 
-    /**
-     * Gets the interfaces this class implements
-     * @return the interfaces this class implements
-     */
-    public Set<InterfaceSymbol> getInterfaces() {
-        return implementees;
+    public ClassSymbol getDeclaringClass() {
+        return declarer;
     }
 
-    /**
-     * Gets this class's fields
-     * @return this class's fields
-     */
-    public Set<VariableSymbol> getFields() {
-        return fields;
+    public Type[] getInterfaces() {
+        return interfaces.toArray(new Type[interfaces.size()]);
     }
 
-    /**
-     * Gets this class's methods
-     * @return this class's methods
-     */
-    public Set<MethodSymbol> getMethods() {
-        return methods;
+    public MethodSymbol[] getMethods() {
+        return methods.toArray(new MethodSymbol[methods.size()]);
     }
 
-    /**
-     * Gets this class's static initializer block
-     * @return this class's static initializer block
-     */
-    public Block getStaticInitializer() {
-        return staticInit;
+    public MethodSymbol[] getConstructors() {
+        return ctors.toArray(new MethodSymbol[ctors.size()]);
     }
 
-    /**
-     * Gets the package this class resides in
-     * @return the package this class resides in
-     */
-    public Package getPackage() {
-        return pkg;
+    public VariableSymbol[] getFields() {
+        return fields.toArray(new VariableSymbol[fields.size()]);
     }
 
-    /**
-     * Sets the superclass of this class
-     * @param cls the class that is the superclass of this class
-     */
-    public void setSuperClass(ClassSymbol cls) {
-        superClass = cls;
+    public TypeVariable[] getTypeParameters() {
+        return params.toArray(new TypeVariable[params.size()]);
     }
 
-    /**
-     * Attempts to add an interface that this class implements
-     * @param intrf the interface this class implements
-     * @return true iff intrf was successfully added
-     */
-    public boolean addInterface(InterfaceSymbol intrf) {
-        return implementees.add(intrf);
+    public ClassSymbol[] getInnerClasses() {
+        return innerClasses.toArray(new ClassSymbol[innerClasses.size()]);
     }
 
-    /**
-     * Attempts to add a field within this class
-     * @param field the field within this class
-     * @return true iff field was successfully added
-     */
-    public boolean addField(VariableSymbol field) {
-        return fields.add(field);
+    public ClassKind getClassKind() {
+        return classKind;
     }
 
-    /**
-     * Attempts to add a method within this class
-     * @param method the method within this class implements
-     * @return true iff method was successfully added
-     */
-    public boolean addMethod(MethodSymbol method) {
-        return methods.add(method);
+    public void setClassKind(ClassKind kind) {
+        classKind = kind;
     }
 
-    /**
-     * Sets the static initializer block of this class
-     * @param block the block of this class's static initializer
-     */
-    public void setStaticInitializer(Block block) {
-        staticInit = block;
+    public void setImportedTypes(ImportingSymbolTable table) {
+        importedTypes = table;
     }
 
-    /**
-     * Sets the package this class resides in
-     * @param pkg the package this class resides in
-     */
-    public void setPackage(Package pkg) {
-        this.pkg = pkg;
+    public Type getInterface(String name) {
+        return interfaces.get(name);
     }
 
-    /**
-     * Gets the number of interfaces this class implements
-     * @return the number of interfaces this class implements
-     */
-    public int numInterfaces() {
-        return implementees.size();
+    public ClassSymbol getInnerClass(String name) {
+        return innerClasses.get(name);
     }
 
-    /**
-     * Gets the number of fields this class has
-     * @return the number of fields this class has
-     */
-    public int numFields() {
-        return fields.size();
+    public VariableSymbol getField(String name) {
+        return fields.get(name);
     }
 
-    /**
-     * Gets the number of methods this class has
-     * @return the number of methods this class has
-     */
-    public int numMethods() {
-        return methods.size();
-    }
-
-    /**
-     * Determines if this class is equivalent to another
-     * @param other the other Object to compare against
-     * @return true iff this symbol is equivalent ot `other`
-     */
-    @Override
-    public boolean equals(Object other) {
-        if (super.equals(other)) {
-            if (other instanceof ClassSymbol) {
-                ClassSymbol cls = (ClassSymbol)other;
-                return superClass.equals(cls.superClass) &&
-                    implementees.equals(cls.implementees) &&
-                    fields.equals(cls.fields) &&
-                    methods.equals(cls.methods) &&
-                    staticInit.equals(cls.staticInit) &&
-                    pkg.equals(cls.pkg);
+    public List<MethodSymbol> getMethods(String name) {
+        List<MethodSymbol> ret = new ArrayList<>();
+        for (MethodSymbol method : methods) {
+            if (method.getName().equals(name)) {
+                ret.add(method);
             }
+        }
+        return ret;
+    }
+
+    public MethodSymbol getMethod(String name, Type... paramTypes) {
+        return methods.get(MethodType.fromParameters(name, paramTypes));
+    }
+
+    public MethodSymbol getConstructor(Type... paramTypes) {
+        return methods.get(MethodType.fromParameters(getName(), paramTypes));
+    }
+
+    public TypeVariable getTypeParameter(String name) {
+        return params.get(name);
+    }
+
+    public boolean isClassLike() { return isEnum() || isClass(); }
+    public abstract boolean isEnum();
+    public abstract boolean isClass();
+    public boolean isInterfaceLike() { return isInterface() || isAnnotation(); }
+    public abstract boolean isInterface();
+    public abstract boolean isAnnotation();
+    public abstract boolean isAnonymous();
+    public abstract boolean isInnerClass();
+    public abstract boolean isBoxed();
+    public abstract PrimitiveType unbox();
+    public abstract String getPackageName();
+    public abstract Package getPackage();
+
+    public boolean equals(Object other) {
+        if (other instanceof ClassSymbol) {
+            ClassSymbol sym = (ClassSymbol)other;
+            return getQualifiedName().equals(sym.getQualifiedName());
         }
         return false;
     }
 
-    /**
-     * Determines the hash code of this class
-     * @return the hash code of this class
-     */
-    @Override
     public int hashCode() {
-        return super.hashCode() ^ implementees.hashCode() ^ fields.hashCode() ^
-            methods.hashCode() ^ pkg.hashCode();
+        return getQualifiedName().hashCode();
+    }
+
+    public boolean hasTypeParameters() {
+        return params.size() > 0;
+    }
+
+    public boolean isGeneric() {
+        return hasTypeParameters();
+    }
+
+    public boolean hasSuperClass() {
+        return getSuperClass() != null;
+    }
+
+    public boolean hasInterfaces() {
+        return interfaces.size() > 0;
+    }
+
+    public abstract String getQualifiedName();
+
+    protected String getQualifiedClassName() {
+        StringBuilder sb = new StringBuilder();
+        {
+            List<String> names = new ArrayList<>();
+            ClassSymbol cur = getDeclaringClass();
+            while (cur != null) {
+                names.add(cur.getName());
+                cur = cur.getDeclaringClass();
+            }
+            for (int i = names.size() - 1; i >= 0; i--) {
+                sb.append(names.get(i));
+                sb.append(".");
+            }
+        }
+
+        sb.append(getName());
+        return sb.toString();
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getTypeName() {
+        StringBuilder sb = new StringBuilder(getQualifiedName());
+        if (hasTypeParameters()) {
+            sb.append("<");
+            sb.append(StringUtils.join(", ",
+                                       getTypeParameters(),
+                                       tp -> tp.getTypeName()));
+            sb.append(">");
+        }
+
+        if (true) { // TODO only an issue for self-referential type parameters like Enum
+            if (hasSuperClass()) {
+                sb.append(" extends ");
+                sb.append(getSuperClass().getName());
+            }
+
+            if (hasInterfaces()) {
+                if (isClass() || isEnum()) {
+                    sb.append(" implements ");
+                } else {
+                    sb.append(" extends ");
+                }
+                sb.append(StringUtils.join(", ",
+                                           getInterfaces(),
+                                           c -> c.getName()));
+            }
+        }
+
+        return sb.toString();
+    }
+
+    public ClassSymbol getClassSymbol() {
+        return this;
+    }
+
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        if (hasModifiers()) {
+            sb.append(getModifiers().toString());
+            sb.append(" ");
+        }
+        if (isEnum()) {
+            sb.append("enum");
+        } else if (isInterface()) {
+            sb.append("interface");
+        } else if (isAnnotation()) {
+            sb.append("@interface");
+        } else {
+            sb.append("class");
+        }
+        sb.append(" ");
+        sb.append(getTypeName());
+        return sb.toString();
+    }
+
+    public String repr() {
+        StringBuilder sb = new StringBuilder(this.toString());
+        sb.append("\n");
+        for (VariableSymbol field : getFields()) {
+            sb.append("field: ");
+            sb.append(field.repr());
+            sb.append("\n");
+        }
+        for (MethodSymbol sym : getConstructors()) {
+            sb.append(sym.repr());
+            sb.append("\n");
+        }
+        for (MethodSymbol sym : getMethods()) {
+            sb.append(sym.repr());
+            sb.append("\n");
+        }
+        return sb.toString();
     }
 }

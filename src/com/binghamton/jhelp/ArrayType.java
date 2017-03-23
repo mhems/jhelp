@@ -1,67 +1,64 @@
 package com.binghamton.jhelp;
 
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.binghamton.jhelp.ast.ASTVisitor;
-import com.binghamton.jhelp.ast.Dimension;
 
 import org.antlr.v4.runtime.Token;
 
 /**
  * Class representing an array type
  */
-public class ArrayType extends ReferenceType {
-    private List<Dimension> dims;
+public class ArrayType extends Type {
+    private Type base;
 
     /**
      * Construct a named array type
-     * @param type the type of the array elements
-     * @param dims the dimensions of the array type
+     * @param base the base Type of the array
      */
-    public ArrayType(Type type, List<Dimension> dims) {
-        super(type.getFirstToken(),
-              dims.get(dims.size()-1).getLastToken(),
-              type.name,
-              type.annotations.getAnnotations());
-        this.dims = dims;
+    public ArrayType(Type base) {
+        this.base = base;
     }
 
-    /**
-     * Augments the type into a new array type
-     * @param dims the dimensions of the array type
-     * @return a new array type with same base type and `dimensions`
-     */
-    @Override
-    public ArrayType augment(List<Dimension> dims) {
-        List<Dimension> newDims = new ArrayList<>(this.dims);
-        newDims.addAll(dims);
-        return new ArrayType(this, newDims);
+    public ArrayType(Type base, AnnotationSymbol[] annotations) {
+        super(annotations);
+        this.base = base;
     }
 
-    /**
-     * Gets the dimensions of this array
-     * @return the dimensions of this array
-     */
-    public List<Dimension> getDimensions() {
-        return dims;
+    public Type getBaseType() {
+        return base;
     }
 
-    /**
-     * Gets the number of dimensions of this array
-     * @return the number of dimensions of this array
-     */
+    public String getTypeName() {
+        return base.getTypeName() + "[]";
+    }
+
     public int rank() {
-        return dims.size();
+        return 1 + base.rank();
     }
 
-    /**
-     * Double dispatch super class and this class on parameter
-     * @param v the visitor to accept
-     */
-    @Override
-    public void accept(ASTVisitor v) {
-        super.accept(v);
-        v.visit(this);
+    public boolean equals(Object other) {
+        if (other instanceof ArrayType) {
+            ArrayType type = (ArrayType)other;
+            return Arrays.equals(annotations, type.annotations) &&
+                base.equals(type);
+        }
+        return false;
+    }
+
+    public int hashCode() {
+        return base.hashCode() ^ annotations.length;
+    }
+
+    public Type erase() {
+        return base.erase();
+    }
+
+    public ClassSymbol getClassSymbol() {
+        return base.getClassSymbol();
+    }
+
+    public ClassSymbol getDeclaringClass() {
+        return base.getDeclaringClass();
     }
 }

@@ -1,18 +1,16 @@
 package com.binghamton.jhelp.ast;
 
-import com.binghamton.jhelp.ClassInterfaceType;
-
-import org.antlr.v4.runtime.Token;
-
 import java.util.List;
 import java.util.ArrayList;
+
+import org.antlr.v4.runtime.Token;
 
 /**
  * A class representing a Java catch block
  */
 public class CatchBlock extends Block {
     private VariableDeclaration var;
-    private List<ClassInterfaceType> types = new ArrayList<>();
+    private List<Expression> types = new ArrayList<>();
 
     /**
      * Construct an empty catch block
@@ -35,7 +33,7 @@ public class CatchBlock extends Block {
      * Adds an exception type this block catches
      * @param type the exception type to catch
      */
-    public void addExceptionType(ClassInterfaceType type) {
+    public void addExceptionType(Expression type) {
         types.add(type);
     }
 
@@ -43,7 +41,7 @@ public class CatchBlock extends Block {
      * Gets the exception types this block catches
      * @return the exception types this block catches
      */
-    public List<ClassInterfaceType> getExceptionTypes() {
+    public List<Expression> getExceptionTypes() {
         return types;
     }
 

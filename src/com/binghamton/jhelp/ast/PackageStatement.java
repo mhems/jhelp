@@ -4,14 +4,11 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.Annotation;
-import com.binghamton.jhelp.Annotations;
-
 /**
  * A class representing a Java package statement
  */
 public class PackageStatement extends Statement {
-    private Annotations annotations;
+    private Annotation[] annotations = {};
     private List<Token> ids;
 
     /**
@@ -27,14 +24,14 @@ public class PackageStatement extends Statement {
                             List<Annotation> annotations) {
         super(ASTNode.getFirstToken(keyword, annotations), last);
         this.ids = ids;
-        this.annotations = new Annotations(annotations);
+        this.annotations = annotations.toArray(this.annotations);
     }
 
     /**
      * Gets the annotations, if any, of this package declaration
      * @return the annotations, if any, of this package declaration
      */
-    public Annotations getAnnotations() {
+    public Annotation[] getAnnotations() {
         return annotations;
     }
 
@@ -51,7 +48,8 @@ public class PackageStatement extends Statement {
      * @return the period-separated name of the declared package
      */
     public String getName() {
-        return getText();
+        String[] names = ids.stream().map(t -> t.getText()).toArray(i -> new String[i]);
+        return String.join(".", names);
     }
 
     /**

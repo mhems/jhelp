@@ -5,16 +5,14 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.ClassInterfaceType;
 import com.binghamton.jhelp.Modifier;
-import com.binghamton.jhelp.TypeParameter;
 
 /**
  * A class representing a Java class declaration
  */
 public class ClassDeclaration extends ConcreteBodyDeclaration {
     private List<TypeParameter> typeParams = new ArrayList<>();
-    private ClassInterfaceType superClass; // Object
+    private Expression superClass = new NilExpression();
 
     /**
      * Construct an anonymous class declaration
@@ -28,6 +26,7 @@ public class ClassDeclaration extends ConcreteBodyDeclaration {
      * @param name the name of the class
      * @param keyword the class keyword of this declaration
      * @param modifiers the class modifiers, if any
+     * @param annotations the annotations of this declaration
      * @param superInterfaces the list of implemented interfaces, if any
      * @param typeParams type parameters of the class, if any
      * @param superClass the name of the super class, if any
@@ -35,10 +34,11 @@ public class ClassDeclaration extends ConcreteBodyDeclaration {
     public ClassDeclaration(Token name,
                             Token keyword,
                             List<Modifier> modifiers,
-                            List<ClassInterfaceType> superInterfaces,
+                            List<Annotation> annotations,
+                            List<Expression> superInterfaces,
                             List<TypeParameter> typeParams,
-                            ClassInterfaceType superClass) {
-        super(name, keyword, modifiers, superInterfaces);
+                            Expression superClass) {
+        super(name, keyword, modifiers, annotations, superInterfaces);
         this.typeParams = typeParams;
         this.superClass = superClass;
     }
@@ -63,7 +63,7 @@ public class ClassDeclaration extends ConcreteBodyDeclaration {
      * Gets this class's super class
      * @return this class's super class
      */
-    public ClassInterfaceType getSuperClass() {
+    public Expression getSuperClass() {
         return superClass;
     }
 
@@ -72,7 +72,7 @@ public class ClassDeclaration extends ConcreteBodyDeclaration {
      * @return true iff this class has a super class
      */
     public boolean hasSuperClass() {
-        return superClass != null;
+        return !superClass.isNil();
     }
 
     /**

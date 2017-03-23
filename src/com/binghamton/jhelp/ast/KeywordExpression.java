@@ -1,5 +1,7 @@
 package com.binghamton.jhelp.ast;
 
+import java.util.List;
+
 import org.antlr.v4.runtime.Token;
 
 /**
@@ -15,13 +17,18 @@ public class KeywordExpression extends IdentifierExpression {
         super(keyword);
     }
 
+    public KeywordExpression(Token keyword,
+                             List<Annotation> annotations) {
+        super(keyword, annotations);
+    }
+
     /**
      * Double dispatch this class on parameter
      * @param v the visitor to accept
      */
     @Override
     public void accept(ASTVisitor v) {
-        super.accept(v);
+        // super.accept(v);
         v.visit(this);
     }
 }

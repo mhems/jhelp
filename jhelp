@@ -1,7 +1,24 @@
 #!/usr/bin/env bash
 
-CP='target/jhelp.jar:lib/antlr-4.6-complete.jar'
+USAGE="Usage: $0 [-m MAIN] [ARGS...]"
+
+CWD=/home/matt/Documents/Computer_Science/dev/jhelp
+CP="$CWD/target/jhelp.jar:$CWD/lib/antlr-4.6-complete.jar"
+# CP='target/jhelp.jar:lib/antlr-4.6-complete.jar'
 PKG='com.binghamton.jhelp'
 MAIN='JHelp'
+
+if [ "$1" = "-m" ]
+then
+    if [ -n "$2" ]
+    then
+        MAIN="$2"
+        shift
+        shift
+    else
+        echo $USAGE
+        exit
+    fi
+fi
 
 java -cp "$CP" "${PKG}.${MAIN}" "$@"

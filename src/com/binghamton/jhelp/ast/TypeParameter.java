@@ -1,19 +1,20 @@
-package com.binghamton.jhelp;
+package com.binghamton.jhelp.ast;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.ast.ASTVisitor;
-import com.binghamton.jhelp.ast.ASTNode;
+import com.binghamton.jhelp.TypeVariable;
 
 /**
  * A class representing a Java type parameter
  */
 public class TypeParameter extends ASTNode {
+    private Token name;
+    private List<Expression> superTypes = new ArrayList<>();
     private TypeVariable type;
-    private List<ReferenceType> superTypes = new ArrayList<>();
+    private Annotation[] annotations;
 
     /**
      * Construct a named type parameter
@@ -40,26 +41,35 @@ public class TypeParameter extends ASTNode {
      */
     public TypeParameter(Token name,
                          List<Annotation> annotations,
-                         List<ReferenceType> superTypes) {
+                         List<Expression> superTypes) {
         super(ASTNode.getFirstToken(name, annotations),
               ASTNode.getLastToken(name, superTypes));
-        type = new TypeVariable(name, annotations);
+        this.annotations = annotations.toArray(new Annotation[annotations.size()]);
+        this.name = name;
         this.superTypes = superTypes;
+    }
+
+    public Annotation[] getAnnotations() {
+        return annotations;
     }
 
     /**
      * Gets the underlying type variable of this parameter
      * @return the underlying type variable of this parameter
      */
-    public TypeVariable getType() {
-        return type;
+    public String getName() {
+        return name.getText();
+    }
+
+    public Token getToken() {
+        return name;
     }
 
     /**
      * Gets the super types of this parameter, if any
      * @return the super types of this parameter, if any
      */
-    public List<ReferenceType> getSuperTypes() {
+    public List<Expression> getSuperTypes() {
         return superTypes;
     }
 
@@ -67,7 +77,7 @@ public class TypeParameter extends ASTNode {
      * Determines if this parameters has any super types
      * @return true iff this parameters has any super types
      */
-    public boolean hasSuperType() {
+    public boolean hasSuperTypes() {
         return numSuperTypes() > 0;
     }
 
@@ -83,7 +93,7 @@ public class TypeParameter extends ASTNode {
      * Adds a super type to this type parameter
      * @param superType the super type of this type parameter
      */
-    public void addSuperType(ReferenceType superType) {
+    public void addSuperType(Expression superType) {
         superTypes.add(superType);
     }
 
@@ -95,5 +105,13 @@ public class TypeParameter extends ASTNode {
     public void accept(ASTVisitor v) {
         super.accept(v);
         v.visit(this);
+    }
+
+    public TypeVariable getType() {
+        return type;
+    }
+
+    public void setType(TypeVariable type) {
+        this.type = type;
     }
 }

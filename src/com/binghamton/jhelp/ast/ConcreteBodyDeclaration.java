@@ -5,7 +5,6 @@ import java.util.ArrayList;
 
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.ClassInterfaceType;
 import com.binghamton.jhelp.Modifier;
 
 /**
@@ -13,8 +12,7 @@ import com.binghamton.jhelp.Modifier;
  * This includes classes and enums.
  */
 public abstract class ConcreteBodyDeclaration extends BodyDeclaration {
-    protected List<ClassInterfaceType> implementees = new ArrayList<>();
-    protected List<MethodDeclaration> methods = new ArrayList<>();
+    protected List<Expression> implementees = new ArrayList<>();
     protected List<MethodDeclaration> ctors = new ArrayList<>();
     protected List<Block> instanceInitializers = new ArrayList<>();
     protected List<Block> staticInitializers = new ArrayList<>();
@@ -31,13 +29,15 @@ public abstract class ConcreteBodyDeclaration extends BodyDeclaration {
      * @param name the name of the declaration
      * @param keyword the keyword of the declaration
      * @param modifiers the modifiers of the declaration
+     * @param annotations the annotations of this declaration
      * @param implementees the interfaces this declaration implements
      */
     public ConcreteBodyDeclaration(Token name,
                                    Token keyword,
                                    List<Modifier> modifiers,
-                                   List<ClassInterfaceType> implementees) {
-        super(name, keyword, modifiers);
+                                   List<Annotation> annotations,
+                                   List<Expression> implementees) {
+        super(name, keyword, modifiers, annotations);
         this.implementees = implementees;
     }
 
@@ -53,32 +53,8 @@ public abstract class ConcreteBodyDeclaration extends BodyDeclaration {
      * Gets the implemented interfaces of this declaration
      * @return the implemented interfaces of this declaration
      */
-    public List<ClassInterfaceType> getSuperInterfaces() {
+    public List<Expression> getSuperInterfaces() {
         return implementees;
-    }
-
-    /**
-     * Gets the methods of this declaration
-     * @return the methods of this declaration
-     */
-    public List<MethodDeclaration> getMethods() {
-        return methods;
-    }
-
-    /**
-     * Adds a method declaration to this body
-     * @param decl the declaration to add
-     */
-    public void addMethod(MethodDeclaration decl) {
-        methods.add(decl);
-    }
-
-    /**
-     * Gets the number of methods declared in this body
-     * @return the number of methods declared in this body
-     */
-    public int numMethods() {
-        return methods.size();
     }
 
     /**
@@ -135,6 +111,16 @@ public abstract class ConcreteBodyDeclaration extends BodyDeclaration {
      */
     public void addStaticInitializer(Block init) {
         staticInitializers.add(init);
+    }
+
+    public boolean isEmpty() {
+        return getFields().isEmpty() &&
+            getInnerBodies().isEmpty() &&
+            getInnerInterfaces().isEmpty() &&
+            getStaticInitializers().isEmpty() &&
+            getInstanceInitializers().isEmpty() &&
+            getMethods().isEmpty() &&
+            getConstructors().isEmpty();
     }
 
     /**

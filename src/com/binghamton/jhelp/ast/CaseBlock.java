@@ -4,8 +4,6 @@ import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.antlr.v4.runtime.Token;
-
 /**
  * A class representing a Java case block of a Java switch statement
  */
@@ -63,7 +61,8 @@ public class CaseBlock extends Block {
      */
     @Override
     public void accept(ASTVisitor v) {
-        super.accept(v);
+        // Case block is not really a scope-delimiting Block, just a sequence of
+        // Statements. Thus do not visit Block superclass.
         v.visit(this);
     }
 }

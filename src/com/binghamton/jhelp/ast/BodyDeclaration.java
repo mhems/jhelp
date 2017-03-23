@@ -5,8 +5,8 @@ import java.util.ArrayList;
 
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.ClassInterfaceType;
 import com.binghamton.jhelp.Modifier;
+import com.binghamton.jhelp.MyClassSymbol;
 
 /**
  * An abstract class representing a structure declaration.
@@ -14,8 +14,10 @@ import com.binghamton.jhelp.Modifier;
  */
 public abstract class BodyDeclaration extends Declaration {
     protected List<VariableDeclaration> fields = new ArrayList<>();
+    protected List<MethodDeclaration> methods = new ArrayList<>();
     protected List<ConcreteBodyDeclaration> innerBodies = new ArrayList<>();
     protected List<AbstractBodyDeclaration> innerInterfaces = new ArrayList<>();
+    protected boolean inner = false;
 
     /**
      * Construct an empty body declaration
@@ -29,11 +31,21 @@ public abstract class BodyDeclaration extends Declaration {
      * @param name the name of this declaration
      * @param keyword the keyword of this declaration
      * @param modifiers the modifiers of this declaration
+     * @param annotations the annotations of this declaration
      */
     public BodyDeclaration(Token name,
                            Token keyword,
-                           List<Modifier> modifiers) {
-        super(name, keyword, modifiers);
+                           List<Modifier> modifiers,
+                           List<Annotation> annotations) {
+        super(name, keyword, modifiers, annotations);
+    }
+
+    public boolean isInnerDeclaration() {
+        return inner;
+    }
+
+    public void setInnerDeclaration(boolean inner) {
+        this.inner = inner;
     }
 
     /**
@@ -58,6 +70,30 @@ public abstract class BodyDeclaration extends Declaration {
      */
     public List<AbstractBodyDeclaration> getInnerInterfaces() {
         return innerInterfaces;
+    }
+
+    /**
+     * Gets the methods of this declaration
+     * @return the methods of this declaration
+     */
+    public List<MethodDeclaration> getMethods() {
+        return methods;
+    }
+
+    /**
+     * Adds a method declaration to this body
+     * @param decl the declaration to add
+     */
+    public void addMethod(MethodDeclaration decl) {
+        methods.add(decl);
+    }
+
+    /**
+     * Gets the number of methods declared in this body
+     * @return the number of methods declared in this body
+     */
+    public int numMethods() {
+        return methods.size();
     }
 
     /**
@@ -106,6 +142,10 @@ public abstract class BodyDeclaration extends Declaration {
      */
     public int numInnerInterfaces() {
         return innerInterfaces.size();
+    }
+
+    public MyClassSymbol getSymbol() {
+        return (MyClassSymbol)sym;
     }
 
     /**

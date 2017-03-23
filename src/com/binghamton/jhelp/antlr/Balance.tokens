@@ -1,0 +1,17 @@
+CharacterLiteral=1
+StringLiteral=2
+LPAREN=3
+RPAREN=4
+LBRACE=5
+RBRACE=6
+LBRACK=7
+RBRACK=8
+WS=9
+COMMENT=10
+LINE_COMMENT=11
+'('=3
+')'=4
+'{'=5
+'}'=6
+'['=7
+']'=8

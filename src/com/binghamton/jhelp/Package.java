@@ -1,16 +1,23 @@
 package com.binghamton.jhelp;
 
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A class representing a Java package
  */
 public class Package {
-    public static final Package DEFAULT_PACKAGE = new Package("");
+    public static final Package DEFAULT_PACKAGE = new Package("<DEFAULT>") {
+            public boolean isDefault() {
+                return true;
+            }
+        };
+
     private String name;
-    private Set<Symbol> symbols = new TreeSet<>();
-    private Set<Package> subpackages = new TreeSet<>();
+    private NamedSymbolTable<ClassSymbol> classes = new NamedSymbolTable<>();
+    private Package parent;
+    private List<Package> children = new ArrayList<>();
+    private AnnotationSymbol[] annotations = {};
 
     /**
      * Constructs a new Package with name `name`
@@ -18,6 +25,13 @@ public class Package {
      */
     public Package(String name) {
         this.name = name;
+    }
+
+    public Package makeChildPackage(String childName) {
+        Package child = new Package(childName);
+        child.parent = this;
+        addSubPackage(child);
+        return child;
     }
 
     /**
@@ -28,20 +42,57 @@ public class Package {
         return name;
     }
 
-    /**
-     * Gets the symbols within this package
-     * @return the symbols within this package
-     */
-    public Set<Symbol> getSymbols() {
-        return symbols;
+    public void setParent(Package pkg) {
+        parent = pkg;
+    }
+
+    public boolean hasParent() {
+        return parent != null;
+    }
+
+    public String getQualifiedName() {
+        String qname = getName();
+        if (hasParent()) {
+            qname = parent.getQualifiedName() + "." + qname;
+        }
+        return qname;
+    }
+
+    public boolean addClass(ClassSymbol cls) {
+        return classes.put(cls);
+    }
+
+    public AnnotationSymbol[] getAnnotations() {
+        return annotations;
+    }
+
+    public void setAnnotations(AnnotationSymbol[] annotations) {
+        this.annotations = annotations;
+    }
+
+    public NamedSymbolTable<ClassSymbol> getClassTable() {
+        return classes;
     }
 
     /**
      * Gets the packages within this package
      * @return the packages within this package
      */
-    public Set<Package> getSubPackages() {
-        return subpackages;
+    public List<Package> getSubPackages() {
+        return children;
+    }
+
+    public boolean hasSubPackages() {
+        return children.size() > 0;
+    }
+
+    public Package getSubPackage(String name) {
+        for (Package p : children) {
+            if (p.getName().equals(name)) {
+                return p;
+            }
+        }
+        return null;
     }
 
     /**
@@ -49,41 +100,15 @@ public class Package {
      * @return true iff this package is the default package
      */
     public boolean isDefault() {
-        return this.equals(DEFAULT_PACKAGE);
-    }
-
-    /**
-     * Attempts to add a symbol to the package
-     * @param sym the symbol to attempt to add
-     * @return true iff the symbol was added, false otherwise
-     */
-    public boolean addSymbol(Symbol sym) {
-        return symbols.add(sym);
+        return false;
     }
 
     /**
      * Attempts to add a subpackage to the package
      * @param subPkg the package to attempt to add
-     * @return true iff the package was added, false otherwise
      */
-    public boolean addSubPackage(Package subPkg) {
-        return subpackages.add(subPkg);
-    }
-
-    /**
-     * Gets the number of symbols within this package
-     * @return the number of symbols within this package
-     */
-    public int numSymbols() {
-        return symbols.size();
-    }
-
-    /**
-     * Gets the number of packages within this package
-     * @return the number of packages within this package
-     */
-    public int numSubPackages() {
-        return subpackages.size();
+    public void addSubPackage(Package subPkg) {
+        children.add(subPkg);
     }
 
     /**
@@ -92,7 +117,7 @@ public class Package {
      */
     @Override
     public int hashCode() {
-        return name.hashCode() ^ symbols.hashCode() ^ subpackages.hashCode();
+        return getQualifiedName().hashCode();
     }
 
     /**
@@ -103,11 +128,25 @@ public class Package {
     @Override
     public boolean equals(Object other) {
         if (other instanceof Package) {
-            Package otherPkg = (Package)other;
-            return name.equals(otherPkg.name) &&
-                symbols.equals(otherPkg.symbols) &&
-                subpackages.equals(otherPkg.subpackages);
+            Package pkg = (Package)other;
+            return getQualifiedName().equals(pkg.getQualifiedName());
         }
         return false;
+    }
+
+    public String repr() {
+        StringBuilder sb = new StringBuilder("package ");
+        sb.append(name);
+        sb.append("\n");
+        sb.append("declares:\n");
+        sb.append(classes.repr());
+        if (hasSubPackages()) {
+            sb.append("\nhas children: \n");
+            for (Package cp : children) {
+                sb.append(cp.repr());
+                sb.append("\n");
+            }
+        }
+        return sb.toString();
     }
 }

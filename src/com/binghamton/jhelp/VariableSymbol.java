@@ -1,132 +1,65 @@
 package com.binghamton.jhelp;
 
-import com.binghamton.jhelp.ast.Expression;
-
 import org.antlr.v4.runtime.Token;
+
 /**
- * A class representing a Java variable at any scope
+ * A base class representing a Java variable at any scope
  */
-public class VariableSymbol extends Symbol {
+public abstract class VariableSymbol extends Symbol {
+        {
+            kind = SymbolKind.VARIABLE;
+        }
+
+    public enum VariableKind {FIELD, LOCAL, PARAMETER};
+
+    private VariableKind varKind;
     private Type type;
-    private Scope scope;
-    private Expression value;
 
-    /**
-     * Constructs a new named, typed variable
-     * @param id the name of the variable
-     * @param type the type of the variable
-     */
-    public VariableSymbol(String id, Type type) {
-        this(id, type, null, null);
+    public VariableSymbol(String name, int modifiers) {
+        super(name, modifiers);
     }
 
-    /**
-     * Constructs a new named, typed, scoped variable
-     * @param id the name of the variable
-     * @param type the type of the variable
-     * @param scope the scope the variable
-     */
-    public VariableSymbol(String id, Type type, Scope scope) {
-        this(id, type, scope, null);
-    }
-
-    /**
-     * Constructs a new named, typed, scoped variable with initial value
-     * @param id the name of the variable
-     * @param type the type of the variable
-     * @param scope the scope the variable
-     * @param value the value the variable
-     */
-    public VariableSymbol(String id, Type type, Scope scope, Expression value) {
-        super(id);
-        this.type = type;
-        this.scope = scope;
-        this.value = value;
+    public VariableSymbol(String name, Modifiers modifiers) {
+        super(name, modifiers);
     }
 
     /**
      * Gets the type of this variable
      * @return the type of this variable
      */
-    public Type getType() {
-        return type;
+    public abstract Type getType();
+
+    public VariableKind getVariableKind() {
+        return varKind;
     }
 
-    /**
-     * Gets the scope of this variable
-     * @return the scope of this variable
-     */
-    public Scope getScope() {
-        return scope;
+    public void setVariableKind(VariableKind kind) {
+        varKind = kind;
     }
 
-    /**
-     * Determines if this variable has been initialized
-     * @return true iff this variable holds some value
-     */
-    public boolean isInitialized() {
-        return value != null;
+    public String toString() {
+        StringBuilder sb = new StringBuilder(getModifiers().toString());
+        sb.append(" ");
+        sb.append(getType().getTypeName());
+        sb.append(" ");
+        sb.append(getName());
+        return sb.toString();
     }
 
-    /**
-     * Gets the value expression of this variable, if any
-     * @return the value expression of this variable,
-     *         null iff variable is uninitialized
-     */
-    public Expression getValue() {
-        return value;
-    }
-
-    /**
-     * Sets this variable's type
-     * @param type this variable's type
-     */
-    public void setType(Type type) {
-        this.type = type;
-    }
-
-    /**
-     * Sets this variable's scope
-     * @param scope this variable's scope
-     */
-    public void setScope(Scope scope) {
-        this.scope = scope;
-    }
-
-    /**
-     * Sets this variable's value
-     * @param value this variable's value
-     */
-    public void setValue(Expression value) {
-        this.value = value;
-    }
-
-    /**
-     * Determines if this variable is equivalent to another
-     * @param other the other Object to compare against
-     * @return true iff this symbol is equivalent ot `other`
-     */
-    @Override
     public boolean equals(Object other) {
-        if (super.equals(other)) {
-            if (other instanceof VariableSymbol) {
-                VariableSymbol var = (VariableSymbol)other;
-                return type.equals(var.type) &&
-                    scope.equals(var.scope) &&
-                    ((value == null && var.value == null) ||
-                     (value != null && value.equals(var.value)));
-            }
+        if (other instanceof VariableSymbol) {
+            VariableSymbol sym = (VariableSymbol)other;
+            return getName().equals(sym.getName()) &&
+                varKind == sym.varKind &&
+                getDeclaringClass().equals(sym.getDeclaringClass()) &&
+                getType().equals(sym.getType());
         }
         return false;
     }
 
-    /**
-     * Determines the hash code of this variable
-     * @return the hash code of this variable
-     */
-    @Override
     public int hashCode() {
-        return super.hashCode() ^ type.hashCode() ^
-            scope.hashCode() ^ value.hashCode();
+        return getName().hashCode() ^
+            getDeclaringClass().hashCode() ^
+            getType().hashCode();
     }
 }

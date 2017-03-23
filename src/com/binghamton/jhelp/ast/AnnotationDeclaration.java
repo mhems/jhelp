@@ -16,11 +16,13 @@ public class AnnotationDeclaration extends AbstractBodyDeclaration {
      * @param name the token holding the name of the annotation
      * @param at the token holding the @ symbol
      * @param modifiers the modifiers of the annotation
+     * @param annotations the annotations of this declaration
      */
     public AnnotationDeclaration(Token name,
                                  Token at,
-                                 List<Modifier> modifiers) {
-        super(name, at, modifiers);
+                                 List<Modifier> modifiers,
+                                 List<Annotation> annotations) {
+        super(name, at, modifiers, annotations);
     }
 
     /**

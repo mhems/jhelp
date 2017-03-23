@@ -5,7 +5,6 @@ import java.util.ArrayList;
 
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.ClassInterfaceType;
 import com.binghamton.jhelp.Modifier;
 
 /**
@@ -19,13 +18,15 @@ public class EnumDeclaration extends ConcreteBodyDeclaration {
      * @param name the name of the declaration
      * @param keyword the keyword Token of this declaration
      * @param modifiers the modifiers of the declaration
+     * @param annotations the annotations of this declaration
      * @param implementees the interfaces this declaration implements
      */
     public EnumDeclaration(Token name,
                            Token keyword,
                            List<Modifier> modifiers,
-                           List<ClassInterfaceType> implementees) {
-        super(name, keyword, modifiers, implementees);
+                           List<Annotation> annotations,
+                           List<Expression> implementees) {
+        super(name, keyword, modifiers, annotations, implementees);
     }
 
     /**

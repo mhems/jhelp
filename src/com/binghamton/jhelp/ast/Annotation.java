@@ -1,36 +1,37 @@
-package com.binghamton.jhelp;
+package com.binghamton.jhelp.ast;
 
 import java.util.Map;
 import java.util.HashMap;
 
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.ast.ASTVisitor;
-import com.binghamton.jhelp.ast.Expression;
-
 /**
- * A class representing a Java annotation
+ * A class representing the use of Java annotation
  */
-public class Annotation extends Modifier {
+public class Annotation extends Expression {
+// must extend Expression for element-value pairs
     private Map<Token, Expression> nameValueMap = new HashMap<>();
     private Expression expr;
 
     /**
-     * Construct a marker or normal annotation
+     * Construct an annotation
+     * @param at the '@' Token
      * @param expr the type Token of the annotation
      */
-    public Annotation(Expression expr) {
-        super(expr);
+    public Annotation(Token at, Expression expr) {
+        super(at, expr.getLastToken());
         this.expr = expr;
     }
 
     /**
      * Construct a single element annotation
+     * @param at the '@' Token
+     * @param last the terminating ')' Token
      * @param expr the type name of the annotation
      * @param value the single element's value
      */
-    public Annotation(Expression expr, Expression value) {
-        super(expr);
+    public Annotation(Token at, Token last, Expression expr, Expression value) {
+        super(at, last);
         this.expr = expr;
         nameValueMap.put(null, value);
     }
@@ -75,7 +76,7 @@ public class Annotation extends Modifier {
         if (isSingleElement()) {
             return nameValueMap.get(null);
         }
-        throw new RuntimeException(); // TODO
+        return null;
     }
 
     /**
@@ -83,10 +84,7 @@ public class Annotation extends Modifier {
      * @return the mapping from argument name to value
      */
     public Map<Token, Expression> getArguments() {
-        if (isNormal()) {
-            return nameValueMap;
-        }
-        throw new RuntimeException(); // TODO
+        return nameValueMap;
     }
 
     /**
@@ -104,10 +102,7 @@ public class Annotation extends Modifier {
      * @return the value of the argument with name `name`
      */
     public Expression getValue(Token name) {
-        if (isNormal()) {
-            return nameValueMap.get(name);
-        }
-        throw new RuntimeException(); // TODO
+        return nameValueMap.get(name);
     }
 
     /**

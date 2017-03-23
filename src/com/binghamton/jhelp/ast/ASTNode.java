@@ -3,22 +3,25 @@ package com.binghamton.jhelp.ast;
 import java.util.Comparator;
 import java.util.List;
 
+import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.Interval;
+
+import com.binghamton.jhelp.antlr.MyToken;
 
 /**
  * Base class representing a node in the AST
  */
 public abstract class ASTNode implements Visitable, Comparable<ASTNode> {
-    private Token first;
-    private Token last;
+    private MyToken first;
+    private MyToken last;
     private boolean singular;
 
     /**
      * A comparator that orders Tokens from the same source lexicographically
      */
-    protected static final Comparator<Token> tokenComparator =
-        Comparator.<Token>comparingInt(t -> t.getLine())
+    protected static final Comparator<MyToken> tokenComparator =
+        Comparator.<MyToken>comparingInt(t -> t.getLine())
               .thenComparingInt(t -> t.getCharPositionInLine())
               .thenComparingInt(t -> t.getStopIndex());
 
@@ -35,8 +38,7 @@ public abstract class ASTNode implements Visitable, Comparable<ASTNode> {
      * @param token the sole Token of this ASTNode
      */
     public ASTNode(Token token) {
-        first = last = token;
-        singular = true;
+        this(token, token);
     }
 
 
@@ -46,8 +48,8 @@ public abstract class ASTNode implements Visitable, Comparable<ASTNode> {
      * @param last the last token of this ASTNode
      */
     public ASTNode(Token first, Token last) {
-        this.first = first;
-        this.last = last;
+        setFirstToken(first);
+        setLastToken(last);
         setSingular();
     }
 
@@ -58,8 +60,8 @@ public abstract class ASTNode implements Visitable, Comparable<ASTNode> {
      */
     public <E extends ASTNode> ASTNode(List<E> nodes) {
         if (!nodes.isEmpty()) {
-            first = nodes.get(0).getFirstToken();
-            last = nodes.get(nodes.size()-1).getLastToken();
+            setFirstToken(nodes.get(0).getFirstToken());
+            setLastToken(nodes.get(nodes.size()-1).getLastToken());
             setSingular();
         }
     }
@@ -102,7 +104,10 @@ public abstract class ASTNode implements Visitable, Comparable<ASTNode> {
      * @param first the first token of this ASTNode
      */
     public void setFirstToken(Token first) {
-        this.first = first;
+        if (!(first instanceof MyToken)) {
+            throw new IllegalArgumentException("AST Node tokens must be MyTokens");
+        }
+        this.first = (MyToken)first;
         setSingular();
     }
 
@@ -119,8 +124,15 @@ public abstract class ASTNode implements Visitable, Comparable<ASTNode> {
      * @param last the last token of this ASTNode
      */
     public void setLastToken(Token last) {
-        this.last = last;
-        setSingular();
+        if (last == null) {
+            this.last = first;
+            singular = true;
+        } else if (!(last instanceof MyToken)) {
+            throw new IllegalArgumentException("AST Node tokens must be MyTokens");
+        } else {
+            this.last = (MyToken)last;
+            setSingular();
+        }
     }
 
     /**
@@ -156,12 +168,24 @@ public abstract class ASTNode implements Visitable, Comparable<ASTNode> {
         v.visit(this);
     }
 
+    /**
+     * Gets the text of this Node's tokens
+     * @return the text of this Node's tokens
+     */
     public String getText() {
         if (isNil()) {
             return "";
         }
-        return first.getInputStream().getText(Interval.of(first.getTokenIndex(),
-                                                          last.getTokenIndex()));
+        return first.getTextUpTo(last);
+    }
+
+    /**
+     * Gets the text of the Tokens comprising this ASTNode
+     * @return the text of the Tokens comprising this ASTNode
+     */
+    @Override
+    public String toString() {
+        return getText();
     }
 
     /**

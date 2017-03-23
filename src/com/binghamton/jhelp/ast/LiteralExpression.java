@@ -9,7 +9,6 @@ import com.binghamton.jhelp.Type;
  */
 public class LiteralExpression extends Expression {
     private String value;
-    private Type type;
 
     /**
      * Construct a new LiteralExpression
@@ -28,14 +27,6 @@ public class LiteralExpression extends Expression {
      */
     public String getValue() {
         return value;
-    }
-
-    /**
-     * Gets the type of this literal
-     * @return the type of this literal
-     */
-    public Type getType() {
-        return type;
     }
 
     /**

@@ -18,11 +18,13 @@ public abstract class AbstractBodyDeclaration extends BodyDeclaration {
      * @param name the name of this declaration
      * @param keyword the keyword token of this declaration
      * @param modifiers the modifiers of this declaration
+     * @param annotations the annotations of this declaration
      */
     public AbstractBodyDeclaration(Token name,
                                    Token keyword,
-                                   List<Modifier> modifiers) {
-        super(name, keyword, modifiers);
+                                   List<Modifier> modifiers,
+                                   List<Annotation> annotations) {
+        super(name, keyword, modifiers, annotations);
     }
 
     /**

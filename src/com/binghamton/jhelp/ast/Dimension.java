@@ -4,14 +4,15 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.Annotation;
-import com.binghamton.jhelp.Annotations;
-
 /**
  * Class representing a dimension
  */
 public class Dimension extends ASTNode {
-    private Annotations annotations;
+    private Annotation[] annotations = {};
+
+    public Dimension(Token ellipsis) {
+        this(ellipsis, ellipsis);
+    }
 
     /**
      * Construct a new Dimension object
@@ -20,7 +21,6 @@ public class Dimension extends ASTNode {
      */
     public Dimension(Token first, Token last) {
         super(first, last);
-        this.annotations = new Annotations();
     }
 
     /**
@@ -31,14 +31,14 @@ public class Dimension extends ASTNode {
      */
     public Dimension(Token first, Token last, List<Annotation> annotations) {
         super(ASTNode.getFirstToken(first, annotations), last);
-        this.annotations = new Annotations(annotations);
+        this.annotations = annotations.toArray(this.annotations);
     }
 
     /**
      * Gets the annotations of this expression
      * @return the annotations of this expression
      */
-    public Annotations getAnnotations() {
+    public Annotation[] getAnnotations() {
         return annotations;
     }
 

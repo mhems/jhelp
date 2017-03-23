@@ -5,8 +5,6 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.TypeArgument;
-
 /**
  * A class representing a Java method call, including explicit constructor calls
  */

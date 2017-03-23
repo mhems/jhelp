@@ -6,40 +6,43 @@ import java.util.List;
 import org.antlr.v4.runtime.Token;
 
 import com.binghamton.jhelp.Modifier;
-import com.binghamton.jhelp.Type;
-import com.binghamton.jhelp.TypeParameter;
+import com.binghamton.jhelp.MyMethodSymbol;
 
 /**
  * A class representing the declaration of a Java method
  */
 public class MethodDeclaration extends Declaration {
-    private Type returnType;
+    private Expression returnType = new NilExpression();
     private List<VariableDeclaration> params = new ArrayList<>();
-    private List<Type> exceptions = new ArrayList<>();
+    private List<Expression> exceptions = new ArrayList<>();
     private List<TypeParameter> typeParams = new ArrayList<>();
     private Block body = new NilBlock();
+    private Annotation[] returnTypeAnnotations = {};
+    private boolean constructor = false;
 
     /**
      * Construct a method declaration
      * @param modifiers the modifiers of this method
+     * @param annotations the annotations of this method
      */
-    public MethodDeclaration(List<Modifier> modifiers) {
-        super(modifiers);
+    public MethodDeclaration(List<Modifier> modifiers,
+                             List<Annotation> annotations) {
+        super(modifiers, annotations);
     }
 
     /**
      * Sets this method's return type
-     * @param returnType this method's return type
+     * @param returnTypeExpr this method's return type
      */
-    public void setReturnType(Type returnType) {
-        this.returnType = returnType;
+    public void setReturnType(Expression returnTypeExpr) {
+        this.returnType = returnTypeExpr;
     }
 
     /**
      * Gets this method's return type
      * @return this method's return type
      */
-    public Type getReturnType() {
+    public Expression getReturnTypeExpression() {
         return returnType;
     }
 
@@ -63,7 +66,7 @@ public class MethodDeclaration extends Declaration {
      * Sets the exceptions this method throws
      * @param exceptions the exceptions this method throws
      */
-    public void setExceptions(List<Type> exceptions) {
+    public void setExceptions(List<Expression> exceptions) {
         this.exceptions = exceptions;
     }
 
@@ -71,7 +74,7 @@ public class MethodDeclaration extends Declaration {
      * Gets the exceptions this method throws
      * @return the exceptions this method throws
      */
-    public List<Type> getExceptions() {
+    public List<Expression> getExceptions() {
         return exceptions;
     }
 
@@ -89,6 +92,14 @@ public class MethodDeclaration extends Declaration {
      */
     public void setTypeParameters(List<TypeParameter> typeParams) {
         this.typeParams = typeParams;
+    }
+
+    public Annotation[] getReturnTypeAnnotations() {
+        return returnTypeAnnotations;
+    }
+
+    public void setReturnTypeAnnotations(List<Annotation> annotations) {
+         returnTypeAnnotations = annotations.toArray(returnTypeAnnotations);
     }
 
     /**
@@ -113,6 +124,18 @@ public class MethodDeclaration extends Declaration {
      */
     public Block getBody() {
         return body;
+    }
+
+    public MyMethodSymbol getSymbol() {
+        return (MyMethodSymbol)sym;
+    }
+
+    public boolean isConstructor() {
+        return constructor;
+    }
+
+    public void setConstructor(boolean constructor) {
+        this.constructor = constructor;
     }
 
     /**

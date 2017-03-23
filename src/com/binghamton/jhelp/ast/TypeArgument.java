@@ -1,20 +1,21 @@
-package com.binghamton.jhelp;
+package com.binghamton.jhelp.ast;
 
 import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.ast.ASTVisitor;
-import com.binghamton.jhelp.ast.ASTNode;
+import com.binghamton.jhelp.Type;
 
 /**
  * A class representing a Java type argument
  */
 public class TypeArgument extends ASTNode {
-    private ReferenceType type;
-    private Annotations annotations;
+    // either expresses a reference type or wildcard bound
+    private Expression typeExpr = new NilExpression();
+    private Annotation[] annotations = {};
     private boolean isWildcard = false;
     private boolean isUpperBound;
+    private Type type;
 
     /**
      * Construct an empty (diamond) type argument
@@ -27,9 +28,9 @@ public class TypeArgument extends ASTNode {
      * Construct a type argument of a reference type
      * @param type the reference type
      */
-    public TypeArgument(ReferenceType type) {
+    public TypeArgument(Expression type) {
         super(type.getFirstToken(), type.getLastToken());
-        this.type = type;
+        this.typeExpr = type;
     }
 
     /**
@@ -40,7 +41,7 @@ public class TypeArgument extends ASTNode {
     public TypeArgument(Token literal, List<Annotation> annotations) {
         super(ASTNode.getFirstToken(literal, annotations), literal);
         this.isWildcard = true;
-        this.annotations = new Annotations(annotations);
+        this.annotations = annotations.toArray(this.annotations);
     }
 
     /**
@@ -48,21 +49,15 @@ public class TypeArgument extends ASTNode {
      * @return the type of this argument if it is not a wildcard
      * @throws RuntimeException if this argument is a wildcard
      */
-    public ReferenceType getType() {
-        if (!isWildcard()) {
-            return type;
-        }
-        throw new RuntimeException(); // TODO
+    public Expression getTypeExpression() {
+        return typeExpr;
     }
 
     /**
      * Gets the annotations of this type argument
      * @return the annotations of this type argument
      */
-    public Annotations getAnnotations() {
-        if (!isWildcard) {
-            return type.getAnnotations();
-        }
+    public Annotation[] getAnnotations() {
         return annotations;
     }
 
@@ -79,7 +74,11 @@ public class TypeArgument extends ASTNode {
      * @return true iff this argument is empty
      */
     public boolean isDiamond() {
-        return type == null && !isWildcard();
+        return typeExpr.isNil() && !isWildcard();
+    }
+
+    public boolean hasExplicitBound() {
+        return typeExpr.isNil();
     }
 
     /**
@@ -87,20 +86,17 @@ public class TypeArgument extends ASTNode {
      * @return the bounding type if this is a wildcard argument
      * @throws RuntimeException if this is not a wildcard argument
      */
-    public ReferenceType getBoundType() {
-        if (isWildcard()) {
-            return type;
-        }
-        throw new RuntimeException(); // TODO
+    public Expression getBoundType() {
+        return typeExpr;
     }
 
     /**
      * Sets the bounding type of this wildcard argument
      * @param type the bounding type of this wildcard argument
      */
-    public void setBoundType(ReferenceType type) {
-        // TODO change last token
-        this.type = type;
+    public void setBoundType(Expression type) {
+        this.typeExpr = type;
+        setLastToken(type.getLastToken());
     }
 
     /**
@@ -109,9 +105,6 @@ public class TypeArgument extends ASTNode {
      * @throws RuntimeException if this is not a wildcarded argument
      */
     public boolean isUpperBounded() {
-        if (!isWildcard) {
-            throw new RuntimeException(); // TODO
-        }
         return isUpperBound;
     }
 
@@ -132,5 +125,13 @@ public class TypeArgument extends ASTNode {
     public void accept(ASTVisitor v) {
         super.accept(v);
         v.visit(this);
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
     }
 }
