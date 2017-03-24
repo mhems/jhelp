@@ -216,7 +216,7 @@ public class NonNullVisitor extends EmptyVisitor {
      */
     public void visit(CompilationUnit ast) {
         if (ast.hasPackage())
-            ast.getPackage().accept(this);
+            ast.getPackageStatement().accept(this);
         for (ImportStatement s : ast.getImports())
             s.accept(this);
         for (BodyDeclaration d : ast.getBodyDeclarations())

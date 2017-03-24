@@ -50,14 +50,14 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
      *         otherwise null
      */
     public V get(K key) {
-        V sym = getCurrentScope(key);
+        V sym = getFromTable(key);
         if (sym == null && parent != null) {
             sym = parent.get(key);
         }
         return sym;
     }
 
-    protected V getCurrentScope(K key) {
+    protected V getFromTable(K key) {
         V sym = null;
         for (Map<K, V> scope : table) {
             sym = scope.get(key);
@@ -68,6 +68,10 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
         return sym;
     }
 
+    protected V getFromCurrentScope(K key) {
+        return table.peekFirst().get(key);
+    }
+
     /**
      * Attempts to place a Symbol in current scope. Symbol will not be placed if
      * an similarly-named entry already exists in current scope.
@@ -76,7 +80,7 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
      */
     public boolean put(V symbol) {
         K key = valueToKey.apply(symbol);
-        if (isDeclaredInCurrentScope(key)) {
+        if (hasInCurrentScope(key)) {
             System.err.println("table put failed (class " + symbol.getDeclaringClass().getName() + ") - " + symbol.getName() + " already exists in current scope");
             return false;
         }
@@ -108,12 +112,16 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
      * @return true iff the Symbol exists in current scope in this SymbolTable,
      *         false otherwise
      */
-    public boolean isDeclaredInCurrentScope(K key) {
-        return table.peekFirst().containsKey(key);
+    public boolean hasInCurrentScope(K key) {
+        return getFromCurrentScope(key) != null;
+    }
+
+    public boolean hasInTable(K key) {
+        return getFromTable(key) != null;
     }
 
     public boolean shadows(K key) {
-        return !isDeclaredInCurrentScope(key) && has(key);
+        return !hasInCurrentScope(key) && parent.has(key);
     }
 
     public int size() {

@@ -2,6 +2,8 @@ package com.binghamton.jhelp.util;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
@@ -21,7 +23,7 @@ public class SymbolFinder {
             }
         };
     private static final List<String> EMPTY = new ArrayList<>();
-    private static final String EXT = ".class";
+    private static final String EXT = "class";
     private JarFile rt_jar;
     private Map<String, List<String>> cache = new HashMap<>();
 
@@ -30,27 +32,33 @@ public class SymbolFinder {
      * @param filename the name of the jar file to search through
      * @throws IOException if I/O exception occurs during processing `filename`
      */
-    public SymbolFinder(String filename) throws IOException {
-        rt_jar = new JarFile(new File(filename));
+    public SymbolFinder(Path path) throws IOException {
+        rt_jar = new JarFile(path.toFile());
         if (rt_jar != null) {
             ArrayList<String> tokens = new ArrayList<>();
-            String curname, cls, pkg;
+            String curname, cls, pkg, ext;
+            int nDirs;
+            Path tmpPath;
+            String[] parts;
             for (Enumeration<JarEntry> e = rt_jar.entries();
                  e.hasMoreElements();)
             {
-                curname = e.nextElement().getName();
-                if (curname.endsWith(EXT)) {
-                    curname = curname.substring(0,
-                                                curname.length() - EXT.length());
-                    tokens.clear();
-                    tokens.addAll(Arrays.asList(curname.split("/")));
-                    cls = tokens.get(tokens.size()-1);
-                    tokens.remove(tokens.size()-1);
-                    pkg = String.join(".", tokens);
-                    if (!cache.containsKey(cls)) {
-                        cache.put(cls, new ArrayList<>());
+                tmpPath = Paths.get(e.nextElement().getName());
+                nDirs = tmpPath.getNameCount();
+                parts = tmpPath.getName(nDirs - 1).toString().split("\\.");
+                if (parts.length == 2) {
+                    cls = parts[0];
+                    if (parts[1].equals(EXT)) {
+                        pkg = "";
+                        for (int i = 0; i < nDirs - 2; i++) {
+                            pkg += tmpPath.getName(i).toString() + ".";
+                        }
+                        pkg += tmpPath.getName(nDirs - 2).toString();
+                        if (!cache.containsKey(cls)) {
+                            cache.put(cls, new ArrayList<>());
+                        }
+                        cache.get(cls).add(pkg);
                     }
-                    cache.get(cls).add(pkg);
                 }
             }
         }
@@ -63,7 +71,12 @@ public class SymbolFinder {
      *         null if no packages contain a `name` class
      */
     public List<String> search(String name) {
-        return cache.get(name);
+        System.out.println("searching for: " + name);
+        List<String> ret = cache.get(name);
+        if (ret == null) {
+            throw new IllegalArgumentException(name + " does not exist");
+        }
+        return ret;
     }
 
     private SymbolFinder() {

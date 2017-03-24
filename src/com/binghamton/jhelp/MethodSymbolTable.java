@@ -1,5 +1,8 @@
 package com.binghamton.jhelp;
 
+import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Function;
 
 public class MethodSymbolTable extends SymbolTable<MethodType, MethodSymbol> {
@@ -9,7 +12,24 @@ public class MethodSymbolTable extends SymbolTable<MethodType, MethodSymbol> {
         super(TO_TYPE);
     }
 
-    public boolean put(MethodSymbol sym){
-        return super.put(sym);
+    public Set<MethodSymbol> getAll(String name) {
+        Set<MethodSymbol> ret = new HashSet<>();
+        Set<MethodType> types = new HashSet<>();
+        for (MethodSymbol sym : this) {
+            if (sym.getName().equals(name)) {
+                if (types.add(sym.getType())) {
+                    ret.add(sym);
+                }
+            }
+        }
+        return ret;
+    }
+
+    public boolean overrides(MethodSymbol sym) {
+        return overrides(sym.getType());
+    }
+
+    public boolean overrides(MethodType key) {
+        return !hasInTable(key) && parent.has(key);
     }
 }

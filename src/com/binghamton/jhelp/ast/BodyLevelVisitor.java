@@ -37,10 +37,7 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
                                                  Modifier.NATIVE,
                                                  Modifier.STRICT_FP,
                                                  Modifier.SYNCHRONIZED};
-    private static final ClassSymbol THROWABLE = ImportManager.get("java.lang.Throwable");
-    private static final ClassSymbol CLASS = ReflectedClassSymbol.get(java.lang.Class.class);
-    private static final MethodSymbol FINALIZE;
-
+    private static MethodSymbol FINALIZE;
     static {
         FINALIZE = ImportManager.get("java.lang.Object").getMethod("finalize");
     }
@@ -60,11 +57,13 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
             currentClass = ast.getSymbol();
         }
 
-        MyVariableSymbol cur;
         for (VariableDeclaration v : ast.getFields()) {
             v.accept(this);
-            cur = v.getSymbol();
-            currentClass.addField(cur);
+            currentClass.addField(v.getSymbol());
+        }
+        for (MethodDeclaration m : ast.getMethods()) {
+            m.accept(this);
+            currentClass.addMethod(m.getSymbol());
         }
     }
 
@@ -73,9 +72,9 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(ConcreteBodyDeclaration ast) {
-        addMethods(ast.getMethods());
-        if (currentClass.isClassLike() && !currentClass.hasModifier(Modifier.ABSTRACT)) {
-            // TODO check all abstract methods have been implemented
+        for (MethodDeclaration ctor : ast.getConstructors()) {
+            ctor.accept(this);
+            currentClass.addConstructor(ctor.getSymbol());
         }
 
         if (currentClass.getConstructors().length == 0) {
@@ -86,6 +85,13 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
             emptyCtor.constructType();
             currentClass.addConstructor(emptyCtor);
         }
+
+        if (currentClass.isClassLike() &&
+            !currentClass.hasModifier(Modifier.ABSTRACT)) {
+            for (MethodSymbol m : currentClass.getUnimplementedMethods()) {
+                System.err.println("cannot leave method " + m.getName() + " unimplemented");
+            }
+        }
     }
 
     /**
@@ -94,6 +100,16 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
      */
     public void visit(ClassDeclaration ast) {
         visitInnerBodies(ast);
+    }
+
+    /**
+     * Visit a CompilationUnit node
+     * @param ast the AST node being visited
+     */
+    public void visit(CompilationUnit ast) {
+        for (BodyDeclaration decl : ast.getBodyDeclarations()) {
+            decl.accept(this);
+        }
     }
 
     /**
@@ -109,10 +125,9 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
         var.setType(currentClass);
         ast.setSymbol(var);
         if (!ast.isEmpty()) {
-            System.out.println("enum constant " + ast.getName() + " is non-empty");
             ast.getBody().accept(this);
         }
-        // TODO enum constant cannot declare abstract methods
+        // TODO enum constant cannot declare abstract methods -- defer to code level anon classes
     }
 
     /**
@@ -121,6 +136,7 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
      */
     public void visit(EnumDeclaration ast) {
         boolean allEmpty = true;
+
         for (EnumConstant c : ast.getConstants()) {
             c.accept(this);
             currentClass.addField(c.getSymbol());
@@ -138,9 +154,9 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
                 hasAbstract = true;
                 break;
             }
-            if (method.getName().equals("finalize") && method.isOverrider()) {
-                System.err.println("enum cannot have a finalizer as it cannot be finalized");
-            }
+            // if (method.getName().equals("finalize") && method.isOverrider()) {
+            //     System.err.println("enum cannot have a finalizer as it cannot be finalized");
+            // }
         }
         if (hasAbstract && (ast.getConstants().size() == 0 || !allEmpty)) {
             System.err.println("enum with implemented constants cannot have abstract methods");
@@ -153,7 +169,6 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(InterfaceDeclaration ast) {
-        addMethods(ast.getMethods());
         visitInnerBodies(ast);
         // TODO cannot declare an override-equivalent public method of Object, with
         // * different return type
@@ -179,10 +194,11 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
     public void visit(MethodDeclaration ast) {
         MyMethodSymbol method = new MyMethodSymbol(ast.getName(), ast.getModifiers());
         int pos;
+
         ast.setSymbol(method);
         method.setDeclaringClass(currentClass);
+        method.setAnnotations(makeAnnotations(ast.getAnnotations()));
 
-        // TODO can this apply to enums too?
         if (currentClass.isClass()) {
             if (method.hasModifier(Modifier.ABSTRACT)) {
                 Modifiers mods = method.getModifiers();
@@ -194,8 +210,7 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
                 if (!ast.getBody().isNil()) {
                     System.err.println("an abstract method must have no body");
                 }
-                if (currentClass.isClass() &&
-                    !currentClass.hasModifier(Modifier.STATIC)) {
+                if (!currentClass.hasModifier(Modifier.ABSTRACT)) {
                     System.err.println("a class with an abstract method must be declared abstract");
                 }
             }
@@ -245,18 +260,11 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
             // TODO 9.4.1.[23]
         }
 
-        if (currentClass.isClassLike()) {
-            if (ast.getBody().isNil() &&
-                !method.hasModifier(Modifier.ABSTRACT) &&
-                !method.hasModifier(Modifier.NATIVE)) {
-                System.err.println("a method with no body must be abstract or native");
-            }
-        }
-
-        if (ast.isConstructor()) {
-            if (!method.getName().equals(currentClass.getName())) {
-                System.err.println("constructors must have same name as class they're declared in");
-            }
+        if (currentClass.isClassLike() &&
+            ast.getBody().isNil() &&
+            !method.hasModifier(Modifier.ABSTRACT) &&
+            !method.hasModifier(Modifier.NATIVE)) {
+            System.err.println("a method with no body must be abstract or native");
         }
 
         if (ast.hasTypeParameters()) {
@@ -289,7 +297,7 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
         for (Expression ex : ast.getExceptions()) {
             ex.accept(this);
             excTypes[pos] = ex.getType();
-            if (!excTypes[pos].isSubTypeOf(THROWABLE)) {
+            if (!excTypes[pos].isSubTypeOf(ImportManager.get("java.lang.Throwable"))) {
                 System.err.println("exceptions a method throws must be a subtype of java.lang.Throwable");
             }
             ++pos;
@@ -297,6 +305,9 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
         method.setExceptionTypes(excTypes);
 
         if (ast.isConstructor()) {
+            if (!method.getName().equals(currentClass.getName())) {
+                System.err.println("constructors must have same name as class they're declared in");
+            }
             method.setConstructor(true);
             method.setReturnType(currentClass);
         } else {
@@ -317,23 +328,15 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
     private boolean validAnnotationReturnType(Type type) {
         if (type instanceof PrimitiveType ||
             type.equals(ImportManager.get("java.lang.String")) ||
-            type.equals(CLASS)) {
+            type.equals(ReflectedClassSymbol.get(java.lang.Class.class))) {
             return true;
         } else if (type instanceof ParameterizedType) {
-            return type.getClassSymbol().equals(CLASS);
+            return type.getClassSymbol().equals(java.lang.Class.class);
         } else if (type instanceof ClassSymbol) {
             ClassSymbol sym = (ClassSymbol)type;
             return sym.isEnum() || sym.isAnnotation();
         }
         return false;
-    }
-
-    /**
-     * Visit a PackageStatement node
-     * @param ast the AST node being visited
-     */
-    public void visit(PackageStatement ast) {
-        pkg = program.getPackage(ast.getName());
     }
 
     /**
@@ -384,18 +387,9 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
         }
     }
 
-    private void addMethods(List<MethodDeclaration> methods) {
-        MyMethodSymbol cur;
-        for (MethodDeclaration m : methods) {
-            m.accept(this);
-            // TODO make sure method is not overriding or hiding final method
-            cur = m.getSymbol();
-            cur.setDeclaringClass(currentClass);
-            if (cur.isConstructor()) {
-                currentClass.addConstructor(cur);
-            } else {
-                currentClass.addMethod(cur);
-            }
+    protected void postVisitHook() {
+        for (ClassSymbol cls : program.getAllClasses()) {
+
         }
     }
 }

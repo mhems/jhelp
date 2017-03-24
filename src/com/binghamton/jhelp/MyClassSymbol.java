@@ -3,15 +3,17 @@ package com.binghamton.jhelp;
 import org.antlr.v4.runtime.Token;
 
 import com.binghamton.jhelp.antlr.MyToken;
+import com.binghamton.jhelp.ast.ASTVisitor;
+import com.binghamton.jhelp.ast.BodyDeclaration;
 
 public class MyClassSymbol extends ClassSymbol {
-    private static final Type[] STRING_PARAM = {ImportManager.get("java.lang.String")};
-    private ClassKind classKind;
+
     private ClassSymbol declarer;
     private boolean anonymous = false;
     private boolean inner = false;
     private Package pkg = Package.DEFAULT_PACKAGE;
     private Token token;
+    private BodyDeclaration AST;
 
     public MyClassSymbol(Token token) {
         super(token.getText());
@@ -83,11 +85,44 @@ public class MyClassSymbol extends ClassSymbol {
     }
 
     public boolean addMethod(MethodSymbol sym) {
-        if (!methods.put(sym)) {
-            System.err.println("class cannot declare same method twice");
-            return false;
+        MethodSymbol parentMethod = null;
+        if (superClass != null) {
+            parentMethod = superClass.getClassSymbol().getMethod(sym);
         }
-        return true;
+        // TODO also have to check overriding interfaces
+        boolean good = true;
+        if (parentMethod != null &&
+            parentMethod.getAccessLevel() != AccessLevel.PRIVATE) {
+            if (parentMethod.hasModifier(Modifier.FINAL)) {
+                System.err.println("cannot override a final method");
+                good = false;
+            } else if (parentMethod.hasModifier(Modifier.STATIC) &&
+                       !sym.hasModifier(Modifier.STATIC)) {
+                System.err.println("an instance method cannot override a static method");
+                good = false;
+            } else if (sym.hasModifier(Modifier.STATIC) &&
+                       !parentMethod.hasModifier(Modifier.STATIC)) {
+                System.err.println("a static method cannot hide an instance method");
+                good = false;
+            }
+            if (sym.hasCheckedExceptions() && !parentMethod.hasExceptions()) {
+                System.err.println("cannot override a method without any exceptions with a method that throws a checked exception");
+                good = false;
+            }
+            if (sym.getAccessLevel().compareTo(parentMethod.getAccessLevel()) > 0) {
+                System.err.println("cannot override a method with a method that has more restrictive access than the method it is overriding");
+            }
+        } else if (sym.hasOverrideAnnotation()){
+            System.out.println("method is not being overridden!");
+        }
+        if (good) {
+            if (!methods.put(sym)) {
+                System.err.println("class cannot declare same method twice");
+                return false;
+            }
+            return true;
+        }
+        return false;
     }
 
     public boolean addConstructor(MethodSymbol sym) {
@@ -142,8 +177,9 @@ public class MyClassSymbol extends ClassSymbol {
         MyMethodSymbol valueOf = new MyMethodSymbol(new MyToken(0, "valueOf"),
                                                     new Modifiers(Modifier.PUBLIC,
                                                                   Modifier.STATIC));
+        Type[] strings = {ImportManager.get("java.lang.String")};
         valueOf.setReturnType(this);
-        valueOf.setParameterTypes(STRING_PARAM);
+        valueOf.setParameterTypes(strings);
         valueOf.constructType();
         addMethod(valueOf);
     }
@@ -184,5 +220,13 @@ public class MyClassSymbol extends ClassSymbol {
         }
         sb.append(getQualifiedClassName());
         return sb.toString();
+    }
+
+    public void setAST(BodyDeclaration ast) {
+        this.AST = ast;
+    }
+
+    public void visit(ASTVisitor visitor) {
+        AST.accept(visitor);
     }
 }

@@ -17,7 +17,7 @@ public class ImportManager {
     static {
         String[] names = {"java.lang.Object", "java.lang.String",
                           "java.lang.Enum", "java.lang.annotation.Annotation",
-                          "java.lang.Throwable"};
+                          "java.lang.Throwable", "java.lang.Override"};
         for (String name : names) {
             try {
                 getOrImport(name);

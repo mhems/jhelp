@@ -2,7 +2,9 @@ package com.binghamton.jhelp;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
+import com.binghamton.jhelp.ast.ASTVisitor;
 import com.binghamton.jhelp.util.StringUtils;
 
 /**
@@ -104,22 +106,24 @@ public abstract class ClassSymbol extends Type {
         return fields.get(name);
     }
 
-    public List<MethodSymbol> getMethods(String name) {
-        List<MethodSymbol> ret = new ArrayList<>();
-        for (MethodSymbol method : methods) {
-            if (method.getName().equals(name)) {
-                ret.add(method);
-            }
-        }
-        return ret;
+    public Set<MethodSymbol> getMethodsByName(String name) {
+        return methods.getAll(name);
     }
 
     public MethodSymbol getMethod(String name, Type... paramTypes) {
         return methods.get(MethodType.fromParameters(name, paramTypes));
     }
 
+    public MethodSymbol getMethod(MethodSymbol sym) {
+        return methods.get(sym.getType());
+    }
+
     public MethodSymbol getConstructor(Type... paramTypes) {
         return methods.get(MethodType.fromParameters(getName(), paramTypes));
+    }
+
+    public MethodSymbol getConstructor(MethodSymbol sym) {
+        return ctors.get(sym.getType());
     }
 
     public TypeVariable getTypeParameter(String name) {
@@ -159,12 +163,53 @@ public abstract class ClassSymbol extends Type {
         return hasTypeParameters();
     }
 
+    public boolean extendsClass(ClassSymbol cls) {
+        return superClass.getClassSymbol().equals(cls) ||
+            superClass.getClassSymbol().extendsClass(cls);
+    }
+
+    public boolean implementsInterface(ClassSymbol intf) {
+        for (Type type : interfaces) {
+            if (type.getClassSymbol().equals(intf)) {
+                return true;
+            }
+        }
+        return superClass.getClassSymbol().implementsInterface(intf);
+    }
+
     public boolean hasSuperClass() {
         return getSuperClass() != null;
     }
 
     public boolean hasInterfaces() {
         return interfaces.size() > 0;
+    }
+
+    public List<MethodSymbol> getUnimplementedMethods() {
+        // TODO still have to hook up tables,
+        // this wont work if superclass's superclass has abstract methods that
+        // superclass left unimplemented
+        List<MethodSymbol> abstractMethods = new ArrayList<>();
+        List<MethodSymbol> ret = new ArrayList<>();
+        for (MethodSymbol method : superClass.getClassSymbol().getMethods()) {
+            if (method.hasModifier(Modifier.ABSTRACT)) {
+                abstractMethods.add(method);
+            }
+        }
+        for (Type intf : interfaces) {
+            for (MethodSymbol method: intf.getClassSymbol().getMethods()) {
+                if (method.hasModifier(Modifier.ABSTRACT)) {
+                    abstractMethods.add(method);
+                }
+            }
+        }
+
+        for (MethodSymbol method : abstractMethods) {
+            if (getMethod(method) == null) {
+                ret.add(method);
+            }
+        }
+        return ret;
     }
 
     public abstract String getQualifiedName();
@@ -265,4 +310,6 @@ public abstract class ClassSymbol extends Type {
         }
         return sb.toString();
     }
+
+    public abstract void visit(ASTVisitor visitor);
 }

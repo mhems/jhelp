@@ -25,8 +25,6 @@ import com.binghamton.jhelp.WildcardType;
  */
 public class DeclarationLevelVisitor extends FileLevelVisitor {
 
-    private static final ReflectedClassSymbol ENUM_CLASS = ImportManager.get("java.lang.Enum");
-
     public DeclarationLevelVisitor(Program program) {
         super(program);
     }
@@ -57,6 +55,20 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         } else {
             System.err.println("unknown identifier: " + ast.getRHS().getText());
         }
+    }
+
+    /**
+     * Visit a Annotation node
+     * @param ast the AST node being visited
+     */
+    public void visit(Annotation ast) {
+        Expression expr = ast.getTypeExpression();
+        expr.accept(this);
+        Type type = expr.getType();
+        if (!type.getClassSymbol().isAnnotation()) {
+            System.err.println("can only use an annotation type as an annotation");
+        }
+        ast.setType(type);
     }
 
     /**
@@ -112,7 +124,7 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         if (ast.hasSuperClass()) {
             ast.getSuperClass().accept(this);
             ClassSymbol superCls = ast.getSuperClass().getType().getClassSymbol();
-            if (superCls.equals(ENUM_CLASS)) {
+            if (superCls.equals(ImportManager.get("java.lang.Enum"))) {
                 System.err.println("cannot directly subclass java.lang.Enum");
             } else if (superCls.isInterfaceLike()) {
                 System.err.println("cannot subclass interface or annotation");
@@ -130,8 +142,9 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(CompilationUnit ast) {
+        pkg = ast.getPackage();
         if (ast.hasPackage()) {
-            ast.getPackage().accept(this);
+            ast.getPackageStatement().accept(this);
         }
 
         for (BodyDeclaration decl : ast.getBodyDeclarations()) {
@@ -165,6 +178,12 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
      */
     public void visit(EnumDeclaration ast) {
         currentClass.addModifier(Modifier.STATIC);
+
+        if (currentClass.hasModifier(Modifier.FINAL) ||
+            currentClass.hasModifier(Modifier.ABSTRACT)) {
+            System.err.println("an enum cannot be final nor abstract");
+        }
+
         boolean isFinal = true;
         for (EnumConstant c : ast.getConstants()) {
             if (!c.isEmpty()) {
@@ -183,9 +202,13 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
      */
     public void visit(IdentifierExpression ast) {
         String id = ast.getIdentifier().getText();
-        Type type = currentClass.getType(id);
+
+        Type type = PrimitiveType.UNBOX_MAP.get(id);
         if (type == null) {
-            type = PrimitiveType.UNBOX_MAP.get(id);
+            type = currentClass.getType(id);
+            if (type != null) {
+
+            }
         }
         if (type != null) {
             type.setAnnotations(makeAnnotations(ast.getAnnotations()));
@@ -217,7 +240,6 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(PackageStatement ast) {
-        pkg = program.getPackage(ast.getName());
         pkg.setAnnotations(makeAnnotations(ast.getAnnotations()));
     }
 
@@ -251,6 +273,11 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
     public void visit(TypeExpression ast) {
         Expression raw = ast.getExpression();
         raw.accept(this);
+        Type rawType = raw.getType();
+
+        if (!rawType.getClassSymbol().isGeneric()) {
+            System.err.println("cannot parameterize a non-generic class");
+        }
 
         List<TypeArgument> args = ast.getTypeArguments();
         Type[] tArgs = new Type[args.size()];
@@ -260,7 +287,7 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
             tArgs[pos] = arg.getType();
             ++pos;
         }
-        ast.setType(new ParameterizedType(raw.getType(), tArgs));
+        ast.setType(new ParameterizedType(rawType, tArgs));
     }
 
     /**
@@ -315,5 +342,11 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
             ret[i] = new AnnotationSymbol((ClassSymbol)annotations[i].getType());
         }
         return ret;
+    }
+
+    protected void postVisitHook() {
+        if (!program.isAcyclicHierarchy()) {
+            System.err.println("program declares classes that depend on themselves");
+        }
     }
 }

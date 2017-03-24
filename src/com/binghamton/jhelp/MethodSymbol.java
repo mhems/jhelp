@@ -54,10 +54,31 @@ public abstract class MethodSymbol extends Symbol {
         return getExceptionTypes().length > 0;
     }
 
+    public boolean hasCheckedExceptions() {
+        Type[] excs = getExceptionTypes();
+        if (excs.length > 0)  {
+            for (Type exc : excs) {
+                if (exc.getClassSymbol().extendsClass(ImportManager.get("java.lang.Throwable"))) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public abstract TypeVariable[] getTypeParameters();
 
     public boolean hasTypeParameters() {
         return getTypeParameters().length > 0;
+    }
+
+    public boolean hasOverrideAnnotation() {
+        for (AnnotationSymbol a : annotations) {
+            if (a.getType().equals(ImportManager.get("java.lang.Override"))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public boolean equals(Object other) {
@@ -105,22 +126,6 @@ public abstract class MethodSymbol extends Symbol {
             return true;
         }
         // TODO incomplete
-        return false;
-    }
-
-    public boolean isOverrider() {
-        // TODO
-        // if shadows -> true
-        return false;
-    }
-
-    public boolean isImplementer() {
-        // TODO
-        return false;
-    }
-
-    public boolean isOverloaded() {
-        // TODO
         return false;
     }
 }

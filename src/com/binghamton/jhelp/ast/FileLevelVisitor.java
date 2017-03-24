@@ -42,32 +42,18 @@ import com.binghamton.jhelp.VariableSymbol;
  * - more than one public body per file
  */
 public class FileLevelVisitor extends EmptyVisitor {
-    private String filename;
-    private ImportingSymbolTable importedClasses;
-    private MethodSymbolTable importedMethods;
-    private NamedSymbolTable<VariableSymbol> importedFields;
-
     protected Package pkg;
     protected Program program;
     protected MyClassSymbol currentClass;
 
-    protected void visitAll() {
-        for (CompilationUnit unit : program.getCompilationUnits()) {
-            filename = new File(unit.getFilename()).getName();
-            filename = filename.substring(0,
-                                          filename.length() - ".java".length());
-            unit.accept(this);
-        }
-    }
+    private String filename;
+    private ImportingSymbolTable importedClasses;
+    private MethodSymbolTable importedMethods;
+    private NamedSymbolTable<VariableSymbol> importedFields;
+    private CompilationUnit currentUnit;
 
     public FileLevelVisitor(Program program) {
         this.program = program;
-        visitAll();
-    }
-
-    public FileLevelVisitor(Program program, String filename) {
-        this.program = program;
-
         visitAll();
     }
 
@@ -76,7 +62,7 @@ public class FileLevelVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(AnnotationDeclaration ast) {
-        ast.getSymbol().setClassKind(MyClassSymbol.ClassKind.ANNOTATION);
+        ast.getSymbol().setClassKind(ClassSymbol.ClassKind.ANNOTATION);
         ast.getSymbol().setSuperClassForAnnotation();
     }
 
@@ -101,6 +87,7 @@ public class FileLevelVisitor extends EmptyVisitor {
         currentClass = sym;
         currentClass.setPackage(pkg);
         ast.setSymbol(sym);
+        sym.setAST(ast);
 
         if (!ast.isInnerDeclaration()) {
             if (!pkg.addClass(currentClass)) {
@@ -142,7 +129,7 @@ public class FileLevelVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(ClassDeclaration ast) {
-        ast.getSymbol().setClassKind(MyClassSymbol.ClassKind.CLASS);
+        ast.getSymbol().setClassKind(ClassSymbol.ClassKind.CLASS);
         ast.getSymbol().setSuperClassForClass();
 
         if (ast.hasTypeParameters()) {
@@ -163,7 +150,9 @@ public class FileLevelVisitor extends EmptyVisitor {
         importedFields = new NamedSymbolTable<>();
 
         if (ast.hasPackage()) {
-            ast.getPackage().accept(this);
+            ast.getPackageStatement().accept(this);
+        } else {
+            System.err.println("WARNING - class without package");
         }
 
         for (BodyDeclaration decl : ast.getBodyDeclarations()) {
@@ -190,7 +179,7 @@ public class FileLevelVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(EnumDeclaration ast) {
-        ast.getSymbol().setClassKind(MyClassSymbol.ClassKind.ENUM);
+        ast.getSymbol().setClassKind(ClassSymbol.ClassKind.ENUM);
         ast.getSymbol().setSuperClassForEnum();
     }
 
@@ -253,7 +242,7 @@ public class FileLevelVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(InterfaceDeclaration ast) {
-        ast.getSymbol().setClassKind(MyClassSymbol.ClassKind.INTERFACE);
+        ast.getSymbol().setClassKind(ClassSymbol.ClassKind.INTERFACE);
 
         if (ast.hasTypeParameters()) {
             for (TypeVariable var : makeTypeParameters(ast.getTypeParameters())) {
@@ -286,6 +275,7 @@ public class FileLevelVisitor extends EmptyVisitor {
         }
 
         this.pkg = pkg;
+        currentUnit.setPackage(this.pkg);
     }
 
     /**
@@ -305,5 +295,20 @@ public class FileLevelVisitor extends EmptyVisitor {
             ret[i] = params.get(i).getType();
         }
         return ret;
+    }
+
+    protected void visitAll() {
+        for (CompilationUnit unit : program.getCompilationUnits()) {
+            currentUnit = unit;
+            filename = new File(unit.getFilename()).getName();
+            filename = filename.substring(0,
+                                          filename.length() - ".java".length());
+            unit.accept(this);
+        }
+        postVisitHook();
+    }
+
+    protected void postVisitHook() {
+
     }
 }

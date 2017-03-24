@@ -42,6 +42,10 @@ public class Package {
         return name;
     }
 
+    public boolean isEmpty() {
+        return children.isEmpty() && classes.size() == 0;
+    }
+
     public void setParent(Package pkg) {
         parent = pkg;
     }
@@ -137,14 +141,16 @@ public class Package {
     public String repr() {
         StringBuilder sb = new StringBuilder("package ");
         sb.append(name);
-        sb.append("\n");
-        sb.append("declares:\n");
-        sb.append(classes.repr());
-        if (hasSubPackages()) {
-            sb.append("\nhas children: \n");
-            for (Package cp : children) {
-                sb.append(cp.repr());
-                sb.append("\n");
+        if (!isEmpty()) {
+            sb.append("\n");
+            sb.append("declares:\n");
+            sb.append(classes.repr());
+            if (hasSubPackages()) {
+                sb.append("\nhas children: \n");
+                for (Package cp : children) {
+                    sb.append(cp.repr());
+                    sb.append("\n");
+                }
             }
         }
         return sb.toString();

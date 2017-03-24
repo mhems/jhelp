@@ -4,6 +4,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
+import com.binghamton.jhelp.ast.ASTVisitor;
+
 public class ReflectedClassSymbol extends ClassSymbol {
     private Class<? extends Object> cls;
     private String pkgName;
@@ -103,5 +105,9 @@ public class ReflectedClassSymbol extends ClassSymbol {
         }
         sb.append(getQualifiedClassName());
         return sb.toString();
+    }
+
+    public void visit(ASTVisitor visitor) {
+
     }
 }

@@ -46,9 +46,6 @@ public class EnvironmentValidator implements Validator {
                          " " +
                          System.getProperty("os.version") +
                          "\n");
-        // TODO
-        // System.out.println("Detected Java Home is " + System.getProperty("java.home"));
-        // rt.jar is at $JAVA_HOME/lib/rt.jar
         return errors;
     }
 }

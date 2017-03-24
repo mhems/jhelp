@@ -2,6 +2,8 @@ package com.binghamton.jhelp.ast;
 
 import java.util.List;
 
+import com.binghamton.jhelp.Package;
+
 /**
  * A class representing a Java compilation unit (file)
  */
@@ -10,6 +12,7 @@ public class CompilationUnit extends ASTNode {
     private PackageStatement pkg;
     private List<ImportStatement> imports;
     private List<BodyDeclaration> bodies;
+    private Package declaringPackage;
 
     /**
      * Construct a new compilation unit
@@ -38,7 +41,7 @@ public class CompilationUnit extends ASTNode {
      * Gets the unit's package statement
      * @return the unit's package statement
      */
-    public PackageStatement getPackage() {
+    public PackageStatement getPackageStatement() {
         return pkg;
     }
 
@@ -64,6 +67,14 @@ public class CompilationUnit extends ASTNode {
      */
     public List<BodyDeclaration> getBodyDeclarations() {
         return bodies;
+    }
+
+    public Package getPackage() {
+        return declaringPackage;
+    }
+
+    public void setPackage(Package pkg) {
+        declaringPackage = pkg;
     }
 
     /**
