@@ -13,18 +13,6 @@ public class MethodReferenceExpression extends Expression {
     private Expression rhs;
 
     /**
-     * Construct a incomplete reference by method name
-     * @param identifier the name of the method being referenced
-     * @param typeArgs the type arguments to this reference
-     */
-    // public MethodReferenceExpression(Token identifier,
-    //                                  List<TypeArgument> typeArgs) {
-    //     this(new NilExpression(),
-    //          new IdentifierExpression(identifier),
-    //          typeArgs);
-    // }
-
-    /**
      * Construct a new parameterized reference
      * @param lhs the left hand side of the method reference
      * @param rhs the right hand side of the method reference
