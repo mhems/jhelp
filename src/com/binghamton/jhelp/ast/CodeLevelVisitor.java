@@ -45,9 +45,13 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
      */
     public void visit(ArrayAccessExpression ast) {
         ast.getArrayExpression().accept(this);
-        // TODO must be array type
+        if (ast.getArrayExpression().getType().rank() == 0) {
+            System.err.println("an array access must be on an array type");
+        }
         ast.getIndexExpression().accept(this);
-        // TODO must promote to int
+        if (!ast.getIndexExpression().getType().equals(PrimitiveType.INT)) {
+            System.err.println("an array access must be with an int index");
+        }
     }
 
     /**
@@ -84,13 +88,14 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
     public void visit(AssertStatement ast) {
         ast.getCondition().accept(this);
         Type condType = ast.getCondition().getType();
-        if (!condType.equals(PrimitiveType.BOOLEAN) &&
-            !PrimitiveType.BOOLEAN.box().equals(condType)) {
+        if (!isBooleanLike(condType)) {
             System.err.println("assert condition must yield boolean");
         }
         if (ast.hasMessage()) {
             ast.getMessage().accept(this);
-            // TODO ensure ast.getMessage().getType() != void
+            if (ast.getMessage().getType().equals(PrimitiveType.VOID)) {
+                System.err.println("assert message cannot yield void");
+            }
         }
     }
 
@@ -181,7 +186,9 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
     public void visit(CatchBlock ast) {
         for (Expression type : ast.getExceptionTypes()) {
             type.accept(this);
-            // TODO assert each type's type extends Throwable
+            if (!type.getType().getClassSymbol().extendsClass(ImportManager.get("java.lang.Throwable"))) {
+                System.err.println("catch block exception must extend Throwable class");
+            }
         }
     }
 
@@ -246,7 +253,10 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
      */
     public void visit(ForEachStatement ast) {
         ast.getIterable().accept(this);
-        // TODO assert type of iterable is array or extends Iterable
+        Type type = ast.getIterable().getType();
+        if (type.rank() == 0 && !type.getClassSymbol().extendsClass(ImportManager.get("java.lang.Iterable"))) {
+            System.err.println("for each statement must iterate over arrays or an implementor of Iterable");
+        }
     }
 
     /**
@@ -258,7 +268,9 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             init.accept(this);
         }
         ast.getCondition().accept(this);
-        // TODO assert condition is boolean
+        if (!isBooleanLike(ast.getCondition().getType())) {
+            System.err.println("a for loop condition must yield a boolean");
+        }
         for (Statement up : ast.getUpdaters()) {
             up.accept(this);
         }
@@ -270,7 +282,9 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
      */
     public void visit(IfElseStatement ast) {
         ast.getCondition().accept(this);
-        // TODO assert condition is boolean
+        if (!isBooleanLike(ast.getCondition().getType())) {
+            System.out.println("an if condition must yield boolean");
+        }
         ast.getThenBlock().accept(this);
         ast.getElseBlock().accept(this);
     }
@@ -399,7 +413,9 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
      */
     public void visit(SwitchStatement ast) {
         ast.getSwitchExpression().accept(this);
-        // TODO check type is enumerable
+        if (!isValidSwitchType(ast.getSwitchExpression().getType())) {
+            System.err.println("switch condition must be one of char, byte, short, int, String, or enum");
+        }
         for (CaseBlock cB: ast.getCases()) {
             cB.accept(this);
         }
@@ -419,10 +435,17 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
      */
     public void visit(TernaryExpression ast) {
         ast.getCondition().accept(this);
-        // TODO check condition is boolean
+        if (!isBooleanLike(ast.getCondition().getType())) {
+            System.err.println("a ternary expression condition must yield boolean");
+        }
         ast.getThenExpression().accept(this);
+        if (ast.getThenExpression().getType().equals(PrimitiveType.VOID)) {
+            System.err.println("then expression cannot be void");
+        }
         ast.getElseExpression().accept(this);
-        // TODO neither can be void
+        if (ast.getElseExpression().getType().equals(PrimitiveType.VOID)) {
+            System.err.println("then expression cannot be void");
+        }
     }
 
     /**
@@ -430,8 +453,12 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(ThrowStatement ast) {
-        ast.getExpression().accept(this);
-        // TODO type must extend Throwable or be null
+        Expression expr = ast.getExpression();
+        expr.accept(this);
+        Type type = expr.getType();
+        if (!type.equals(NilType.TYPE) && !type.getClassSymbol().extendsClass(ImportManager.get("java.lang.Throwable"))) {
+            System.err.println("must either throw null or instance of Throwable");
+        }
     }
 
     /**
@@ -471,6 +498,26 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
      */
     public void visit(WhileStatement ast) {
         ast.getCondition().accept(this);
-        // TODO check boolean
+        if (!isBooleanLike(ast.getCondition().getType())) {
+            System.err.println("a while loop condition must yield boolean");
+        }
+    }
+
+    private static boolean isBooleanLike(Type type) {
+        return type.equals(PrimitiveType.BOOLEAN) ||
+            PrimitiveType.BOOLEAN.box().equals(type);
+    }
+
+    private static boolean isValidSwitchType(Type type) {
+        return type.equals(PrimitiveType.CHAR) ||
+            type.equals(PrimitiveType.BYTE) ||
+            type.equals(PrimitiveType.SHORT) ||
+            type.equals(PrimitiveType.INT) ||
+            PrimitiveType.CHAR.box().equals(type) ||
+            PrimitiveType.BYTE.box().equals(type) ||
+            PrimitiveType.SHORT.box().equals(type) ||
+            PrimitiveType.INT.box().equals(type) ||
+            type.equals(ImportManager.get("java.lang.String")) ||
+            type.getClassSymbol().isEnum();
     }
 }

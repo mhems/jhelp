@@ -73,8 +73,8 @@ public class JavaValidator implements Validator {
             new BodyLevelVisitor(program).visitInOrder();
             System.out.println(program.repr());
 
-            // System.out.println("---------- CODE ----------");
-            // new CodeLevelVisitor(program).visitAll();
+            System.out.println("---------- CODE ----------");
+            new CodeLevelVisitor(program).visitAll();
 
         } catch (IOException e) {
             errors.add(new ExceptionError(e));
