@@ -54,7 +54,6 @@ public class FileLevelVisitor extends EmptyVisitor {
 
     public FileLevelVisitor(Program program) {
         this.program = program;
-        visitAll();
     }
 
     /**
@@ -297,7 +296,7 @@ public class FileLevelVisitor extends EmptyVisitor {
         return ret;
     }
 
-    protected void visitAll() {
+    public void visitAll() {
         for (CompilationUnit unit : program.getCompilationUnits()) {
             currentUnit = unit;
             filename = new File(unit.getFilename()).getName();
@@ -305,10 +304,5 @@ public class FileLevelVisitor extends EmptyVisitor {
                                           filename.length() - ".java".length());
             unit.accept(this);
         }
-        postVisitHook();
-    }
-
-    protected void postVisitHook() {
-
     }
 }

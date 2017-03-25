@@ -31,4 +31,10 @@ public class MyVariableSymbol extends VariableSymbol {
     public void setDeclaringClass(ClassSymbol sym) {
         owningClass = sym;
     }
+
+    @Override
+    public MyVariableSymbol adapt(Type[] args) {
+        // TODO
+        return null;
+    }
 }

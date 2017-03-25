@@ -28,7 +28,6 @@ public abstract class ClassSymbol extends Type {
     protected MethodSymbolTable methods = new MethodSymbolTable();
     protected MethodSymbolTable ctors = new MethodSymbolTable();
     protected NamedSymbolTable<TypeVariable> params = new NamedSymbolTable<>();
-
     /**
      * Construct a new ClassSymbol
      * @param name the name of this class symbol
@@ -236,6 +235,9 @@ public abstract class ClassSymbol extends Type {
     public String getName() {
         return name;
     }
+
+    @Override
+    public abstract ClassSymbol adapt(Type[] args);
 
     public String getTypeName() {
         StringBuilder sb = new StringBuilder(getQualifiedName());

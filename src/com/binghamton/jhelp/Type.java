@@ -13,6 +13,9 @@ public abstract class Type extends Symbol {
     public abstract String getTypeName();
     public abstract ClassSymbol getClassSymbol();
 
+    @Override
+    public abstract Type adapt(Type[] args);
+
     public Type() {
 
     }

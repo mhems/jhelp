@@ -46,6 +46,11 @@ public class WildcardType extends Type {
         return bound;
     }
 
+    @Override
+    public WildcardType adapt(Type[] args) {
+        return new WildcardType(upper, bound.adapt(args));
+    }
+
     public boolean equals(Object other) {
         if (other instanceof WildcardType) {
             WildcardType type = (WildcardType)other;

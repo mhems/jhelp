@@ -29,8 +29,8 @@ public class SymbolFinder {
 
     /**
      * Construct a SymbolFinder with the name of a jar file
-     * @param filename the name of the jar file to search through
-     * @throws IOException if I/O exception occurs during processing `filename`
+     * @param path the Path pointing to the jar file to search through
+     * @throws IOException if an I/O exception occurs during processing
      */
     public SymbolFinder(Path path) throws IOException {
         rt_jar = new JarFile(path.toFile());

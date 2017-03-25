@@ -99,6 +99,11 @@ public class PrimitiveType extends Type {
         return getName();
     }
 
+    @Override
+    public PrimitiveType adapt(Type[] args) {
+        throw new UnsupportedOperationException("a primitive cannot be adapted");
+    }
+
     public ClassSymbol getDeclaringClass() {
         throw new UnsupportedOperationException("a primitive has no declaring class");
     }

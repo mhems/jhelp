@@ -39,7 +39,6 @@ public class JavaValidator implements Validator {
         CommonTokenStream stream;
         Java8Parser parser;
         CompilationUnit cu;
-        ASTVisitor visitor;
         List<JHelpError> errors = Validator.buildErrors();
         try {
             Program program = new Program();
@@ -63,19 +62,19 @@ public class JavaValidator implements Validator {
                 }
             }
             System.out.println("---------- FILE ----------");
-            visitor = new FileLevelVisitor(program);
+            new FileLevelVisitor(program).visitAll();
             System.out.println(program.repr());
 
             System.out.println("---------- DECLARATION ----------");
-            visitor = new DeclarationLevelVisitor(program);
+            new DeclarationLevelVisitor(program).visitAll();
             System.out.println(program.repr());
 
             System.out.println("---------- BODY ----------");
-            visitor = new BodyLevelVisitor(program);
+            new BodyLevelVisitor(program).visitInOrder();
             System.out.println(program.repr());
 
             // System.out.println("---------- CODE ----------");
-            // visitor = new CodeLevelVisitor(program);
+            // new CodeLevelVisitor(program).visitAll();
 
         } catch (IOException e) {
             errors.add(new ExceptionError(e));

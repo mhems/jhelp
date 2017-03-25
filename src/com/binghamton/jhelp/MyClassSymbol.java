@@ -88,8 +88,14 @@ public class MyClassSymbol extends ClassSymbol {
         MethodSymbol parentMethod = null;
         if (superClass != null) {
             parentMethod = superClass.getClassSymbol().getMethod(sym);
+        } else {
+            for (Type type : interfaces) {
+                parentMethod = type.getClassSymbol().getMethod(sym);
+                if (parentMethod != null) {
+                    break;
+                }
+            }
         }
-        // TODO also have to check overriding interfaces
         boolean good = true;
         if (parentMethod != null &&
             parentMethod.getAccessLevel() != AccessLevel.PRIVATE) {
@@ -228,5 +234,11 @@ public class MyClassSymbol extends ClassSymbol {
 
     public void visit(ASTVisitor visitor) {
         AST.accept(visitor);
+    }
+
+    @Override
+    public MyClassSymbol adapt(Type[] args) {
+        // TODO
+        return null;
     }
 }

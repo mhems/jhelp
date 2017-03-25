@@ -85,4 +85,10 @@ public class MyMethodSymbol extends MethodSymbol {
     public void setConstructor(boolean constructor) {
         this.constructor = constructor;
     }
+
+    @Override
+    public MyMethodSymbol adapt(Type[] args) {
+        // TODO
+        return null;
+    }
 }

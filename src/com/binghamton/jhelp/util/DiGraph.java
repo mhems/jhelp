@@ -62,18 +62,20 @@ public class DiGraph<E> {
         edgeMap.get(fromNode).add(toNode);
     }
 
-    public List<E> topologicalSort() {
-        if (sorted.size() == 0) {
-            DFS();
-        }
-        return sorted;
-    }
-
     public boolean isAcyclic() {
         if (sorted.size() == 0) {
             DFS();
         }
         return acyclic;
+    }
+
+    public List<E> topologicalSort() {
+        if (sorted.size() == 0) {
+            DFS();
+        }
+        if (!acyclic)
+            return null;
+        return sorted;
     }
 
     public String toString() {

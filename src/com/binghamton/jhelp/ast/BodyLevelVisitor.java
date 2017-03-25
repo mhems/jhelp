@@ -387,9 +387,10 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
         }
     }
 
-    protected void postVisitHook() {
+    public void visitInOrder() {
+        program.topologicalSort();
         for (ClassSymbol cls : program.getAllClasses()) {
-
+            cls.visit(this);
         }
     }
 }

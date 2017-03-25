@@ -54,6 +54,11 @@ public class ParameterizedType extends Type {
         return params;
     }
 
+    @Override
+    public ParameterizedType adapt(Type[] args) {
+        throw new UnsupportedOperationException("cannot adapt a parameterized type");
+    }
+
     public boolean equals(Object other) {
         if (other instanceof ParameterizedType) {
             ParameterizedType type = (ParameterizedType)other;

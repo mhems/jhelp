@@ -1,6 +1,7 @@
 package com.binghamton.jhelp;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import com.binghamton.jhelp.ast.CompilationUnit;
@@ -22,12 +23,6 @@ public class Program {
 
     public List<CompilationUnit> getCompilationUnits() {
         return units;
-    }
-
-    public boolean isAcyclicHierarchy() {
-        DiGraph<ClassSymbol> graph = new DiGraph<>();
-        constructGraph(graph);
-        return graph.isAcyclic();
     }
 
     public boolean hasPackage(String name) {
@@ -82,11 +77,6 @@ public class Program {
     private void gatherClasses(Package pkg) {
         for (ClassSymbol cls : pkg.getClassTable()) {
             classes.add(cls);
-            for (ClassSymbol inner : cls.getInnerClasses()) {
-                if (!inner.isAnonymous()) {
-                    classes.add(inner);
-                }
-            }
         }
         for (Package subPkg : pkg.getSubPackages()) {
             gatherClasses(subPkg);
@@ -104,6 +94,18 @@ public class Program {
             for (Type type : cls.getInterfaces()) {
                 graph.addEdge(cls, type.getClassSymbol());
             }
+        }
+    }
+
+    public void topologicalSort() {
+        DiGraph<ClassSymbol> graph = new DiGraph<>();
+        constructGraph(graph);
+        List<ClassSymbol> ret = graph.topologicalSort();
+        if (ret == null) {
+            System.err.println("cyclic inheritance hierarchy");
+        } else {
+            Collections.reverse(ret);
+            classes = ret;
         }
     }
 }

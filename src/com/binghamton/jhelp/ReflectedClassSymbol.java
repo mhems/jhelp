@@ -108,6 +108,12 @@ public class ReflectedClassSymbol extends ClassSymbol {
     }
 
     public void visit(ASTVisitor visitor) {
+        // cannot visit a pre-compiled class
+    }
 
+    @Override
+    public ReflectedClassSymbol adapt(Type[] args) {
+        // TODO
+        return null;
     }
 }

@@ -98,6 +98,8 @@ public abstract class Symbol {
         return annotations;
     }
 
+    public abstract Symbol adapt(Type[] args);
+
     public boolean hasModifier(Modifier modifier) {
         return modifiers.contains(modifier);
     }

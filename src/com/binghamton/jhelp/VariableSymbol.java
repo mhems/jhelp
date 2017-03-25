@@ -33,6 +33,9 @@ public abstract class VariableSymbol extends Symbol {
         return varKind;
     }
 
+    @Override
+    public abstract VariableSymbol adapt(Type[] args);
+
     public void setVariableKind(VariableKind kind) {
         varKind = kind;
     }

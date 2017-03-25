@@ -23,4 +23,10 @@ public class ReflectedVariableSymbol extends VariableSymbol {
     public ClassSymbol getDeclaringClass() {
         return ReflectedClassSymbol.get(field.getDeclaringClass());
     }
+
+    @Override
+    public ReflectedVariableSymbol adapt(Type[] args) {
+        // TODO
+        return null;
+    }
 }

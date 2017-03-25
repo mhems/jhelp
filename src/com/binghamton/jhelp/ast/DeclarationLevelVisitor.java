@@ -343,10 +343,4 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         }
         return ret;
     }
-
-    protected void postVisitHook() {
-        if (!program.isAcyclicHierarchy()) {
-            System.err.println("program declares classes that depend on themselves");
-        }
-    }
 }

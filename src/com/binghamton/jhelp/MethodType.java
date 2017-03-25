@@ -70,6 +70,17 @@ public class MethodType extends Type {
         return name;
     }
 
+    @Override
+    public MethodType adapt(Type[] args) {
+        MethodType ret = new MethodType(name);
+        ret.declarer = declarer;
+        ret.paramTypes = new Type[paramTypes.length];
+        for (int i = 0; i < ret.paramTypes.length; i++) {
+            ret.paramTypes[i] = paramTypes[i].adapt(args);
+        }
+        return ret;
+    }
+
     public int hashCode() {
         return name.hashCode() ^
             typeParams.length ^

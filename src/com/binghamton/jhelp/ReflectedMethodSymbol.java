@@ -69,4 +69,10 @@ public class ReflectedMethodSymbol extends MethodSymbol {
     public boolean isConstructor() {
         return constructor;
     }
+
+    @Override
+    public ReflectedMethodSymbol adapt(Type[] args) {
+        // TODO
+        return null;
+    }
 }

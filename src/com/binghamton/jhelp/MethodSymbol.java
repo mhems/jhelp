@@ -81,6 +81,9 @@ public abstract class MethodSymbol extends Symbol {
         return false;
     }
 
+    @Override
+    public abstract MethodSymbol adapt(Type[] args);
+
     public boolean equals(Object other) {
         return other instanceof MethodSymbol &&
             type.equals(((MethodSymbol)other).type);

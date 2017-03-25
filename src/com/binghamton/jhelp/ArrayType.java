@@ -54,6 +54,11 @@ public class ArrayType extends Type {
         return base.erase();
     }
 
+    @Override
+    public ArrayType adapt(Type[] args) {
+        return new ArrayType(base.adapt(args), annotations);
+    }
+
     public ClassSymbol getClassSymbol() {
         return base.getClassSymbol();
     }

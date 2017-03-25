@@ -57,6 +57,11 @@ public class TypeVariable extends Type {
         return bounds;
     }
 
+    @Override
+    public TypeVariable adapt(Type[] args) {
+        throw new UnsupportedOperationException("a type variable cannot be adapted");
+    }
+
     public void setBounds(Type[] bounds) {
         this.bounds = bounds;
     }
