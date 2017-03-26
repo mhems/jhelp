@@ -63,11 +63,13 @@ public class JavaValidator implements Validator {
             }
             System.out.println("---------- FILE ----------");
             new FileLevelVisitor(program).visitAll();
-            System.out.println(program.repr());
+            // System.out.println(program.repr());
 
             System.out.println("---------- DECLARATION ----------");
             new DeclarationLevelVisitor(program).visitAll();
-            System.out.println(program.repr());
+            // System.out.println(program.repr());
+
+            program.topologicalSort();
 
             System.out.println("---------- BODY ----------");
             new BodyLevelVisitor(program).visitInOrder();

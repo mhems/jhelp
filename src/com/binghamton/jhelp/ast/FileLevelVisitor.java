@@ -164,7 +164,6 @@ public class FileLevelVisitor extends EmptyVisitor {
             for (ImportStatement s : ast.getImports()) {
                 s.accept(this);
             }
-            pkg.getClassTable().enterScope();
         }
 
         if (pkg.getClassTable().get(filename) == null) {

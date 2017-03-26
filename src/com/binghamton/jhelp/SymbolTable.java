@@ -176,18 +176,17 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
                 sb.append(symbol.repr());
                 sb.append("\n");
             }
-            sb.append("----------------------------------------\n");
+            sb.append("end scope ----------------------------------------\n");
         }
+        sb.append("end table ----------------------------------------\n");
         return sb.toString();
     }
 
     private class SymbolTableIterator implements Iterator<V> {
         private Iterator<Map<K, V>> tableItr;
         private Iterator<V> scopeItr;
-        private ArrayDeque<Map<K, V>> table;
 
         public SymbolTableIterator(ArrayDeque<Map<K, V>> table) {
-            this.table = table;
             tableItr = table.iterator();
         }
 
@@ -198,7 +197,13 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
             }
             if (tableItr.hasNext()) {
                 scopeItr = tableItr.next().values().iterator();
-                return scopeItr.hasNext();
+                if (scopeItr.hasNext()) {
+                    return true;
+                }
+                if (tableItr.hasNext()) {
+                    scopeItr = tableItr.next().values().iterator();
+                    return hasNext();
+                }
             }
             return false;
         }
