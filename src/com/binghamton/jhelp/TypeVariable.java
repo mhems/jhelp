@@ -29,6 +29,7 @@ public class TypeVariable extends Type {
     }
 
     public ClassSymbol getClassSymbol() {
+        // TODO think this should trigger error
         return bounds[0].getClassSymbol(); // TODO lub
     }
 
@@ -50,6 +51,7 @@ public class TypeVariable extends Type {
     }
 
     public boolean isBounded() {
+        // TODO incorrect
         return bounds.length > 0;
     }
 

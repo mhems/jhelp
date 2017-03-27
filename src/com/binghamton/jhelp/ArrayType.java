@@ -60,6 +60,7 @@ public class ArrayType extends Type {
     }
 
     public ClassSymbol getClassSymbol() {
+        // TODO incorrect?
         return base.getClassSymbol();
     }
 

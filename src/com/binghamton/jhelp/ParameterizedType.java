@@ -75,4 +75,17 @@ public class ParameterizedType extends Type {
     public Type erase() {
         return wrapped.erase();
     }
+
+    @Override
+    public ParameterizedType captureConvert() {
+        Type[] newArgs = new Type[params.length];
+        for (int i = 0; i < newArgs.length; i++) {
+            if (params[i] instanceof WildcardType) {
+                // TODO
+            } else {
+                newArgs[i] = params[i];
+            }
+        }
+        return new ParameterizedType(wrapped, newArgs);
+    }
 }

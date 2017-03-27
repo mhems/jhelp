@@ -99,6 +99,15 @@ public class PrimitiveType extends Type {
         return getName();
     }
 
+    public boolean isNumeric() {
+        return primitive != Primitive.VOID && primitive != Primitive.BOOLEAN;
+    }
+
+    @Override
+    public boolean isReference() {
+        return false;
+    }
+
     @Override
     public PrimitiveType adapt(Type[] args) {
         throw new UnsupportedOperationException("a primitive cannot be adapted");

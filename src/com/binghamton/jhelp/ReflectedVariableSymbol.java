@@ -4,7 +4,6 @@ import java.lang.reflect.Field;
 
 public class ReflectedVariableSymbol extends VariableSymbol {
     private Field field = null;
-    private Type type;
 
         {
             setVariableKind(VariableKind.FIELD);

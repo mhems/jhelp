@@ -64,4 +64,13 @@ public abstract class Type extends Symbol {
     public boolean isEquivalentTo(Type other) { return true; }
     public boolean isSubTypeOf(Type other) { return other.isSuperTypeOf(this); }
     public boolean isSuperTypeOf(Type other) { return true; }
+    public boolean isReifiable() { return true; }
+
+    public boolean isReference() {
+        return true;
+    }
+
+    public Type captureConvert() {
+        return this;
+    }
 }

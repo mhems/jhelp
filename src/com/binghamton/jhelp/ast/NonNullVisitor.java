@@ -184,7 +184,8 @@ public class NonNullVisitor extends EmptyVisitor {
      */
     public void visit(CastExpression ast) {
         ast.getSourceExpression().accept(this);
-        for (Expression e : ast.getTargetExpressions()) {
+        ast.getTargetExpression().accept(this);
+        for (Expression e : ast.getBoundExpressions()) {
             e.accept(this);
         }
     }

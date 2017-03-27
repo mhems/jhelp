@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.Type;
+import com.binghamton.jhelp.ArrayType;
 
 /**
  * A class representing the construction of a new array
@@ -94,6 +94,11 @@ public class ArrayConstruction extends Expression {
      */
     public List<DimensionExpression> getDimensionExpressions() {
         return dimExprs;
+    }
+
+    @Override
+    public ArrayType getType() {
+        return (ArrayType)type;
     }
 
     /**

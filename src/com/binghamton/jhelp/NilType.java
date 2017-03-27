@@ -24,6 +24,11 @@ public class NilType extends Type {
     }
 
     @Override
+    public boolean isReference() {
+        return false;
+    }
+
+    @Override
     public Type adapt(Type[] args) {
         throw new UnsupportedOperationException("the nil type cannot be adapted");
     }

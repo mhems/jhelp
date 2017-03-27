@@ -113,7 +113,7 @@ public class ForStatement extends Block {
      */
     @Override
     public void accept(ASTVisitor v) {
-        super.accept(v);
         v.visit(this);
+        // must visit block statements explicitly
     }
 }

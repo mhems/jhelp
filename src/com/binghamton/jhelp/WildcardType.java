@@ -47,6 +47,11 @@ public class WildcardType extends Type {
     }
 
     @Override
+    public boolean isReference() {
+        return false;
+    }
+
+    @Override
     public WildcardType adapt(Type[] args) {
         return new WildcardType(upper, bound.adapt(args));
     }

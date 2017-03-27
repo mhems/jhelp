@@ -2258,14 +2258,14 @@ castExpression returns [CastExpression ret]
     locals [List<Expression> ls = new ArrayList<>()]
     :   first = '(' pt = primitiveType ')' uex = unaryExpression
         {$ret = new CastExpression($first, $uex.ret, $pt.ret);}
-    |   first = '(' rt = referenceType {$ls.add($rt.ret);}
+    |   first = '(' rt = referenceType
         (b = additionalBound {$ls.add($b.ret);})* ')'
         npm = unaryExpressionNotPlusMinus
-        {$ret = new CastExpression($first, $npm.ret, $ls);}
-    |   first = '(' rt = referenceType {$ls.add($rt.ret);}
+        {$ret = new CastExpression($first, $npm.ret, $rt.ret, $ls);}
+    |   first = '(' rt = referenceType
         (b = additionalBound {$ls.add($b.ret);})* ')'
         lam = lambdaExpression
-        {$ret = new CastExpression($first, $lam.ret, $ls);}
+        {$ret = new CastExpression($first, $lam.ret, $rt.ret, $ls);}
     ;
 
 // LEXER

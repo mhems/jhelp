@@ -4,7 +4,6 @@ import org.antlr.v4.runtime.Token;
 
 public class MyVariableSymbol extends VariableSymbol {
     private ClassSymbol owningClass;
-    private Type type;
     private Token token;
 
     public MyVariableSymbol(Token name, Modifiers modifiers) {

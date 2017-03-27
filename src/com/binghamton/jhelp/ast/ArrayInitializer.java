@@ -4,6 +4,8 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
+import com.binghamton.jhelp.ArrayType;
+
 /**
  * A class representing a Java array initializer
  */
@@ -46,6 +48,11 @@ public class ArrayInitializer extends Expression {
      */
     public int size() {
         return elements.size();
+    }
+
+    @Override
+    public ArrayType getType() {
+        return (ArrayType)type;
     }
 
     /**

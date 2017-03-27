@@ -13,7 +13,7 @@ public abstract class VariableSymbol extends Symbol {
     public enum VariableKind {FIELD, LOCAL, PARAMETER};
 
     private VariableKind varKind;
-    private Type type;
+    protected Type type;
 
     public VariableSymbol(String name, int modifiers) {
         super(name, modifiers);

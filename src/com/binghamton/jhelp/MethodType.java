@@ -71,6 +71,11 @@ public class MethodType extends Type {
     }
 
     @Override
+    public boolean isReference() {
+        return false;
+    }
+
+    @Override
     public MethodType adapt(Type[] args) {
         MethodType ret = new MethodType(name);
         ret.declarer = declarer;
