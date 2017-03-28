@@ -15,6 +15,7 @@ import com.binghamton.jhelp.Package;
 import com.binghamton.jhelp.ParameterizedType;
 import com.binghamton.jhelp.Program;
 import com.binghamton.jhelp.PrimitiveType;
+import com.binghamton.jhelp.ReferenceType;
 import com.binghamton.jhelp.Type;
 import com.binghamton.jhelp.TypeVariable;
 import com.binghamton.jhelp.WildcardType;
@@ -253,7 +254,7 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
             if (ast.hasExplicitBound()) {
                 ast.getBoundType().accept(this);
                 type = new WildcardType(ast.isUpperBounded(),
-                                        ast.getBoundType().getType());
+                                        (ReferenceType)ast.getBoundType().getType());
             } else {
                 type = new WildcardType();
             }

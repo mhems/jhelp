@@ -8382,7 +8382,7 @@ public class Java8Parser extends Parser {
 				{
 				setState(1937);
 				((BlockStatementContext)_localctx).c = classDeclaration();
-				((BlockStatementContext)_localctx).ret =  ((BlockStatementContext)_localctx).c.ret;
+				((BlockStatementContext)_localctx).ret =  ((BlockStatementContext)_localctx).c.ret; ((BlockStatementContext)_localctx).c.ret.setLocal(true);
 				}
 				break;
 			case 3:

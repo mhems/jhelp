@@ -26,6 +26,7 @@ public class PrimitiveType extends Type {
     private static final Map<String, Primitive> PRIMITIVE_MAP = new HashMap<>();
     private static final Map<PrimitiveType, PrimitiveType> SUBTYPE_MAP = new HashMap<>();
     private static final Map<PrimitiveType, List<PrimitiveType>> WIDENING_MAP = new HashMap<>();
+    private static final Map<PrimitiveType, List<PrimitiveType>> NARROWING_MAP = new HashMap<>();
     public static final Map<String, PrimitiveType> UNBOX_MAP = new HashMap<>();
 
     static {
@@ -58,6 +59,18 @@ public class PrimitiveType extends Type {
         WIDENING_MAP.put(INT, new ArrayList<>(Arrays.asList(LONG, FLOAT, DOUBLE)));
         WIDENING_MAP.put(LONG, new ArrayList<>(Arrays.asList(FLOAT, DOUBLE)));
         WIDENING_MAP.put(FLOAT, new ArrayList<>(Arrays.asList(DOUBLE)));
+
+
+        NARROWING_MAP.put(SHORT, new ArrayList<>(Arrays.asList(BYTE, CHAR)));
+        NARROWING_MAP.put(CHAR, new ArrayList<>(Arrays.asList(BYTE, SHORT)));
+        NARROWING_MAP.put(INT, NARROWING_MAP.get(CHAR));
+        NARROWING_MAP.get(INT).add(CHAR);
+        NARROWING_MAP.put(LONG, NARROWING_MAP.get(INT));
+        NARROWING_MAP.get(LONG).add(INT);
+        NARROWING_MAP.put(FLOAT, NARROWING_MAP.get(LONG));
+        NARROWING_MAP.get(FLOAT).add(LONG);
+        NARROWING_MAP.put(DOUBLE, NARROWING_MAP.get(FLOAT));
+        NARROWING_MAP.get(DOUBLE).add(FLOAT);
     }
 
     private Primitive primitive;
@@ -87,12 +100,17 @@ public class PrimitiveType extends Type {
         return box();
     }
 
-    public ClassSymbol box() {
+    @Override
+    public ReflectedClassSymbol box() {
         return ImportManager.get("java.lang." + primitive.classname);
     }
 
     public String getName() {
         return primitive.name;
+    }
+
+    public boolean isReifiable() {
+        return true;
     }
 
     public String getTypeName() {
@@ -127,8 +145,20 @@ public class PrimitiveType extends Type {
         return false;
     }
 
-    public boolean canWidenTo(PrimitiveType target) {
-        return WIDENING_MAP.get(this).contains(target);
+    @Override
+    public boolean canWidenTo(Type type) {
+        if (type instanceof PrimitiveType) {
+            return WIDENING_MAP.get(this).contains((PrimitiveType)type);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean canNarrowTo(Type type) {
+        if (type instanceof PrimitiveType) {
+            return NARROWING_MAP.get(this).contains((PrimitiveType)type);
+        }
+        return false;
     }
 
     private enum Primitive {

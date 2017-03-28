@@ -1077,7 +1077,7 @@ blockStatements returns [List<Statement> ret]
 
 blockStatement returns [Statement ret]
     :   d = localVariableDeclarationStatement {$ret = $d.ret;}
-    |   c = classDeclaration {$ret = $c.ret;}
+    |   c = classDeclaration {$ret = $c.ret; $c.ret.setLocal(true);}
     |   st = statement {$ret = $st.ret;}
     ;
 

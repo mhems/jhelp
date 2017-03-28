@@ -11,7 +11,7 @@ import com.binghamton.jhelp.util.StringUtils;
 /**
  * A class representing a Java type variable
  */
-public class TypeVariable extends Type {
+public class TypeVariable extends ReferenceType {
     private Type[] bounds = {};
 
     public TypeVariable(String name) {
@@ -30,7 +30,9 @@ public class TypeVariable extends Type {
 
     public ClassSymbol getClassSymbol() {
         // TODO think this should trigger error
-        return bounds[0].getClassSymbol(); // TODO lub
+        // TODO but may present problems for member lookup on fields of generic type
+        throw new UnsupportedOperationException();
+        // return bounds[0].getClassSymbol(); // TODO lub
     }
 
     public ClassSymbol getDeclaringClass() {
@@ -43,16 +45,9 @@ public class TypeVariable extends Type {
 
     public String getTypeName() {
         StringBuilder sb = new StringBuilder(name);
-        if (isBounded()) {
-            sb.append(" extends ");
-            sb.append(StringUtils.join(" & ", bounds, t -> t.getTypeName()));
-        }
+        sb.append(" extends ");
+        sb.append(StringUtils.join(" & ", bounds, t -> t.getTypeName()));
         return sb.toString();
-    }
-
-    public boolean isBounded() {
-        // TODO incorrect
-        return bounds.length > 0;
     }
 
     public Type[] getBounds() {

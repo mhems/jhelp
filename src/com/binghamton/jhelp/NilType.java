@@ -7,10 +7,6 @@ public class NilType extends Type {
 
     }
 
-    public Type erase() {
-        return this;
-    }
-
     public String getTypeName() {
         return "null";
     }

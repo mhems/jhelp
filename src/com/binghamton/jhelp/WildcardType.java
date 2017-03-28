@@ -4,16 +4,17 @@ import java.util.Arrays;
 
 public class WildcardType extends Type {
     private boolean upper;
-    private Type bound;
+    private ReferenceType bound;
+    private boolean bounded; // non-trivially by Object
 
     public WildcardType() {
-        upper = true;
-        bound = ImportManager.get("java.lang.Object");
+        this(true, ImportManager.get("java.lang.Object"));
     }
 
-    public WildcardType(boolean upper, Type bound) {
+    public WildcardType(boolean upper, ReferenceType bound) {
         this.upper = upper;
         this.bound = bound;
+        bounded = !bound.equals(ImportManager.get("java.lang.Object"));
     }
 
     public String getName() {
@@ -38,17 +39,16 @@ public class WildcardType extends Type {
         return ret;
     }
 
+    public boolean isBounded() {
+        return bounded;
+    }
+
     public boolean isUpperBounded() {
         return upper;
     }
 
-    public Type getBound() {
+    public ReferenceType getBound() {
         return bound;
-    }
-
-    @Override
-    public boolean isReference() {
-        return false;
     }
 
     @Override

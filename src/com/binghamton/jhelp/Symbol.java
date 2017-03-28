@@ -207,9 +207,9 @@ public abstract class Symbol {
             java.lang.reflect.Type[] lb = ref.getLowerBounds();
             java.lang.reflect.Type[] ub = ref.getUpperBounds();
             if (lb.length == 0) {
-                ret = new WildcardType(true, fromType(ub[0]));
+                ret = new WildcardType(true, (ReferenceType)fromType(ub[0]));
             } else {
-                ret = new WildcardType(false, fromType(lb[0]));
+                ret = new WildcardType(false, (ReferenceType)fromType(lb[0]));
             }
         } else if (type instanceof Class<?>) {
             Class<?> cls = (Class<?>)type;

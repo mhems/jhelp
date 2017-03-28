@@ -214,10 +214,6 @@ public class MyClassSymbol extends ClassSymbol {
         return false;
     }
 
-    public PrimitiveType unbox() {
-        return null;
-    }
-
     public String getQualifiedName() {
         StringBuilder sb = new StringBuilder();
         if (!getPackage().isDefault()) {

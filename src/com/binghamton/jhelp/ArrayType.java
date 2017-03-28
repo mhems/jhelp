@@ -9,7 +9,7 @@ import org.antlr.v4.runtime.Token;
 /**
  * Class representing an array type
  */
-public class ArrayType extends Type {
+public class ArrayType extends ReferenceType {
     private Type base;
 
     /**
@@ -60,11 +60,19 @@ public class ArrayType extends Type {
     }
 
     public ClassSymbol getClassSymbol() {
-        // TODO incorrect?
         return base.getClassSymbol();
     }
 
     public ClassSymbol getDeclaringClass() {
         return base.getDeclaringClass();
+    }
+
+    public boolean isReifiable() {
+        return base.isReifiable();
+    }
+
+    @Override
+    public boolean isRaw() {
+        return base.isRaw();
     }
 }

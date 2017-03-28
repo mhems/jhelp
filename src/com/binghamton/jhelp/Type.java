@@ -9,7 +9,6 @@ public abstract class Type extends Symbol {
             kind = SymbolKind.TYPE;
         }
 
-
     public abstract String getTypeName();
     public abstract ClassSymbol getClassSymbol();
 
@@ -44,6 +43,26 @@ public abstract class Type extends Symbol {
         return this;
     }
 
+    public ReflectedClassSymbol box() {
+        return null;
+    }
+
+    public PrimitiveType unbox() {
+        return null;
+    }
+
+    public ParameterizedType captureConvert() {
+        return null;
+    }
+
+    public boolean canWidenTo(Type type) {
+        return false;
+    }
+
+    public boolean canNarrowTo(Type type) {
+        return false;
+    }
+
     public String repr() {
         return getTypeName();
     }
@@ -60,17 +79,29 @@ public abstract class Type extends Symbol {
         return getTypeName();
     }
 
-    // For now, until type checking
-    public boolean isEquivalentTo(Type other) { return true; }
-    public boolean isSubTypeOf(Type other) { return other.isSuperTypeOf(this); }
-    public boolean isSuperTypeOf(Type other) { return true; }
-    public boolean isReifiable() { return true; }
-
-    public boolean isReference() {
-        return true;
+    public boolean isSubTypeOf(Type other) {
+        return other.isSuperTypeOf(this);
     }
 
-    public Type captureConvert() {
-        return this;
+    // TODO implement
+    public /*abstract*/ boolean isSuperTypeOf(Type other) {return true;}
+
+    public boolean isReifiable() {
+        return false;
+    }
+
+    public boolean isRaw() {
+        return false;
+    }
+
+    public boolean isReference() {
+        return false;
+    }
+
+    public static Type lub(Type... types) {
+        if (types.length == 1) {
+            return types[0];
+        }
+        return null; // TODO
     }
 }

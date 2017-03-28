@@ -16,6 +16,7 @@ public abstract class ConcreteBodyDeclaration extends BodyDeclaration {
     protected List<MethodDeclaration> ctors = new ArrayList<>();
     protected List<Block> instanceInitializers = new ArrayList<>();
     protected List<Block> staticInitializers = new ArrayList<>();
+    protected boolean local = false;
 
     /**
      * Construct an anonymous declaration
@@ -121,6 +122,14 @@ public abstract class ConcreteBodyDeclaration extends BodyDeclaration {
             getInstanceInitializers().isEmpty() &&
             getMethods().isEmpty() &&
             getConstructors().isEmpty();
+    }
+
+    public boolean isLocal() {
+        return local;
+    }
+
+    public void setLocal(boolean local) {
+        this.local = local;
     }
 
     /**

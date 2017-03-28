@@ -89,6 +89,7 @@ public class ReflectedClassSymbol extends ClassSymbol {
         return cls.isPrimitive();
     }
 
+    @Override
     public PrimitiveType unbox() {
         if (isBoxed()) {
             return PrimitiveType.UNBOX_MAP.get(cls.getSimpleName());

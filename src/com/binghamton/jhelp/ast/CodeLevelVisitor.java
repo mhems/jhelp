@@ -11,6 +11,7 @@ import com.binghamton.jhelp.ArrayType;
 import com.binghamton.jhelp.ClassSymbol;
 import com.binghamton.jhelp.ImportManager;
 import com.binghamton.jhelp.MethodSymbol;
+import com.binghamton.jhelp.Modifier;
 import com.binghamton.jhelp.NamedSymbolTable;
 import com.binghamton.jhelp.NilType;
 import com.binghamton.jhelp.Package;
@@ -116,11 +117,16 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(ArrayInitializer ast) {
+        Type baseType = null; // TODO must be "inferred" (passed-down)
+        if (!baseType.isReifiable()) {
+            System.err.println("base type of array initializer must be reifiable");
+        }
         for (Expression e : ast.getInitializers()) {
             e.accept(this);
+            if (!isAssignable(baseType, e.getType())) {
+                System.err.println("elements of array initializer must be assignable to base type");
+            }
         }
-        // TODO assert each elem assignment-compatible with each other, parent type?
-        // i.e. how to infer or know you cannot?
     }
 
     /**
@@ -150,7 +156,18 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         ast.getRHS().accept(this);
         Type lType = ast.getLHS().getType();
         Type rType = ast.getRHS().getType();
-        // TODO lType must be l-value (variable)
+        AssignmentOperator op = ast.getOperator();
+        // TODO lType must be l-value (variable, field access, array access)
+        // TODO lType must name non-final variable/index of array
+        if (op == AssignmentOperator.EQUALS) {
+            if (!isAssignable(lType, rType)) {
+                System.err.println("cannot assign rhs type to lhs type");
+            }
+            ast.setType(lType.captureConvert());
+        } else {
+            // TODO synthesize assignment of casted binary expression
+            // LHS OP= RHS -> LHS = (LTYPE) (LHS OP RHS)
+        }
     }
 
     /**
@@ -331,6 +348,10 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(ConcreteBodyDeclaration ast) {
+        // first see if exists, if does, visit members,
+        // otherwise must be local or anon, or inner of the one of the former
+        // add to appropriate tables and visit and establish member decl.s
+
         for (MethodDeclaration ctor : ast.getConstructors()) {
             ctor.accept(this);
         }
@@ -428,6 +449,14 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         }
         visit((Block)ast);
         // TODO exit scope
+    }
+
+    /**
+     * Visit a IdentifierExpression node
+     * @param ast the AST node being visited
+     */
+    public void visit(IdentifierExpression ast) {
+        // TODO use super to classify types, this to classify members
     }
 
     /**
@@ -604,7 +633,9 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             cB.accept(this);
             for (Expression labelExpr : cB.getLabels()) {
                 caseType = labelExpr.getType();
-                // TODO check caseType assig-compat w/ condType
+                if (!isAssignable(condType, caseType)) {
+                    System.err.println("switch label type must be assignable to switch condition typee");
+                }
                 if (enumClass != null) {
                     caseClass = caseType.getClassSymbol();
                     if (!caseClass.isEnum() || !caseClass.equals(enumClass)) {
@@ -649,17 +680,49 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             System.err.println("a ternary expression condition must be boolean type");
         }
         ast.getThenExpression().accept(this);
-        if (ast.getThenExpression().getType().equals(PrimitiveType.VOID)) {
-            System.err.println("then expression cannot be void");
-        }
+        Type lType = ast.getThenExpression().getType();
+        Type rType = ast.getElseExpression().getType();
         ast.getElseExpression().accept(this);
-        if (ast.getElseExpression().getType().equals(PrimitiveType.VOID)) {
-            System.err.println("then expression cannot be void");
+        if (lType.equals(PrimitiveType.VOID) ||
+            rType.equals(PrimitiveType.VOID)) {
+            System.err.println("ternary expression operands cannot be void");
         }
-        // TODO not totally correct, may need lub or something else
-        // could make look-up table...
-        ast.setType(binaryPromotion(ast.getThenExpression(),
-                                    ast.getElseExpression()));
+        if (lType.equals(rType)) {
+            ast.setType(lType);
+        } else if (lType.equals(PrimitiveType.BOOLEAN) ||
+                   rType.equals(PrimitiveType.BOOLEAN)) {
+            ast.setType(PrimitiveType.BOOLEAN);
+        } else if (isNumericLike(lType) && isNumericLike(rType)) {
+            Type ulType = lType.unbox();
+            if (ulType != null) {
+                lType = ulType;
+            }
+            Type urType = rType.unbox();
+            if (urType != null) {
+                rType = urType;
+            }
+
+            if (ulType.equals(urType)) {
+                ast.setType(ulType);
+            } else if ((ulType.equals(PrimitiveType.BYTE) ||
+                        urType.equals(PrimitiveType.BYTE)) &&
+                       (ulType.equals(PrimitiveType.SHORT) ||
+                        urType.equals(PrimitiveType.SHORT))) {
+                ast.setType(PrimitiveType.SHORT);
+            // skipped over 15.25.2, if int representable in T ...
+            } else {
+                ast.setType(binaryPromotion(ast.getThenExpression(),
+                                            ast.getElseExpression()));
+            }
+        } else {
+            if (lType == NilType.TYPE) {
+                ast.setType(rType);
+            } else if (rType == NilType.TYPE) {
+                ast.setType(lType);
+            } else {
+                ast.setType(Type.lub(lType.box(), rType.box()).captureConvert());
+            }
+        }
     }
 
     /**
@@ -670,14 +733,12 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         Expression expr = ast.getExpression();
         expr.accept(this);
         Type type = expr.getType();
-        if (!type.isReference()) {
-            System.out.println("can only throw reference types");
-        } else if (!type.getClassSymbol().extendsClass(ImportManager.get("java.lang.Throwable"))) {
-            // TODO technically should be assering assignable to Throwable
+        if (type != NilType.TYPE && !isAssignable(type,
+                                                  ImportManager.get("java.lang.Throwable"))) {
             System.err.println("must either throw null or instance of Throwable");
         }
         if (type != NilType.TYPE &&
-            type.getClassSymbol().implementsInterface(ImportManager.get("java.lang.RuntimeException"))) {
+            !type.getClassSymbol().implementsInterface(ImportManager.get("java.lang.RuntimeException"))) {
             // TODO make sure we're in a method with a throws that we are assignable to
         }
     }
@@ -690,8 +751,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         // TODO enter scope
         for (VariableDeclaration var : ast.getResources()) {
             var.accept(this);
-            // TODO make var final
-
+            var.getSymbol().addModifier(Modifier.FINAL);
             if (!var.getSymbol().getType().getClassSymbol().implementsInterface(ImportManager.get("java.lang.AutoCloseable"))) {
                 System.err.println("resource in try-with-resources must implement AutoCloseable");
             }
@@ -770,18 +830,11 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             ((PrimitiveType)type).isNumeric()) {
             return true;
         }
-        PrimitiveType unboxed = unbox(type);
+        PrimitiveType unboxed = type.unbox();
         if (unboxed != null) {
             return unboxed.isNumeric();
         }
         return false;
-    }
-
-    private static PrimitiveType unbox(Type type) {
-        if (type instanceof ReflectedClassSymbol) {
-            return ((ReflectedClassSymbol)type).unbox();
-        }
-        return null;
     }
 
     private static boolean isValidSwitchType(Type type) {
@@ -818,11 +871,11 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
     private static Type binaryPromotion(Expression lhs, Expression rhs) {
         Type lType = lhs.getType();
         Type rType = rhs.getType();
-        Type tmp = unbox(lType);
+        Type tmp = lType.unbox();
         if (tmp != null) {
             lType = tmp;
         }
-        tmp = unbox(rType);
+        tmp = rType.unbox();
         if (tmp != null) {
             rType = tmp;
         }
@@ -844,7 +897,52 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
     }
 
     private static boolean canCast(Type source, Type target) {
-        // TODO section 5.5.1
+        // TODO section 5.5
         return true;
+    }
+
+
+    /**
+     * Determines if rType is equivalent to lType in an assignment-context
+     * @param lType the type of the l-value being assigned to
+     * @param rType the type of the expression being assigned with
+     * @return true iff rType is assignable to lType
+     */
+    private static boolean isAssignable(Type lType, Type rType) {
+        // TODO incomplete, non-recursive
+        if (lType.equals(rType) ||
+            rType.canWidenTo(lType) ||
+            rType == NilType.TYPE && lType.isReference()) {
+            return true;
+        }
+        Type boxedRType = rType.box();
+        if (boxedRType != null && boxedRType.canWidenTo(lType)) {
+            return true;
+        }
+        Type unboxedRType = rType.unbox();
+        if (unboxedRType != null && unboxedRType.canWidenTo(lType)) {
+            return true;
+        }
+        if (rType.isRaw() &&
+            lType.getClassSymbol().equals(rType.getClassSymbol()) &&
+            lType.rank() == rType.rank()) { // unchecked conversion
+                return true;
+        }
+        if (rType.equals(PrimitiveType.BYTE) ||
+            rType.equals(PrimitiveType.SHORT) ||
+            rType.equals(PrimitiveType.CHAR) ||
+            rType.equals(PrimitiveType.INT)) {
+            Type toUse = lType;
+            if (unboxedRType != null) {
+                toUse = unboxedRType;
+            }
+            if (toUse.equals(PrimitiveType.BYTE) ||
+                toUse.equals(PrimitiveType.SHORT) ||
+                toUse.equals(PrimitiveType.CHAR)) {
+                // erroneously assume toUse can represent r-value const. expr.
+                return rType.canNarrowTo(toUse);
+            }
+        }
+        return false;
     }
 }

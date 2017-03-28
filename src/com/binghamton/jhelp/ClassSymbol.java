@@ -2,6 +2,7 @@ package com.binghamton.jhelp;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
 
 import com.binghamton.jhelp.ast.ASTVisitor;
@@ -10,7 +11,7 @@ import com.binghamton.jhelp.util.StringUtils;
 /**
  * A base class representing a Java class and its members
  */
-public abstract class ClassSymbol extends Type {
+public abstract class ClassSymbol extends ReferenceType {
     public enum ClassKind {CLASS, INTERFACE, ENUM, ANNOTATION};
 
         {
@@ -138,7 +139,6 @@ public abstract class ClassSymbol extends Type {
     public abstract boolean isAnonymous();
     public abstract boolean isInnerClass();
     public abstract boolean isBoxed();
-    public abstract PrimitiveType unbox();
     public abstract String getPackageName();
     public abstract Package getPackage();
 
@@ -160,6 +160,11 @@ public abstract class ClassSymbol extends Type {
 
     public boolean isGeneric() {
         return hasTypeParameters();
+    }
+
+    @Override
+    public boolean isRaw() {
+        return isGeneric();
     }
 
     public boolean extendsClass(ClassSymbol cls) {
@@ -272,6 +277,38 @@ public abstract class ClassSymbol extends Type {
 
     public ClassSymbol getClassSymbol() {
         return this;
+    }
+
+    @Override
+    public boolean canNarrowTo(Type type) {
+        if (!super.canNarrowTo(type)) {
+            if (type instanceof ClassSymbol) {
+                ClassSymbol K = (ClassSymbol)type;
+                if (!K.isGeneric()) {
+                    if (K.isInterfaceLike() && !hasModifier(Modifier.FINAL) &&
+                        !implementsInterface(K)) {
+                        return true;
+                    }
+                    if (isInterfaceLike()) {
+                        if (K.isClassLike() && !K.hasModifier(Modifier.FINAL)) {
+                            return true;
+                        }
+                        if (K.isInterfaceLike() && !implementsInterface(K)) {
+                            return true;
+                        }
+                    }
+                }
+            } else if (type instanceof ArrayType) {
+                return this.equals(ImportManager.get("java.lang.Cloneable")) ||
+                    this.equals(ImportManager.get("java.io.Serializable"));
+            }
+            return false;
+        }
+        return true;
+    }
+
+    public boolean isReifiable() {
+        return true;
     }
 
     public String toString() {
