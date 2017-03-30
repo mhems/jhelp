@@ -6,6 +6,8 @@ import com.binghamton.jhelp.antlr.MyToken;
 import com.binghamton.jhelp.ast.ASTVisitor;
 import com.binghamton.jhelp.ast.BodyDeclaration;
 
+import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
+
 public class MyClassSymbol extends ClassSymbol {
 
     private ClassSymbol declarer;
@@ -99,15 +101,13 @@ public class MyClassSymbol extends ClassSymbol {
         boolean good = true;
         if (parentMethod != null &&
             parentMethod.getAccessLevel() != AccessLevel.PRIVATE) {
-            if (parentMethod.hasModifier(Modifier.FINAL)) {
+            if (parentMethod.isFinal()) {
                 System.err.println("cannot override a final method");
                 good = false;
-            } else if (parentMethod.hasModifier(Modifier.STATIC) &&
-                       !sym.hasModifier(Modifier.STATIC)) {
+            } else if (parentMethod.isStatic() && !sym.isStatic()) {
                 System.err.println("an instance method cannot override a static method");
                 good = false;
-            } else if (sym.hasModifier(Modifier.STATIC) &&
-                       !parentMethod.hasModifier(Modifier.STATIC)) {
+            } else if (sym.isStatic() && !parentMethod.isStatic()) {
                 System.err.println("a static method cannot hide an instance method");
                 good = false;
             }
@@ -172,8 +172,7 @@ public class MyClassSymbol extends ClassSymbol {
     }
 
     public void setSuperClassForEnum() {
-        superClass = new ParameterizedType(ImportManager.get("java.lang.Enum"),
-                                           this);
+        superClass = new ParameterizedType(fetch("Enum"), this);
         MyMethodSymbol values = new MyMethodSymbol(new MyToken(0, "values"),
                                                    new Modifiers(Modifier.PUBLIC,
                                                                  Modifier.STATIC));
@@ -183,7 +182,7 @@ public class MyClassSymbol extends ClassSymbol {
         MyMethodSymbol valueOf = new MyMethodSymbol(new MyToken(0, "valueOf"),
                                                     new Modifiers(Modifier.PUBLIC,
                                                                   Modifier.STATIC));
-        Type[] strings = {ImportManager.get("java.lang.String")};
+        Type[] strings = {fetch("String")};
         valueOf.setReturnType(this);
         valueOf.setParameterTypes(strings);
         valueOf.constructType();
@@ -191,11 +190,11 @@ public class MyClassSymbol extends ClassSymbol {
     }
 
     public void setSuperClassForAnnotation() {
-        superClass = ImportManager.get("java.lang.annotation.Annotation");
+        superClass = fetch("java.lang.annotation.Annotation");
     }
 
     public void setSuperClassForClass() {
-        superClass = ImportManager.get("java.lang.Object");
+        superClass = fetch("Object");
     }
 
     public String getPackageName() {

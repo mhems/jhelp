@@ -120,6 +120,12 @@ public abstract class EmptyVisitor implements ASTVisitor {
     public void visit(ClassDeclaration ast) { }
 
     /**
+     * Visit a ClassLiteralExpression node
+     * @param ast the AST node being visited
+     */
+    public void visit(ClassLiteralExpression ast) { }
+
+    /**
      * Visit a CompilationUnit node
      * @param ast the AST node being visited
      */

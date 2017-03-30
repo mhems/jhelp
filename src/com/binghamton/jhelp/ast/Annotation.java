@@ -73,10 +73,7 @@ public class Annotation extends Expression {
      * @return the single value of this annotation
      */
     public Expression getSingleValue() {
-        if (isSingleElement()) {
-            return nameValueMap.get(null);
-        }
-        return null;
+        return nameValueMap.get(null);
     }
 
     /**

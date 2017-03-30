@@ -108,6 +108,18 @@ public abstract class Symbol {
         return modifiers.getModifiers().size() > 0;
     }
 
+    public boolean isAbstract() {
+        return hasModifier(Modifier.ABSTRACT);
+    }
+
+    public boolean isFinal() {
+        return hasModifier(Modifier.FINAL);
+    }
+
+    public boolean isStatic() {
+        return hasModifier(Modifier.STATIC);
+    }
+
     public boolean hasAnnotations() {
         return annotations.length > 0;
     }

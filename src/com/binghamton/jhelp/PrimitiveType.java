@@ -8,6 +8,8 @@ import java.util.Map;
 
 import org.antlr.v4.runtime.Token;
 
+import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
+
 /**
  * Class representing valid Java primitive types
  */
@@ -101,8 +103,8 @@ public class PrimitiveType extends Type {
     }
 
     @Override
-    public ReflectedClassSymbol box() {
-        return ImportManager.get("java.lang." + primitive.classname);
+    public ClassSymbol box() {
+        return fetch(primitive.classname);
     }
 
     public String getName() {

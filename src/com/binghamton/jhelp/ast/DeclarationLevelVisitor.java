@@ -20,6 +20,8 @@ import com.binghamton.jhelp.Type;
 import com.binghamton.jhelp.TypeVariable;
 import com.binghamton.jhelp.WildcardType;
 
+import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
+
 /**
  * The top level Visitor for visiting top-level declarations and adding them to
  * the symbol table
@@ -125,7 +127,7 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         if (ast.hasSuperClass()) {
             ast.getSuperClass().accept(this);
             ClassSymbol superCls = ast.getSuperClass().getType().getClassSymbol();
-            if (superCls.equals(ImportManager.get("java.lang.Enum"))) {
+            if (superCls.equals(fetch("Enum"))) {
                 System.err.println("cannot directly subclass java.lang.Enum");
             } else if (superCls.isInterfaceLike()) {
                 System.err.println("cannot subclass interface or annotation");

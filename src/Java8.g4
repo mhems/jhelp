@@ -965,7 +965,12 @@ annotationTypeElementDeclaration returns [MethodDeclaration ret]
         {checkModifiers($mods);}
         t = unannType id = Identifier '(' ')'
         (ds = dims {$ls = $ds.ret;})?
-        (dv = defaultValue {$expr = $dv.ret;})? ';'
+        (dv = defaultValue
+            {
+                $expr = $dv.ret;
+                $mods.add(Modifier.DEFAULT);
+            }
+        )? ';'
         {
             $type = $t.ret;
             if ($ls.size() > 0) {
@@ -1471,22 +1476,20 @@ primaryNoNewArray_typeAccess returns [Expression ret]
             if ($ls.size() > 0) {
                 $expr = new ArrayTypeExpression($expr, $ls);
             }
-            $ret = new AccessExpression($expr, new KeywordExpression($kw));
+            $ret = new ClassLiteralExpression($expr, $kw);
         }
     |   p = packageOrTypeName '.' id = Identifier
         (first = '[' last = ']' {$ls.add(new Dimension($first, $last));})*
         '.' kw = 'class'
         {
-            $expr = new IdentifierExpression($id);
+            $expr = new AccessExpression($p.ret, $id);
             if ($ls.size() > 0) {
                 $expr = new ArrayTypeExpression($expr, $ls);
             }
-            $ret = new AccessExpression(new AccessExpression($p.ret, $expr),
-                                        new KeywordExpression($kw));
+            $ret = new ClassLiteralExpression($expr, $kw);
         }
-    |   kv = 'void' '.' kc = 'class'
-        {$ret = new AccessExpression(new KeywordExpression($kv),
-                                     new KeywordExpression($kc));}
+    |   kv = 'void' '.' kw = 'class'
+        {$ret = new ClassLiteralExpression(new KeywordExpression($kv), $kw);}
     |   a5 = typeName '.' kw = 'this'
         {
             $ret = new AccessExpression($a5.ret, new KeywordExpression($kw));
@@ -2098,19 +2101,19 @@ leftHandSide returns [Expression ret]
     |   a = arrayAccess {$ret = $a.ret;}
     ;
 
-assignmentOperator returns [AssignmentOperator ret]
-    :   '=' {$ret = AssignmentOperator.EQUALS;}
-    |   '*=' {$ret = AssignmentOperator.MULTIPLICATION;}
-    |   '/=' {$ret = AssignmentOperator.DIVISION;}
-    |   '%=' {$ret = AssignmentOperator.MODULUS;}
-    |   '+=' {$ret = AssignmentOperator.ADDITION;}
-    |   '-=' {$ret = AssignmentOperator.SUBTRACTION;}
-    |   '<<=' {$ret = AssignmentOperator.LEFT_SHIFT;}
-    |   '>>=' {$ret = AssignmentOperator.RIGHT_SHIFT;}
-    |   '>>>=' {$ret = AssignmentOperator.RIGHT_LOGICAL_SHIFT;}
-    |   '&=' {$ret = AssignmentOperator.BITWISE_AND;}
-    |   '^=' {$ret = AssignmentOperator.BITWISE_XOR;}
-    |   '|=' {$ret = AssignmentOperator.BITWISE_OR;}
+assignmentOperator returns [BinaryOperator ret]
+    :   '=' {$ret = null;}
+    |   '*=' {$ret = BinaryOperator.MULTIPLICATION;}
+    |   '/=' {$ret = BinaryOperator.DIVISION;}
+    |   '%=' {$ret = BinaryOperator.MODULUS;}
+    |   '+=' {$ret = BinaryOperator.ADDITION;}
+    |   '-=' {$ret = BinaryOperator.SUBTRACTION;}
+    |   '<<=' {$ret = BinaryOperator.LEFT_SHIFT;}
+    |   '>>=' {$ret = BinaryOperator.RIGHT_SHIFT;}
+    |   '>>>=' {$ret = BinaryOperator.RIGHT_LOGICAL_SHIFT;}
+    |   '&=' {$ret = BinaryOperator.BITWISE_AND;}
+    |   '^=' {$ret = BinaryOperator.BITWISE_XOR;}
+    |   '|=' {$ret = BinaryOperator.BITWISE_OR;}
     ;
 
 conditionalExpression returns [Expression ret]

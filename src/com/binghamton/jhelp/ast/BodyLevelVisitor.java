@@ -25,6 +25,8 @@ import com.binghamton.jhelp.Type;
 import com.binghamton.jhelp.TypeVariable;
 import com.binghamton.jhelp.VariableSymbol;
 
+import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
+
 /**
  * The body level Visitor for visiting the member declarations contained within
  * body declarations
@@ -39,7 +41,7 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
                                                  Modifier.SYNCHRONIZED};
     private static MethodSymbol FINALIZE;
     static {
-        FINALIZE = ImportManager.get("java.lang.Object").getMethod("finalize");
+        FINALIZE = fetch("Object").getMethod("finalize");
     }
 
     private MethodSymbol currentMethod;
@@ -86,8 +88,7 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
             currentClass.addConstructor(emptyCtor);
         }
 
-        if (currentClass.isClassLike() &&
-            !currentClass.hasModifier(Modifier.ABSTRACT)) {
+        if (currentClass.isClassLike() && !currentClass.isAbstract()) {
             for (MethodSymbol m : currentClass.getUnimplementedMethods()) {
                 System.err.println("cannot leave method " + m.getName() + " unimplemented");
             }
@@ -150,7 +151,7 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
         }
         boolean hasAbstract = false;
         for (MethodSymbol method : currentClass.getMethods()) {
-            if (method.hasModifier(Modifier.ABSTRACT)) {
+            if (method.isAbstract()) {
                 hasAbstract = true;
                 break;
             }
@@ -200,7 +201,7 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
         method.setAnnotations(makeAnnotations(ast.getAnnotations()));
 
         if (currentClass.isClass()) {
-            if (method.hasModifier(Modifier.ABSTRACT)) {
+            if (method.isAbstract()) {
                 Modifiers mods = method.getModifiers();
                 for (Modifier bad : FORBIDDEN) {
                     if (mods.contains(bad)) {
@@ -210,7 +211,7 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
                 if (!ast.getBody().isNil()) {
                     System.err.println("an abstract method must have no body");
                 }
-                if (!currentClass.hasModifier(Modifier.ABSTRACT)) {
+                if (!currentClass.isAbstract()) {
                     System.err.println("a class with an abstract method must be declared abstract");
                 }
             }
@@ -230,27 +231,26 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
             if (method.hasModifier(Modifier.DEFAULT)) {
                 ++count;
             }
-            if (method.hasModifier(Modifier.ABSTRACT)) {
+            if (method.isAbstract()) {
                 ++count;
                 if (method.hasModifier(Modifier.STRICT_FP)) {
                     System.err.println("an interface method cannot both be abstract and strictfp");
                 }
             }
-            if (method.hasModifier(Modifier.STATIC)) {
+            if (method.isStatic()) {
                 ++count;
             }
             if (!method.hasModifier(Modifier.DEFAULT) &&
-                !method.hasModifier(Modifier.STATIC)) {
+                !method.isStatic()) {
                 method.addModifier(Modifier.ABSTRACT);
             }
 
             if (ast.getBody().isNil() &&
-                (method.hasModifier(Modifier.DEFAULT) ||
-                 method.hasModifier(Modifier.STATIC))) {
+                (method.hasModifier(Modifier.DEFAULT) || method.isStatic())) {
                     System.err.println("a default or static method in an interface must have a body");
             }
 
-            if (method.hasModifier(Modifier.ABSTRACT) && !ast.getBody().isNil()) {
+            if (method.isAbstract() && !ast.getBody().isNil()) {
                 System.err.println("an interface method cannot have a body unless that method is default is static");
             }
 
@@ -262,7 +262,7 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
 
         if (currentClass.isClassLike() &&
             ast.getBody().isNil() &&
-            !method.hasModifier(Modifier.ABSTRACT) &&
+            !method.isAbstract() &&
             !method.hasModifier(Modifier.NATIVE)) {
             System.err.println("a method with no body must be abstract or native");
         }
@@ -297,7 +297,7 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
         for (Expression ex : ast.getExceptions()) {
             ex.accept(this);
             excTypes[pos] = ex.getType();
-            if (!excTypes[pos].isSubTypeOf(ImportManager.get("java.lang.Throwable"))) {
+            if (!excTypes[pos].isSubTypeOf(fetch("Throwable"))) {
                 System.err.println("exceptions a method throws must be a subtype of java.lang.Throwable");
             }
             ++pos;
@@ -327,11 +327,11 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
 
     private boolean validAnnotationReturnType(Type type) {
         if (type instanceof PrimitiveType ||
-            type.equals(ImportManager.get("java.lang.String")) ||
-            type.equals(ReflectedClassSymbol.get(java.lang.Class.class))) {
+            type.equals(fetch("String")) ||
+            type.equals(fetch("Class"))) {
             return true;
         } else if (type instanceof ParameterizedType) {
-            return type.getClassSymbol().equals(java.lang.Class.class);
+            return type.getClassSymbol().equals(fetch("Class"));
         } else if (type instanceof ClassSymbol) {
             ClassSymbol sym = (ClassSymbol)type;
             return sym.isEnum() || sym.isAnnotation();
@@ -374,7 +374,7 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
         ast.getExpression().accept(this);
         var.setType(ast.getExpression().getType());
 
-        if (var.hasModifier(Modifier.FINAL) &&
+        if (var.isFinal() &&
             var.hasModifier(Modifier.VOLATILE)) {
             System.err.println("field cannot both be final and volatile");
         }

@@ -222,7 +222,7 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
     public boolean importStaticMember(String memberName, V[] members) {
         boolean added = false;
         for (V member : members) {
-            if (member.hasModifier(Modifier.STATIC) &&
+            if (member.isStatic() &&
                 member.getName().equals(memberName)) {
                 added = true;
                 if (!put(member)) {
@@ -236,7 +236,7 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
 
     public boolean importStaticMemberOnDemand(V[] members) {
         for (V member : members) {
-            if (member.hasModifier(Modifier.STATIC)) {
+            if (member.isStatic()) {
                 if (!put(member)) {
                     System.err.println("cannot import two members with same name");
                     return false;

@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
+import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
+
 /**
  * Class representing an array type
  */
@@ -74,5 +76,32 @@ public class ArrayType extends ReferenceType {
     @Override
     public boolean isRaw() {
         return base.isRaw();
+    }
+
+    @Override
+    public boolean isValidClassLiteralType() {
+        return base.isValidClassLiteralType();
+    }
+
+    @Override
+    public boolean canCastTo(Type target) {
+        if (target instanceof ClassSymbol) {
+            ClassSymbol targetCls = (ClassSymbol)target;
+            if (targetCls.isClassLike()) {
+                return fetch("Object").equals(target);
+            } else {
+                return fetch("java.io.Serializable").equals(target) ||
+                    fetch("Serializable").equals(target);
+            }
+        } else if (target instanceof TypeVariable) {
+            return canCastTo(((TypeVariable)target).getUpperBound());
+        } else if (target instanceof ArrayType) {
+            Type targetBaseType = ((ArrayType)target).base;
+            if (base instanceof PrimitiveType) {
+                return base.equals(targetBaseType);
+            }
+            return base.canCastTo(targetBaseType);
+        }
+        return true;
     }
 }

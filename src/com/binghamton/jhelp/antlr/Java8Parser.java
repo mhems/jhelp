@@ -7505,7 +7505,10 @@ public class Java8Parser extends Parser {
 				{
 				setState(1785);
 				((AnnotationTypeElementDeclarationContext)_localctx).dv = defaultValue();
-				((AnnotationTypeElementDeclarationContext)_localctx).expr =  ((AnnotationTypeElementDeclarationContext)_localctx).dv.ret;
+
+				                ((AnnotationTypeElementDeclarationContext)_localctx).expr =  ((AnnotationTypeElementDeclarationContext)_localctx).dv.ret;
+				                _localctx.mods.add(Modifier.DEFAULT);
+				            
 				}
 			}
 
@@ -11649,7 +11652,6 @@ public class Java8Parser extends Parser {
 		public Token kw;
 		public PackageOrTypeNameContext p;
 		public Token kv;
-		public Token kc;
 		public TypeNameContext a5;
 		public TerminalNode Identifier() { return getToken(Java8Parser.Identifier, 0); }
 		public PackageOrTypeNameContext packageOrTypeName() {
@@ -11703,7 +11705,7 @@ public class Java8Parser extends Parser {
 				            if (_localctx.ls.size() > 0) {
 				                ((PrimaryNoNewArray_typeAccessContext)_localctx).expr =  new ArrayTypeExpression(_localctx.expr, _localctx.ls);
 				            }
-				            ((PrimaryNoNewArray_typeAccessContext)_localctx).ret =  new AccessExpression(_localctx.expr, new KeywordExpression(((PrimaryNoNewArray_typeAccessContext)_localctx).kw));
+				            ((PrimaryNoNewArray_typeAccessContext)_localctx).ret =  new ClassLiteralExpression(_localctx.expr, ((PrimaryNoNewArray_typeAccessContext)_localctx).kw);
 				        
 				}
 				break;
@@ -11738,12 +11740,11 @@ public class Java8Parser extends Parser {
 				setState(2560);
 				((PrimaryNoNewArray_typeAccessContext)_localctx).kw = match(CLASS);
 
-				            ((PrimaryNoNewArray_typeAccessContext)_localctx).expr =  new IdentifierExpression(((PrimaryNoNewArray_typeAccessContext)_localctx).id);
+				            ((PrimaryNoNewArray_typeAccessContext)_localctx).expr =  new AccessExpression(((PrimaryNoNewArray_typeAccessContext)_localctx).p.ret, ((PrimaryNoNewArray_typeAccessContext)_localctx).id);
 				            if (_localctx.ls.size() > 0) {
 				                ((PrimaryNoNewArray_typeAccessContext)_localctx).expr =  new ArrayTypeExpression(_localctx.expr, _localctx.ls);
 				            }
-				            ((PrimaryNoNewArray_typeAccessContext)_localctx).ret =  new AccessExpression(new AccessExpression(((PrimaryNoNewArray_typeAccessContext)_localctx).p.ret, _localctx.expr),
-				                                        new KeywordExpression(((PrimaryNoNewArray_typeAccessContext)_localctx).kw));
+				            ((PrimaryNoNewArray_typeAccessContext)_localctx).ret =  new ClassLiteralExpression(_localctx.expr, ((PrimaryNoNewArray_typeAccessContext)_localctx).kw);
 				        
 				}
 				break;
@@ -11755,9 +11756,8 @@ public class Java8Parser extends Parser {
 				setState(2564);
 				match(DOT);
 				setState(2565);
-				((PrimaryNoNewArray_typeAccessContext)_localctx).kc = match(CLASS);
-				((PrimaryNoNewArray_typeAccessContext)_localctx).ret =  new AccessExpression(new KeywordExpression(((PrimaryNoNewArray_typeAccessContext)_localctx).kv),
-				                                     new KeywordExpression(((PrimaryNoNewArray_typeAccessContext)_localctx).kc));
+				((PrimaryNoNewArray_typeAccessContext)_localctx).kw = match(CLASS);
+				((PrimaryNoNewArray_typeAccessContext)_localctx).ret =  new ClassLiteralExpression(new KeywordExpression(((PrimaryNoNewArray_typeAccessContext)_localctx).kv), ((PrimaryNoNewArray_typeAccessContext)_localctx).kw);
 				}
 				break;
 			case 4:
@@ -15770,7 +15770,7 @@ public class Java8Parser extends Parser {
 	}
 
 	public static class AssignmentOperatorContext extends ParserRuleContext {
-		public AssignmentOperator ret;
+		public BinaryOperator ret;
 		public AssignmentOperatorContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -15789,7 +15789,7 @@ public class Java8Parser extends Parser {
 				{
 				setState(3543);
 				match(ASSIGN);
-				((AssignmentOperatorContext)_localctx).ret =  AssignmentOperator.EQUALS;
+				((AssignmentOperatorContext)_localctx).ret =  null;
 				}
 				break;
 			case MUL_ASSIGN:
@@ -15797,7 +15797,7 @@ public class Java8Parser extends Parser {
 				{
 				setState(3545);
 				match(MUL_ASSIGN);
-				((AssignmentOperatorContext)_localctx).ret =  AssignmentOperator.MULTIPLICATION;
+				((AssignmentOperatorContext)_localctx).ret =  BinaryOperator.MULTIPLICATION;
 				}
 				break;
 			case DIV_ASSIGN:
@@ -15805,7 +15805,7 @@ public class Java8Parser extends Parser {
 				{
 				setState(3547);
 				match(DIV_ASSIGN);
-				((AssignmentOperatorContext)_localctx).ret =  AssignmentOperator.DIVISION;
+				((AssignmentOperatorContext)_localctx).ret =  BinaryOperator.DIVISION;
 				}
 				break;
 			case MOD_ASSIGN:
@@ -15813,7 +15813,7 @@ public class Java8Parser extends Parser {
 				{
 				setState(3549);
 				match(MOD_ASSIGN);
-				((AssignmentOperatorContext)_localctx).ret =  AssignmentOperator.MODULUS;
+				((AssignmentOperatorContext)_localctx).ret =  BinaryOperator.MODULUS;
 				}
 				break;
 			case ADD_ASSIGN:
@@ -15821,7 +15821,7 @@ public class Java8Parser extends Parser {
 				{
 				setState(3551);
 				match(ADD_ASSIGN);
-				((AssignmentOperatorContext)_localctx).ret =  AssignmentOperator.ADDITION;
+				((AssignmentOperatorContext)_localctx).ret =  BinaryOperator.ADDITION;
 				}
 				break;
 			case SUB_ASSIGN:
@@ -15829,7 +15829,7 @@ public class Java8Parser extends Parser {
 				{
 				setState(3553);
 				match(SUB_ASSIGN);
-				((AssignmentOperatorContext)_localctx).ret =  AssignmentOperator.SUBTRACTION;
+				((AssignmentOperatorContext)_localctx).ret =  BinaryOperator.SUBTRACTION;
 				}
 				break;
 			case LSHIFT_ASSIGN:
@@ -15837,7 +15837,7 @@ public class Java8Parser extends Parser {
 				{
 				setState(3555);
 				match(LSHIFT_ASSIGN);
-				((AssignmentOperatorContext)_localctx).ret =  AssignmentOperator.LEFT_SHIFT;
+				((AssignmentOperatorContext)_localctx).ret =  BinaryOperator.LEFT_SHIFT;
 				}
 				break;
 			case RSHIFT_ASSIGN:
@@ -15845,7 +15845,7 @@ public class Java8Parser extends Parser {
 				{
 				setState(3557);
 				match(RSHIFT_ASSIGN);
-				((AssignmentOperatorContext)_localctx).ret =  AssignmentOperator.RIGHT_SHIFT;
+				((AssignmentOperatorContext)_localctx).ret =  BinaryOperator.RIGHT_SHIFT;
 				}
 				break;
 			case URSHIFT_ASSIGN:
@@ -15853,7 +15853,7 @@ public class Java8Parser extends Parser {
 				{
 				setState(3559);
 				match(URSHIFT_ASSIGN);
-				((AssignmentOperatorContext)_localctx).ret =  AssignmentOperator.RIGHT_LOGICAL_SHIFT;
+				((AssignmentOperatorContext)_localctx).ret =  BinaryOperator.RIGHT_LOGICAL_SHIFT;
 				}
 				break;
 			case AND_ASSIGN:
@@ -15861,7 +15861,7 @@ public class Java8Parser extends Parser {
 				{
 				setState(3561);
 				match(AND_ASSIGN);
-				((AssignmentOperatorContext)_localctx).ret =  AssignmentOperator.BITWISE_AND;
+				((AssignmentOperatorContext)_localctx).ret =  BinaryOperator.BITWISE_AND;
 				}
 				break;
 			case XOR_ASSIGN:
@@ -15869,7 +15869,7 @@ public class Java8Parser extends Parser {
 				{
 				setState(3563);
 				match(XOR_ASSIGN);
-				((AssignmentOperatorContext)_localctx).ret =  AssignmentOperator.BITWISE_XOR;
+				((AssignmentOperatorContext)_localctx).ret =  BinaryOperator.BITWISE_XOR;
 				}
 				break;
 			case OR_ASSIGN:
@@ -15877,7 +15877,7 @@ public class Java8Parser extends Parser {
 				{
 				setState(3565);
 				match(OR_ASSIGN);
-				((AssignmentOperatorContext)_localctx).ret =  AssignmentOperator.BITWISE_OR;
+				((AssignmentOperatorContext)_localctx).ret =  BinaryOperator.BITWISE_OR;
 				}
 				break;
 			default:

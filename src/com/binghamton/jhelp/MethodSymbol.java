@@ -4,6 +4,8 @@ import java.util.Arrays;
 
 import com.binghamton.jhelp.util.StringUtils;
 
+import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
+
 /**
  * A class representing a Java method
  */
@@ -58,7 +60,7 @@ public abstract class MethodSymbol extends Symbol {
         Type[] excs = getExceptionTypes();
         if (excs.length > 0)  {
             for (Type exc : excs) {
-                if (exc.getClassSymbol().extendsClass(ImportManager.get("java.lang.Throwable"))) {
+                if (exc.getClassSymbol().extendsClass(fetch("Throwable"))) {
                     return true;
                 }
             }
@@ -74,7 +76,7 @@ public abstract class MethodSymbol extends Symbol {
 
     public boolean hasOverrideAnnotation() {
         for (AnnotationSymbol a : annotations) {
-            if (a.getType().equals(ImportManager.get("java.lang.Override"))) {
+            if (a.getType().equals(fetch("Override"))) {
                 return true;
             }
         }

@@ -15,12 +15,15 @@ import com.binghamton.jhelp.Modifier;
 import com.binghamton.jhelp.NamedSymbolTable;
 import com.binghamton.jhelp.NilType;
 import com.binghamton.jhelp.Package;
+import com.binghamton.jhelp.ParameterizedType;
 import com.binghamton.jhelp.PrimitiveType;
 import com.binghamton.jhelp.Program;
 import com.binghamton.jhelp.ReflectedClassSymbol;
 import com.binghamton.jhelp.Type;
 import com.binghamton.jhelp.TypeVariable;
 import com.binghamton.jhelp.VariableSymbol;
+
+import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
 
 /**
  * The code (lowest) level Visitor for visiting each line of code contained
@@ -30,7 +33,8 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
 
     private Set<String> labels;
     private boolean inJumpContext = false;
-    // TODO can we get away with this? I think so.
+    // TODO can we get away with this?
+    // No, wouldn't allow us to monitor shadowing of fields
     private NamedSymbolTable<VariableSymbol> localVars = new NamedSymbolTable<>();
 
     public CodeLevelVisitor(Program program) {
@@ -51,11 +55,58 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(Annotation ast) {
+        Expression arg;
+        MethodSymbol method;
+        Set<String> needed = new HashSet<>();
         ast.getTypeExpression().accept(this);
-        for (Token arg : ast.getArguments().keySet()) {
-            ast.getValue(arg).accept(this);
+        ClassSymbol ann = ast.getTypeExpression().getType().getClassSymbol();
+        if (!ann.isAnnotation()) {
+            System.err.println("can only annotate with an annotation");
+        }
+        for (MethodSymbol m : ann.getMethods()) {
+            if (!m.hasModifier(Modifier.DEFAULT)) {
+                needed.add(m.getName());
+            }
+        }
+        if (ast.isSingleElement()) {
+            arg = ast.getSingleValue();
+            arg.accept(this);
+            if (needed.size() != 1) {
+                System.err.println("single element annotation requires annotation with only one method");
+            } else {
+                method = ann.getMethod(needed.toArray(new String[1])[0]);
+                annotationTypeCheck(method.getReturnType(), arg.getType());
+            }
+        } else {
+            for (Token id : ast.getArguments().keySet()) {
+                method = ann.getMethod(id.getText());
+                if (method != null) {
+                    needed.remove(id);
+                    arg = ast.getValue(id);
+                    arg.accept(this);
+                    annotationTypeCheck(method.getReturnType(), arg.getType());
+                } else {
+                    System.err.println("unknown annotation element");
+                }
+            }
+            if (needed.size() > 0) {
+                System.err.println("non-default annotation element values omitted from annotation");
+            }
+        }
+        ast.setType(ann);
+    }
+
+    private void annotationTypeCheck(Type expected, Type actual) {
+        if (!(expected instanceof ArrayType)) {
+            if (!isAssignable(expected, actual)) {
+                System.err.println("invalid annotation element value, must be assignable to element type");
+            }
+            if (actual == NilType.TYPE) {
+                System.err.println("annotation element value cannot be null");
+            }
         }
     }
+
 
     /**
      * Visit a ArrayAccessExpression node
@@ -155,19 +206,22 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         ast.getLHS().accept(this);
         ast.getRHS().accept(this);
         Type lType = ast.getLHS().getType();
-        Type rType = ast.getRHS().getType();
-        AssignmentOperator op = ast.getOperator();
         // TODO lType must be l-value (variable, field access, array access)
         // TODO lType must name non-final variable/index of array
-        if (op == AssignmentOperator.EQUALS) {
-            if (!isAssignable(lType, rType)) {
+        if (ast.isSimple()) {
+            if (!isAssignable(lType, ast.getRHS().getType())) {
                 System.err.println("cannot assign rhs type to lhs type");
             }
-            ast.setType(lType.captureConvert());
         } else {
-            // TODO synthesize assignment of casted binary expression
-            // LHS OP= RHS -> LHS = (LTYPE) (LHS OP RHS)
+            BinaryExpression synthBin = new BinaryExpression(ast.getLHS(),
+                                                             ast.getOperator(),
+                                                             ast.getRHS());
+            synthBin.accept(this);
+            if (!canCast(synthBin.getType(), lType)) {
+                System.err.println("result of applying op is not castable to l-value");
+            }
         }
+        ast.setType(lType.captureConvert());
     }
 
     /**
@@ -179,7 +233,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         ast.getRHS().accept(this);
         Type lType = ast.getLHS().getType();
         Type rType = ast.getRHS().getType();
-        ClassSymbol STRING_TYPE = ImportManager.get("java.lang.String");
+        ClassSymbol STRING_TYPE = fetch("String");
         BinaryOperator op = ast.getOperator();
         if (op.undergoesBinaryPromotion()) {
             if (op == BinaryOperator.ADDITION &&
@@ -328,7 +382,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
     public void visit(CatchBlock ast) {
         for (Expression expr : ast.getExceptionTypes()) {
             expr.accept(this);
-            if (!expr.getType().getClassSymbol().extendsClass(ImportManager.get("java.lang.Throwable"))) {
+            if (!expr.getType().getClassSymbol().extendsClass(fetch("Throwable"))) {
                 System.err.println("catch block exception must extend Throwable class");
             }
             if (expr.getType() instanceof TypeVariable) {
@@ -373,6 +427,23 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
     }
 
     /**
+     * Visit a ClassLiteralExpression node
+     * @param ast the AST node being visited
+     */
+    public void visit(ClassLiteralExpression ast) {
+        ast.getTypeExpression().accept(this);
+        Type type = ast.getTypeExpression().getType();
+        Type tmp = type.box();
+        if (tmp != null) {
+            type = tmp;
+        }
+        if (!type.isValidClassLiteralType()) {
+            System.err.println("type in class literal must be valid");
+        }
+        ast.setType(new ParameterizedType(fetch("Class"), type));
+    }
+
+    /**
      * Visit a DimensionExpression node
      * @param ast the AST node being visited
      */
@@ -412,13 +483,23 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
      */
     public void visit(ForEachStatement ast) {
         inJumpContext = true;
-        // TODO push var into scope
         // TODO enter scope
         ast.getVariable().accept(this);
         ast.getIterable().accept(this);
         Type type = ast.getIterable().getType();
-        // TODO check that var. type == iteratable type arg. or array base type
-        if (type.rank() == 0 && !type.getClassSymbol().extendsClass(ImportManager.get("java.lang.Iterable"))) {
+        VariableSymbol var = ast.getVariable().getSymbol();
+        if (type.rank() > 1 ||
+            type.getClassSymbol().extendsClass(fetch("Iterable"))) {
+            Type source;
+            if (type.rank() > 1) {
+                source = ((ArrayType)type).getBaseType();
+            } else {
+                source = ((ParameterizedType)type).getParameter(0);
+            }
+            if (!isAssignable(var.getType(), source)) {
+                System.err.println("type of elements being iterated over does not match type of variable declared in this loop");
+            }
+        } else {
             System.err.println("for each statement must iterate over arrays or an implementor of Iterable");
         }
         visit((Block)ast);
@@ -456,7 +537,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(IdentifierExpression ast) {
-        // TODO use super to classify types, this to classify members
+        // TODO use super() to classify types, this to classify members
     }
 
     /**
@@ -510,16 +591,15 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(KeywordExpression ast) {
-        // TODO
-        String kw = ast.getIdentifier().getText();
-        switch (kw) {
+        switch (ast.getIdentifier().getText()) {
         case "super":
+            ast.setType(currentClass.getSuperClass());
             break;
         case "this":
-            break;
-        case "class":
+            ast.setType(currentClass);
             break;
         case "new":
+            // omitted, only used by method references (omitted)
             break;
         default:
             super.visit(ast);
@@ -541,11 +621,8 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(LambdaExpression ast) {
-        labels = new HashSet<>();
-        for (VariableDeclaration param : ast.getParameters()) {
-            param.accept(this);
-        }
-        ast.getBody().accept(this);
+        // omitted
+        // TODO warning message
     }
 
     /**
@@ -555,7 +632,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
     public void visit(LiteralExpression ast) {
         if (ast.getType() == null) {
             if (ast.getValue().charAt(0) == '"') {
-                ast.setType(ImportManager.get("java.lang.String"));
+                ast.setType(fetch("String"));
             } else {
                 ast.setType(NilType.TYPE);
             }
@@ -597,8 +674,8 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(MethodReferenceExpression ast) {
-        ast.getLHS().accept(this);
-        ast.getRHS().accept(this);
+        // omitted
+        // TODO warning message
     }
 
     /**
@@ -733,12 +810,11 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         Expression expr = ast.getExpression();
         expr.accept(this);
         Type type = expr.getType();
-        if (type != NilType.TYPE && !isAssignable(type,
-                                                  ImportManager.get("java.lang.Throwable"))) {
+        if (type != NilType.TYPE && !isAssignable(type, fetch("Throwable"))) {
             System.err.println("must either throw null or instance of Throwable");
         }
         if (type != NilType.TYPE &&
-            !type.getClassSymbol().implementsInterface(ImportManager.get("java.lang.RuntimeException"))) {
+            !type.getClassSymbol().implementsInterface(fetch("RuntimeException"))) {
             // TODO make sure we're in a method with a throws that we are assignable to
         }
     }
@@ -752,7 +828,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         for (VariableDeclaration var : ast.getResources()) {
             var.accept(this);
             var.getSymbol().addModifier(Modifier.FINAL);
-            if (!var.getSymbol().getType().getClassSymbol().implementsInterface(ImportManager.get("java.lang.AutoCloseable"))) {
+            if (!var.getSymbol().getType().getClassSymbol().implementsInterface(fetch("AutoCloseable"))) {
                 System.err.println("resource in try-with-resources must implement AutoCloseable");
             }
         }
@@ -839,7 +915,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
 
     private static boolean isValidSwitchType(Type type) {
         return unaryPromotion(type).equals(PrimitiveType.INT) ||
-            type.equals(ImportManager.get("java.lang.String")) ||
+            type.equals(fetch("String")) ||
             type.getClassSymbol().isEnum();
     }
 
@@ -897,10 +973,18 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
     }
 
     private static boolean canCast(Type source, Type target) {
-        // TODO section 5.5
+        if (source.canCastTo(target) || isAssignable(target, source)) {
+            return true;
+        }
+        // TODO
         return true;
     }
 
+    private static boolean canUncheckConvert(Type source, Type target) {
+        return source.isRaw() &&
+            source.getClassSymbol().equals(target.getClassSymbol()) &&
+            source.rank() == target.rank();
+    }
 
     /**
      * Determines if rType is equivalent to lType in an assignment-context
@@ -923,10 +1007,8 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         if (unboxedRType != null && unboxedRType.canWidenTo(lType)) {
             return true;
         }
-        if (rType.isRaw() &&
-            lType.getClassSymbol().equals(rType.getClassSymbol()) &&
-            lType.rank() == rType.rank()) { // unchecked conversion
-                return true;
+        if (canUncheckConvert(rType, lType)) {
+            return true;
         }
         if (rType.equals(PrimitiveType.BYTE) ||
             rType.equals(PrimitiveType.SHORT) ||

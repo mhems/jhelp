@@ -120,6 +120,12 @@ public interface ASTVisitor {
     void visit(ClassDeclaration ast);
 
     /**
+     * Visit a ClassLiteralExpression node
+     * @param ast the AST node being visited
+     */
+    void visit(ClassLiteralExpression ast);
+
+    /**
      * Visit a CompilationUnit node
      * @param ast the AST node being visited
      */

@@ -8,6 +8,8 @@ import java.util.Set;
 import com.binghamton.jhelp.ast.ASTVisitor;
 import com.binghamton.jhelp.util.StringUtils;
 
+import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
+
 /**
  * A base class representing a Java class and its members
  */
@@ -299,10 +301,44 @@ public abstract class ClassSymbol extends ReferenceType {
                     }
                 }
             } else if (type instanceof ArrayType) {
-                return this.equals(ImportManager.get("java.lang.Cloneable")) ||
-                    this.equals(ImportManager.get("java.io.Serializable"));
+                return this.equals(fetch("Cloneable")) ||
+                    this.equals(fetch("java.io.Serializable"));
             }
             return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean canCastTo(Type target) {
+        if (isClassLike()) {
+            if (target instanceof ClassSymbol) {
+                ClassSymbol targetCls = (ClassSymbol)target;
+                if (targetCls.isClassLike()) {
+                    return this.erase().isSubTypeOf(targetCls.erase()) ||
+                        targetCls.erase().isSubTypeOf(this.erase());
+                } else {
+                    return !hasModifier(Modifier.FINAL) ||
+                        this.implementsInterface(targetCls);
+                }
+            } else if (target instanceof TypeVariable) {
+                return canCastTo(((TypeVariable)target).getUpperBound());
+            } else if (target instanceof ArrayType) {
+                return this.equals(fetch("Object"));
+            }
+        } else {
+            if (target instanceof ArrayType) {
+                return this.equals(fetch("java.io.Serializable")) ||
+                    this.equals(fetch("Cloneable"));
+            } else if (target instanceof ClassSymbol) {
+                ClassSymbol targetCls = (ClassSymbol)target;
+                if (targetCls.isClassLike() &&
+                    targetCls.hasModifier(Modifier.FINAL)) {
+                    return targetCls.implementsInterface(this);
+                }
+            } else if (target instanceof TypeVariable) {
+                return canCastTo(((TypeVariable)target).getUpperBound());
+            }
         }
         return true;
     }

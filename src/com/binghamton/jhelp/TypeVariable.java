@@ -8,6 +8,8 @@ import org.antlr.v4.runtime.Token;
 
 import com.binghamton.jhelp.util.StringUtils;
 
+import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
+
 /**
  * A class representing a Java type variable
  */
@@ -15,7 +17,7 @@ public class TypeVariable extends ReferenceType {
     private Type[] bounds = {};
 
     public TypeVariable(String name) {
-        this(name, new Type[]{ImportManager.get("java.lang.Object")});
+        this(name, new Type[]{fetch("Object")});
     }
 
     /**
@@ -54,6 +56,10 @@ public class TypeVariable extends ReferenceType {
         return bounds;
     }
 
+    public Type getUpperBound() {
+        return bounds[0];
+    }
+
     @Override
     public TypeVariable adapt(Type[] args) {
         throw new UnsupportedOperationException("a type variable cannot be adapted");
@@ -79,5 +85,15 @@ public class TypeVariable extends ReferenceType {
 
     public Type erase() {
         return bounds[0].erase();
+    }
+
+    @Override
+    public boolean isValidClassLiteralType() {
+        return false;
+    }
+
+    @Override
+    public boolean canCastTo(Type target) {
+        return canCastTo(getUpperBound());
     }
 }

@@ -212,6 +212,14 @@ public class NonNullVisitor extends EmptyVisitor {
     }
 
     /**
+     * Visit a ClassLiteralExpression node
+     * @param ast the AST node being visited
+     */
+    public void visit(ClassLiteralExpression ast) {
+        ast.getTypeExpression().accept(this);
+    }
+
+    /**
      * Visit a CompilationUnit node
      * @param ast the AST node being visited
      */

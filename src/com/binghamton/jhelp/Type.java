@@ -43,7 +43,7 @@ public abstract class Type extends Symbol {
         return this;
     }
 
-    public ReflectedClassSymbol box() {
+    public ClassSymbol box() {
         return null;
     }
 
@@ -56,6 +56,10 @@ public abstract class Type extends Symbol {
     }
 
     public boolean canWidenTo(Type type) {
+        return false;
+    }
+
+    public boolean canCastTo(Type target) {
         return false;
     }
 
@@ -96,6 +100,10 @@ public abstract class Type extends Symbol {
 
     public boolean isReference() {
         return false;
+    }
+
+    public boolean isValidClassLiteralType() {
+        return true;
     }
 
     public static Type lub(Type... types) {

@@ -34,6 +34,8 @@ public abstract class ReferenceType extends Type {
         return this.isSubTypeOf(type);
     }
 
+
+
     @Override
     public boolean canNarrowTo(Type type) {
         return !this.equals(type) && this.isSuperTypeOf(type);

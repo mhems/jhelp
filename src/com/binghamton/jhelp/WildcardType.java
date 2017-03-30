@@ -2,19 +2,21 @@ package com.binghamton.jhelp;
 
 import java.util.Arrays;
 
+import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
+
 public class WildcardType extends Type {
     private boolean upper;
     private ReferenceType bound;
     private boolean bounded; // non-trivially by Object
 
     public WildcardType() {
-        this(true, ImportManager.get("java.lang.Object"));
+        this(true, fetch("Object"));
     }
 
     public WildcardType(boolean upper, ReferenceType bound) {
         this.upper = upper;
         this.bound = bound;
-        bounded = !bound.equals(ImportManager.get("java.lang.Object"));
+        bounded = !bound.equals(fetch("Object"));
     }
 
     public String getName() {

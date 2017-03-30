@@ -54,6 +54,10 @@ public class ParameterizedType extends ReferenceType {
         return params;
     }
 
+    public Type getParameter(int i) {
+        return params[i];
+    }
+
     @Override
     public ParameterizedType adapt(Type[] args) {
         throw new UnsupportedOperationException("cannot adapt a parameterized type");
@@ -127,5 +131,10 @@ public class ParameterizedType extends ReferenceType {
             }
         }
         return true;
+    }
+
+    @Override
+    public boolean isValidClassLiteralType() {
+        return false;
     }
 }

@@ -32,6 +32,10 @@ public class ImportingSymbolTable extends NamedSymbolTable<ClassSymbol> {
 
     }
 
+    public static ClassSymbol fetch(String name) {
+        return ROOT.get(name);
+    }
+
     @Override
     public ClassSymbol get(String name) {
         ClassSymbol ret = getFromTable(name);
