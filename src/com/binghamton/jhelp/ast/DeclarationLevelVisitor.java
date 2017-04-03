@@ -58,7 +58,6 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         Kind rKind = rName.getKind();
 
         if (lKind == Kind.TYPE) {
-            ast.setKind(Kind.TYPE);
             Type lType = lhs.getType();
             Type type = lType.getClassSymbol().getType(rName.getName());
             if (type == null) {
@@ -170,6 +169,14 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
     }
 
     /**
+     * Visit a ClassLiteralExpression node
+     * @param ast the AST node being visited
+     */
+    public void visit(ClassLiteralExpression ast) {
+        // TODO
+    }
+
+    /**
      * Visit a CompilationUnit node
      * @param ast the AST node being visited
      */
@@ -264,6 +271,7 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         if (ast.getKind() == Kind.AMBIGUOUS) {
             ast.setKind(Kind.TYPE);
         }
+        // TODO include primitives
         Type type = currentClass.getType(name);
         if (type != null) {
             ast.setType(type);
@@ -287,6 +295,30 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
     }
 
     /**
+     * Visit a ParamExpression node
+     * @param ast the AST node being visited
+     */
+    public void visit(ParamExpression ast) {
+        Expression raw = ast.getExpression();
+        raw.accept(this);
+        Type rawType = raw.getType();
+
+        if (!rawType.getClassSymbol().isGeneric()) {
+            System.err.println("cannot parameterize a non-generic class");
+        }
+
+        List<TypeArgument> args = ast.getTypeArguments();
+        Type[] tArgs = new Type[args.size()];
+        int pos = 0;
+        for (TypeArgument arg : args) {
+            arg.accept(this);
+            tArgs[pos] = arg.getType();
+            ++pos;
+        }
+        ast.setType(new ParameterizedType(rawType, tArgs));
+    }
+
+    /**
      * Visit a TypeArgument node
      * @param ast the AST node being visited
      */
@@ -307,30 +339,6 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
             ast.getTypeExpression().accept(this);
             ast.setType(ast.getTypeExpression().getType());
         }
-    }
-
-    /**
-     * Visit a TypeExpression node
-     * @param ast the AST node being visited
-     */
-    public void visit(TypeExpression ast) {
-        Expression raw = ast.getExpression();
-        raw.accept(this);
-        Type rawType = raw.getType();
-
-        if (!rawType.getClassSymbol().isGeneric()) {
-            System.err.println("cannot parameterize a non-generic class");
-        }
-
-        List<TypeArgument> args = ast.getTypeArguments();
-        Type[] tArgs = new Type[args.size()];
-        int pos = 0;
-        for (TypeArgument arg : args) {
-            arg.accept(this);
-            tArgs[pos] = arg.getType();
-            ++pos;
-        }
-        ast.setType(new ParameterizedType(rawType, tArgs));
     }
 
     /**

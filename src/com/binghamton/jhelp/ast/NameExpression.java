@@ -1,5 +1,6 @@
 package com.binghamton.jhelp.ast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.antlr.v4.runtime.Token;
@@ -8,20 +9,37 @@ public class NameExpression extends Expression {
     public static enum Kind { TYPE, PACKAGE, EXPRESSION,
                               METHOD, AMBIGUOUS, PACKAGE_OR_TYPE };
 
-    private NameExpression qualifier = new NilExpression();
+    private NameExpression qualifier = null;
     private Annotation[] annotations = {};
     private Kind kind;
     private Token name;
 
+    public NameExpression(NameExpression qualifier, NameExpression expr) {
+        super(qualifier.getFirstToken(), expr.getLastToken());
+        if (expr.isQualified()) {
+            throw new IllegalArgumentException("only lhs can be qualified");
+        }
+        this.qualifier = qualifier;
+        this.annotations = expr.annotations;
+        this.kind = expr.kind;
+        this.name = expr.name;
+    }
+
     public NameExpression(Token name, Kind kind) {
+        super(name);
         this.kind = kind;
         this.name = name;
     }
 
     public NameExpression(Token name, Kind kind, List<Annotation> annotations) {
+        super(name);
         this.kind = kind;
         this.name = name;
         this.annotations = annotations.toArray(new Annotation[annotations.size()]);
+    }
+
+    protected NameExpression(Token first, Token last) {
+        super(first, last);
     }
 
     public static NameExpression createTypeName(Token token) {
@@ -83,7 +101,7 @@ public class NameExpression extends Expression {
     }
 
     public boolean isQualified() {
-        return !qualifier.isNil();
+        return qualifier != null;
     }
 
     public void setQualifyingName(NameExpression name) {
@@ -108,6 +126,15 @@ public class NameExpression extends Expression {
 
     public String getName() {
         return name.getText();
+    }
+
+    public List<Token> getTokens() {
+        List<Token> ret = new ArrayList<>();
+        if (isQualified()) {
+            ret.addAll(qualifier.getTokens());
+        }
+        ret.add(name);
+        return ret;
     }
 
     /**

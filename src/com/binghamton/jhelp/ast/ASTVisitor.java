@@ -288,6 +288,12 @@ public interface ASTVisitor {
     void visit(PackageStatement ast);
 
     /**
+     * Visit a ParamExpression node
+     * @param ast the AST node being visited
+     */
+    void visit(ParamExpression ast);
+
+    /**
      * Visit a ReturnStatement node
      * @param ast the AST node being visited
      */
@@ -334,12 +340,6 @@ public interface ASTVisitor {
      * @param ast the AST node being visited
      */
     void visit(TypeArgument ast);
-
-    /**
-     * Visit a TypeExpression node
-     * @param ast the AST node being visited
-     */
-    void visit(TypeExpression ast);
 
     /**
      * Visit a TypeParameter node

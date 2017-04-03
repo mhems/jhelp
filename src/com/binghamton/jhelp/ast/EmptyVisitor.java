@@ -288,6 +288,12 @@ public abstract class EmptyVisitor implements ASTVisitor {
     public void visit(PackageStatement ast) { }
 
     /**
+     * Visit a ParamExpression node
+     * @param ast the AST node being visited
+     */
+    public void visit(ParamExpression ast) { }
+
+    /**
      * Visit a ReturnStatement node
      * @param ast the AST node being visited
      */
@@ -334,12 +340,6 @@ public abstract class EmptyVisitor implements ASTVisitor {
      * @param ast the AST node being visited
      */
     public void visit(TypeArgument ast) { }
-
-    /**
-     * Visit a TypeExpression node
-     * @param ast the AST node being visited
-     */
-    public void visit(TypeExpression ast) { }
 
     /**
      * Visit a TypeParameter node

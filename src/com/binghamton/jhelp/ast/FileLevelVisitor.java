@@ -496,7 +496,7 @@ public class FileLevelVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(PackageStatement ast) {
-        List<Token> parts = ast.getIdentifiers();
+        List<Token> parts = ast.getName().getTokens();
         Token token = parts.get(0);
         Package pkg = program.getPackage(token.getText());
         Package sub;

@@ -12,7 +12,7 @@ import com.binghamton.jhelp.MyMethodSymbol;
  * A class representing the declaration of a Java method
  */
 public class MethodDeclaration extends Declaration {
-    private Expression returnType = new NilExpression();
+    private Expression returnType;
     private List<VariableDeclaration> params = new ArrayList<>();
     private List<Expression> exceptions = new ArrayList<>();
     private List<TypeParameter> typeParams = new ArrayList<>();
@@ -44,6 +44,10 @@ public class MethodDeclaration extends Declaration {
      */
     public Expression getReturnTypeExpression() {
         return returnType;
+    }
+
+    public boolean hasReturnType() {
+        return returnType != null;
     }
 
     /**

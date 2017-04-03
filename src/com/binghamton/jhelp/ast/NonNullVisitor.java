@@ -332,7 +332,7 @@ public class NonNullVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(ImportStatement ast) {
-        assertNonNull(ast.getName());
+        ast.getNameExpression().accept(this);
     }
 
     /**
@@ -433,6 +433,9 @@ public class NonNullVisitor extends EmptyVisitor {
         for (Annotation a : ast.getAnnotations()) {
             a.accept(this);
         }
+        if (ast.isQualified()) {
+            ast.getQualifyingName().accept(this);
+        }
         assertNonNull(ast.getName());
         assertNonNull(ast.getKind());
     }
@@ -445,8 +448,18 @@ public class NonNullVisitor extends EmptyVisitor {
         for (Annotation a : ast.getAnnotations()) {
             a.accept(this);
         }
-        for (Token id : ast.getIdentifiers())
-            assertNonNull(id);
+        ast.getName().accept(this);
+    }
+
+    /**
+     * Visit a ParamExpression node
+     * @param ast the AST node being visited
+     */
+    public void visit(ParamExpression ast) {
+        ast.getExpression().accept(this);
+        for (TypeArgument arg : ast.getTypeArguments()) {
+            arg.accept(this);
+        }
     }
 
     /**
@@ -520,17 +533,6 @@ public class NonNullVisitor extends EmptyVisitor {
         }
         else if (!ast.isDiamond()) {
             ast.getTypeExpression().accept(this);
-        }
-    }
-
-    /**
-     * Visit a TypeExpression node
-     * @param ast the AST node being visited
-     */
-    public void visit(TypeExpression ast) {
-        ast.getExpression().accept(this);
-        for (TypeArgument arg : ast.getTypeArguments()) {
-            arg.accept(this);
         }
     }
 
