@@ -5,7 +5,7 @@ import org.antlr.v4.runtime.Token;
 /**
  * A class representing a Java symbol access expression
  */
-public class AccessExpression extends Expression {
+public class AccessExpression extends QualifiableExpression {
     private Expression lhs;
     private Expression rhs;
 
@@ -44,5 +44,10 @@ public class AccessExpression extends Expression {
     public void accept(ASTVisitor v) {
         super.accept(v);
         v.visit(this);
+    }
+
+    @Override
+    public void qualifyWith(Expression expr) {
+        lhs = new AccessExpression(expr, lhs);
     }
 }

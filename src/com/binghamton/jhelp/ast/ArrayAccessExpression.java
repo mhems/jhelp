@@ -5,7 +5,7 @@ import org.antlr.v4.runtime.Token;
 /**
  * A class representing a Java array access
  */
-public class ArrayAccessExpression extends Expression {
+public class ArrayAccessExpression extends QualifiableExpression {
     private Expression arrayExpr;
     private Expression indexExpr;
 
@@ -47,5 +47,10 @@ public class ArrayAccessExpression extends Expression {
     public void accept(ASTVisitor v) {
         super.accept(v);
         v.visit(this);
+    }
+
+    @Override
+    public void qualifyWith(Expression expr) {
+        arrayExpr = new AccessExpression(expr, arrayExpr);
     }
 }

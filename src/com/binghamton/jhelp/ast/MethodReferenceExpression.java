@@ -8,7 +8,7 @@ import org.antlr.v4.runtime.Token;
 /**
  * A class representing a Java8 method reference
  */
-public class MethodReferenceExpression extends Expression {
+public class MethodReferenceExpression extends QualifiableExpression {
     private Expression lhs;
     private Expression rhs;
     private List<TypeArgument> targs;
@@ -17,6 +17,7 @@ public class MethodReferenceExpression extends Expression {
      * Construct a new parameterized reference
      * @param lhs the left hand side of the method reference
      * @param rhs the right hand side of the method reference
+     * @param targs any TypeArguments to the method being referenced
      */
     public MethodReferenceExpression(Expression lhs,
                                      Expression rhs,
@@ -62,5 +63,10 @@ public class MethodReferenceExpression extends Expression {
     public void accept(ASTVisitor v) {
         super.accept(v);
         v.visit(this);
+    }
+
+    @Override
+    public void qualifyWith(Expression expr) {
+        lhs = expr;
     }
 }

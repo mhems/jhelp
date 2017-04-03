@@ -5943,8 +5943,8 @@ public class Java8Parser extends Parser {
 				((ExplicitConstructorInvocationContext)_localctx).last = match(SEMI);
 
 				            ((ExplicitConstructorInvocationContext)_localctx).ret =  new CallExpression(((ExplicitConstructorInvocationContext)_localctx).last,
-				                                      new NameExpression(((ExplicitConstructorInvocationContext)_localctx).en.ret,
-				                                                         createTypeName(((ExplicitConstructorInvocationContext)_localctx).kw)),
+				                                      new AccessExpression(((ExplicitConstructorInvocationContext)_localctx).en.ret,
+				                                                           createTypeName(((ExplicitConstructorInvocationContext)_localctx).kw)),
 				                                      _localctx.args,
 				                                      _localctx.targs);
 				        
@@ -11496,12 +11496,8 @@ public class Java8Parser extends Parser {
 					setState(2498);
 					((PrimaryContext)_localctx).p = primaryNoNewArray_lf_primary();
 
-					                // if (((PrimaryContext)_localctx).p.ret instanceof MethodReferenceExpression) {
-					                //     ((MethodReferenceExpression)((PrimaryContext)_localctx).p.ret).setLHS(_localctx.ret);
-					                //     ((PrimaryContext)_localctx).ret =  ((PrimaryContext)_localctx).p.ret;
-					                // } else {
-					                //     ((PrimaryContext)_localctx).ret =  new AccessExpression(_localctx.ret, ((PrimaryContext)_localctx).p.ret);
-					                // }
+					                ((PrimaryContext)_localctx).p.ret.qualifyWith(_localctx.ret);
+					                ((PrimaryContext)_localctx).ret =  ((PrimaryContext)_localctx).p.ret;
 					            
 					}
 					} 
@@ -11961,8 +11957,7 @@ public class Java8Parser extends Parser {
 	}
 
 	public static class PrimaryNoNewArray_lf_primaryContext extends ParserRuleContext {
-		public Expression ret;
-		public boolean isAccess;
+		public QualifiableExpression ret;
 		public ClassInstanceCreationExpression_lf_primaryContext a1;
 		public FieldAccess_lf_primaryContext a2;
 		public ArrayAccess_lf_primaryContext a3;
@@ -12002,7 +11997,6 @@ public class Java8Parser extends Parser {
 				setState(2603);
 				((PrimaryNoNewArray_lf_primaryContext)_localctx).a1 = classInstanceCreationExpression_lf_primary();
 				((PrimaryNoNewArray_lf_primaryContext)_localctx).ret =  ((PrimaryNoNewArray_lf_primaryContext)_localctx).a1.ret;
-				                                                         ((PrimaryNoNewArray_lf_primaryContext)_localctx).isAccess =  true;
 				}
 				break;
 			case 2:
@@ -12010,7 +12004,7 @@ public class Java8Parser extends Parser {
 				{
 				setState(2606);
 				((PrimaryNoNewArray_lf_primaryContext)_localctx).a2 = fieldAccess_lf_primary();
-				((PrimaryNoNewArray_lf_primaryContext)_localctx).ret =  ((PrimaryNoNewArray_lf_primaryContext)_localctx).a2.ret; ((PrimaryNoNewArray_lf_primaryContext)_localctx).isAccess =  true;
+				((PrimaryNoNewArray_lf_primaryContext)_localctx).ret =  ((PrimaryNoNewArray_lf_primaryContext)_localctx).a2.ret;
 				}
 				break;
 			case 3:
@@ -12018,7 +12012,7 @@ public class Java8Parser extends Parser {
 				{
 				setState(2609);
 				((PrimaryNoNewArray_lf_primaryContext)_localctx).a3 = arrayAccess_lf_primary();
-				((PrimaryNoNewArray_lf_primaryContext)_localctx).ret =  ((PrimaryNoNewArray_lf_primaryContext)_localctx).a3.ret; ((PrimaryNoNewArray_lf_primaryContext)_localctx).isAccess =  ((PrimaryNoNewArray_lf_primaryContext)_localctx).a3.isAccess;
+				((PrimaryNoNewArray_lf_primaryContext)_localctx).ret =  ((PrimaryNoNewArray_lf_primaryContext)_localctx).a3.ret;
 				}
 				break;
 			case 4:
@@ -12026,7 +12020,7 @@ public class Java8Parser extends Parser {
 				{
 				setState(2612);
 				((PrimaryNoNewArray_lf_primaryContext)_localctx).a4 = methodInvocation_lf_primary();
-				((PrimaryNoNewArray_lf_primaryContext)_localctx).ret =  ((PrimaryNoNewArray_lf_primaryContext)_localctx).a4.ret; ((PrimaryNoNewArray_lf_primaryContext)_localctx).isAccess =  true;
+				((PrimaryNoNewArray_lf_primaryContext)_localctx).ret =  ((PrimaryNoNewArray_lf_primaryContext)_localctx).a4.ret;
 				}
 				break;
 			case 5:
@@ -12034,7 +12028,7 @@ public class Java8Parser extends Parser {
 				{
 				setState(2615);
 				((PrimaryNoNewArray_lf_primaryContext)_localctx).a5 = methodReference_lf_primary();
-				((PrimaryNoNewArray_lf_primaryContext)_localctx).ret =  ((PrimaryNoNewArray_lf_primaryContext)_localctx).a5.ret; ((PrimaryNoNewArray_lf_primaryContext)_localctx).isAccess =  false;
+				((PrimaryNoNewArray_lf_primaryContext)_localctx).ret =  ((PrimaryNoNewArray_lf_primaryContext)_localctx).a5.ret;
 				}
 				break;
 			}
@@ -12078,7 +12072,6 @@ public class Java8Parser extends Parser {
 
 	public static class PrimaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primaryContext extends ParserRuleContext {
 		public Expression ret;
-		public boolean isAccess;
 		public ClassInstanceCreationExpression_lf_primaryContext a1;
 		public FieldAccess_lf_primaryContext a2;
 		public MethodInvocation_lf_primaryContext a3;
@@ -12114,7 +12107,6 @@ public class Java8Parser extends Parser {
 				setState(2622);
 				((PrimaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primaryContext)_localctx).a1 = classInstanceCreationExpression_lf_primary();
 				((PrimaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primaryContext)_localctx).ret =  ((PrimaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primaryContext)_localctx).a1.ret;
-				                                                         ((PrimaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primaryContext)_localctx).isAccess =  true;
 				}
 				break;
 			case 2:
@@ -12122,7 +12114,7 @@ public class Java8Parser extends Parser {
 				{
 				setState(2625);
 				((PrimaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primaryContext)_localctx).a2 = fieldAccess_lf_primary();
-				((PrimaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primaryContext)_localctx).ret =  ((PrimaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primaryContext)_localctx).a2.ret; ((PrimaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primaryContext)_localctx).isAccess =  true;
+				((PrimaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primaryContext)_localctx).ret =  ((PrimaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primaryContext)_localctx).a2.ret;
 				}
 				break;
 			case 3:
@@ -12130,7 +12122,7 @@ public class Java8Parser extends Parser {
 				{
 				setState(2628);
 				((PrimaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primaryContext)_localctx).a3 = methodInvocation_lf_primary();
-				((PrimaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primaryContext)_localctx).ret =  ((PrimaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primaryContext)_localctx).a3.ret; ((PrimaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primaryContext)_localctx).isAccess =  true;
+				((PrimaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primaryContext)_localctx).ret =  ((PrimaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primaryContext)_localctx).a3.ret;
 				}
 				break;
 			case 4:
@@ -12138,7 +12130,7 @@ public class Java8Parser extends Parser {
 				{
 				setState(2631);
 				((PrimaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primaryContext)_localctx).a4 = methodReference_lf_primary();
-				((PrimaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primaryContext)_localctx).ret =  ((PrimaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primaryContext)_localctx).a4.ret; ((PrimaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primaryContext)_localctx).isAccess =  false;
+				((PrimaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primaryContext)_localctx).ret =  ((PrimaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primaryContext)_localctx).a4.ret;
 				}
 				break;
 			}
@@ -12533,7 +12525,6 @@ public class Java8Parser extends Parser {
 	public static class ClassInstanceCreationExpressionContext extends ParserRuleContext {
 		public InstantiationExpression ret;
 		public Expression methodExpr;
-		public NameExpression nameExpr;
 		public List<Annotation> ans = new ArrayList<>();
 		public List<Annotation> ans2 = new ArrayList<>();
 		public ConcreteBodyDeclaration anon;
@@ -12626,8 +12617,7 @@ public class Java8Parser extends Parser {
 				setState(2735);
 				((ClassInstanceCreationExpressionContext)_localctx).id = match(Identifier);
 
-				            ((ClassInstanceCreationExpressionContext)_localctx).nameExpr =  createPackageOrTypeName(((ClassInstanceCreationExpressionContext)_localctx).id, _localctx.ans);
-				            ((ClassInstanceCreationExpressionContext)_localctx).methodExpr =  _localctx.nameExpr;
+				            ((ClassInstanceCreationExpressionContext)_localctx).methodExpr =  createPackageOrTypeName(((ClassInstanceCreationExpressionContext)_localctx).id, _localctx.ans);
 				        
 				setState(2750);
 				_errHandler.sync(this);
@@ -12655,9 +12645,8 @@ public class Java8Parser extends Parser {
 					setState(2746);
 					((ClassInstanceCreationExpressionContext)_localctx).id2 = match(Identifier);
 
-					                ((ClassInstanceCreationExpressionContext)_localctx).nameExpr =  new NameExpression(_localctx.nameExpr,
-					                                               createPackageOrTypeName(((ClassInstanceCreationExpressionContext)_localctx).id2, _localctx.ans2));
-					                ((ClassInstanceCreationExpressionContext)_localctx).methodExpr =  _localctx.nameExpr;
+					                ((ClassInstanceCreationExpressionContext)_localctx).methodExpr =  new AccessExpression(_localctx.methodExpr,
+					                                                   createPackageOrTypeName(((ClassInstanceCreationExpressionContext)_localctx).id2, _localctx.ans2));
 					                _localctx.ans2.clear();
 					            
 					}
@@ -12750,9 +12739,8 @@ public class Java8Parser extends Parser {
 				setState(2785);
 				((ClassInstanceCreationExpressionContext)_localctx).id = match(Identifier);
 
-				            ((ClassInstanceCreationExpressionContext)_localctx).nameExpr =  new NameExpression(((ClassInstanceCreationExpressionContext)_localctx).name.ret,
-				                                           createTypeName(((ClassInstanceCreationExpressionContext)_localctx).id, _localctx.ans));
-				            ((ClassInstanceCreationExpressionContext)_localctx).methodExpr =  _localctx.nameExpr;
+				            ((ClassInstanceCreationExpressionContext)_localctx).methodExpr =  new AccessExpression(((ClassInstanceCreationExpressionContext)_localctx).name.ret,
+				                                               createTypeName(((ClassInstanceCreationExpressionContext)_localctx).id, _localctx.ans));
 				        
 				setState(2790);
 				_errHandler.sync(this);
@@ -12762,7 +12750,7 @@ public class Java8Parser extends Parser {
 					setState(2787);
 					((ClassInstanceCreationExpressionContext)_localctx).ta = typeArgumentsOrDiamond();
 
-					                ((ClassInstanceCreationExpressionContext)_localctx).methodExpr =  new ParamExpression(_localctx.nameExpr, ((ClassInstanceCreationExpressionContext)_localctx).ta.ret);
+					                ((ClassInstanceCreationExpressionContext)_localctx).methodExpr =  new ParamExpression(_localctx.methodExpr, ((ClassInstanceCreationExpressionContext)_localctx).ta.ret);
 					            
 					}
 				}
@@ -13041,7 +13029,6 @@ public class Java8Parser extends Parser {
 	public static class ClassInstanceCreationExpression_lfno_primaryContext extends ParserRuleContext {
 		public InstantiationExpression ret;
 		public Expression methodExpr;
-		public NameExpression nameExpr;
 		public List<Annotation> ans = new ArrayList<>();
 		public List<Annotation> ans2 = new ArrayList<>();
 		public ConcreteBodyDeclaration anon;
@@ -13130,8 +13117,7 @@ public class Java8Parser extends Parser {
 				setState(2886);
 				((ClassInstanceCreationExpression_lfno_primaryContext)_localctx).id = match(Identifier);
 
-				            ((ClassInstanceCreationExpression_lfno_primaryContext)_localctx).nameExpr =  createPackageOrTypeName(((ClassInstanceCreationExpression_lfno_primaryContext)_localctx).id, _localctx.ans);
-				            ((ClassInstanceCreationExpression_lfno_primaryContext)_localctx).methodExpr =  _localctx.nameExpr;
+				            ((ClassInstanceCreationExpression_lfno_primaryContext)_localctx).methodExpr =  createPackageOrTypeName(((ClassInstanceCreationExpression_lfno_primaryContext)_localctx).id, _localctx.ans);
 				        
 				setState(2901);
 				_errHandler.sync(this);
@@ -13159,9 +13145,8 @@ public class Java8Parser extends Parser {
 					setState(2897);
 					((ClassInstanceCreationExpression_lfno_primaryContext)_localctx).id2 = match(Identifier);
 
-					                ((ClassInstanceCreationExpression_lfno_primaryContext)_localctx).nameExpr =  new NameExpression(_localctx.nameExpr,
-					                                               createPackageOrTypeName(((ClassInstanceCreationExpression_lfno_primaryContext)_localctx).id2, _localctx.ans2));
-					                ((ClassInstanceCreationExpression_lfno_primaryContext)_localctx).methodExpr =  _localctx.nameExpr;
+					                ((ClassInstanceCreationExpression_lfno_primaryContext)_localctx).methodExpr =  new AccessExpression(_localctx.methodExpr,
+					                                                   createPackageOrTypeName(((ClassInstanceCreationExpression_lfno_primaryContext)_localctx).id2, _localctx.ans2));
 					                _localctx.ans2.clear();
 					            
 					}
@@ -13254,9 +13239,8 @@ public class Java8Parser extends Parser {
 				setState(2936);
 				((ClassInstanceCreationExpression_lfno_primaryContext)_localctx).id = match(Identifier);
 
-				            ((ClassInstanceCreationExpression_lfno_primaryContext)_localctx).nameExpr =  new NameExpression(((ClassInstanceCreationExpression_lfno_primaryContext)_localctx).name.ret,
-				                                           createTypeName(((ClassInstanceCreationExpression_lfno_primaryContext)_localctx).id, _localctx.ans));
-				            ((ClassInstanceCreationExpression_lfno_primaryContext)_localctx).methodExpr =  _localctx.nameExpr;
+				            ((ClassInstanceCreationExpression_lfno_primaryContext)_localctx).methodExpr =  new AccessExpression(((ClassInstanceCreationExpression_lfno_primaryContext)_localctx).name.ret,
+				                                                createTypeName(((ClassInstanceCreationExpression_lfno_primaryContext)_localctx).id, _localctx.ans));
 				        
 				setState(2941);
 				_errHandler.sync(this);
@@ -13370,7 +13354,7 @@ public class Java8Parser extends Parser {
 	}
 
 	public static class FieldAccessContext extends ParserRuleContext {
-		public Expression ret;
+		public AccessExpression ret;
 		public PrimaryContext p;
 		public Token id;
 		public Token kw;
@@ -13416,8 +13400,8 @@ public class Java8Parser extends Parser {
 				match(DOT);
 				setState(2971);
 				((FieldAccessContext)_localctx).id = match(Identifier);
-				((FieldAccessContext)_localctx).ret =  new NameExpression(createTypeName(((FieldAccessContext)_localctx).kw),
-				                                   createExpressionName(((FieldAccessContext)_localctx).id));
+				((FieldAccessContext)_localctx).ret =  new AccessExpression(createTypeName(((FieldAccessContext)_localctx).kw),
+				                                     createExpressionName(((FieldAccessContext)_localctx).id));
 				}
 				break;
 			case 3:
@@ -13434,9 +13418,9 @@ public class Java8Parser extends Parser {
 				setState(2977);
 				((FieldAccessContext)_localctx).id = match(Identifier);
 
-				            ((FieldAccessContext)_localctx).ret =  new NameExpression(new NameExpression(((FieldAccessContext)_localctx).t.ret,
-				                                                         createTypeName(((FieldAccessContext)_localctx).kw)),
-				                                      createExpressionName(((FieldAccessContext)_localctx).id));
+				            ((FieldAccessContext)_localctx).ret =  new AccessExpression(new AccessExpression(((FieldAccessContext)_localctx).t.ret,
+				                                                             createTypeName(((FieldAccessContext)_localctx).kw)),
+				                                        createExpressionName(((FieldAccessContext)_localctx).id));
 				        
 				}
 				break;
@@ -13454,7 +13438,7 @@ public class Java8Parser extends Parser {
 	}
 
 	public static class FieldAccess_lf_primaryContext extends ParserRuleContext {
-		public NameExpression ret;
+		public AccessExpression ret;
 		public Token id;
 		public TerminalNode Identifier() { return getToken(Java8Parser.Identifier, 0); }
 		public FieldAccess_lf_primaryContext(ParserRuleContext parent, int invokingState) {
@@ -13473,7 +13457,10 @@ public class Java8Parser extends Parser {
 			match(DOT);
 			setState(2983);
 			((FieldAccess_lf_primaryContext)_localctx).id = match(Identifier);
-			((FieldAccess_lf_primaryContext)_localctx).ret =  createExpressionName(((FieldAccess_lf_primaryContext)_localctx).id);
+
+			            ((FieldAccess_lf_primaryContext)_localctx).ret =  new AccessExpression(new NilExpression(),
+			                                        createExpressionName(((FieldAccess_lf_primaryContext)_localctx).id));
+			        
 			}
 		}
 		catch (RecognitionException re) {
@@ -13488,7 +13475,7 @@ public class Java8Parser extends Parser {
 	}
 
 	public static class FieldAccess_lfno_primaryContext extends ParserRuleContext {
-		public NameExpression ret;
+		public AccessExpression ret;
 		public Token kw;
 		public Token id;
 		public TypeNameContext t;
@@ -13519,8 +13506,8 @@ public class Java8Parser extends Parser {
 				setState(2988);
 				((FieldAccess_lfno_primaryContext)_localctx).id = match(Identifier);
 
-				            ((FieldAccess_lfno_primaryContext)_localctx).ret =  new NameExpression(createTypeName(((FieldAccess_lfno_primaryContext)_localctx).kw),
-				                                      createExpressionName(((FieldAccess_lfno_primaryContext)_localctx).id));
+				            ((FieldAccess_lfno_primaryContext)_localctx).ret =  new AccessExpression(createTypeName(((FieldAccess_lfno_primaryContext)_localctx).kw),
+				                                        createExpressionName(((FieldAccess_lfno_primaryContext)_localctx).id));
 				        
 				}
 				break;
@@ -13538,9 +13525,9 @@ public class Java8Parser extends Parser {
 				setState(2994);
 				((FieldAccess_lfno_primaryContext)_localctx).id = match(Identifier);
 
-				            ((FieldAccess_lfno_primaryContext)_localctx).ret =  new NameExpression(new NameExpression(((FieldAccess_lfno_primaryContext)_localctx).t.ret,
-				                                                         createTypeName(((FieldAccess_lfno_primaryContext)_localctx).kw)),
-				                                      createExpressionName(((FieldAccess_lfno_primaryContext)_localctx).id));
+				            ((FieldAccess_lfno_primaryContext)_localctx).ret =  new AccessExpression(new AccessExpression(((FieldAccess_lfno_primaryContext)_localctx).t.ret,
+				                                                             createTypeName(((FieldAccess_lfno_primaryContext)_localctx).kw)),
+				                                        createExpressionName(((FieldAccess_lfno_primaryContext)_localctx).id));
 				        
 				}
 				break;
@@ -13666,7 +13653,6 @@ public class Java8Parser extends Parser {
 
 	public static class ArrayAccess_lf_primaryContext extends ParserRuleContext {
 		public ArrayAccessExpression ret;
-		public boolean isAccess;
 		public PrimaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primaryContext pno;
 		public ExpressionContext i;
 		public Token last;
@@ -13710,7 +13696,6 @@ public class Java8Parser extends Parser {
 			setState(3027);
 			((ArrayAccess_lf_primaryContext)_localctx).last = match(RBRACK);
 			((ArrayAccess_lf_primaryContext)_localctx).ret =  new ArrayAccessExpression(((ArrayAccess_lf_primaryContext)_localctx).last, ((ArrayAccess_lf_primaryContext)_localctx).pno.ret, ((ArrayAccess_lf_primaryContext)_localctx).i.ret);
-			                 ((ArrayAccess_lf_primaryContext)_localctx).isAccess =  ((ArrayAccess_lf_primaryContext)_localctx).pno.isAccess;
 			}
 			}
 			setState(3038);
@@ -13960,8 +13945,8 @@ public class Java8Parser extends Parser {
 				((MethodInvocationContext)_localctx).last = match(RPAREN);
 
 				            ((MethodInvocationContext)_localctx).ret =  new CallExpression(((MethodInvocationContext)_localctx).last,
-				                                      new NameExpression(((MethodInvocationContext)_localctx).tn.ret,
-				                                                         createMethodName(((MethodInvocationContext)_localctx).id)),
+				                                      new AccessExpression(((MethodInvocationContext)_localctx).tn.ret,
+				                                                           createMethodName(((MethodInvocationContext)_localctx).id)),
 				                                      _localctx.args,
 				                                      _localctx.targs);
 				        
@@ -14004,7 +13989,7 @@ public class Java8Parser extends Parser {
 				((MethodInvocationContext)_localctx).last = match(RPAREN);
 
 				            ((MethodInvocationContext)_localctx).ret =  new CallExpression(((MethodInvocationContext)_localctx).last,
-				                                      new NameExpression(((MethodInvocationContext)_localctx).en.ret,
+				                                      new AccessExpression(((MethodInvocationContext)_localctx).en.ret,
 				                                                         createMethodName(((MethodInvocationContext)_localctx).id)),
 				                                      _localctx.args,
 				                                      _localctx.targs);
@@ -14092,8 +14077,8 @@ public class Java8Parser extends Parser {
 				((MethodInvocationContext)_localctx).last = match(RPAREN);
 
 				            ((MethodInvocationContext)_localctx).ret =  new CallExpression(((MethodInvocationContext)_localctx).last,
-				                                      new NameExpression(createTypeName(((MethodInvocationContext)_localctx).kw),
-				                                                         createMethodName(((MethodInvocationContext)_localctx).id)),
+				                                      new AccessExpression(createTypeName(((MethodInvocationContext)_localctx).kw),
+				                                                           createMethodName(((MethodInvocationContext)_localctx).id)),
 				                                      _localctx.args,
 				                                      _localctx.targs);
 				        
@@ -14140,9 +14125,9 @@ public class Java8Parser extends Parser {
 				((MethodInvocationContext)_localctx).last = match(RPAREN);
 
 				            ((MethodInvocationContext)_localctx).ret =  new CallExpression(((MethodInvocationContext)_localctx).last,
-				                                      new NameExpression(new NameExpression(((MethodInvocationContext)_localctx).tn.ret,
-				                                                                            createTypeName(((MethodInvocationContext)_localctx).kw)),
-				                                                         createMethodName(((MethodInvocationContext)_localctx).id)),
+				                                      new AccessExpression(new AccessExpression(((MethodInvocationContext)_localctx).tn.ret,
+				                                                                                createTypeName(((MethodInvocationContext)_localctx).kw)),
+				                                                           createMethodName(((MethodInvocationContext)_localctx).id)),
 				                                      _localctx.args,
 				                                      _localctx.targs);
 				        
@@ -14332,8 +14317,8 @@ public class Java8Parser extends Parser {
 				((MethodInvocation_lfno_primaryContext)_localctx).last = match(RPAREN);
 
 				            ((MethodInvocation_lfno_primaryContext)_localctx).ret =  new CallExpression(((MethodInvocation_lfno_primaryContext)_localctx).last,
-				                                      new NameExpression(((MethodInvocation_lfno_primaryContext)_localctx).tn.ret,
-				                                                         createMethodName(((MethodInvocation_lfno_primaryContext)_localctx).id)),
+				                                      new AccessExpression(((MethodInvocation_lfno_primaryContext)_localctx).tn.ret,
+				                                                           createMethodName(((MethodInvocation_lfno_primaryContext)_localctx).id)),
 				                                      _localctx.args,
 				                                      _localctx.targs);
 				        
@@ -14376,8 +14361,8 @@ public class Java8Parser extends Parser {
 				((MethodInvocation_lfno_primaryContext)_localctx).last = match(RPAREN);
 
 				            ((MethodInvocation_lfno_primaryContext)_localctx).ret =  new CallExpression(((MethodInvocation_lfno_primaryContext)_localctx).last,
-				                                      new NameExpression(((MethodInvocation_lfno_primaryContext)_localctx).en.ret,
-				                                                         createMethodName(((MethodInvocation_lfno_primaryContext)_localctx).id)),
+				                                      new AccessExpression(((MethodInvocation_lfno_primaryContext)_localctx).en.ret,
+				                                                           createMethodName(((MethodInvocation_lfno_primaryContext)_localctx).id)),
 				                                      _localctx.args,
 				                                      _localctx.targs);
 				        
@@ -14420,8 +14405,8 @@ public class Java8Parser extends Parser {
 				((MethodInvocation_lfno_primaryContext)_localctx).last = match(RPAREN);
 
 				            ((MethodInvocation_lfno_primaryContext)_localctx).ret =  new CallExpression(((MethodInvocation_lfno_primaryContext)_localctx).last,
-				                                      new NameExpression(createTypeName(((MethodInvocation_lfno_primaryContext)_localctx).kw),
-				                                                         createMethodName(((MethodInvocation_lfno_primaryContext)_localctx).id)),
+				                                      new AccessExpression(createTypeName(((MethodInvocation_lfno_primaryContext)_localctx).kw),
+				                                                           createMethodName(((MethodInvocation_lfno_primaryContext)_localctx).id)),
 				                                      _localctx.args,
 				                                      _localctx.targs);
 				        
@@ -14468,9 +14453,9 @@ public class Java8Parser extends Parser {
 				((MethodInvocation_lfno_primaryContext)_localctx).last = match(RPAREN);
 
 				            ((MethodInvocation_lfno_primaryContext)_localctx).ret =  new CallExpression(((MethodInvocation_lfno_primaryContext)_localctx).last,
-				                                      new NameExpression(new NameExpression(((MethodInvocation_lfno_primaryContext)_localctx).tn.ret,
-				                                                                            createTypeName(((MethodInvocation_lfno_primaryContext)_localctx).kw)),
-				                                                         createMethodName(((MethodInvocation_lfno_primaryContext)_localctx).id)),
+				                                      new AccessExpression(new AccessExpression(((MethodInvocation_lfno_primaryContext)_localctx).tn.ret,
+				                                                                                createTypeName(((MethodInvocation_lfno_primaryContext)_localctx).kw)),
+				                                                           createMethodName(((MethodInvocation_lfno_primaryContext)_localctx).id)),
 				                                      _localctx.args,
 				                                      _localctx.targs);
 				        
@@ -14730,8 +14715,8 @@ public class Java8Parser extends Parser {
 				setState(3321);
 				((MethodReferenceContext)_localctx).id = match(Identifier);
 
-				            ((MethodReferenceContext)_localctx).ret =  new MethodReferenceExpression(new NameExpression(((MethodReferenceContext)_localctx).tn.ret,
-				                                                                    createTypeName(((MethodReferenceContext)_localctx).kw)),
+				            ((MethodReferenceContext)_localctx).ret =  new MethodReferenceExpression(new AccessExpression(((MethodReferenceContext)_localctx).tn.ret,
+				                                                                      createTypeName(((MethodReferenceContext)_localctx).kw)),
 				                                                 createMethodName(((MethodReferenceContext)_localctx).id),
 				                                                 _localctx.targs);
 				        
@@ -14794,7 +14779,7 @@ public class Java8Parser extends Parser {
 	}
 
 	public static class MethodReference_lf_primaryContext extends ParserRuleContext {
-		public Expression ret;
+		public MethodReferenceExpression ret;
 		public List<TypeArgument> targs = new ArrayList<>();
 		public TypeArgumentsContext t;
 		public Token id;
@@ -14998,8 +14983,8 @@ public class Java8Parser extends Parser {
 				setState(3388);
 				((MethodReference_lfno_primaryContext)_localctx).id = match(Identifier);
 
-				            ((MethodReference_lfno_primaryContext)_localctx).ret =  new MethodReferenceExpression(new NameExpression(((MethodReference_lfno_primaryContext)_localctx).tn.ret,
-				                                                                    createTypeName(((MethodReference_lfno_primaryContext)_localctx).kw)),
+				            ((MethodReference_lfno_primaryContext)_localctx).ret =  new MethodReferenceExpression(new AccessExpression(((MethodReference_lfno_primaryContext)_localctx).tn.ret,
+				                                                                      createTypeName(((MethodReference_lfno_primaryContext)_localctx).kw)),
 				                                                 createMethodName(((MethodReference_lfno_primaryContext)_localctx).id),
 				                                                 _localctx.targs);
 				        

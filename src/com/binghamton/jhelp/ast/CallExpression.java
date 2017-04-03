@@ -8,7 +8,7 @@ import org.antlr.v4.runtime.Token;
 /**
  * A class representing a Java method call, including explicit constructor calls
  */
-public class CallExpression extends Expression {
+public class CallExpression extends QualifiableExpression {
     private Expression methodExpr;
     private List<Expression> args;
     private List<TypeArgument> typeArgs = new ArrayList<>();
@@ -161,5 +161,10 @@ public class CallExpression extends Expression {
     public void accept(ASTVisitor v) {
         super.accept(v);
         v.visit(this);
+    }
+
+    @Override
+    public void qualifyWith(Expression expr) {
+        methodExpr = new AccessExpression(expr, methodExpr);
     }
 }
