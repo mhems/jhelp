@@ -13,11 +13,13 @@ import com.binghamton.jhelp.MyClassSymbol;
  * This includes interfaces, annotations, classes, and enums.
  */
 public abstract class BodyDeclaration extends Declaration {
+    public enum Kind {TOP, INNER, ANONYMOUS, LOCAL};
+
     protected List<VariableDeclaration> fields = new ArrayList<>();
     protected List<MethodDeclaration> methods = new ArrayList<>();
     protected List<ConcreteBodyDeclaration> innerBodies = new ArrayList<>();
     protected List<AbstractBodyDeclaration> innerInterfaces = new ArrayList<>();
-    protected boolean inner = false;
+    protected Kind kind = Kind.TOP;
 
     /**
      * Construct an empty body declaration
@@ -40,12 +42,28 @@ public abstract class BodyDeclaration extends Declaration {
         super(name, keyword, modifiers, annotations);
     }
 
-    public boolean isInnerDeclaration() {
-        return inner;
+    public Kind getKind() {
+        return kind;
     }
 
-    public void setInnerDeclaration(boolean inner) {
-        this.inner = inner;
+    public void setKind(Kind kind) {
+        this.kind = kind;
+    }
+
+    public boolean isTop() {
+        return kind == Kind.TOP;
+    }
+
+    public boolean isInner() {
+        return kind == Kind.INNER;
+    }
+
+    public boolean isAnonymous() {
+        return kind == Kind.ANONYMOUS;
+    }
+
+    public boolean isLocal() {
+        return kind == Kind.LOCAL;
     }
 
     /**
@@ -117,6 +135,7 @@ public abstract class BodyDeclaration extends Declaration {
      * @param decl the declaration to add
      */
     public void addInnerBody(ConcreteBodyDeclaration decl) {
+        decl.setKind(Kind.INNER);
         innerBodies.add(decl);
     }
 
@@ -133,6 +152,7 @@ public abstract class BodyDeclaration extends Declaration {
      * @param decl the declaration to add
      */
     public void addInnerInterface(AbstractBodyDeclaration decl) {
+        decl.setKind(Kind.INNER);
         innerInterfaces.add(decl);
     }
 

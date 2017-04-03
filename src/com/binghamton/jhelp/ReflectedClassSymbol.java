@@ -69,12 +69,19 @@ public class ReflectedClassSymbol extends ClassSymbol {
         return cls.isAnnotation();
     }
 
+    @Override
     public boolean isAnonymous() {
         return cls.isAnonymousClass();
     }
 
-    public boolean isInnerClass() {
+    @Override
+    public boolean isInner() {
         return cls.isMemberClass();
+    }
+
+    @Override
+    public boolean isLocal() {
+        return cls.isLocalClass();
     }
 
     public String getPackageName() {

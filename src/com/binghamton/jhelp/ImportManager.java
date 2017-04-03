@@ -14,18 +14,18 @@ import java.util.Set;
 public class ImportManager {
     private static final Map<String, ReflectedClassSymbol> cache = new HashMap<>();
 
-    static {
-        String[] names = {"java.lang.Object", "java.lang.String",
-                          "java.lang.Enum", "java.lang.annotation.Annotation",
-                          "java.lang.Throwable", "java.lang.Override"};
-        for (String name : names) {
-            try {
-                getOrImport(name);
-            } catch (ClassNotFoundException e) {
-                System.err.println("error initializing established class: " + name);
-            }
-        }
-    }
+    // static {
+    //     String[] names = {"java.lang.Object", "java.lang.String",
+    //                       "java.lang.Enum", "java.lang.annotation.Annotation",
+    //                       "java.lang.Throwable", "java.lang.Override"};
+    //     for (String name : names) {
+    //         try {
+    //             getOrImport(name);
+    //         } catch (ClassNotFoundException e) {
+    //             System.err.println("error initializing established class: " + name);
+    //         }
+    //     }
+    // }
 
     /**
      * Determines if a symbol has been explicity imported

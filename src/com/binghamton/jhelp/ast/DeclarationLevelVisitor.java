@@ -21,6 +21,7 @@ import com.binghamton.jhelp.TypeVariable;
 import com.binghamton.jhelp.WildcardType;
 
 import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
+import static com.binghamton.jhelp.ast.NameExpression.Kind;
 
 /**
  * The top level Visitor for visiting top-level declarations and adding them to
@@ -37,27 +38,55 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(AccessExpression ast) {
-        ast.getLHS().accept(this);
+        Expression lhs, rhs;
+        NameExpression rName = null;
 
-        ClassSymbol sym = ast.getLHS().getType().getClassSymbol();
-        Expression rhs = ast.getRHS();
-        if (!(rhs instanceof IdentifierExpression)) {
-            System.err.println("unknown rhs type: " + ast.getRHS().getText());
+        lhs = ast.getLHS();
+        rhs = ast.getRHS();
+
+        lhs.accept(this);
+        rhs.accept(this);
+
+        if (!(rhs instanceof NameExpression)) {
+            System.err.println("unknown rhs type: " + rhs.getText());
             return;
+        } else {
+            rName = (NameExpression)rhs;
         }
 
-        Type type = null;
-        for (ClassSymbol inner : sym.getInnerClasses()) {
-            if (inner.getName().equals(rhs.getText())) {
-                type = inner;
-                break;
+        Kind lKind = null; //lhs.getKind(); TO COMPILE
+        Kind rKind = rName.getKind();
+
+        if (lKind == Kind.TYPE) {
+            ast.setKind(Kind.TYPE);
+            Type lType = lhs.getType();
+            Type type = lType.getClassSymbol().getType(rName.getName());
+            if (type == null) {
+                System.err.println("unknown type " + lhs.getText() + "." + rName.getName());
+            } else {
+                ast.setType(type);
             }
+        } else if (lKind == Kind.PACKAGE) {
+            // if (rKind == )
+            // TODO
         }
-        if (type != null) {
-            ast.setType(type);
-        } else {
-            System.err.println("unknown identifier: " + ast.getRHS().getText());
-        }
+
+        // ClassSymbol sym = ast.getLHS().getType().getClassSymbol();
+        // Expression rhs = ast.getRHS();
+
+
+        // Type type = null;
+        // for (ClassSymbol inner : sym.getInnerClasses()) {
+        //     if (inner.getName().equals(rhs.getText())) {
+        //         type = inner;
+        //         break;
+        //     }
+        // }
+        // if (type != null) {
+        //     ast.setType(type);
+        // } else {
+        //     System.err.println("unknown identifier: " + ast.getRHS().getText());
+        // }
     }
 
     /**
@@ -200,28 +229,6 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
     }
 
     /**
-     * Visit a IdentifierExpression node
-     * @param ast the AST node being visited
-     */
-    public void visit(IdentifierExpression ast) {
-        String id = ast.getIdentifier().getText();
-
-        Type type = PrimitiveType.UNBOX_MAP.get(id);
-        if (type == null) {
-            type = currentClass.getType(id);
-            if (type != null) {
-
-            }
-        }
-        if (type != null) {
-            type.setAnnotations(makeAnnotations(ast.getAnnotations()));
-            ast.setType(type);
-        } else {
-            System.err.println("unknown symbol '" + id + "'");
-        }
-    }
-
-    /**
      * Visit a InterfaceDeclaration node
      * @param ast the AST node being visited
      */
@@ -236,6 +243,39 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
             addInterfaces(ast.getSuperInterfaces());
         }
         visitInnerBodies(ast);
+    }
+
+    /**
+     * Visit a LocalClassDeclaration node
+     * @param ast the AST node being visited
+     */
+    public void visit(LocalClassDeclaration ast) {
+        ast.getDeclaration().accept(this);
+    }
+
+    /**
+     * Visit a NameExpression node
+     * @param ast the AST node being visited
+     */
+    public void visit(NameExpression ast) {
+        String name = ast.getName();
+        AnnotationSymbol[] anns = makeAnnotations(ast.getAnnotations());
+
+        if (ast.getKind() == Kind.AMBIGUOUS) {
+            ast.setKind(Kind.TYPE);
+        }
+        Type type = currentClass.getType(name);
+        if (type != null) {
+            ast.setType(type);
+            type.setAnnotations(anns);
+            ast.setKind(Kind.TYPE);
+        } else {
+            if (ast.getKind() == Kind.TYPE) {
+                System.err.println("unknown type - not in scope of current declaration");
+            } else {
+                ast.setKind(Kind.PACKAGE);
+            }
+        }
     }
 
     /**

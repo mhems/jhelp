@@ -22,7 +22,7 @@ public class CallExpression extends Expression {
     public CallExpression(Token last,
                           Token id,
                           List<Expression> args) {
-        this(last, new IdentifierExpression(id), args);
+        this(last, NameExpression.createMethodName(id), args);
     }
 
     /**
@@ -52,7 +52,7 @@ public class CallExpression extends Expression {
                           List<TypeArgument> typeArgs) {
         this(ASTNode.getFirstToken(id, typeArgs),
              last,
-             new IdentifierExpression(id),
+             NameExpression.createMethodName(id),
              args,
              typeArgs);
     }
@@ -82,11 +82,11 @@ public class CallExpression extends Expression {
      * @param args the list of arguments to the method call
      * @param typeArgs the list of type arguments to the method call
      */
-    public CallExpression(Token first,
-                          Token last,
-                          Expression methodExpr,
-                          List<Expression> args,
-                          List<TypeArgument> typeArgs) {
+    protected CallExpression(Token first,
+                             Token last,
+                             Expression methodExpr,
+                             List<Expression> args,
+                             List<TypeArgument> typeArgs) {
         super(ASTNode.getFirstToken(first, typeArgs), last);
         this.methodExpr = methodExpr;
         this.args = args;

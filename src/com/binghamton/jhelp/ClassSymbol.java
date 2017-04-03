@@ -15,12 +15,14 @@ import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
  */
 public abstract class ClassSymbol extends ReferenceType {
     public enum ClassKind {CLASS, INTERFACE, ENUM, ANNOTATION};
+    public enum Level {TOP, INNER, ANONYMOUS, LOCAL};
 
         {
             kind = SymbolKind.CLASS;
         }
 
     protected ClassKind classKind;
+    protected Level level = Level.TOP;
     protected Type superClass = null;
     protected ClassSymbol declarer;
 
@@ -31,6 +33,7 @@ public abstract class ClassSymbol extends ReferenceType {
     protected MethodSymbolTable methods = new MethodSymbolTable();
     protected MethodSymbolTable ctors = new MethodSymbolTable();
     protected NamedSymbolTable<TypeVariable> params = new NamedSymbolTable<>();
+
     /**
      * Construct a new ClassSymbol
      * @param name the name of this class symbol
@@ -88,6 +91,29 @@ public abstract class ClassSymbol extends ReferenceType {
         return classKind;
     }
 
+    public Type getType(String name) {
+        Type ret = null;
+        ret = params.get(name);
+        if (ret == null) {
+            ret = innerClasses.get(name);
+            if (ret == null) {
+                if (declarer != null) {
+                    ret = declarer.getType(name);
+                }
+                if (ret == null) {
+                    Package pkg = getPackage();
+                    if (pkg != null) {
+                        ret = pkg.getClassTable().get(name);
+                    }
+                    if (ret == null) {
+                        ret = importedTypes.get(name);
+                    }
+                }
+            }
+        }
+        return ret;
+    }
+
     public void setClassKind(ClassKind kind) {
         classKind = kind;
     }
@@ -132,14 +158,28 @@ public abstract class ClassSymbol extends ReferenceType {
         return params.get(name);
     }
 
+    public boolean isTop() {
+        return level == Level.TOP;
+    }
+
+    public boolean isInner() {
+        return level == Level.INNER;
+    }
+
+    public boolean isAnonymous() {
+        return level == Level.ANONYMOUS;
+    }
+
+    public boolean isLocal() {
+        return level == Level.LOCAL;
+    }
+
     public boolean isClassLike() { return isEnum() || isClass(); }
     public abstract boolean isEnum();
     public abstract boolean isClass();
     public boolean isInterfaceLike() { return isInterface() || isAnnotation(); }
     public abstract boolean isInterface();
     public abstract boolean isAnnotation();
-    public abstract boolean isAnonymous();
-    public abstract boolean isInnerClass();
     public abstract boolean isBoxed();
     public abstract String getPackageName();
     public abstract Package getPackage();

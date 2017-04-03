@@ -71,7 +71,6 @@ public class SymbolFinder {
      *         null if no packages contain a `name` class
      */
     public List<String> search(String name) {
-        System.out.println("searching for: " + name);
         List<String> ret = cache.get(name);
         if (ret == null) {
             throw new IllegalArgumentException(name + " does not exist");

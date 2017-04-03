@@ -61,6 +61,9 @@ grammar Java8;
 
     import com.binghamton.jhelp.*;
     import com.binghamton.jhelp.ast.*;
+
+    import static com.binghamton.jhelp.ast.NameExpression.*;
+    import static com.binghamton.jhelp.ast.BodyDeclaration.Kind.*;
 }
 
 @parser::members {
@@ -117,12 +120,12 @@ type_ returns [Expression ret]
     |   r = referenceType {$ret = $r.ret;}
     ;
 
-primitiveType returns [KeywordExpression ret]
+primitiveType returns [NameExpression ret]
     locals [List<Annotation> anns = new ArrayList<>()]
     :   (a = annotation {$anns.add($a.ret);})* n = numericType
-        {$ret = new KeywordExpression($n.ret, $anns);}
+        {$ret = createTypeName($n.ret, $anns);}
     |   (a = annotation {$anns.add($a.ret);})* b = 'boolean'
-        {$ret = new KeywordExpression($b, $anns);}
+        {$ret = createTypeName($b, $anns);}
     ;
 
 numericType returns [Token ret]
@@ -162,12 +165,12 @@ classType returns [Expression ret]
             List<TypeArgument> ls = new ArrayList<>()]
     :   (a = annotation {$anns.add($a.ret);})*
         id = Identifier
-        {$ret = new IdentifierExpression($id, $anns);}
+        {$ret = createPackageOrTypeName($id, $anns);}
         (targs = typeArguments {$ret = new TypeExpression($ret, $targs.ret);})?
     |   st = classOrInterfaceType '.'
         (a = annotation {$anns.add($a.ret);})*
         id = Identifier
-        {$ret = new AccessExpression($st.ret, new IdentifierExpression($id, $anns));}
+        {$ret = new AccessExpression($st.ret, createPackageOrTypeName($id, $anns));}
         (targs = typeArguments {$ret = new TypeExpression($ret, $targs.ret);})?
     ;
 
@@ -175,17 +178,17 @@ classType_lfno_classOrInterfaceType returns [Expression ret]
     locals [List<Annotation> ans = new ArrayList<>()]
     :   (a = annotation {$ans.add($a.ret);})*
         id = Identifier
-        {$ret = new IdentifierExpression($id, $ans);}
+        {$ret = createPackageOrTypeName($id, $ans);}
         (
             targs = typeArguments
             {$ret = new TypeExpression($ret, $targs.ret);}
         )?
     ;
 
-typeVariable returns [Expression ret]
+typeVariable returns [NameExpression ret]
     locals [List<Annotation> ans = new ArrayList<>()]
     :   (a = annotation {$ans.add($a.ret);})* id = Identifier
-        {$ret = new IdentifierExpression($id, $ans);}
+        {$ret = createTypeName($id, $ans);}
     ;
 
 arrayType returns [ArrayTypeExpression ret]
@@ -268,27 +271,27 @@ wildcardBounds [TypeArgument ret]
  * Productions from §6 (Names)
  */
 typeName returns [Expression ret]
-    :   id = Identifier { $ret = new IdentifierExpression($id); }
+    :   id = Identifier { $ret = createTypeName($id); }
     |   p = packageOrTypeName '.' id = Identifier
-        { $ret = new AccessExpression($p.ret, $id); }
+        { $ret = new AccessExpression($p.ret, createTypeName($id)); }
     ;
 
 packageOrTypeName returns [Expression ret]
-    :   id = Identifier { $ret = new IdentifierExpression($id); }
+    :   id = Identifier { $ret = createPackageOrTypeName($id); }
     |   p = packageOrTypeName '.' id = Identifier
-        { $ret = new AccessExpression($p.ret, $id); }
+        { $ret = new AccessExpression($p.ret, createPackageOrTypeName($id)); }
     ;
 
 expressionName returns [Expression ret]
-    :   id = Identifier { $ret = new IdentifierExpression($id); }
+    :   id = Identifier { $ret = createExpressionName($id); }
     |   a = ambiguousName '.' id = Identifier
-        { $ret = new AccessExpression($a.ret, $id); }
+        { $ret = new AccessExpression($a.ret, createExpressionName($id)); }
     ;
 
 ambiguousName returns [Expression ret]
-    :   id = Identifier { $ret = new IdentifierExpression($id); }
+    :   id = Identifier { $ret = createAmbiguousName($id); }
     |   a = ambiguousName '.' id = Identifier
-        { $ret = new AccessExpression($a.ret, $id); }
+        { $ret = new AccessExpression($a.ret, createAmbiguousName($id)); }
     ;
 
 /*
@@ -340,7 +343,8 @@ singleStaticImportDeclaration returns [ImportStatement ret]
     :   kw = 'import' 'static' t = typeName '.' id = Identifier last = ';'
         {$ret = new ImportStatement($kw,
                                     $last,
-                                    new AccessExpression($t.ret, $id),
+                                    new AccessExpression($t.ret,
+                                                         createAmbiguousName($id)),
                                     true,
                                     false);}
     ;
@@ -523,13 +527,13 @@ variableInitializer returns [Expression ret]
     ;
 
 unannType returns [Expression ret]
-    :   p = unannPrimitiveType {$ret = new IdentifierExpression($p.ret);}
+    :   p = unannPrimitiveType {$ret = $p.ret;}
     |   r = unannReferenceType {$ret = $r.ret;}
     ;
 
-unannPrimitiveType returns [Token ret]
-    :   n = numericType {$ret = $n.ret;}
-    |   b = 'boolean' {$ret = $b;}
+unannPrimitiveType returns [NameExpression ret]
+    :   n = numericType {$ret = createTypeName($n.ret);}
+    |   b = 'boolean' {$ret = createTypeName($b);}
     ;
 
 unannReferenceType returns [Expression ret]
@@ -556,7 +560,7 @@ unannClassType returns [Expression ret]
 
 unannClassType_lfno_unannClassOrInterfaceType returns [Expression ret]
     :   id = Identifier
-        {$ret = new IdentifierExpression($id);}
+        {$ret = createPackageOrTypeName($id);}
         (
             targs = typeArguments
             {$ret = new TypeExpression($ret, $targs.ret);}
@@ -564,12 +568,12 @@ unannClassType_lfno_unannClassOrInterfaceType returns [Expression ret]
     ;
 
 unannTypeVariable returns [Expression ret]
-    :   i = Identifier {$ret = new IdentifierExpression($i);}
+    :   id = Identifier {$ret = createTypeName($id);}
     ;
 
 unannArrayType returns [ArrayTypeExpression ret]
     :   p = unannPrimitiveType d = dims
-        {$ret = new ArrayTypeExpression(new KeywordExpression($p.ret), $d.ret);}
+        {$ret = new ArrayTypeExpression($p.ret, $d.ret);}
     |   c = unannClassOrInterfaceType d = dims
         {$ret = new ArrayTypeExpression($c.ret, $d.ret);}
     |   v = unannTypeVariable d = dims
@@ -619,7 +623,7 @@ methodHeader [MethodDeclaration ret]
 
 result returns [Expression ret]
     :   u = unannType {$ret = $u.ret;}
-    |   v = 'void' {$ret = new KeywordExpression($v);}
+    |   v = 'void' {$ret = createTypeName($v);}
     ;
 
 methodDeclarator [MethodDeclaration ret]
@@ -774,24 +778,32 @@ explicitConstructorInvocation returns [Expression ret]
             Expression tmp]
     :   (t = typeArguments {$targs = $t.ret;})? kw = 'this'
         '(' (a = argumentList {$args = $a.ret;})? ')' last = ';'
-        {$ret = new CallExpression($last, new KeywordExpression($kw),
+        {$ret = new CallExpression($last, createTypeName($kw),
                                    $args, $targs);}
     |   (t = typeArguments {$targs = $t.ret;})? kw = 'super'
         '(' (a = argumentList {$args = $a.ret;})? ')' last = ';'
-        {$ret = new CallExpression($last, new KeywordExpression($kw),
+        {$ret = new CallExpression($last, createTypeName($kw),
                                    $args, $targs);}
     |   en = expressionName '.'
         (t = typeArguments {$targs = $t.ret;})? kw = 'super'
         '(' (a = argumentList {$args = $a.ret;})? ')' last = ';'
-        {$ret = new CallExpression($last, new KeywordExpression($kw),
-                                   $args, $targs);
-         $ret = new AccessExpression($en.ret, $ret);}
+        {
+            $ret = new CallExpression($last,
+                                      new AccessExpression($en.ret,
+                                                           createTypeName($kw)),
+                                      $args,
+                                      $targs);
+        }
     |   p = primary '.'
         (t = typeArguments {$targs = $t.ret;})? kw = 'super'
         '(' (a = argumentList {$args = $a.ret;})? ')' last = ';'
-        {$ret = new CallExpression($last, new KeywordExpression($kw),
-                                   $args, $targs);
-         $ret = new AccessExpression($p.ret, $ret);}
+        {
+            $ret = new CallExpression($last,
+                                      new AccessExpression($p.ret,
+                                                           createTypeName($kw)),
+                                      $args,
+                                      $targs);
+        }
     ;
 
 enumDeclaration returns [EnumDeclaration ret]
@@ -1082,7 +1094,7 @@ blockStatements returns [List<Statement> ret]
 
 blockStatement returns [Statement ret]
     :   d = localVariableDeclarationStatement {$ret = $d.ret;}
-    |   c = classDeclaration {$ret = $c.ret; $c.ret.setLocal(true);}
+    |   c = classDeclaration {$ret = $c.ret; $c.ret.setKind(LOCAL);}
     |   st = statement {$ret = $st.ret;}
     ;
 
@@ -1221,8 +1233,8 @@ switchLabels returns [List<Expression> ret]
 
 switchLabel returns [Expression ret]
     :   'case' c = constantExpression ':' {$ret = $c.ret;}
-    |   'case' id = Identifier ':' {$ret = new IdentifierExpression($id);}
-    |   kw = 'default' ':' {$ret = new IdentifierExpression($kw);}
+    |   'case' id = Identifier ':' {$ret = createExpressionName($id);}
+    |   kw = 'default' ':' {$ret = new NilExpression();}
     ;
 
 whileStatement returns [WhileStatement ret]
@@ -1443,10 +1455,10 @@ primary returns [Expression ret]
         )
         (   p = primaryNoNewArray_lf_primary
             {
-                if ($p.isAccess) {
-                    $ret = new AccessExpression($ret, $p.ret);
+                if ($p.ret instanceof MethodReferenceExpression) {
+                    ((MethodReferenceExpression)$p.ret).setLHS($ret);
                 } else {
-                    $ret = new MethodReferenceExpression($ret, $p.ret);
+                    $ret = new AccessExpression($ret, $p.ret);
                 }
             }
         )*
@@ -1455,7 +1467,7 @@ primary returns [Expression ret]
 primaryNoNewArray returns [Expression ret]
     :   a1 = literal {$ret = $a1.ret;}
     |   a2 = primaryNoNewArray_typeAccess {$ret = $a2.ret;}
-    |   kw = 'this' {$ret = new KeywordExpression($kw);}
+    |   kw = 'this' {$ret = createTypeName($kw);}
     |   first = '(' p = expression last = ')'
         {$ret = $p.ret; $ret.setFirstToken($first); $ret.setLastToken($last);}
     |   a7 = classInstanceCreationExpression {$ret = $a7.ret;}
@@ -1472,7 +1484,7 @@ primaryNoNewArray_typeAccess returns [Expression ret]
         (first = '[' last = ']' {$ls.add(new Dimension($first, $last));})*
         '.' kw = 'class'
         {
-            $expr = new IdentifierExpression($id);
+            $expr = createTypeName($id);
             if ($ls.size() > 0) {
                 $expr = new ArrayTypeExpression($expr, $ls);
             }
@@ -1482,17 +1494,17 @@ primaryNoNewArray_typeAccess returns [Expression ret]
         (first = '[' last = ']' {$ls.add(new Dimension($first, $last));})*
         '.' kw = 'class'
         {
-            $expr = new AccessExpression($p.ret, $id);
+            $expr = new AccessExpression($p.ret, createTypeName($id));
             if ($ls.size() > 0) {
                 $expr = new ArrayTypeExpression($expr, $ls);
             }
             $ret = new ClassLiteralExpression($expr, $kw);
         }
     |   kv = 'void' '.' kw = 'class'
-        {$ret = new ClassLiteralExpression(new KeywordExpression($kv), $kw);}
-    |   a5 = typeName '.' kw = 'this'
+        {$ret = new ClassLiteralExpression(createTypeName($kv), $kw);}
+    |   t = typeName '.' kw = 'this'
         {
-            $ret = new AccessExpression($a5.ret, new KeywordExpression($kw));
+            $ret = new AccessExpression($t.ret, createTypeName($kw));
         }
     ;
 
@@ -1503,7 +1515,7 @@ primaryNoNewArray_lf_arrayAccess
 primaryNoNewArray_lfno_arrayAccess returns [Expression ret]
     :   a1 = literal {$ret = $a1.ret;}
     |   a2 = primaryNoNewArray_typeAccess {$ret = $a2.ret;}
-    |   kw = 'this' {$ret = new KeywordExpression($kw);}
+    |   kw = 'this' {$ret = createTypeName($kw);}
     |   first = '(' p = expression last = ')'
         {$ret = $p.ret; $ret.setFirstToken($first); $ret.setLastToken($last);}
     |   a5 = classInstanceCreationExpression {$ret = $a5.ret;}
@@ -1543,13 +1555,13 @@ primaryNoNewArray_lfno_primary returns [Expression ret]
         (first = '[' last = ']' {$ls.add(new Dimension($first, $last));})*
         '.' kw = 'class'
         {
-            $lhs = new KeywordExpression($a3.ret);
+            $lhs = $a3.ret;
             if ($ls.size() > 0) {
                 $lhs = new ArrayTypeExpression($lhs, $ls);
             }
-            $ret = new AccessExpression($lhs, new KeywordExpression($kw));
+            $ret = new ClassLiteralExpression($lhs, $kw);
         }
-    |   kw = 'this' {$ret = new KeywordExpression($kw);}
+    |   kw = 'this' {$ret = createTypeName($kw);}
     |   first = '(' p = expression last = ')' {$ret = $p.ret;}
     |   a7 = classInstanceCreationExpression_lfno_primary {$ret = $a7.ret;}
     |   a8 = fieldAccess_lfno_primary {$ret = $a8.ret;}
@@ -1571,13 +1583,13 @@ primaryNoNewArray_lfno_primary_lfno_arrayAccess_lfno_primary returns [Expression
         (first = '[' last = ']' {$ls.add(new Dimension($first, $last));})*
         '.' kw = 'class'
         {
-            $lhs = new KeywordExpression($a3.ret);
+            $lhs = $a3.ret;
             if ($ls.size() > 0) {
                 $lhs = new ArrayTypeExpression($lhs, $ls);
             }
-            $ret = new AccessExpression($lhs, new KeywordExpression($kw));
+            $ret = new ClassLiteralExpression($lhs, $kw);
         }
-    |   kw = 'this' {$ret = new KeywordExpression($kw);}
+    |   kw = 'this' {$ret = createTypeName($kw);}
     |   first = '(' p = expression last = ')' {$ret = $p.ret;}
     |   a7 = classInstanceCreationExpression_lfno_primary {$ret = $a7.ret;}
     |   a8 = fieldAccess_lfno_primary {$ret = $a8.ret;}
@@ -1585,12 +1597,11 @@ primaryNoNewArray_lfno_primary_lfno_arrayAccess_lfno_primary returns [Expression
     |   a10 = methodReference_lfno_primary {$ret = $a10.ret;}
     ;
 
-classInstanceCreationExpression returns [Expression ret]
+classInstanceCreationExpression returns [InstantiationExpression ret]
     locals [Expression methodExpr,
             List<Annotation> ans = new ArrayList<>(),
             List<Annotation> ans2 = new ArrayList<>(),
             ConcreteBodyDeclaration anon,
-            InstantiationExpression inst,
             List<TypeArgument> targs = new ArrayList<>(),
             List<Expression> args = new ArrayList<>()]
     :   kw = 'new'
@@ -1598,14 +1609,13 @@ classInstanceCreationExpression returns [Expression ret]
         (a = annotation {$ans.add($a.ret);})*
         id = Identifier
         {
-            $methodExpr = new IdentifierExpression($id, $ans);
+            $methodExpr = createPackageOrTypeName($id, $ans);
         }
 
         ('.' (a2 = annotation {$ans2.add($a2.ret);})* id2 = Identifier
             {
                 $methodExpr = new AccessExpression($methodExpr,
-                                                   new IdentifierExpression($id2,
-                                                                            $ans2));
+                                                   createPackageOrTypeName($id2, $ans2));
                 $ans2.clear();
             }
         )*
@@ -1617,11 +1627,10 @@ classInstanceCreationExpression returns [Expression ret]
         )?
         '(' (l = argumentList {$args = $l.ret;})? last = ')'
         {
-            $inst = new InstantiationExpression($kw, $last,
-                                                $methodExpr,
-                                                $args, $targs);
-            $anon = $inst.getAnonymousClass();
-            $ret = $inst;
+            $ret = new InstantiationExpression($kw, $last,
+                                               $methodExpr,
+                                               $args, $targs);
+            $anon = $ret.getAnonymousClass();
         }
 
         (classBody[$anon])?
@@ -1631,7 +1640,8 @@ classInstanceCreationExpression returns [Expression ret]
         (a = annotation {$ans.add($a.ret);})*
         id = Identifier
         {
-            $methodExpr = new IdentifierExpression($id, $ans);
+            $methodExpr = new AccessExpression($name.ret,
+                                               createTypeName($id, $ans));
         }
         (
             ta = typeArgumentsOrDiamond
@@ -1641,11 +1651,10 @@ classInstanceCreationExpression returns [Expression ret]
         )?
         '(' (l = argumentList {$args = $l.ret;})? last = ')'
         {
-            $inst = new InstantiationExpression($kw, $last,
-                                                $methodExpr,
-                                                $args, $targs);
-            $anon = $inst.getAnonymousClass();
-            $ret = new AccessExpression($name.ret, $inst);
+            $ret = new InstantiationExpression($kw, $last,
+                                               $methodExpr,
+                                               $args, $targs);
+            $anon = $ret.getAnonymousClass();
         }
         (classBody[$anon])?
     |   p = primary '.'
@@ -1653,7 +1662,8 @@ classInstanceCreationExpression returns [Expression ret]
         (a = annotation {$ans.add($a.ret);})*
         id = Identifier
         {
-            $methodExpr = new IdentifierExpression($id, $ans);
+            $methodExpr = new AccessExpression($p.ret,
+                                               createTypeName($id, $ans));
         }
         (
             ta = typeArgumentsOrDiamond
@@ -1663,11 +1673,10 @@ classInstanceCreationExpression returns [Expression ret]
         )?
         '(' (l = argumentList {$args = $l.ret;})? last = ')'
         {
-            $inst = new InstantiationExpression($kw, $last,
-                                                $methodExpr,
-                                                $args, $targs);
-            $anon = $inst.getAnonymousClass();
-            $ret = new AccessExpression($p.ret, $inst);
+            $ret = new InstantiationExpression($kw, $last,
+                                               $methodExpr,
+                                               $args, $targs);
+            $anon = $ret.getAnonymousClass();
         }
         (classBody[$anon])?
     ;
@@ -1675,7 +1684,6 @@ classInstanceCreationExpression returns [Expression ret]
 classInstanceCreationExpression_lf_primary returns [InstantiationExpression ret]
     locals [List<Annotation> ans = new ArrayList<>(),
             ConcreteBodyDeclaration anon,
-            InstantiationExpression inst,
             List<TypeArgument> targs = new ArrayList<>(),
             List<Expression> args = new ArrayList<>(),
             Expression methodExpr]
@@ -1684,7 +1692,7 @@ classInstanceCreationExpression_lf_primary returns [InstantiationExpression ret]
         (a = annotation {$ans.add($a.ret);})*
         id = Identifier
         {
-            $methodExpr = new IdentifierExpression($id, $ans);
+            $methodExpr = createTypeName($id, $ans);
         }
         (
             ta = typeArgumentsOrDiamond
@@ -1694,11 +1702,10 @@ classInstanceCreationExpression_lf_primary returns [InstantiationExpression ret]
         )?
         '(' (l = argumentList {$args = $l.ret;})? last = ')'
         {
-            $inst = new InstantiationExpression($kw, $last,
-                                                $methodExpr,
-                                                $args, $targs);
-            $anon = $inst.getAnonymousClass();
-            $ret = $inst;
+            $ret = new InstantiationExpression($kw, $last,
+                                               $methodExpr,
+                                               $args, $targs);
+            $anon = $ret.getAnonymousClass();
         }
         (classBody[$anon])?
     ;
@@ -1715,13 +1722,12 @@ classInstanceCreationExpression_lfno_primary returns [Expression ret]
         (a = annotation {$ans.add($a.ret);})*
         id = Identifier
         {
-            $methodExpr = new IdentifierExpression($id, $ans);
+            $methodExpr = createPackageOrTypeName($id, $ans);
         }
         ('.' (a2 = annotation {$ans2.add($a2.ret);})* id2 = Identifier
             {
                 $methodExpr = new AccessExpression($methodExpr,
-                                                   new IdentifierExpression($id2,
-                                                                            $ans2));
+                                                   createPackageOrTypeName($id2, $ans2));
                 $ans2.clear();
             }
         )*
@@ -1745,7 +1751,7 @@ classInstanceCreationExpression_lfno_primary returns [Expression ret]
         (a = annotation {$ans.add($a.ret);})*
         id = Identifier
         {
-            $methodExpr = new IdentifierExpression($id, $ans);
+            $methodExpr = createTypeName($id, $ans);
         }
         (
             ta = typeArgumentsOrDiamond
@@ -1771,26 +1777,33 @@ typeArgumentsOrDiamond returns [List<TypeArgument> ret]
 
 fieldAccess returns [AccessExpression ret]
     :   p = primary '.' id = Identifier
-        {$ret = new AccessExpression($p.ret, $id);}
+        {$ret = new AccessExpression($p.ret, createExpressionName($id));}
     |   kw = 'super' '.' id = Identifier
-        {$ret = new AccessExpression(new KeywordExpression($kw), $id);}
+        {$ret = new AccessExpression(createTypeName($kw),
+                                     createExpressionName($id));}
     |   t = typeName '.' kw = 'super' '.' id = Identifier
-        {$ret = new AccessExpression($t.ret,
-                                     new AccessExpression(new KeywordExpression($kw),
-                                                          $id));}
+        {
+            $ret = new AccessExpression(new AccessExpression($t.ret,
+                                                             createTypeName($kw)),
+                                        createExpressionName($id));
+        }
     ;
 
-fieldAccess_lf_primary returns [IdentifierExpression ret]
-    :   '.' id = Identifier {$ret = new IdentifierExpression($id);}
+fieldAccess_lf_primary returns [NameExpression ret]
+    :   '.' id = Identifier {$ret = createExpressionName($id);}
     ;
 
 fieldAccess_lfno_primary returns [AccessExpression ret]
     :   kw = 'super' '.' id = Identifier
-        {$ret = new AccessExpression(new KeywordExpression($kw), $id);}
+        {
+            $ret = new AccessExpression(createTypeName($kw),
+                                        createExpressionName($id));
+        }
     |   t = typeName '.' kw = 'super' '.' id = Identifier
         {
-            $ret = new AccessExpression(new KeywordExpression($kw), $id);
-            $ret = new AccessExpression($t.ret, $ret);
+            $ret = new AccessExpression(new AccessExpression($t.ret,
+                                                             createTypeName($kw)),
+                                        createExpressionName($id));
         }
     ;
 
@@ -1837,25 +1850,50 @@ methodInvocation returns [Expression ret]
         {$ret = new CallExpression($last, $mn, $args);}
     |   tn = typeName '.' (t = typeArguments {$targs = $t.ret;})?
         id = Identifier '(' (a = argumentList {$args = $a.ret;})? last = ')'
-        {$ret = new CallExpression($last, $id, $args, $targs);
-         $ret = new AccessExpression($tn.ret, $ret);}
+        {
+            $ret = new CallExpression($last,
+                                      new AccessExpression($tn.ret,
+                                                           createMethodName($id)),
+                                      $args,
+                                      $targs);
+        }
     |   en = expressionName '.' (t = typeArguments {$targs = $t.ret;})?
         id = Identifier '(' (a = argumentList {$args = $a.ret;})? last = ')'
-        {$ret = new CallExpression($last, $id, $args, $targs);
-         $ret = new AccessExpression($en.ret, $ret);}
+        {
+            $ret = new CallExpression($last,
+                                      new AccessExpression($en.ret,
+                                                           createMethodName($id)),
+                                      $args,
+                                      $targs);
+        }
     |   p = primary '.' (t = typeArguments {$targs = $t.ret;})?
         id = Identifier '(' (a = argumentList {$args = $a.ret;})? last = ')'
-        {$ret = new CallExpression($last, $id, $args, $targs);
-         $ret = new AccessExpression($p.ret, $ret);}
+        {
+            $ret = new CallExpression($last,
+                                      new AccessExpression($p.ret,
+                                                           createMethodName($id)),
+                                      $args,
+                                      $targs);
+        }
     |   kw = 'super' '.' (t = typeArguments {$targs = $t.ret;})?
         id = Identifier '(' (a = argumentList {$args = $a.ret;})? last = ')'
-        {$ret = new CallExpression($last, $id, $args, $targs);
-         $ret = new AccessExpression(new KeywordExpression($kw), $ret);}
+        {
+            $ret = new CallExpression($last,
+                                      new AccessExpression(createTypeName($kw),
+                                                           createMethodName($id)),
+                                      $args,
+                                      $targs);
+        }
     |   tn = typeName '.' kw = 'super' '.' (t = typeArguments {$targs = $t.ret;})?
         id = Identifier '(' (a = argumentList {$args = $a.ret;})? last = ')'
-        {$ret = new CallExpression($last, $id, $args, $targs);
-         $ret = new AccessExpression(new KeywordExpression($kw), $ret);
-         $ret = new AccessExpression($tn.ret, $ret);}
+        {
+            $ret = new CallExpression($last,
+                                      new AccessExpression(new AccessExpression($tn.ret,
+                                                                                createTypeName($kw)),
+                                                           createMethodName($id)),
+                                      $args,
+                                      $targs);
+        }
     ;
 
 methodInvocation_lf_primary returns [CallExpression ret]
@@ -1873,21 +1911,41 @@ methodInvocation_lfno_primary returns [Expression ret]
         {$ret = new CallExpression($last, $mn, $args);}
     |   tn = typeName '.' (t = typeArguments {$targs = $t.ret;})?
         id = Identifier '(' (a = argumentList {$args = $a.ret;})? last = ')'
-        {$ret = new CallExpression($last, $id, $args, $targs);
-         $ret = new AccessExpression($tn.ret, $ret);}
+        {
+            $ret = new CallExpression($last,
+                                      new AccessExpression($tn.ret,
+                                                           createMethodName($id)),
+                                      $args,
+                                      $targs);
+        }
     |   en = expressionName '.' (t = typeArguments {$targs = $t.ret;})?
         id = Identifier '(' (a = argumentList {$args = $a.ret;})? last = ')'
-        {$ret = new CallExpression($last, $id, $args, $targs);
-         $ret = new AccessExpression($en.ret, $ret);}
+        {
+            $ret = new CallExpression($last,
+                                      new AccessExpression($en.ret,
+                                                           createMethodName($id)),
+                                      $args,
+                                      $targs);
+        }
     |   kw = 'super' '.' (t = typeArguments {$targs = $t.ret;})?
         id = Identifier '(' (a = argumentList {$args = $a.ret;})? last = ')'
-        {$ret = new CallExpression($last, $id, $args, $targs);
-         $ret = new AccessExpression(new KeywordExpression($kw), $ret);}
+        {
+            $ret = new CallExpression($last,
+                                      new AccessExpression(createTypeName($kw),
+                                                           createMethodName($id)),
+                                      $args,
+                                      $targs);
+        }
     |   tn = typeName '.' kw = 'super' '.' (t = typeArguments {$targs = $t.ret;})?
         id = Identifier '(' (a = argumentList {$args = $a.ret;})? last = ')'
-        {$ret = new CallExpression($last, $id, $args, $targs);
-         $ret = new AccessExpression(new KeywordExpression($kw), $ret);
-         $ret = new AccessExpression($tn.ret, $ret);}
+        {
+            $ret = new CallExpression($last,
+                                      new AccessExpression(new AccessExpression($tn.ret,
+                                                                                createTypeName($kw)),
+                                                           createMethodName($id)),
+                                      $args,
+                                      $targs);
+        }
     ;
 
 argumentList returns [List<Expression> ret]
@@ -1902,69 +1960,58 @@ methodReference returns [Expression ret]
     :   en = expressionName '::' (t = typeArguments {$targs = $t.ret;})?
         id = Identifier
         {
-            $ret = new IdentifierExpression($id);
-            if ($targs.size() > 0) {
-                $ret = new TypeExpression($ret, $targs);
-            }
-            $ret = new MethodReferenceExpression($en.ret, $ret);
+            $ret = new MethodReferenceExpression($en.ret,
+                                                 createMethodName($id),
+                                                 $targs);
         }
     |   r = referenceType '::' (t = typeArguments {$targs = $t.ret;})?
         id = Identifier
         {
-            $ret = new IdentifierExpression($id);
-            if ($targs.size() > 0) {
-                $ret = new TypeExpression($ret, $targs);
-            }
-            $ret = new MethodReferenceExpression($r.ret, $ret);
+            $ret = new MethodReferenceExpression($r.ret,
+                                                 createMethodName($id),
+                                                 $targs);
         }
     |   p = primary '::' (t = typeArguments {$targs = $t.ret;})? id = Identifier
         {
-            $ret = new IdentifierExpression($id);
-            if ($targs.size() > 0) {
-                $ret = new TypeExpression($ret, $targs);
-            }
-            $ret = new MethodReferenceExpression($p.ret, $ret);
+            $ret = new MethodReferenceExpression($p.ret,
+                                                 createMethodName($id),
+                                                 $targs);
         }
     |   kw = 'super' '::' (t = typeArguments {$targs = $t.ret;})? id = Identifier
         {
-            $ret = new IdentifierExpression($id);
-            if ($targs.size() > 0) {
-                $ret = new TypeExpression($ret, $targs);
-            }
-            $ret = new MethodReferenceExpression(new KeywordExpression($kw),
-                                                 $ret);
+            $ret = new MethodReferenceExpression(createTypeName($kw),
+                                                 createMethodName($id),
+                                                 $targs);
         }
     |   tn = typeName '.' kw = 'super' '::'
         (t = typeArguments {$targs = $t.ret;})? id = Identifier
         {
-            $ret = new IdentifierExpression($id);
-            if ($targs.size() > 0) {
-                $ret = new TypeExpression($ret, $targs);
-            }
-            $tmp = new AccessExpression($tn.ret, new KeywordExpression($kw));
-            $ret = new MethodReferenceExpression($tmp, $ret);
+            $ret = new MethodReferenceExpression(new AccessExpression($tn.ret,
+                                                                      createTypeName($kw)),
+                                                 createMethodName($id),
+                                                 $targs);
         }
     |   c = classType '::' (t = typeArguments {$targs = $t.ret;})? kw = 'new'
         {
-            $ret = new KeywordExpression($kw);
-            if ($targs.size() > 0) {
-                $ret = new TypeExpression($ret, $targs);
-            }
-            $ret = new MethodReferenceExpression($c.ret, $ret);
+            $ret = new MethodReferenceExpression($c.ret,
+                                                 createMethodName($kw),
+                                                 $targs);
         }
     |   a = arrayType '::' kw = 'new'
-        {$ret = new MethodReferenceExpression($a.ret,
-                                              new KeywordExpression($kw));}
+        {
+            $ret = new MethodReferenceExpression($a.ret,
+                                                 createMethodName($kw),
+                                                 $targs);
+        }
     ;
 
 methodReference_lf_primary returns [Expression ret]
     locals [List<TypeArgument> targs = new ArrayList<>()]
     :   '::' (t = typeArguments {$targs = $t.ret;})? id = Identifier
         {
-            $ret = new IdentifierExpression($id);
-            if ($targs.size() > 0) {
-                $ret = new TypeExpression($ret, $targs);
-            }
+            $ret = new MethodReferenceExpression(new NilExpression(),
+                                                 createMethodName($id),
+                                                 $targs);
         }
     ;
 
@@ -1974,51 +2021,44 @@ methodReference_lfno_primary returns [Expression ret]
     :   en = expressionName '::' (t = typeArguments {$targs = $t.ret;})?
         id = Identifier
         {
-            $ret = new IdentifierExpression($id);
-            if ($targs.size() > 0) {
-                $ret = new TypeExpression($ret, $targs);
-            }
-            $ret = new MethodReferenceExpression($en.ret, $ret);
+            $ret = new MethodReferenceExpression($en.ret,
+                                                 createMethodName($id),
+                                                 $targs);
         }
     |   r = referenceType '::' (t = typeArguments {$targs = $t.ret;})?
         id = Identifier
         {
-            $ret = new IdentifierExpression($id);
-            if ($targs.size() > 0) {
-                $ret = new TypeExpression($ret, $targs);
-            }
-            $ret = new MethodReferenceExpression($r.ret, $ret);
+            $ret = new MethodReferenceExpression($r.ret,
+                                                 createMethodName($id),
+                                                 $targs);
         }
+
     |   kw = 'super' '::' (t = typeArguments {$targs = $t.ret;})? id = Identifier
         {
-            $ret = new IdentifierExpression($id);
-            if ($targs.size() > 0) {
-                $ret = new TypeExpression($ret, $targs);
-            }
-            $ret = new MethodReferenceExpression(new KeywordExpression($kw),
-                                                 $ret);
+            $ret = new MethodReferenceExpression(createTypeName($kw),
+                                                 createMethodName($id),
+                                                 $targs);
         }
     |   tn = typeName '.' kw = 'super' '::'
         (t = typeArguments {$targs = $t.ret;})? id = Identifier
         {
-            $ret = new IdentifierExpression($id);
-            if ($targs.size() > 0) {
-                $ret = new TypeExpression($ret, $targs);
-            }
-            $tmp = new AccessExpression($tn.ret, new KeywordExpression($kw));
-            $ret = new MethodReferenceExpression($tmp, $ret);
+            $ret = new MethodReferenceExpression(new AccessExpression($tn.ret,
+                                                                      createTypeName($kw)),
+                                                 createMethodName($id),
+                                                 $targs);
         }
     |   c = classType '::' (t = typeArguments {$targs = $t.ret;})? kw = 'new'
         {
-            $ret = new KeywordExpression($kw);
-            if ($targs.size() > 0) {
-                $ret = new TypeExpression($ret, $targs);
-            }
-            $ret = new MethodReferenceExpression($c.ret, $ret);
+            $ret = new MethodReferenceExpression($c.ret,
+                                                 createMethodName($kw),
+                                                 $targs);
         }
     |   a = arrayType '::' kw = 'new'
-        {$ret = new MethodReferenceExpression($a.ret,
-                                              new KeywordExpression($kw));}
+        {
+            $ret = new MethodReferenceExpression($a.ret,
+                                                 createMethodName($kw),
+                                                 $targs);
+        }
     ;
 
 arrayCreationExpression returns [ArrayConstruction ret]

@@ -12,18 +12,6 @@ public class UnaryExpression extends Expression {
     /**
      * Construct a new unary expression
      * @param token the operator token
-     * @param identifier the name of the variable being operated on
-     * @param op the operation being performed upon expression
-     */
-    public UnaryExpression(Token token,
-                           Token identifier,
-                           UnaryOperator op) {
-        this(token, new IdentifierExpression(identifier), op);
-    }
-
-    /**
-     * Construct a new unary expression
-     * @param token the operator token
      * @param expr the sole expression
      * @param op the operation being performed upon expression
      */

@@ -15,7 +15,7 @@ public class ParameterizedType extends ReferenceType {
     public ParameterizedType(Type wrapped, Type[] parameters) {
         this.wrapped = wrapped;
         this.params = parameters;
-        isWellFormed();
+        // isWellFormed(); // TODO infinite recursion?
     }
 
     public String getName() {

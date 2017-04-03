@@ -11,11 +11,16 @@ import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
 public class MyClassSymbol extends ClassSymbol {
 
     private ClassSymbol declarer;
-    private boolean anonymous = false;
-    private boolean inner = false;
     private Package pkg = Package.DEFAULT_PACKAGE;
-    private Token token;
     private BodyDeclaration AST;
+    private Token token;
+    private int anonCount = 1;
+
+    public MyClassSymbol(MyClassSymbol declarer) {
+        super(declarer.nextAnonName());
+        this.declarer = declarer;
+        level = Level.ANONYMOUS;
+    }
 
     public MyClassSymbol(Token token) {
         super(token.getText());
@@ -47,36 +52,6 @@ public class MyClassSymbol extends ClassSymbol {
     public boolean isInterface() { return classKind == ClassKind.INTERFACE; }
 
     public boolean isAnnotation() { return classKind == ClassKind.ANNOTATION; }
-
-    public boolean isAnonymous() { return anonymous; }
-
-    public void setAnonymous(boolean anonymous) { this.anonymous = anonymous; }
-
-    public boolean isInnerClass() { return inner; }
-
-    public Type getType(String name) {
-        Type ret = null;
-        ret = params.get(name);
-        if (ret == null) {
-            ret = innerClasses.get(name);
-            if (ret == null) {
-                if (declarer != null) {
-                    ret = ((MyClassSymbol)declarer).getType(name);
-                }
-                if (ret == null) {
-                    ret = pkg.getClassTable().get(name);
-                    if (ret == null) {
-                        ret = importedTypes.get(name);
-                    }
-                }
-            }
-        }
-        return ret;
-    }
-
-    public void setInnerClass(boolean inner) {
-        this.inner = inner;
-    }
 
     public boolean addInterface(Type sym) {
         if (!interfaces.put(sym)) {
@@ -156,11 +131,16 @@ public class MyClassSymbol extends ClassSymbol {
     }
 
     public boolean addInnerClass(MyClassSymbol sym) {
+        sym.level = Level.INNER;
         if (!innerClasses.put(sym)) {
             System.err.println("class cannot declare same inner class twice");
             return false;
         }
         return true;
+    }
+
+    public void setLocal() {
+        this.level = Level.LOCAL;
     }
 
     public void setSuperClass(Type cls) {
@@ -235,5 +215,9 @@ public class MyClassSymbol extends ClassSymbol {
     public MyClassSymbol adapt(Type[] args) {
         // TODO
         return null;
+    }
+
+    private String nextAnonName() {
+        return getName() + ".$" + (anonCount++);
     }
 }

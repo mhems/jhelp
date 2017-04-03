@@ -533,14 +533,6 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
     }
 
     /**
-     * Visit a IdentifierExpression node
-     * @param ast the AST node being visited
-     */
-    public void visit(IdentifierExpression ast) {
-        // TODO use super() to classify types, this to classify members
-    }
-
-    /**
      * Visit a IfElseStatement node
      * @param ast the AST node being visited
      */
@@ -587,26 +579,6 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
     }
 
     /**
-     * Visit a KeywordExpression node
-     * @param ast the AST node being visited
-     */
-    public void visit(KeywordExpression ast) {
-        switch (ast.getIdentifier().getText()) {
-        case "super":
-            ast.setType(currentClass.getSuperClass());
-            break;
-        case "this":
-            ast.setType(currentClass);
-            break;
-        case "new":
-            // omitted, only used by method references (omitted)
-            break;
-        default:
-            super.visit(ast);
-        }
-    }
-
-    /**
      * Visit a LabelStatement node
      * @param ast the AST node being visited
      */
@@ -637,6 +609,14 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                 ast.setType(NilType.TYPE);
             }
         }
+    }
+
+    /**
+     * Visit a LocalClassDeclaration node
+     * @param ast the AST node being visited
+     */
+    public void visit(LocalClassDeclaration ast) {
+        ast.getDeclaration().accept(this);
     }
 
     /**

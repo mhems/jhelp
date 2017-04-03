@@ -192,12 +192,6 @@ public interface ASTVisitor {
     void visit(ForStatement ast);
 
     /**
-     * Visit a IdentifierExpression node
-     * @param ast the AST node being visited
-     */
-    void visit(IdentifierExpression ast);
-
-    /**
      * Visit a IfElseStatement node
      * @param ast the AST node being visited
      */
@@ -228,12 +222,6 @@ public interface ASTVisitor {
     void visit(JumpStatement ast);
 
     /**
-     * Visit a KeywordExpression node
-     * @param ast the AST node being visited
-     */
-    void visit(KeywordExpression ast);
-
-    /**
      * Visit a LabelStatement node
      * @param ast the AST node being visited
      */
@@ -252,6 +240,12 @@ public interface ASTVisitor {
     void visit(LiteralExpression ast);
 
     /**
+     * Visit a LocalClassDeclaration node
+     * @param ast the AST node being visited
+     */
+    void visit(LocalClassDeclaration ast);
+
+    /**
      * Visit a LocalVariableStatement node
      * @param ast the AST node being visited
      */
@@ -268,6 +262,12 @@ public interface ASTVisitor {
      * @param ast the AST node being visited
      */
     void visit(MethodReferenceExpression ast);
+
+    /**
+     * Visit a NameExpression node
+     * @param ast the AST node being visited
+     */
+    void visit(NameExpression ast);
 
     /**
      * Visit a NilBlock node

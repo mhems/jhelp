@@ -19,6 +19,7 @@ public class ClassDeclaration extends ConcreteBodyDeclaration {
      */
     public ClassDeclaration() {
         super();
+        kind = Kind.ANONYMOUS;
     }
 
     /**

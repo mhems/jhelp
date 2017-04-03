@@ -182,10 +182,18 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
      * Visit a KeywordExpression node
      * @param ast the AST node being visited
      */
-    public void visit(KeywordExpression ast) {
-        Type type = PrimitiveType.UNBOX_MAP.get(ast.getIdentifier().getText());
-        type.setAnnotations(makeAnnotations(ast.getAnnotations()));
-        ast.setType(type);
+    // public void visit(KeywordExpression ast) {
+    //     Type type = PrimitiveType.UNBOX_MAP.get(ast.getIdentifier().getText());
+    //     type.setAnnotations(makeAnnotations(ast.getAnnotations()));
+    //     ast.setType(type);
+    // }
+
+    /**
+     * Visit a LocalClassDeclaration node
+     * @param ast the AST node being visited
+     */
+    public void visit(LocalClassDeclaration ast) {
+        ast.getDeclaration().accept(this);
     }
 
     /**

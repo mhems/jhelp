@@ -12,18 +12,6 @@ public class ArrayAccessExpression extends Expression {
     /**
      * Construct an array access expression
      * @param last the terminating Token
-     * @param token the token of the symbol being accessed
-     * @param indexExpr the expression yielding the array index
-     */
-    public ArrayAccessExpression(Token last,
-                                 Token token,
-                                 Expression indexExpr) {
-        this(last, new IdentifierExpression(token), indexExpr);
-    }
-
-    /**
-     * Construct an array access expression
-     * @param last the terminating Token
      * @param arrayExpr the expression yielding the array being accessed
      * @param indexExpr the expression yielding the array index
      */

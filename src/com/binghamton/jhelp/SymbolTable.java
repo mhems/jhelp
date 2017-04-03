@@ -113,11 +113,16 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
      *         false otherwise
      */
     public boolean hasInCurrentScope(K key) {
-        return getFromCurrentScope(key) != null;
+        return table.peekFirst().containsKey(key);
     }
 
     public boolean hasInTable(K key) {
-        return getFromTable(key) != null;
+        for (Map<K, V> scope : table) {
+            if (scope.containsKey(key)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public boolean shadows(K key) {

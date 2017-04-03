@@ -6,6 +6,7 @@ import org.antlr.v4.runtime.Token;
  * A class representing a Java label statement
  */
 public class LabelStatement extends Statement {
+    private Statement stmt;
     private Token label;
 
     /**
@@ -15,7 +16,12 @@ public class LabelStatement extends Statement {
      */
     public LabelStatement(Token label, Statement statement) {
         super(label, statement.getLastToken());
+        this.stmt = statement;
         this.label = label;
+    }
+
+    public Statement getStatement() {
+        return stmt;
     }
 
     /**

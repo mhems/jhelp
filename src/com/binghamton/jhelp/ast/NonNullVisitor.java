@@ -151,6 +151,8 @@ public class NonNullVisitor extends EmptyVisitor {
     public void visit(BodyDeclaration ast) {
         for (VariableDeclaration var : ast.getFields())
             var.accept(this);
+        for (MethodDeclaration m : ast.getMethods())
+            m.accept(this);
         for (ConcreteBodyDeclaration cls : ast.getInnerBodies())
             cls.accept(this);
         for (AbstractBodyDeclaration intf : ast.getInnerInterfaces())
@@ -239,8 +241,6 @@ public class NonNullVisitor extends EmptyVisitor {
     public void visit(ConcreteBodyDeclaration ast) {
         for (Expression im : ast.getSuperInterfaces())
             im.accept(this);
-        for (MethodDeclaration m : ast.getMethods())
-            m.accept(this);
         for (MethodDeclaration ctor : ast.getConstructors())
             ctor.accept(this);
         for (Block sb : ast.getStaticInitializers())
@@ -318,17 +318,6 @@ public class NonNullVisitor extends EmptyVisitor {
     }
 
     /**
-     * Visit a IdentifierExpression node
-     * @param ast the AST node being visited
-     */
-    public void visit(IdentifierExpression ast) {
-        for (Annotation a : ast.getAnnotations()) {
-            a.accept(this);
-        }
-        assertNonNull(ast.getIdentifier());
-    }
-
-    /**
      * Visit a IfElseStatement node
      * @param ast the AST node being visited
      */
@@ -373,6 +362,7 @@ public class NonNullVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(LabelStatement ast) {
+        ast.getStatement().accept(this);
         assertNonNull(ast.getLabel());
     }
 
@@ -392,6 +382,14 @@ public class NonNullVisitor extends EmptyVisitor {
      */
     public void visit(LiteralExpression ast) {
         assertNonNull(ast.getValue());
+    }
+
+    /**
+     * Visit a LocalClassDeclaration node
+     * @param ast the AST node being visited
+     */
+    public void visit(LocalClassDeclaration ast) {
+        ast.getDeclaration().accept(this);
     }
 
     /**
@@ -425,6 +423,18 @@ public class NonNullVisitor extends EmptyVisitor {
     public void visit(MethodReferenceExpression ast) {
         ast.getLHS().accept(this);
         ast.getRHS().accept(this);
+    }
+
+    /**
+     * Visit a NameExpression node
+     * @param ast the AST node being visited
+     */
+    public void visit(NameExpression ast) {
+        for (Annotation a : ast.getAnnotations()) {
+            a.accept(this);
+        }
+        assertNonNull(ast.getName());
+        assertNonNull(ast.getKind());
     }
 
     /**

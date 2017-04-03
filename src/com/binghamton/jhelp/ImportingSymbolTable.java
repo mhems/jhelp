@@ -8,11 +8,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 import com.binghamton.jhelp.util.SymbolFinder;
 
 public class ImportingSymbolTable extends NamedSymbolTable<ClassSymbol> {
-    private static final ImportingSymbolTable ROOT = new ImportingSymbolTable();
+    private static final ImportingSymbolTable ROOT = new ImportingSymbolTable(cls -> cls.getQualifiedName());
     private static SymbolFinder FINDER;
 
     static {
@@ -32,6 +33,10 @@ public class ImportingSymbolTable extends NamedSymbolTable<ClassSymbol> {
 
     }
 
+    private ImportingSymbolTable(Function<ClassSymbol, String> valueToKey) {
+        super(valueToKey);
+    }
+
     public static ClassSymbol fetch(String name) {
         return ROOT.get(name);
     }
@@ -41,15 +46,33 @@ public class ImportingSymbolTable extends NamedSymbolTable<ClassSymbol> {
         ClassSymbol ret = getFromTable(name);
         if (ret == null) {
             ClassSymbol cls = null;
+            try {
+                cls = ImportManager.getOrImport(name);
+            } catch(ClassNotFoundException e) {
+                // squelch, still other options to try
+            }
+            if (cls != null) {
+                return cls;
+            }
             for (String pkg : onDemandPackages) {
+                cls = getFromTable(pkg + "." + name);
+                if (cls != null) {
+                    return cls;
+                }
+            }
+            String qName;
+            for (String pkg : onDemandPackages) {
+                qName = pkg + "." + name;
                 try {
-                    cls = ImportManager.getOrImport(pkg + "." + name);
+                    cls = ImportManager.getOrImport(qName);
                 } catch(ClassNotFoundException e) {
                     // squelch - on-demand is a non-error
                 }
                 if (cls != null) {
-                    put(cls);
-                    ret = cls;
+                    if (!hasInCurrentScope(qName)) {
+                        put(cls);
+                    }
+                    return cls;
                 }
             }
         }
@@ -57,6 +80,7 @@ public class ImportingSymbolTable extends NamedSymbolTable<ClassSymbol> {
             ret = ROOT.get(name);
         }
         if (ret == null) {
+            System.err.println("unknown symbol " + name + ", checking options...");
             List<String> results = FINDER.search(name);
             if (results.size() > 0) {
                 System.err.println("looks like you forgot to import " + name);

@@ -2,30 +2,15 @@ package com.binghamton.jhelp.ast;
 
 import org.antlr.v4.runtime.Token;
 
+import static com.binghamton.jhelp.ast.NameExpression.Kind;
+
 /**
  * A class representing a Java symbol access expression
  */
 public class AccessExpression extends Expression {
     private Expression lhs;
     private Expression rhs;
-
-    /**
-     * Construct a new Java symbol access expression
-     * @param lhs the left hand side of the access expression
-     * @param token the token of the symbol being accessed
-     */
-    public AccessExpression(Expression lhs, Token token) {
-        this(lhs, new IdentifierExpression(token));
-    }
-
-    /**
-     * Construct a new Java symbol access expression
-     * @param token the token of the symbol being accessed
-     * @param rhs the right hand side of the access expression
-     */
-    public AccessExpression(Token token, Expression rhs) {
-        this(new IdentifierExpression(token), rhs);
-    }
+    private Kind kind;
 
     /**
      * Construct a new Java symbol access expression
@@ -52,6 +37,14 @@ public class AccessExpression extends Expression {
      */
     public Expression getRHS() {
         return rhs;
+    }
+
+    public Kind getKind() {
+        return kind;
+    }
+
+    public void setKind(Kind kind) {
+        this.kind = kind;
     }
 
     /**

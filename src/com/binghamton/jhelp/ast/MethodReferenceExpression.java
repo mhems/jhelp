@@ -11,13 +11,16 @@ import org.antlr.v4.runtime.Token;
 public class MethodReferenceExpression extends Expression {
     private Expression lhs;
     private Expression rhs;
+    private List<TypeArgument> targs;
 
     /**
      * Construct a new parameterized reference
      * @param lhs the left hand side of the method reference
      * @param rhs the right hand side of the method reference
      */
-    public MethodReferenceExpression(Expression lhs, Expression rhs) {
+    public MethodReferenceExpression(Expression lhs,
+                                     Expression rhs,
+                                     List<TypeArgument> targs) {
         super(lhs.getFirstToken(), rhs.getLastToken());
         this.lhs = lhs;
         this.rhs = rhs;
@@ -45,6 +48,10 @@ public class MethodReferenceExpression extends Expression {
      */
     public Expression getRHS() {
         return rhs;
+    }
+
+    public List<TypeArgument> getTypeArguments() {
+        return targs;
     }
 
     /**
