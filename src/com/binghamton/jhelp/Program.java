@@ -9,12 +9,12 @@ import com.binghamton.jhelp.util.DiGraph;
 import com.binghamton.jhelp.util.StringUtils;
 
 public class Program {
-    private List<Package> packages = new ArrayList<>();
+    private List<MyPackage> packages = new ArrayList<>();
     private List<CompilationUnit> units = new ArrayList<>();
     private List<ClassSymbol> classes;
 
         {
-            packages.add(Package.DEFAULT_PACKAGE);
+            packages.add(MyPackage.DEFAULT_PACKAGE);
         }
 
     public void addCompilationUnit(CompilationUnit unit) {
@@ -26,19 +26,18 @@ public class Program {
     }
 
     public boolean hasPackage(String name) {
-        for (Package pkg : packages) {
-            if (pkg.getName().equals(name)) {
-                return true;
-            }
-        }
-        return false;
+        return getPackage(name) != null;
     }
 
     public Package getPackage(String name) {
-        Package pkg = null;
-        List<Package> pkgs = packages;
+        java.lang.Package existingPkg = java.lang.Package.getPackage(name);
+        if (existingPkg != null) {
+            return new ReflectedPackage(existingPkg.getName());
+        }
+        MyPackage pkg = null;
+        List<MyPackage> pkgs = packages;
         for (String part : name.split("\\.")) {
-            for (Package p : pkgs) {
+            for (MyPackage p : pkgs) {
                 if (p.getName().equals(part)) {
                     pkg = p;
                     if (p.hasSubPackages()) {
@@ -51,11 +50,11 @@ public class Program {
         return pkg;
     }
 
-    public void addPackage(Package pkg) {
+    public void addPackage(MyPackage pkg) {
         packages.add(pkg);
     }
 
-    public List<Package> getPackages() {
+    public List<MyPackage> getPackages() {
         return packages;
     }
 
@@ -64,21 +63,24 @@ public class Program {
     }
 
     public List<ClassSymbol> getAllClasses() {
+        if (classes == null) {
+            gatherClasses();
+        }
         return classes;
     }
 
     public void gatherClasses() {
         classes = new ArrayList<>();
-        for (Package pkg: packages) {
+        for (MyPackage pkg: packages) {
             gatherClasses(pkg);
         }
     }
 
-    private void gatherClasses(Package pkg) {
+    private void gatherClasses(MyPackage pkg) {
         for (ClassSymbol cls : pkg.getClassTable()) {
             classes.add(cls);
         }
-        for (Package subPkg : pkg.getSubPackages()) {
+        for (MyPackage subPkg : pkg.getSubPackages()) {
             gatherClasses(subPkg);
         }
     }

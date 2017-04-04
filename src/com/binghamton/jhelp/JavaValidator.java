@@ -19,6 +19,7 @@ import com.binghamton.jhelp.ast.FileLevelVisitor;
 import com.binghamton.jhelp.ast.DeclarationLevelVisitor;
 import com.binghamton.jhelp.ast.BodyLevelVisitor;
 import com.binghamton.jhelp.ast.CodeLevelVisitor;
+import com.binghamton.jhelp.ast.NonNullVisitor;
 import com.binghamton.jhelp.error.ExceptionError;
 import com.binghamton.jhelp.error.JHelpError;
 
@@ -61,6 +62,7 @@ public class JavaValidator implements Validator {
                     program.addCompilationUnit(cu);
                 }
             }
+
             System.out.println("---------- FILE ----------");
             new FileLevelVisitor(program).visitAll();
             // System.out.println(program.repr());
@@ -72,11 +74,11 @@ public class JavaValidator implements Validator {
             program.topologicalSort();
 
             System.out.println("---------- BODY ----------");
-            new BodyLevelVisitor(program).visitInOrder();
+            // new BodyLevelVisitor(program).visitInOrder();
             System.out.println(program.repr());
 
             System.out.println("---------- CODE ----------");
-            new CodeLevelVisitor(program).visitAll();
+            // new CodeLevelVisitor(program).visitAll();
 
         } catch (IOException e) {
             errors.add(new ExceptionError(e));

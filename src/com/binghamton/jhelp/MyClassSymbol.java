@@ -10,8 +10,7 @@ import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
 
 public class MyClassSymbol extends ClassSymbol {
 
-    private ClassSymbol declarer;
-    private Package pkg = Package.DEFAULT_PACKAGE;
+    private MyPackage pkg = MyPackage.DEFAULT_PACKAGE;
     private BodyDeclaration AST;
     private Token token;
     private int anonCount = 1;
@@ -94,7 +93,7 @@ public class MyClassSymbol extends ClassSymbol {
                 System.err.println("cannot override a method with a method that has more restrictive access than the method it is overriding");
             }
         } else if (sym.hasOverrideAnnotation()){
-            System.out.println("method is not being overridden!");
+            System.err.println("method is not being overridden!");
         }
         if (good) {
             if (!methods.put(sym)) {
@@ -136,6 +135,7 @@ public class MyClassSymbol extends ClassSymbol {
             System.err.println("class cannot declare same inner class twice");
             return false;
         }
+        sym.declarer = this;
         return true;
     }
 
@@ -181,11 +181,11 @@ public class MyClassSymbol extends ClassSymbol {
         return pkg.getQualifiedName();
     }
 
-    public Package getPackage() {
+    public MyPackage getPackage() {
         return pkg;
     }
 
-    public void setPackage(Package pkg) {
+    public void setPackage(MyPackage pkg) {
         this.pkg = pkg;
     }
 

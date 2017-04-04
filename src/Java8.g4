@@ -153,10 +153,21 @@ referenceType returns [Expression ret]
     ;
 
 classOrInterfaceType returns [Expression ret]
-    :   co = classType_lfno_classOrInterfaceType {$ret = $co.ret;}
+    :   co = classType_lfno_classOrInterfaceType
+        {
+            $ret = $co.ret;
+            if ($co.targs != null) {
+                $ret = new ParamExpression($ret, $co.targs);
+            }
+        }
         (   '.'
             c = classType_lfno_classOrInterfaceType
-            {$ret = new AccessExpression($co.ret, $c.ret);}
+            {
+                $ret = new AccessExpression($ret, $c.ret);
+                if ($c.targs != null) {
+                    $ret = new ParamExpression($ret, $c.targs);
+                }
+            }
         )*
     ;
 
@@ -177,15 +188,13 @@ classType returns [Expression ret]
         (targs = typeArguments {$ret = new ParamExpression($ret, $targs.ret);})?
     ;
 
-classType_lfno_classOrInterfaceType returns [Expression ret]
+classType_lfno_classOrInterfaceType returns [NameExpression ret,
+                                             List<TypeArgument> targs]
     locals [List<Annotation> ans = new ArrayList<>()]
     :   (a = annotation {$ans.add($a.ret);})*
         id = Identifier
         {$ret = createPackageOrTypeName($id, $ans);}
-        (
-            targs = typeArguments
-            {$ret = new ParamExpression($ret, $targs.ret);}
-        )?
+        (ta = typeArguments {$targs = $ta.ret;})?
     ;
 
 typeVariable returns [NameExpression ret]
@@ -558,7 +567,12 @@ unannClassOrInterfaceType returns [Expression ret]
             {$ret = $cno.ret;}
         )
         (   '.' c = classType_lfno_classOrInterfaceType
-            {$ret = new AccessExpression($ret, $c.ret);}
+            {
+                $ret = new AccessExpression($ret, $c.ret);
+                if ($c.targs != null) {
+                    $ret = new ParamExpression($ret, $c.targs);
+                }
+            }
         )*
     ;
 
@@ -566,7 +580,12 @@ unannClassType returns [Expression ret]
     :   u = unannClassType_lfno_unannClassOrInterfaceType {$ret = $u.ret;}
     |   a = unannClassOrInterfaceType '.'
         b = classType_lfno_classOrInterfaceType
-        {$ret = new AccessExpression($a.ret, $b.ret);}
+        {
+            $ret = new AccessExpression($a.ret, $b.ret);
+            if ($b.targs != null) {
+                $ret = new ParamExpression($ret, $b.targs);
+            }
+        }
     ;
 
 unannClassType_lfno_unannClassOrInterfaceType returns [Expression ret]
@@ -1539,11 +1558,7 @@ primaryNoNewArray_lf_primary returns [QualifiableExpression ret]
     |   a5 = methodReference_lf_primary {$ret = $a5.ret;}
     ;
 
-primaryNoNewArray_lf_primary_lf_arrayAccess_lf_primary
-    :
-    ;
-
-primaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primary returns [Expression ret]
+primaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primary returns [QualifiableExpression ret]
     :   a1 = classInstanceCreationExpression_lf_primary {$ret = $a1.ret;}
     |   a2 = fieldAccess_lf_primary {$ret = $a2.ret;}
     |   a3 = methodInvocation_lf_primary {$ret = $a3.ret;}
@@ -1825,12 +1840,11 @@ arrayAccess returns [ArrayAccessExpression ret]
     ;
 
 arrayAccess_lf_primary returns [ArrayAccessExpression ret]
-    :   (   (pno = primaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primary
+    :   (   pno = primaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primary
            '[' i = expression last = ']'
-                {$ret = new ArrayAccessExpression($last, $pno.ret, $i.ret);})
+            {$ret = new ArrayAccessExpression($last, $pno.ret, $i.ret);}
         )
-        (   primaryNoNewArray_lf_primary_lf_arrayAccess_lf_primary
-            '[' i2 = expression last = ']'
+        (   '[' i2 = expression last = ']'
             {$ret = new ArrayAccessExpression($last, $ret, $i2.ret);}
         )*
     ;
@@ -1867,7 +1881,7 @@ methodInvocation returns [Expression ret]
         {
             $ret = new CallExpression($last,
                                       new AccessExpression($en.ret,
-                                                         createMethodName($id)),
+                                                           createMethodName($id)),
                                       $args,
                                       $targs);
         }

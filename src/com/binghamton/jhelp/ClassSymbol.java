@@ -103,10 +103,10 @@ public abstract class ClassSymbol extends ReferenceType {
                 if (ret == null) {
                     Package pkg = getPackage();
                     if (pkg != null) {
-                        ret = pkg.getClassTable().get(name);
-                    }
-                    if (ret == null) {
-                        ret = importedTypes.get(name);
+                        ret = pkg.getClass(name);
+                        if (ret == null) {
+                            ret = importedTypes.get(name);
+                        }
                     }
                 }
             }

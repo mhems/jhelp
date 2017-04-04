@@ -38,54 +38,36 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(AccessExpression ast) {
-        Expression lhs, rhs;
-        NameExpression rName = null;
-
-        lhs = ast.getLHS();
-        rhs = ast.getRHS();
+        Expression lhs = ast.getLHS();
+        NameExpression rhs = ast.getRHS();
 
         lhs.accept(this);
-        rhs.accept(this);
+        // rhs.accept(this);
 
-        if (!(rhs instanceof NameExpression)) {
-            System.err.println("unknown rhs type: " + rhs.getText());
-            return;
-        } else {
-            rName = (NameExpression)rhs;
-        }
+        Type lType = lhs.getType();
+        String rName = rhs.getName();
 
-        Kind lKind = null; //lhs.getKind(); TO COMPILE
-        Kind rKind = rName.getKind();
-
-        if (lKind == Kind.TYPE) {
-            Type lType = lhs.getType();
-            Type type = lType.getClassSymbol().getType(rName.getName());
+        if (lType != null) {
+            Type type = lType.getClassSymbol().getType(rName);
             if (type == null) {
-                System.err.println("unknown type " + lhs.getText() + "." + rName.getName());
+                System.err.println("unknown type " + ast.getText());
             } else {
                 ast.setType(type);
             }
-        } else if (lKind == Kind.PACKAGE) {
-            // if (rKind == )
-            // TODO
+        } else {
+            // if not typed yet, must name Package or part of a Package
+            Package curPkg = program.getPackage(lhs.getText());
+            if (curPkg != null) {
+                ClassSymbol cls = curPkg.getClass(rName);
+                if (cls != null) {
+                    ast.setType(cls);
+                } else {
+                    rhs.setKind(Kind.PACKAGE);
+                }
+            } else {
+                rhs.setKind(Kind.PACKAGE);
+            }
         }
-
-        // ClassSymbol sym = ast.getLHS().getType().getClassSymbol();
-        // Expression rhs = ast.getRHS();
-
-
-        // Type type = null;
-        // for (ClassSymbol inner : sym.getInnerClasses()) {
-        //     if (inner.getName().equals(rhs.getText())) {
-        //         type = inner;
-        //         break;
-        //     }
-        // }
-        // if (type != null) {
-        //     ast.setType(type);
-        // } else {
-        //     System.err.println("unknown identifier: " + ast.getRHS().getText());
-        // }
     }
 
     /**
@@ -266,23 +248,119 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
      */
     public void visit(NameExpression ast) {
         String name = ast.getName();
+        String rName = ast.getToken().getText();
         AnnotationSymbol[] anns = makeAnnotations(ast.getAnnotations());
+        Kind kind = ast.getKind();
+        boolean reclassed = false;
 
-        if (ast.getKind() == Kind.AMBIGUOUS) {
-            ast.setKind(Kind.TYPE);
-        }
-        // TODO include primitives
-        Type type = currentClass.getType(name);
-        if (type != null) {
-            ast.setType(type);
-            type.setAnnotations(anns);
-            ast.setKind(Kind.TYPE);
-        } else {
-            if (ast.getKind() == Kind.TYPE) {
-                System.err.println("unknown type - not in scope of current declaration");
+        if (kind == Kind.AMBIGUOUS) {
+            reclassed = true;
+            if (!ast.isQualified()) {
+                Type type = currentClass.getType(name);
+                if (type != null) {
+                    ast.setKind(Kind.TYPE);
+                    type.setAnnotations(anns);
+                    ast.setType(type);
+                } else {
+                    ast.setKind(Kind.PACKAGE);
+                }
             } else {
-                ast.setKind(Kind.PACKAGE);
+                NameExpression qual = ast.getQualifyingName();
+                qual.accept(this);
+                if (qual.getKind() == Kind.PACKAGE) {
+                    ClassSymbol cls = qual.getPackage().getClass(rName);
+                    if (cls != null) {
+                        ast.setKind(Kind.TYPE);
+                        cls.setAnnotations(anns);
+                        ast.setType(cls);
+                    } else {
+                        ast.setKind(Kind.PACKAGE);
+                    }
+                } else if (qual.getKind() == Kind.TYPE) {
+                    Type type = qual.getType().getClassSymbol().getType(rName);
+                    if (type != null) {
+                        ast.setKind(Kind.TYPE);
+                        type.setAnnotations(anns);
+                        ast.setType(type);
+                    } else {
+                        System.err.println("unknown type " + rName);
+                    }
+                }
             }
+        } else if (kind == Kind.PACKAGE_OR_TYPE) {
+            reclassed = true;
+            if (!ast.isQualified()) {
+                Type type = currentClass.getType(name);
+                if (type != null) {
+                    ast.setKind(Kind.TYPE);
+                    type.setAnnotations(anns);
+                    ast.setType(type);
+                } else {
+                    ast.setKind(Kind.PACKAGE);
+                }
+            } else {
+                NameExpression qual = ast.getQualifyingName();
+                qual.accept(this);
+                if (qual.getKind() == Kind.TYPE) {
+                    Type type = qual.getType().getClassSymbol().getType(rName);
+                    if (type != null) {
+                        ast.setKind(Kind.TYPE);
+                        type.setAnnotations(anns);
+                        ast.setType(type);
+                    } else {
+                        ast.setKind(Kind.PACKAGE);
+                    }
+                } else {
+                    ClassSymbol cls = qual.getPackage().getClass(rName);
+                    if (cls != null) {
+                        ast.setKind(Kind.TYPE);
+                        cls.setAnnotations(anns);
+                        ast.setType(cls);
+                    } else {
+                        ast.setKind(Kind.PACKAGE);
+                    }
+                }
+            }
+        }
+
+        // allow those just reclassified to be resolved
+        kind = ast.getKind();
+        if (kind == Kind.TYPE) {
+            if (!ast.isQualified()) {
+                Type type = currentClass.getType(name);
+                if (type != null) {
+                    type.setAnnotations(anns);
+                    ast.setType(type);
+                }
+            } else {
+                NameExpression qual = ast.getQualifyingName();
+                if (!reclassed) {
+                    qual.accept(this);
+                }
+                if (qual.getKind() == Kind.TYPE) {
+                    Type type = qual.getType().getClassSymbol().getType(rName);
+                    if (type != null) {
+                        type.setAnnotations(anns);
+                        ast.setType(type);
+                    }
+                } else {
+                    ClassSymbol cls = qual.getPackage().getClass(rName);
+                    if (cls != null) {
+                        cls.setAnnotations(anns);
+                        ast.setType(cls);
+                    }
+                }
+            }
+            if (ast.getType() == null) {
+                System.err.println("unknown type " + name);
+            }
+        } else if (kind == Kind.PACKAGE) {
+            Package pkg = program.getPackage(name);
+            if (pkg != null) {
+                ast.setPackage(pkg);
+            }
+            // cannot throw error yet, java.lang.Package will say there is no
+            // package named java, must wait and hoist from Access
         }
     }
 

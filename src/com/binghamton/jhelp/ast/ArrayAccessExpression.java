@@ -7,7 +7,16 @@ import org.antlr.v4.runtime.Token;
  */
 public class ArrayAccessExpression extends QualifiableExpression {
     private Expression arrayExpr;
+    private QualifiableExpression qualExpr;
     private Expression indexExpr;
+
+
+    public ArrayAccessExpression(Token last,
+                                 QualifiableExpression arrayExpr,
+                                 Expression indexExpr) {
+        this(last, (Expression)arrayExpr, indexExpr);
+        this.qualExpr = arrayExpr;
+    }
 
     /**
      * Construct an array access expression
@@ -51,6 +60,7 @@ public class ArrayAccessExpression extends QualifiableExpression {
 
     @Override
     public void qualifyWith(Expression expr) {
-        arrayExpr = new AccessExpression(expr, arrayExpr);
+        qualExpr.qualifyWith(expr);
+        arrayExpr = qualExpr;
     }
 }

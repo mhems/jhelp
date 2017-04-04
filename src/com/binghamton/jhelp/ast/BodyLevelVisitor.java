@@ -15,7 +15,6 @@ import com.binghamton.jhelp.MyMethodSymbol;
 import com.binghamton.jhelp.ClassSymbol;
 import com.binghamton.jhelp.MyClassSymbol;
 import com.binghamton.jhelp.MyVariableSymbol;
-import com.binghamton.jhelp.Package;
 import com.binghamton.jhelp.ParameterizedType;
 import com.binghamton.jhelp.PrimitiveType;
 import com.binghamton.jhelp.Program;

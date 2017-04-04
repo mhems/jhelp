@@ -10,6 +10,7 @@ import org.antlr.v4.runtime.Token;
  */
 public class CallExpression extends QualifiableExpression {
     private Expression methodExpr;
+    private NameExpression nameExpr;
     private List<Expression> args;
     private List<TypeArgument> typeArgs = new ArrayList<>();
 
@@ -22,7 +23,10 @@ public class CallExpression extends QualifiableExpression {
     public CallExpression(Token last,
                           Token id,
                           List<Expression> args) {
-        this(last, NameExpression.createMethodName(id), args);
+        super(id, last);
+        this.nameExpr = NameExpression.createMethodName(id);
+        this.methodExpr = this.nameExpr;
+        this.args = args;
     }
 
     /**
@@ -165,6 +169,6 @@ public class CallExpression extends QualifiableExpression {
 
     @Override
     public void qualifyWith(Expression expr) {
-        methodExpr = new AccessExpression(expr, methodExpr);
+        methodExpr = new AccessExpression(expr, nameExpr);
     }
 }

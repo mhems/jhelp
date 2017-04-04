@@ -15,7 +15,7 @@ import com.binghamton.jhelp.MethodSymbolTable;
 import com.binghamton.jhelp.Modifier;
 import com.binghamton.jhelp.MethodSymbol;
 import com.binghamton.jhelp.MyClassSymbol;
-import com.binghamton.jhelp.Package;
+import com.binghamton.jhelp.MyPackage;
 import com.binghamton.jhelp.Program;
 import com.binghamton.jhelp.ReflectedClassSymbol;
 import com.binghamton.jhelp.Symbol;
@@ -42,7 +42,7 @@ import com.binghamton.jhelp.VariableSymbol;
  * - more than one public body per file
  */
 public class FileLevelVisitor extends EmptyVisitor {
-    protected Package pkg;
+    protected MyPackage pkg;
     protected Program program;
     protected MyClassSymbol currentClass;
 
@@ -249,7 +249,7 @@ public class FileLevelVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(CompilationUnit ast) {
-        pkg = Package.DEFAULT_PACKAGE;
+        pkg = MyPackage.DEFAULT_PACKAGE;
         importedClasses = new ImportingSymbolTable();
         importedMethods = new MethodSymbolTable();
         importedFields = new NamedSymbolTable<>();
@@ -498,10 +498,10 @@ public class FileLevelVisitor extends EmptyVisitor {
     public void visit(PackageStatement ast) {
         List<Token> parts = ast.getName().getTokens();
         Token token = parts.get(0);
-        Package pkg = program.getPackage(token.getText());
-        Package sub;
+        MyPackage pkg = (MyPackage)program.getPackage(token.getText());
+        MyPackage sub;
         if (pkg == null) {
-            pkg = new Package(token.getText());
+            pkg = new MyPackage(token.getText());
             program.addPackage(pkg);
         }
 

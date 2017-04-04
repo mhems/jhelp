@@ -14,7 +14,6 @@ import com.binghamton.jhelp.MethodSymbol;
 import com.binghamton.jhelp.Modifier;
 import com.binghamton.jhelp.NamedSymbolTable;
 import com.binghamton.jhelp.NilType;
-import com.binghamton.jhelp.Package;
 import com.binghamton.jhelp.ParameterizedType;
 import com.binghamton.jhelp.PrimitiveType;
 import com.binghamton.jhelp.Program;

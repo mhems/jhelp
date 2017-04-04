@@ -79,26 +79,31 @@ public class ImportingSymbolTable extends NamedSymbolTable<ClassSymbol> {
         if (ret == null && this != ROOT) {
             ret = ROOT.get(name);
         }
-        if (ret == null) {
-            System.err.println("unknown symbol " + name + ", checking options...");
-            List<String> results = FINDER.search(name);
-            if (results.size() > 0) {
-                System.err.println("looks like you forgot to import " + name);
-                if (results.size() > 1) {
-                    System.err.println("you can import it from the following packages:");
-                    results.forEach(s -> System.err.println("  * " + s));
-                    System.err.println("not sure which one you mean, exiting");
-                } else {
-                    String toImport = results.get(0) + "." + name;
-                    System.err.println("importing " + toImport);
-                    try {
-                        ret = ImportManager.getOrImport(toImport);
-                    } catch (ClassNotFoundException e) {
-                        System.err.println("could not import " + toImport);
-                    }
-                }
-            }
-        }
+        // TODO need way to distinguish between when we're classifying package
+        // vs type name where failed lookup is non-error and failure is crucial
+        // to classification and case where we're looking for an unqualified
+        // type the user forgot to import
+
+        // if (ret == null) {
+        //     System.err.println("unknown symbol " + name + ", checking options...");
+        //     List<String> results = FINDER.search(name);
+        //     if (results.size() > 0) {
+        //         System.err.println("looks like you forgot to import " + name);
+        //         if (results.size() > 1) {
+        //             System.err.println("you can import it from the following packages:");
+        //             results.forEach(s -> System.err.println("  * " + s));
+        //             System.err.println("not sure which one you mean, exiting");
+        //         } else {
+        //             String toImport = results.get(0) + "." + name;
+        //             System.err.println("importing " + toImport);
+        //             try {
+        //                 ret = ImportManager.getOrImport(toImport);
+        //             } catch (ClassNotFoundException e) {
+        //                 System.err.println("could not import " + toImport);
+        //             }
+        //         }
+        //     }
+        // }
         return ret;
     }
 

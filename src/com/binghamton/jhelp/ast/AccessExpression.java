@@ -7,14 +7,14 @@ import org.antlr.v4.runtime.Token;
  */
 public class AccessExpression extends QualifiableExpression {
     private Expression lhs;
-    private Expression rhs;
+    private NameExpression rhs;
 
     /**
      * Construct a new Java symbol access expression
      * @param lhs the left hand side of the access expression
      * @param rhs the expression of the symbol being accessed
      */
-    public AccessExpression(Expression lhs, Expression rhs) {
+    public AccessExpression(Expression lhs, NameExpression rhs) {
         super(lhs.getFirstToken(), rhs.getLastToken());
         this.lhs = lhs;
         this.rhs = rhs;
@@ -32,7 +32,7 @@ public class AccessExpression extends QualifiableExpression {
      * Gets the right hand side of this expression
      * @return the right hand side of this expression
      */
-    public Expression getRHS() {
+    public NameExpression getRHS() {
         return rhs;
     }
 
@@ -48,6 +48,6 @@ public class AccessExpression extends QualifiableExpression {
 
     @Override
     public void qualifyWith(Expression expr) {
-        lhs = new AccessExpression(expr, lhs);
+        lhs = expr;
     }
 }
