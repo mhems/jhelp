@@ -42,7 +42,8 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         NameExpression rhs = ast.getRHS();
 
         lhs.accept(this);
-        // rhs.accept(this);
+        // rhs is guaranteed to be unqualified NameExpression
+        // instead of visiting, we just hoist its data
 
         Type lType = lhs.getType();
         String rName = rhs.getName();
@@ -71,25 +72,11 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
     }
 
     /**
-     * Visit a Annotation node
-     * @param ast the AST node being visited
-     */
-    public void visit(Annotation ast) {
-        Expression expr = ast.getTypeExpression();
-        expr.accept(this);
-        Type type = expr.getType();
-        if (!type.getClassSymbol().isAnnotation()) {
-            System.err.println("can only use an annotation type as an annotation");
-        }
-        ast.setType(type);
-    }
-
-    /**
      * Visit a AnnotationDeclaration node
      * @param ast the AST node being visited
      */
     public void visit(AnnotationDeclaration ast) {
-        visitInnerBodies(ast);
+
     }
 
     /**
@@ -121,6 +108,13 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
             }
             enclosingSym = enclosingSym.getDeclaringClass();
         }
+        for (VariableDeclaration v : ast.getFields()) {
+            v.accept(this);
+        }
+        for (MethodDeclaration m : ast.getMethods()){
+            m.accept(this);
+        }
+        visitInnerBodies(ast);
     }
 
     /**
@@ -128,12 +122,6 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(ClassDeclaration ast) {
-        if (ast.hasTypeParameters()) {
-            for (TypeParameter p : ast.getTypeParameters()) {
-                p.accept(this);
-            }
-        }
-
         if (ast.hasSuperClass()) {
             ast.getSuperClass().accept(this);
             ClassSymbol superCls = ast.getSuperClass().getType().getClassSymbol();
@@ -147,15 +135,6 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
                 currentClass.setSuperClass(ast.getSuperClass().getType());
             }
         }
-        visitInnerBodies(ast);
-    }
-
-    /**
-     * Visit a ClassLiteralExpression node
-     * @param ast the AST node being visited
-     */
-    public void visit(ClassLiteralExpression ast) {
-        // TODO
     }
 
     /**
@@ -181,6 +160,7 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         if (ast.hasSuperInterfaces()) {
             addInterfaces(ast.getSuperInterfaces());
         }
+        super.visit(ast);
     }
 
     /**
@@ -206,15 +186,17 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         }
 
         boolean isFinal = true;
+        MyClassSymbol decl = currentClass;
         for (EnumConstant c : ast.getConstants()) {
+            c.accept(this);
             if (!c.isEmpty()) {
                 isFinal = false;
             }
+            currentClass = decl;
         }
         if (isFinal) {
             currentClass.addModifier(Modifier.FINAL);
         }
-        visitInnerBodies(ast);
     }
 
     /**
@@ -222,16 +204,7 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(InterfaceDeclaration ast) {
-        if (ast.hasTypeParameters()) {
-            for (TypeParameter p : ast.getTypeParameters()) {
-                p.accept(this);
-            }
-        }
 
-        if (ast.hasSuperInterfaces()) {
-            addInterfaces(ast.getSuperInterfaces());
-        }
-        visitInnerBodies(ast);
     }
 
     /**
@@ -239,7 +212,9 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(LocalClassDeclaration ast) {
+        MyClassSymbol decl = currentClass;
         ast.getDeclaration().accept(this);
+        currentClass = decl;
     }
 
     /**
@@ -251,116 +226,37 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         String rName = ast.getToken().getText();
         AnnotationSymbol[] anns = makeAnnotations(ast.getAnnotations());
         Kind kind = ast.getKind();
-        boolean reclassed = false;
+        Type type;
+        NameExpression qual = ast.getQualifyingName();
 
-        if (kind == Kind.AMBIGUOUS) {
-            reclassed = true;
-            if (!ast.isQualified()) {
-                Type type = currentClass.getType(name);
-                if (type != null) {
-                    ast.setKind(Kind.TYPE);
-                    type.setAnnotations(anns);
-                    ast.setType(type);
-                } else {
-                    ast.setKind(Kind.PACKAGE);
-                }
-            } else {
-                NameExpression qual = ast.getQualifyingName();
-                qual.accept(this);
-                if (qual.getKind() == Kind.PACKAGE) {
-                    ClassSymbol cls = qual.getPackage().getClass(rName);
-                    if (cls != null) {
-                        ast.setKind(Kind.TYPE);
-                        cls.setAnnotations(anns);
-                        ast.setType(cls);
-                    } else {
-                        ast.setKind(Kind.PACKAGE);
-                    }
-                } else if (qual.getKind() == Kind.TYPE) {
-                    Type type = qual.getType().getClassSymbol().getType(rName);
-                    if (type != null) {
-                        ast.setKind(Kind.TYPE);
-                        type.setAnnotations(anns);
-                        ast.setType(type);
-                    } else {
-                        System.err.println("unknown type " + rName);
-                    }
-                }
-            }
-        } else if (kind == Kind.PACKAGE_OR_TYPE) {
-            reclassed = true;
-            if (!ast.isQualified()) {
-                Type type = currentClass.getType(name);
-                if (type != null) {
-                    ast.setKind(Kind.TYPE);
-                    type.setAnnotations(anns);
-                    ast.setType(type);
-                } else {
-                    ast.setKind(Kind.PACKAGE);
-                }
-            } else {
-                NameExpression qual = ast.getQualifyingName();
-                qual.accept(this);
-                if (qual.getKind() == Kind.TYPE) {
-                    Type type = qual.getType().getClassSymbol().getType(rName);
-                    if (type != null) {
-                        ast.setKind(Kind.TYPE);
-                        type.setAnnotations(anns);
-                        ast.setType(type);
-                    } else {
-                        ast.setKind(Kind.PACKAGE);
-                    }
-                } else {
-                    ClassSymbol cls = qual.getPackage().getClass(rName);
-                    if (cls != null) {
-                        ast.setKind(Kind.TYPE);
-                        cls.setAnnotations(anns);
-                        ast.setType(cls);
-                    } else {
-                        ast.setKind(Kind.PACKAGE);
-                    }
-                }
-            }
-        }
-
-        // allow those just reclassified to be resolved
-        kind = ast.getKind();
-        if (kind == Kind.TYPE) {
-            if (!ast.isQualified()) {
-                Type type = currentClass.getType(name);
-                if (type != null) {
-                    type.setAnnotations(anns);
-                    ast.setType(type);
-                }
-            } else {
-                NameExpression qual = ast.getQualifyingName();
-                if (!reclassed) {
-                    qual.accept(this);
-                }
-                if (qual.getKind() == Kind.TYPE) {
-                    Type type = qual.getType().getClassSymbol().getType(rName);
-                    if (type != null) {
-                        type.setAnnotations(anns);
-                        ast.setType(type);
-                    }
-                } else {
-                    ClassSymbol cls = qual.getPackage().getClass(rName);
-                    if (cls != null) {
-                        cls.setAnnotations(anns);
-                        ast.setType(cls);
-                    }
-                }
-            }
-            if (ast.getType() == null) {
-                System.err.println("unknown type " + name);
-            }
-        } else if (kind == Kind.PACKAGE) {
+        if (kind == Kind.PACKAGE) {
             Package pkg = program.getPackage(name);
             if (pkg != null) {
                 ast.setPackage(pkg);
             }
-            // cannot throw error yet, java.lang.Package will say there is no
-            // package named java, must wait and hoist from Access
+            // cannot throw error yet, must wait and hoist from Access
+        } else {
+            if (!ast.isQualified()) {
+                type = currentClass.getType(name);
+            } else {
+                qual.accept(this);
+                if (qual.getKind() == Kind.PACKAGE) {
+                    type = qual.getPackage().getClass(rName);
+                } else {
+                    type = qual.getType().getClassSymbol().getType(rName);
+                }
+            }
+            if (type != null) {
+                ast.setKind(Kind.TYPE);
+                type.setAnnotations(anns);
+                ast.setType(type);
+            } else {
+                if (kind == Kind.TYPE) {
+                    System.err.println("unknown type " + name);
+                } else {
+                    ast.setKind(Kind.PACKAGE);
+                }
+            }
         }
     }
 

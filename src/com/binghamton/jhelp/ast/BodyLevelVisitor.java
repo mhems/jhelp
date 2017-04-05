@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.binghamton.jhelp.antlr.MyToken;
+import com.binghamton.jhelp.AnnotationSymbol;
 import com.binghamton.jhelp.ArrayType;
 import com.binghamton.jhelp.ImportManager;
 import com.binghamton.jhelp.Modifier;
@@ -25,6 +26,7 @@ import com.binghamton.jhelp.TypeVariable;
 import com.binghamton.jhelp.VariableSymbol;
 
 import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
+import static com.binghamton.jhelp.ast.NameExpression.Kind;
 
 /**
  * The body level Visitor for visiting the member declarations contained within
@@ -54,10 +56,7 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(BodyDeclaration ast) {
-        if (!ast.isAnonymous()) { // TODO correct?
-            currentClass = ast.getSymbol();
-        }
-
+        currentClass = ast.getSymbol();
         for (VariableDeclaration v : ast.getFields()) {
             v.accept(this);
             currentClass.addField(v.getSymbol());
@@ -65,6 +64,18 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
         for (MethodDeclaration m : ast.getMethods()) {
             m.accept(this);
             currentClass.addMethod(m.getSymbol());
+        }
+        visitInnerBodies(ast);
+    }
+
+    /**
+     * Visit a CompilationUnit node
+     * @param ast the AST node being visited
+     */
+    public void visit(CompilationUnit ast) {
+        pkg = ast.getPackage();
+        for (BodyDeclaration decl : ast.getBodyDeclarations()) {
+            decl.accept(this);
         }
     }
 
@@ -77,6 +88,11 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
             ctor.accept(this);
             currentClass.addConstructor(ctor.getSymbol());
         }
+
+        for (Block sb : ast.getStaticInitializers())
+            sb.accept(this);
+        for (Block ib : ast.getInstanceInitializers())
+            ib.accept(this);
 
         if (currentClass.getConstructors().length == 0) {
             MyMethodSymbol emptyCtor = new MyMethodSymbol(new MyToken(0,
@@ -99,17 +115,7 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(ClassDeclaration ast) {
-        visitInnerBodies(ast);
-    }
 
-    /**
-     * Visit a CompilationUnit node
-     * @param ast the AST node being visited
-     */
-    public void visit(CompilationUnit ast) {
-        for (BodyDeclaration decl : ast.getBodyDeclarations()) {
-            decl.accept(this);
-        }
     }
 
     /**
@@ -127,7 +133,8 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
         if (!ast.isEmpty()) {
             ast.getBody().accept(this);
         }
-        // TODO enum constant cannot declare abstract methods -- defer to code level anon classes
+        // TODO enum constant cannot declare abstract methods
+        // TODO check synthetic call
     }
 
     /**
@@ -137,8 +144,10 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
     public void visit(EnumDeclaration ast) {
         boolean allEmpty = true;
 
+        MyClassSymbol decl = currentClass;
         for (EnumConstant c : ast.getConstants()) {
             c.accept(this);
+            currentClass = decl;
             currentClass.addField(c.getSymbol());
             allEmpty &= c.isEmpty();
         }
@@ -161,7 +170,7 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
         if (hasAbstract && (ast.getConstants().size() == 0 || !allEmpty)) {
             System.err.println("enum with implemented constants cannot have abstract methods");
         }
-        visitInnerBodies(ast);
+        // visitInnerBodies(ast);
     }
 
     /**
@@ -169,30 +178,11 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(InterfaceDeclaration ast) {
-        visitInnerBodies(ast);
         // TODO cannot declare an override-equivalent public method of Object, with
         // * different return type
         // * incompatible exceptions
         // * not abstract
 
-    }
-
-    /**
-     * Visit a KeywordExpression node
-     * @param ast the AST node being visited
-     */
-    // public void visit(KeywordExpression ast) {
-    //     Type type = PrimitiveType.UNBOX_MAP.get(ast.getIdentifier().getText());
-    //     type.setAnnotations(makeAnnotations(ast.getAnnotations()));
-    //     ast.setType(type);
-    // }
-
-    /**
-     * Visit a LocalClassDeclaration node
-     * @param ast the AST node being visited
-     */
-    public void visit(LocalClassDeclaration ast) {
-        ast.getDeclaration().accept(this);
     }
 
     /**
@@ -332,18 +322,33 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
         method.constructType();
     }
 
-    private boolean validAnnotationReturnType(Type type) {
-        if (type instanceof PrimitiveType ||
-            type.equals(fetch("String")) ||
-            type.equals(fetch("Class"))) {
-            return true;
-        } else if (type instanceof ParameterizedType) {
-            return type.getClassSymbol().equals(fetch("Class"));
-        } else if (type instanceof ClassSymbol) {
-            ClassSymbol sym = (ClassSymbol)type;
-            return sym.isEnum() || sym.isAnnotation();
+    /**
+     * Visit a NameExpression node
+     * @param ast the AST node being visited
+     */
+    public void visit(NameExpression ast) {
+        String name = ast.getName();
+        String rName = ast.getToken().getText();
+        AnnotationSymbol[] anns = makeAnnotations(ast.getAnnotations());
+        Kind kind = ast.getKind();
+        NameExpression qual = ast.getQualifyingName();
+        Type type = null;
+        if (kind == Kind.TYPE) {
+            type = PrimitiveType.UNBOX_MAP.get(name);
+            type.setAnnotations(anns);
+            ast.setType(type);
         }
-        return false;
+        if (type == null) {
+            super.visit(ast);
+        }
+    }
+
+    /**
+     * Visit a PackageStatement node
+     * @param ast the AST node being visited
+     */
+    public void visit(PackageStatement ast) {
+
     }
 
     /**
@@ -399,5 +404,19 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
         for (ClassSymbol cls : program.getAllClasses()) {
             cls.visit(this);
         }
+    }
+
+    private boolean validAnnotationReturnType(Type type) {
+        if (type instanceof PrimitiveType ||
+            type.equals(fetch("String")) ||
+            type.equals(fetch("Class"))) {
+            return true;
+        } else if (type instanceof ParameterizedType) {
+            return type.getClassSymbol().equals(fetch("Class"));
+        } else if (type instanceof ClassSymbol) {
+            ClassSymbol sym = (ClassSymbol)type;
+            return sym.isEnum() || sym.isAnnotation();
+        }
+        return false;
     }
 }
