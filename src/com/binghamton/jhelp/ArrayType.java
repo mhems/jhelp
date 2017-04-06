@@ -35,6 +35,10 @@ public class ArrayType extends ReferenceType {
         return base.getTypeName() + "[]";
     }
 
+    public String getName() {
+        return base.getName() + "[]";
+    }
+
     public int rank() {
         return 1 + base.rank();
     }

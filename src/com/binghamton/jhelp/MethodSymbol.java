@@ -74,6 +74,10 @@ public abstract class MethodSymbol extends Symbol {
         return getTypeParameters().length > 0;
     }
 
+    public ClassSymbol getDeclaringClass() {
+        return null;
+    }
+
     public boolean hasOverrideAnnotation() {
         for (AnnotationSymbol a : annotations) {
             if (a.getType().equals(fetch("Override"))) {
@@ -81,6 +85,10 @@ public abstract class MethodSymbol extends Symbol {
             }
         }
         return false;
+    }
+
+    public boolean overrides(MethodSymbol other) {
+        return type.overrideEquivalent(other.type);
     }
 
     @Override
@@ -99,14 +107,18 @@ public abstract class MethodSymbol extends Symbol {
     public abstract boolean isConstructor();
 
     public String toString() {
-        StringBuilder sb = new StringBuilder(getModifiers().toString());
-        sb.append(" ");
+        StringBuilder sb = new StringBuilder();
 
-        if (!isConstructor()) {
-            sb.append(getReturnType().getTypeName());
+        if (hasModifiers()) {
+            sb.append(getModifiers().toString());
             sb.append(" ");
         }
-        sb.append(type.toString());
+
+        if (!isConstructor()) {
+            sb.append(getReturnType().getName());
+            sb.append(" ");
+        }
+        sb.append(type.getTypeName());
         if (getExceptionTypes().length > 0) {
             sb.append(" throws ");
             sb.append(StringUtils.join(", ",
@@ -122,6 +134,10 @@ public abstract class MethodSymbol extends Symbol {
 
     public MethodType getType() {
         return type;
+    }
+
+    public boolean hasSameSubsignature(MethodSymbol other) {
+        return type.sameSubsignature(other.type);
     }
 
     public boolean returnTypeSubstitutable(MethodSymbol other) {

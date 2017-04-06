@@ -15,7 +15,7 @@ import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
  */
 public abstract class ClassSymbol extends ReferenceType {
     public enum ClassKind {CLASS, INTERFACE, ENUM, ANNOTATION};
-    public enum Level {TOP, INNER, ANONYMOUS, LOCAL};
+    public enum Level {TOP, MEMBER, INNER, ANONYMOUS, LOCAL};
 
         {
             kind = SymbolKind.CLASS;
@@ -29,6 +29,7 @@ public abstract class ClassSymbol extends ReferenceType {
     protected ImportingSymbolTable importedTypes = new ImportingSymbolTable();
     protected NamedSymbolTable<Type> interfaces = new NamedSymbolTable<>();
     protected NamedSymbolTable<ClassSymbol> innerClasses = new NamedSymbolTable<>();
+    protected NamedSymbolTable<ClassSymbol> memberTypes = new NamedSymbolTable<>();
     protected NamedSymbolTable<VariableSymbol> fields = new NamedSymbolTable<>();
     protected MethodSymbolTable methods = new MethodSymbolTable();
     protected MethodSymbolTable ctors = new MethodSymbolTable();
@@ -79,12 +80,20 @@ public abstract class ClassSymbol extends ReferenceType {
         return fields.toArray(new VariableSymbol[fields.size()]);
     }
 
+    public NamedSymbolTable<VariableSymbol> getFieldTable() {
+        return fields;
+    }
+
     public TypeVariable[] getTypeParameters() {
         return params.toArray(new TypeVariable[params.size()]);
     }
 
     public ClassSymbol[] getInnerClasses() {
         return innerClasses.toArray(new ClassSymbol[innerClasses.size()]);
+    }
+
+    public ClassSymbol[] getMemberTypes() {
+        return memberTypes.toArray(new ClassSymbol[memberTypes.size()]);
     }
 
     public ClassKind getClassKind() {
@@ -97,15 +106,18 @@ public abstract class ClassSymbol extends ReferenceType {
         if (ret == null) {
             ret = innerClasses.get(name);
             if (ret == null) {
-                if (declarer != null) {
-                    ret = declarer.getType(name);
-                }
+                ret = memberTypes.get(name);
                 if (ret == null) {
-                    Package pkg = getPackage();
-                    if (pkg != null) {
-                        ret = pkg.getClass(name);
-                        if (ret == null) {
-                            ret = importedTypes.get(name);
+                    if (declarer != null) {
+                        ret = declarer.getType(name);
+                    }
+                    if (ret == null) {
+                        Package pkg = getPackage();
+                        if (pkg != null) {
+                            ret = pkg.getClass(name);
+                            if (ret == null) {
+                                ret = importedTypes.get(name);
+                            }
                         }
                     }
                 }
@@ -128,6 +140,10 @@ public abstract class ClassSymbol extends ReferenceType {
 
     public ClassSymbol getInnerClass(String name) {
         return innerClasses.get(name);
+    }
+
+    public ClassSymbol getMemberType(String name) {
+        return memberTypes.get(name);
     }
 
     public VariableSymbol getField(String name) {
@@ -162,8 +178,12 @@ public abstract class ClassSymbol extends ReferenceType {
         return level == Level.TOP;
     }
 
+    public boolean isMember() {
+        return level == Level.MEMBER;
+    }
+
     public boolean isInner() {
-        return level == Level.INNER;
+        return level != Level.TOP && level != Level.MEMBER;
     }
 
     public boolean isAnonymous() {
@@ -231,6 +251,15 @@ public abstract class ClassSymbol extends ReferenceType {
         return interfaces.size() > 0;
     }
 
+    public boolean hasAbstractMethod() {
+        for (MethodSymbol m : getMethods()) {
+            if (m.isAbstract()) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public List<MethodSymbol> getUnimplementedMethods() {
         // TODO still have to hook up tables,
         // this wont work if superclass's superclass has abstract methods that
@@ -287,31 +316,40 @@ public abstract class ClassSymbol extends ReferenceType {
     public abstract ClassSymbol adapt(Type[] args);
 
     public String getTypeName() {
-        StringBuilder sb = new StringBuilder(getQualifiedName());
+        StringBuilder sb = new StringBuilder();
+        if (isEnum()) {
+            sb.append("enum");
+        } else if (isInterface()) {
+            sb.append("interface");
+        } else if (isAnnotation()) {
+            sb.append("@interface");
+        } else {
+            sb.append("class");
+        }
+        sb.append(" ");
+        sb.append(getName());
         if (hasTypeParameters()) {
             sb.append("<");
             sb.append(StringUtils.join(", ",
                                        getTypeParameters(),
-                                       tp -> tp.getTypeName()));
+                                       tp -> tp.getName()));
             sb.append(">");
         }
 
-        if (true) { // TODO only an issue for self-referential type parameters like Enum
-            if (hasSuperClass()) {
-                sb.append(" extends ");
-                sb.append(getSuperClass().getName());
-            }
+        if (hasSuperClass()) {
+            sb.append(" extends ");
+            sb.append(getSuperClass().getName());
+        }
 
-            if (hasInterfaces()) {
-                if (isClass() || isEnum()) {
-                    sb.append(" implements ");
-                } else {
-                    sb.append(" extends ");
-                }
-                sb.append(StringUtils.join(", ",
-                                           getInterfaces(),
-                                           c -> c.getName()));
+        if (hasInterfaces()) {
+            if (isClass() || isEnum()) {
+                sb.append(" implements ");
+            } else {
+                sb.append(" extends ");
             }
+            sb.append(StringUtils.join(", ",
+                                       getInterfaces(),
+                                       c -> c.getName()));
         }
 
         return sb.toString();
@@ -388,30 +426,30 @@ public abstract class ClassSymbol extends ReferenceType {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        if (hasModifiers()) {
-            sb.append(getModifiers().toString());
-            sb.append(" ");
-        }
-        if (isEnum()) {
-            sb.append("enum");
-        } else if (isInterface()) {
-            sb.append("interface");
-        } else if (isAnnotation()) {
-            sb.append("@interface");
-        } else {
-            sb.append("class");
-        }
-        sb.append(" ");
-        sb.append(getTypeName());
-        return sb.toString();
+        return getName();
     }
 
     public String repr() {
-        StringBuilder sb = new StringBuilder(this.toString());
+        StringBuilder sb = new StringBuilder("====> " + this.toString());
         sb.append("\n");
+
+        if (level != Level.TOP) {
+            sb.append("declared by: ");
+            sb.append(declarer.getName());
+            sb.append("\n");
+        }
+        for (ClassSymbol inner : getInnerClasses()) {
+            sb.append("inner class: ");
+            sb.append(inner.getName());
+            sb.append("\n");
+        }
+        for (ClassSymbol mem : getMemberTypes()) {
+            sb.append("member type: ");
+            sb.append(mem.getName());
+            sb.append("\n");
+        }
+
         for (VariableSymbol field : getFields()) {
-            sb.append("field: ");
             sb.append(field.repr());
             sb.append("\n");
         }
@@ -423,6 +461,7 @@ public abstract class ClassSymbol extends ReferenceType {
             sb.append(sym.repr());
             sb.append("\n");
         }
+        sb.append("\n");
         return sb.toString();
     }
 

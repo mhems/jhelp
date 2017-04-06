@@ -11,6 +11,10 @@ public class NilType extends Type {
         return "null";
     }
 
+    public String getName() {
+        return "null";
+    }
+
     public ClassSymbol getClassSymbol() {
         throw new UnsupportedOperationException("the nil type represents no class");
     }

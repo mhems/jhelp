@@ -466,7 +466,7 @@ classMemberDeclaration [ConcreteBodyDeclaration ret]
     :   f = fieldDeclaration[ret]
     |   m = methodDeclaration {$ret.addMethod($m.ret);}
     |   c = classDeclaration {$ret.addInnerBody($c.ret);}
-    |   i = interfaceDeclaration {$ret.addInnerInterface($i.ret);}
+    |   i = interfaceDeclaration {$ret.addInnerBody($i.ret);}
     |   ';'
     ;
 
@@ -925,7 +925,7 @@ interfaceMemberDeclaration [InterfaceDeclaration ret]
     :   constantDeclaration[$ret]
     |   im = interfaceMethodDeclaration {$ret.addMethod($im.ret);}
     |   cl = classDeclaration {$ret.addInnerBody($cl.ret);}
-    |   id = interfaceDeclaration {$ret.addInnerInterface($id.ret);}
+    |   id = interfaceDeclaration {$ret.addInnerBody($id.ret);}
     |   ';'
     ;
 
@@ -989,7 +989,7 @@ annotationTypeMemberDeclaration [AnnotationDeclaration ret]
     :   a = annotationTypeElementDeclaration {$ret.addMethod($a.ret);}
     |   constantDeclaration[$ret]
     |   cl = classDeclaration {$ret.addInnerBody($cl.ret);}
-    |   i = interfaceDeclaration {$ret.addInnerInterface($i.ret);}
+    |   i = interfaceDeclaration {$ret.addInnerBody($i.ret);}
     |   ';'
     ;
 
@@ -1123,7 +1123,7 @@ blockStatements returns [List<Statement> ret]
 
 blockStatement returns [Statement ret]
     :   d = localVariableDeclarationStatement {$ret = $d.ret;}
-    |   c = classDeclaration {$ret = $c.ret; $c.ret.setKind(LOCAL);}
+    |   c = classDeclaration {$ret = new LocalClassDeclaration($c.ret);}
     |   st = statement {$ret = $st.ret;}
     ;
 

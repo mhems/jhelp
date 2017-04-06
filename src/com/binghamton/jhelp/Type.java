@@ -75,9 +75,7 @@ public abstract class Type extends Symbol {
         return 0;
     }
 
-    public String getName() {
-        return getTypeName();
-    }
+    public abstract String getName();
 
     public String toString() {
         return getTypeName();
@@ -110,6 +108,6 @@ public abstract class Type extends Symbol {
         if (types.length == 1) {
             return types[0];
         }
-        return null; // TODO
+        return types[0]; // TODO
     }
 }

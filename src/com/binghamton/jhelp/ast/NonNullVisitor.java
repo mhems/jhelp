@@ -153,10 +153,8 @@ public class NonNullVisitor extends EmptyVisitor {
             var.accept(this);
         for (MethodDeclaration m : ast.getMethods())
             m.accept(this);
-        for (ConcreteBodyDeclaration cls : ast.getInnerBodies())
-            cls.accept(this);
-        for (AbstractBodyDeclaration intf : ast.getInnerInterfaces())
-            intf.accept(this);
+        for (BodyDeclaration b : ast.getInnerBodies())
+            b.accept(this);
     }
 
     /**

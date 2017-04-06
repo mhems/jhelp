@@ -20,7 +20,7 @@ public abstract class Symbol {
     private Modifiers modifiers ;
 
     public Symbol() {
-        modifiers = Modifiers.NO_MODIFIERS;
+        modifiers = new Modifiers();
     }
 
     /**
@@ -28,18 +28,18 @@ public abstract class Symbol {
      * @param name the name of the symbol
      */
     public Symbol(String name) {
-        this(name, Modifiers.NO_MODIFIERS);
+        this(name, new Modifiers());
     }
 
     public Symbol(String name, AnnotationSymbol[] annotations) {
         this.name = name;
         this.annotations = annotations;
-        modifiers = Modifiers.NO_MODIFIERS;
+        modifiers = new Modifiers();
     }
 
     public Symbol(AnnotationSymbol[] annotations) {
         this.annotations = annotations;
-        modifiers = Modifiers.NO_MODIFIERS;
+        modifiers = new Modifiers();
     }
 
     public Symbol(String name, int modifiers) {

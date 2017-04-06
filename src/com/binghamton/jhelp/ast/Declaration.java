@@ -14,7 +14,7 @@ import com.binghamton.jhelp.Symbol;
 public abstract class Declaration extends Statement {
     protected Symbol sym;
     protected Token name;
-    protected Modifiers modifiers = Modifiers.NO_MODIFIERS;
+    protected Modifiers modifiers = new Modifiers();
     protected Annotation[] annotations = {};
 
     /**

@@ -14,7 +14,6 @@ import com.binghamton.jhelp.util.StringUtils;
  * A class abstracting a set of Java modifiers
  */
 public class Modifiers {
-    public static final Modifiers NO_MODIFIERS = new Modifiers();
     private static final List<Modifier> ORDERED_MODIFIERS = new ArrayList<>();
     private static final Comparator<Modifier> BY_STANDARD;
     private Set<Modifier> modifiers = new HashSet<>();

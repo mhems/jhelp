@@ -139,6 +139,16 @@ public class MyClassSymbol extends ClassSymbol {
         return true;
     }
 
+    public boolean addMemberType(MyClassSymbol sym) {
+        sym.level = Level.MEMBER;
+        if (!memberTypes.put(sym)) {
+            System.err.println("class cannot declare same member class twice");
+            return false;
+        }
+        sym.declarer = this;
+        return true;
+    }
+
     public void setLocal() {
         this.level = Level.LOCAL;
     }
@@ -177,6 +187,10 @@ public class MyClassSymbol extends ClassSymbol {
         superClass = fetch("Object");
     }
 
+    public void setSuperClassForEnumConstant() {
+        superClass = declarer;
+    }
+
     public String getPackageName() {
         return pkg.getQualifiedName();
     }
@@ -209,6 +223,7 @@ public class MyClassSymbol extends ClassSymbol {
 
     public void visit(ASTVisitor visitor) {
         AST.accept(visitor);
+        System.out.println(repr());
     }
 
     @Override
@@ -218,6 +233,6 @@ public class MyClassSymbol extends ClassSymbol {
     }
 
     private String nextAnonName() {
-        return getName() + ".$" + (anonCount++);
+        return getName() + "$" + (anonCount++);
     }
 }

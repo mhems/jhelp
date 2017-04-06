@@ -23,6 +23,7 @@ public class MyVariableSymbol extends VariableSymbol {
         this.type = type;
     }
 
+    @Override
     public ClassSymbol getDeclaringClass() {
         return owningClass;
     }

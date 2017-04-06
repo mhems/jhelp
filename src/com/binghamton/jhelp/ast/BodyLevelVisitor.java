@@ -45,10 +45,30 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
         FINALIZE = fetch("Object").getMethod("finalize");
     }
 
-    private MethodSymbol currentMethod;
-
     public BodyLevelVisitor(Program program) {
         super(program);
+    }
+
+    /**
+     * Visit a AnnotationDeclaration node
+     * @param ast the AST node being visited
+     */
+    public void visit(AnnotationDeclaration ast) {
+        ClassSymbol objCls = fetch("Object");
+        ClassSymbol annoCls = fetch("java.lang.annotation.Annotation");
+        MethodSymbol refMethod;
+        for (MethodSymbol method : currentClass.getMethods()) {
+            refMethod = objCls.getMethod(method);
+            if (refMethod == null) {
+                refMethod = annoCls.getMethod(method);
+            }
+            if (refMethod != null && refMethod.getAccessLevel().compareTo(Symbol.AccessLevel.PROTECTED) <= 0) {
+                System.err.println("an annotation cannot define a method that is override-equivalent to a method in Object or Annotation");
+            }
+            if (method.getReturnType().equals(currentClass)) {
+                System.err.println("an annotation cannot have an element of its own type");
+            }
+        }
     }
 
     /**
@@ -57,25 +77,37 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
      */
     public void visit(BodyDeclaration ast) {
         currentClass = ast.getSymbol();
-        for (VariableDeclaration v : ast.getFields()) {
-            v.accept(this);
-            currentClass.addField(v.getSymbol());
-        }
-        for (MethodDeclaration m : ast.getMethods()) {
-            m.accept(this);
-            currentClass.addMethod(m.getSymbol());
-        }
-        visitInnerBodies(ast);
-    }
+        pkg = currentClass.getPackage();
 
-    /**
-     * Visit a CompilationUnit node
-     * @param ast the AST node being visited
-     */
-    public void visit(CompilationUnit ast) {
-        pkg = ast.getPackage();
-        for (BodyDeclaration decl : ast.getBodyDeclarations()) {
-            decl.accept(this);
+        // delay visiting non-enum anonymous classes as instantiation type
+        // cannot be determined until code-level visitor
+        if (!currentClass.isAnonymous() ||
+            currentClass.getDeclaringClass().isEnum()) {
+            for (VariableDeclaration v : ast.getFields()) {
+                v.accept(this);
+                currentClass.addField(v.getSymbol());
+                if (currentClass.isInner()) {
+                    if (v.getSymbol().isStatic() && !v.getSymbol().isConstant()) {
+                        System.err.println("inner class cannot declare non-constant static variable");
+                    }
+                }
+            }
+            for (MethodDeclaration m : ast.getMethods()) {
+                m.accept(this);
+                currentClass.addMethod(m.getSymbol());
+                if (currentClass.isInner() && m.getSymbol().isStatic()) {
+                    System.err.println("inner class cannot declare static method");
+                }
+            }
+        }
+        MyClassSymbol tmp = currentClass;
+        for (BodyDeclaration body : ast.getInnerBodies()) {
+            body.accept(this);
+            currentClass = tmp;
+            if (currentClass.isInner() && body.getSymbol().isStatic()) {
+                System.err.println("inner class cannot declare static body");
+            }
+            System.out.println(body.getSymbol().repr());
         }
     }
 
@@ -84,23 +116,32 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(ConcreteBodyDeclaration ast) {
-        for (MethodDeclaration ctor : ast.getConstructors()) {
-            ctor.accept(this);
-            currentClass.addConstructor(ctor.getSymbol());
-        }
-
         for (Block sb : ast.getStaticInitializers())
             sb.accept(this);
         for (Block ib : ast.getInstanceInitializers())
             ib.accept(this);
 
-        if (currentClass.getConstructors().length == 0) {
-            MyMethodSymbol emptyCtor = new MyMethodSymbol(new MyToken(0,
-                                                                      currentClass.getName()));
-            emptyCtor.setConstructor(true);
-            emptyCtor.setDeclaringClass(currentClass);
-            emptyCtor.constructType();
-            currentClass.addConstructor(emptyCtor);
+        if (!currentClass.isAnonymous() ||
+            currentClass.getDeclaringClass().isEnum()) {
+            for (MethodDeclaration ctor : ast.getConstructors()) {
+                ctor.accept(this);
+                currentClass.addConstructor(ctor.getSymbol());
+            }
+
+            if (currentClass.getConstructors().length == 0) {
+                MyMethodSymbol emptyCtor = new MyMethodSymbol(new MyToken(0,
+                                                                          currentClass.getName()));
+                Symbol.AccessLevel access = currentClass.getAccessLevel();
+                if (currentClass.isAnonymous() &&
+                    currentClass.getDeclaringClass().isEnum()) {
+                    access = Symbol.AccessLevel.PRIVATE;
+                }
+                emptyCtor.setAccessLevel(access);
+                emptyCtor.setConstructor(true);
+                emptyCtor.setDeclaringClass(currentClass);
+                emptyCtor.constructType();
+                currentClass.addConstructor(emptyCtor);
+            }
         }
 
         if (currentClass.isClassLike() && !currentClass.isAbstract()) {
@@ -131,10 +172,13 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
         var.setType(currentClass);
         ast.setSymbol(var);
         if (!ast.isEmpty()) {
+            MyClassSymbol tmp = currentClass;
             ast.getBody().accept(this);
+            currentClass = tmp;
+            if (ast.getBody().getSymbol().hasAbstractMethod()) {
+                System.err.println("an enum constant body cannot declare abstract methods");
+            }
         }
-        // TODO enum constant cannot declare abstract methods
-        // TODO check synthetic call
     }
 
     /**
@@ -144,10 +188,8 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
     public void visit(EnumDeclaration ast) {
         boolean allEmpty = true;
 
-        MyClassSymbol decl = currentClass;
         for (EnumConstant c : ast.getConstants()) {
             c.accept(this);
-            currentClass = decl;
             currentClass.addField(c.getSymbol());
             allEmpty &= c.isEmpty();
         }
@@ -163,14 +205,19 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
                 hasAbstract = true;
                 break;
             }
-            // if (method.getName().equals("finalize") && method.isOverrider()) {
-            //     System.err.println("enum cannot have a finalizer as it cannot be finalized");
-            // }
+            if (method.getName().equals("finalize") && method.overrides(FINALIZE)) {
+                System.err.println("enum cannot have a finalizer as it cannot be finalized");
+            }
         }
         if (hasAbstract && (ast.getConstants().size() == 0 || !allEmpty)) {
             System.err.println("enum with implemented constants cannot have abstract methods");
         }
-        // visitInnerBodies(ast);
+
+        for (EnumConstant c : ast.getConstants()) {
+            if (!c.isEmpty()) {
+                System.out.println(c.getBody().getSymbol().repr());
+            }
+        }
     }
 
     /**
@@ -178,11 +225,20 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(InterfaceDeclaration ast) {
-        // TODO cannot declare an override-equivalent public method of Object, with
-        // * different return type
-        // * incompatible exceptions
-        // * not abstract
+        ClassSymbol objCls = fetch("Object");
+        MethodSymbol objMethod;
+        for (MethodSymbol method : currentClass.getMethods()) {
+            objMethod = objCls.getMethod(method);
+            if (method.hasModifier(Modifier.DEFAULT) &&
+                objMethod != null &&
+                objMethod.getAccessLevel() != Symbol.AccessLevel.PRIVATE) {
+                System.err.println("default method of interface cannot be override equivalent to non-private method of Object");
+                if (!method.getReturnType().equals(objMethod.getReturnType())) {
+                    System.err.println("interface cannot override public method of Object");
+                }
 
+            }
+        }
     }
 
     /**
@@ -254,7 +310,7 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
             if (count > 1) {
                 System.err.println("an interface method can only be one of abstract, default, and static");
             }
-            // TODO 9.4.1.[23]
+            // TODO 9.4.1.3
         }
 
         if (currentClass.isClassLike() &&
@@ -266,10 +322,12 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
 
         if (ast.hasTypeParameters()) {
             TypeVariable[] typeParams = makeTypeParameters(ast.getTypeParameters());
+            for (TypeVariable param : typeParams) {
+                param.setDeclaringSymbol(method);
+            }
             method.setTypeParameters(typeParams);
             currentClass.enterMethodScope(typeParams);
         }
-        // TODO check parameter types dont use instance type variables
         Type[] paramTypes = new Type[ast.getParameters().size()];
         pos = 0;
         Set<String> paramNames = new HashSet<>();
@@ -319,7 +377,29 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
                     System.err.println("invalid annotation method return type");
             }
         }
+
         method.constructType();
+
+        if (method.isStatic()) {
+            for (Type type : paramTypes) {
+                if (type instanceof TypeVariable) {
+                    if (!method.equals(((TypeVariable)type).getDeclaringSymbol())) {
+                        System.err.println("static method cannot use instance type variables");
+                    }
+                }
+            }
+            if (currentClass.isInterfaceLike()) {
+                for (Type intf : currentClass.getInterfaces()) {
+                    for (MethodSymbol m : intf.getClassSymbol().getMethodsByName(method.getName())) {
+                        if (!m.isStatic() && method.hasSameSubsignature(m)) {
+                            System.err.println("static interface method cannot hide instance method of super interface");
+                        }
+                    }
+                }
+            }
+        }
+
+        ast.getBody().accept(this);
     }
 
     /**
@@ -335,10 +415,11 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
         Type type = null;
         if (kind == Kind.TYPE) {
             type = PrimitiveType.UNBOX_MAP.get(name);
+        }
+        if (type != null) {
             type.setAnnotations(anns);
             ast.setType(type);
-        }
-        if (type == null) {
+        } else {
             super.visit(ast);
         }
     }
@@ -397,12 +478,15 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
             var.addModifier(Modifier.FINAL);
             var.setAccessLevel(Symbol.AccessLevel.PUBLIC);
         }
+        ast.getInitializer().accept(this);
     }
 
     public void visitInOrder() {
         program.topologicalSort();
         for (ClassSymbol cls : program.getAllClasses()) {
-            cls.visit(this);
+            if (cls.isTop()) {
+                cls.visit(this);
+            }
         }
     }
 
