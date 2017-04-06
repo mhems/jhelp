@@ -163,6 +163,7 @@ public class FileLevelVisitor extends EmptyVisitor {
         MyClassSymbol sym;
         if (ast.isAnonymous()) {
             sym = new MyClassSymbol(currentClass);
+            sym.addModifier(Modifier.FINAL);
         } else {
             if (!Character.isUpperCase(ast.getName().getText().charAt(0))) {
                 System.err.printf("Body names should be capitalized, '%s' is not\n",
@@ -192,15 +193,14 @@ public class FileLevelVisitor extends EmptyVisitor {
         ast.setSymbol(sym);
 
         MyClassSymbol cur;
-        for (ConcreteBodyDeclaration c : ast.getInnerBodies()) {
-            c.accept(this);
+        for (BodyDeclaration body : ast.getInnerBodies()) {
+            body.accept(this);
             currentClass = sym;
-            sym.addInnerClass(c.getSymbol());
-        }
-        for (AbstractBodyDeclaration a : ast.getInnerInterfaces()) {
-            a.accept(this);
-            currentClass = sym;
-            sym.addInnerClass(a.getSymbol());
+            if (body.getSymbol().isStatic()) {
+                sym.addMemberType(body.getSymbol());
+            } else {
+                sym.addInnerClass(body.getSymbol());
+            }
         }
         for (VariableDeclaration v : ast.getFields()) {
             v.accept(this);
@@ -283,6 +283,15 @@ public class FileLevelVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(ConcreteBodyDeclaration ast) {
+        if (ast.isLocal()) {
+            if (currentClass.isStatic()) {
+                System.err.println("local class cannot be static");
+            }
+            if (currentClass.getAccessLevel() != Symbol.AccessLevel.PACKAGE_PRIVATE) {
+                System.err.println("local class cannot have access modifier");
+            }
+        }
+
         for (MethodDeclaration ctor : ast.getConstructors())
             ctor.accept(this);
         for (Block sb : ast.getStaticInitializers())
@@ -310,7 +319,12 @@ public class FileLevelVisitor extends EmptyVisitor {
         for (Expression e : ast.getArguments()) {
             e.accept(this);
         }
-        ast.getBody().accept(this);
+        if (!ast.isEmpty()) {
+            MyClassSymbol tmp = currentClass;
+            ast.getBody().accept(this);
+            ast.getBody().getSymbol().setSuperClassForEnumConstant();
+            currentClass = tmp;
+        }
     }
 
     /**
@@ -320,10 +334,9 @@ public class FileLevelVisitor extends EmptyVisitor {
     public void visit(EnumDeclaration ast) {
         ast.getSymbol().setClassKind(ClassSymbol.ClassKind.ENUM);
         ast.getSymbol().setSuperClassForEnum();
-        MyClassSymbol decl = currentClass;
+
         for (EnumConstant c : ast.getConstants()) {
             c.accept(this);
-            currentClass = decl;
         }
     }
 
@@ -419,6 +432,7 @@ public class FileLevelVisitor extends EmptyVisitor {
         if (ast.hasAnonymousClass()) {
             MyClassSymbol decl = currentClass;
             ast.getAnonymousClass().accept(this);
+            System.out.println(ast.getAnonymousClass().getSymbol().repr());
             currentClass = decl;
         }
     }
@@ -459,6 +473,7 @@ public class FileLevelVisitor extends EmptyVisitor {
      */
     public void visit(LocalClassDeclaration ast) {
         MyClassSymbol decl = currentClass;
+        ast.getDeclaration().setKind(BodyDeclaration.Kind.LOCAL);
         ast.getDeclaration().accept(this);
         ast.getSymbol().setLocal();
         currentClass = decl;
@@ -585,6 +600,7 @@ public class FileLevelVisitor extends EmptyVisitor {
     public void visit(TypeParameter ast) {
         String name = ast.getName();
         TypeVariable type = new TypeVariable(name);
+        type.setDeclaringSymbol(currentClass);
         ast.setType(type);
     }
 

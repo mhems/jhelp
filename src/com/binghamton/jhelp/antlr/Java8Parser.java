@@ -3276,7 +3276,7 @@ public class Java8Parser extends Parser {
 				{
 				setState(1005);
 				((ClassMemberDeclarationContext)_localctx).i = interfaceDeclaration();
-				_localctx.ret.addInnerInterface(((ClassMemberDeclarationContext)_localctx).i.ret);
+				_localctx.ret.addInnerBody(((ClassMemberDeclarationContext)_localctx).i.ret);
 				}
 				break;
 			case 5:
@@ -6843,7 +6843,7 @@ public class Java8Parser extends Parser {
 				{
 				setState(1663);
 				((InterfaceMemberDeclarationContext)_localctx).id = interfaceDeclaration();
-				_localctx.ret.addInnerInterface(((InterfaceMemberDeclarationContext)_localctx).id.ret);
+				_localctx.ret.addInnerBody(((InterfaceMemberDeclarationContext)_localctx).id.ret);
 				}
 				break;
 			case 5:
@@ -7410,7 +7410,7 @@ public class Java8Parser extends Parser {
 				{
 				setState(1756);
 				((AnnotationTypeMemberDeclarationContext)_localctx).i = interfaceDeclaration();
-				_localctx.ret.addInnerInterface(((AnnotationTypeMemberDeclarationContext)_localctx).i.ret);
+				_localctx.ret.addInnerBody(((AnnotationTypeMemberDeclarationContext)_localctx).i.ret);
 				}
 				break;
 			case 5:
@@ -8423,7 +8423,7 @@ public class Java8Parser extends Parser {
 				{
 				setState(1935);
 				((BlockStatementContext)_localctx).c = classDeclaration();
-				((BlockStatementContext)_localctx).ret =  ((BlockStatementContext)_localctx).c.ret; ((BlockStatementContext)_localctx).c.ret.setKind(LOCAL);
+				((BlockStatementContext)_localctx).ret =  new LocalClassDeclaration(((BlockStatementContext)_localctx).c.ret);
 				}
 				break;
 			case 3:

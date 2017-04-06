@@ -15,6 +15,7 @@ import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
  */
 public class TypeVariable extends ReferenceType {
     private Type[] bounds = {};
+    private Symbol declarer;
 
     public TypeVariable(String name) {
         this(name, new Type[]{fetch("Object")});
@@ -31,14 +32,23 @@ public class TypeVariable extends ReferenceType {
     }
 
     public ClassSymbol getClassSymbol() {
-        // TODO think this should trigger error
-        // TODO but may present problems for member lookup on fields of generic type
-        throw new UnsupportedOperationException();
-        // return bounds[0].getClassSymbol(); // TODO lub
+        return Type.lub(bounds).getClassSymbol();
     }
 
     public ClassSymbol getDeclaringClass() {
-        throw new UnsupportedOperationException();
+        if (declarer instanceof ClassSymbol) {
+            return (ClassSymbol)declarer;
+        } else {
+            return ((MethodSymbol)declarer).getDeclaringClass();
+        }
+    }
+
+    public void setDeclaringSymbol(Symbol declarer) {
+        this.declarer = declarer;
+    }
+
+    public Symbol getDeclaringSymbol() {
+        return declarer;
     }
 
     public String getName() {

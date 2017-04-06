@@ -2,6 +2,8 @@ package com.binghamton.jhelp;
 
 import org.antlr.v4.runtime.Token;
 
+import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
+
 /**
  * A base class representing a Java variable at any scope
  */
@@ -33,6 +35,16 @@ public abstract class VariableSymbol extends Symbol {
         return varKind;
     }
 
+    public ClassSymbol getDeclaringClass() {
+        return null;
+    }
+
+    public boolean isConstant() {
+        return isFinal() && (
+            (type instanceof PrimitiveType) ||
+            type.equals(fetch("String")));
+    }
+
     @Override
     public abstract VariableSymbol adapt(Type[] args);
 
@@ -41,9 +53,12 @@ public abstract class VariableSymbol extends Symbol {
     }
 
     public String toString() {
-        StringBuilder sb = new StringBuilder(getModifiers().toString());
-        sb.append(" ");
-        sb.append(getType().getTypeName());
+        StringBuilder sb = new StringBuilder();
+        if (hasModifiers()) {
+            sb.append(getModifiers().toString());
+            sb.append(" ");
+        }
+        sb.append(getType().getName());
         sb.append(" ");
         sb.append(getName());
         return sb.toString();

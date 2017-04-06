@@ -72,6 +72,19 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
     }
 
     /**
+     * Visit a Annotation node
+     * @param ast the AST node being visited
+     */
+    public void visit(Annotation ast) {
+        ast.getTypeExpression().accept(this);
+        ClassSymbol ann = ast.getTypeExpression().getType().getClassSymbol();
+        if (!ann.isAnnotation()) {
+            System.err.println("can only annotate with an annotation");
+        }
+        ast.setType(ann);
+    }
+
+    /**
      * Visit a AnnotationDeclaration node
      * @param ast the AST node being visited
      */
@@ -108,13 +121,31 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
             }
             enclosingSym = enclosingSym.getDeclaringClass();
         }
+
+        if (currentClass.isInner()) {
+            if (currentClass.getDeclaringClass().isInterfaceLike()) {
+                currentClass.addModifier(Modifier.PUBLIC);
+                currentClass.addModifier(Modifier.STATIC);
+                currentClass.setAccessLevel(ClassSymbol.AccessLevel.PUBLIC);
+                if (currentClass.hasModifier(Modifier.PROTECTED) ||
+                    currentClass.hasModifier(Modifier.PRIVATE)) {
+                    System.err.println("a member type in an interface cannot be protected or private");
+                }
+            }
+        }
+
         for (VariableDeclaration v : ast.getFields()) {
             v.accept(this);
         }
         for (MethodDeclaration m : ast.getMethods()){
             m.accept(this);
         }
-        visitInnerBodies(ast);
+        MyClassSymbol tmp = currentClass;
+        for (BodyDeclaration body : ast.getInnerBodies()) {
+            body.accept(this);
+            currentClass = tmp;
+            System.out.println(body.getSymbol().repr());
+        }
     }
 
     /**
@@ -149,6 +180,7 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
 
         for (BodyDeclaration decl : ast.getBodyDeclarations()) {
             decl.accept(this);
+            System.out.println(decl.getSymbol().repr());
         }
     }
 
@@ -160,7 +192,12 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         if (ast.hasSuperInterfaces()) {
             addInterfaces(ast.getSuperInterfaces());
         }
-        super.visit(ast);
+        for (MethodDeclaration ctor : ast.getConstructors())
+            ctor.accept(this);
+        for (Block sb : ast.getStaticInitializers())
+            sb.accept(this);
+        for (Block ib : ast.getInstanceInitializers())
+            ib.accept(this);
     }
 
     /**
@@ -170,6 +207,21 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
     public void visit(Dimension ast) {
         for (Annotation a : ast.getAnnotations()) {
             a.accept(this);
+        }
+    }
+
+    /**
+     * Visit a EnumConstant node
+     * @param ast the AST node being visited
+     */
+    public void visit(EnumConstant ast) {
+        for (Expression e : ast.getArguments()) {
+            e.accept(this);
+        }
+        if (!ast.isEmpty()) {
+            MyClassSymbol tmp = currentClass;
+            ast.getBody().accept(this);
+            currentClass = tmp;
         }
     }
 
@@ -185,6 +237,12 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
             System.err.println("an enum cannot be final nor abstract");
         }
 
+        if (currentClass.isInner() &&
+            currentClass.isEnum() &&
+            currentClass.getDeclaringClass().isEnum()) {
+            currentClass.addModifier(Modifier.STATIC);
+        }
+
         boolean isFinal = true;
         MyClassSymbol decl = currentClass;
         for (EnumConstant c : ast.getConstants()) {
@@ -197,6 +255,13 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         if (isFinal) {
             currentClass.addModifier(Modifier.FINAL);
         }
+
+        for (EnumConstant c : ast.getConstants()) {
+            if (!c.isEmpty()) {
+                System.out.println(c.getBody().getSymbol().repr());
+            }
+        }
+
     }
 
     /**
@@ -214,6 +279,7 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
     public void visit(LocalClassDeclaration ast) {
         MyClassSymbol decl = currentClass;
         ast.getDeclaration().accept(this);
+        System.out.println(ast.getSymbol().repr());
         currentClass = decl;
     }
 
@@ -332,19 +398,6 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
             type.setBounds(bounds);
         }
         type.setAnnotations(makeAnnotations(ast.getAnnotations()));
-    }
-
-    protected void visitInnerBodies(BodyDeclaration ast) {
-        MyClassSymbol tmp = currentClass;
-        for (ConcreteBodyDeclaration c : ast.getInnerBodies()) {
-            currentClass = tmp;
-            c.accept(this);
-        }
-        for (AbstractBodyDeclaration a : ast.getInnerInterfaces()) {
-            currentClass = tmp;
-            a.accept(this);
-        }
-        currentClass = tmp;
     }
 
     private void addInterfaces(List<Expression> interfaces) {

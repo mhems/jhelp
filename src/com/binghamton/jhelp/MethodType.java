@@ -44,13 +44,13 @@ public class MethodType extends Type {
             sb.append("<");
             sb.append(StringUtils.join(", ",
                                        typeParams,
-                                       t -> t.getTypeName()));
+                                       t -> t.getName()));
             sb.append(">");
         }
         sb.append("(");
         sb.append(StringUtils.join(", ",
                                    paramTypes,
-                                   t -> t.getTypeName()));
+                                   t -> t.getName()));
         sb.append(")");
         return sb.toString();
     }
@@ -95,8 +95,7 @@ public class MethodType extends Type {
     public boolean equals(Object other) {
         if (other instanceof MethodType) {
             MethodType otherT = (MethodType)other;
-            return //declarer.equals(otherT.getDeclaringClass()) &&
-                this.isEquivalentTo(otherT);
+            return this.isEquivalentTo(otherT);
         }
         return false;
     }

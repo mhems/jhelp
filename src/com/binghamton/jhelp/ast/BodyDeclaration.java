@@ -17,8 +17,7 @@ public abstract class BodyDeclaration extends Declaration {
 
     protected List<VariableDeclaration> fields = new ArrayList<>();
     protected List<MethodDeclaration> methods = new ArrayList<>();
-    protected List<ConcreteBodyDeclaration> innerBodies = new ArrayList<>();
-    protected List<AbstractBodyDeclaration> innerInterfaces = new ArrayList<>();
+    protected List<BodyDeclaration> innerBodies = new ArrayList<>();
     protected Kind kind = Kind.TOP;
 
     /**
@@ -78,16 +77,8 @@ public abstract class BodyDeclaration extends Declaration {
      * Gets the inner bodies of this declaration
      * @return the inner bodies of this declaration
      */
-    public List<ConcreteBodyDeclaration> getInnerBodies() {
+    public List<BodyDeclaration> getInnerBodies() {
         return innerBodies;
-    }
-
-    /**
-     * Gets the inner abstract bodies of this declaration
-     * @return the inner abstract bodies of this declaration
-     */
-    public List<AbstractBodyDeclaration> getInnerInterfaces() {
-        return innerInterfaces;
     }
 
     /**
@@ -134,7 +125,7 @@ public abstract class BodyDeclaration extends Declaration {
      * Adds a inner body declaration to this body
      * @param decl the declaration to add
      */
-    public void addInnerBody(ConcreteBodyDeclaration decl) {
+    public void addInnerBody(BodyDeclaration decl) {
         decl.setKind(Kind.INNER);
         innerBodies.add(decl);
     }
@@ -145,23 +136,6 @@ public abstract class BodyDeclaration extends Declaration {
      */
     public int numInnerBodies() {
         return innerBodies.size();
-    }
-
-    /**
-     * Adds a inner abstract body declaration to this body
-     * @param decl the declaration to add
-     */
-    public void addInnerInterface(AbstractBodyDeclaration decl) {
-        decl.setKind(Kind.INNER);
-        innerInterfaces.add(decl);
-    }
-
-    /**
-     * Gets the number of inner abstract bodies declared in this body
-     * @return the number of inner abstract bodies declared in this body
-     */
-    public int numInnerInterfaces() {
-        return innerInterfaces.size();
     }
 
     public MyClassSymbol getSymbol() {

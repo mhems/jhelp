@@ -116,7 +116,6 @@ public abstract class ConcreteBodyDeclaration extends BodyDeclaration {
     public boolean isEmpty() {
         return getFields().isEmpty() &&
             getInnerBodies().isEmpty() &&
-            getInnerInterfaces().isEmpty() &&
             getStaticInitializers().isEmpty() &&
             getInstanceInitializers().isEmpty() &&
             getMethods().isEmpty() &&

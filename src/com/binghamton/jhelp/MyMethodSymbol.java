@@ -62,6 +62,7 @@ public class MyMethodSymbol extends MethodSymbol {
         typeVars = vars;
     }
 
+    @Override
     public ClassSymbol getDeclaringClass() {
         return owner;
     }
