@@ -46,7 +46,7 @@ public abstract class ConcreteBodyDeclaration extends BodyDeclaration {
      * @return true iff this declaration implements any interfaces
      */
     public boolean hasSuperInterfaces() {
-        return implementees.size() > 0;
+        return !implementees.isEmpty();
     }
 
     /**

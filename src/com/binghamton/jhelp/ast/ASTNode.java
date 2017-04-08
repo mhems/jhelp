@@ -3,9 +3,7 @@ package com.binghamton.jhelp.ast;
 import java.util.Comparator;
 import java.util.List;
 
-import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.misc.Interval;
 
 import com.binghamton.jhelp.antlr.MyToken;
 
@@ -78,8 +76,8 @@ public abstract class ASTNode implements Visitable, Comparable<ASTNode> {
     /**
      * Establishes whether this node is comprised of one or many Tokens
      */
-    public void setSingular() {
-        singular = first == last;
+    public final void setSingular() {
+        singular = first.equals(last);
     }
 
     /**
@@ -95,7 +93,7 @@ public abstract class ASTNode implements Visitable, Comparable<ASTNode> {
      * Gets the first token of this ASTNode
      * @return the first token of this ASTNode
      */
-    public Token getFirstToken() {
+    public final Token getFirstToken() {
         return first;
     }
 
@@ -103,7 +101,7 @@ public abstract class ASTNode implements Visitable, Comparable<ASTNode> {
      * Sets the first token of this ASTNode
      * @param first the first token of this ASTNode
      */
-    public void setFirstToken(Token first) {
+    public final void setFirstToken(Token first) {
         if (first != null && !(first instanceof MyToken)) {
             System.out.println(first);
             throw new IllegalArgumentException("AST Node tokens must be MyTokens");
@@ -116,7 +114,7 @@ public abstract class ASTNode implements Visitable, Comparable<ASTNode> {
      * Gets the last token of this ASTNode
      * @return the last token of this ASTNode
      */
-    public Token getLastToken() {
+    public final Token getLastToken() {
         return last;
     }
 
@@ -124,7 +122,7 @@ public abstract class ASTNode implements Visitable, Comparable<ASTNode> {
      * Sets the last token of this ASTNode
      * @param last the last token of this ASTNode
      */
-    public void setLastToken(Token last) {
+    public final void setLastToken(Token last) {
         if (last == null) {
             this.last = first;
             singular = true;
@@ -143,8 +141,12 @@ public abstract class ASTNode implements Visitable, Comparable<ASTNode> {
      */
     @Override
     public boolean equals(Object other) {
-        return this == other;
-
+        if (other instanceof ASTNode){
+            ASTNode oNode = (ASTNode)other;
+            return first.equals(oNode.first) &&
+                last.equals(oNode.last);
+        }
+        return false;
     }
 
     /**

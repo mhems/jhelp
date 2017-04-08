@@ -1,10 +1,6 @@
 package com.binghamton.jhelp;
 
 import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.antlr.v4.runtime.Token;
 
 import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
 
@@ -12,7 +8,7 @@ import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
  * Class representing an array type
  */
 public class ArrayType extends ReferenceType {
-    private Type base;
+    private final Type base;
 
     /**
      * Construct a named array type

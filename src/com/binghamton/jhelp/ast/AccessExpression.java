@@ -1,13 +1,11 @@
 package com.binghamton.jhelp.ast;
 
-import org.antlr.v4.runtime.Token;
-
 /**
  * A class representing a Java symbol access expression
  */
 public class AccessExpression extends QualifiableExpression {
     private Expression lhs;
-    private NameExpression rhs;
+    private final NameExpression rhs;
 
     /**
      * Construct a new Java symbol access expression

@@ -9,9 +9,9 @@ import com.binghamton.jhelp.MyPackage;
  */
 public class CompilationUnit extends ASTNode {
     private String filename;
-    private PackageStatement pkg;
-    private List<ImportStatement> imports;
-    private List<BodyDeclaration> bodies;
+    private final PackageStatement pkg;
+    private final List<ImportStatement> imports;
+    private final List<BodyDeclaration> bodies;
     private MyPackage declaringPackage;
 
     /**

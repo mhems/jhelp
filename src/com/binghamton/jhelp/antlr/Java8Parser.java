@@ -5882,7 +5882,7 @@ public class Java8Parser extends Parser {
 				match(RPAREN);
 				setState(1467);
 				((ExplicitConstructorInvocationContext)_localctx).last = match(SEMI);
-				((ExplicitConstructorInvocationContext)_localctx).ret =  new CallExpression(((ExplicitConstructorInvocationContext)_localctx).last, createTypeName(((ExplicitConstructorInvocationContext)_localctx).kw),
+				((ExplicitConstructorInvocationContext)_localctx).ret =  new CallExpression(((ExplicitConstructorInvocationContext)_localctx).last, createTypeName(((ExplicitConstructorInvocationContext)_localctx).kw), ((ExplicitConstructorInvocationContext)_localctx).kw,
 				                                   _localctx.args, _localctx.targs);
 				}
 				break;
@@ -5919,7 +5919,7 @@ public class Java8Parser extends Parser {
 				match(RPAREN);
 				setState(1482);
 				((ExplicitConstructorInvocationContext)_localctx).last = match(SEMI);
-				((ExplicitConstructorInvocationContext)_localctx).ret =  new CallExpression(((ExplicitConstructorInvocationContext)_localctx).last, createTypeName(((ExplicitConstructorInvocationContext)_localctx).kw),
+				((ExplicitConstructorInvocationContext)_localctx).ret =  new CallExpression(((ExplicitConstructorInvocationContext)_localctx).last, createTypeName(((ExplicitConstructorInvocationContext)_localctx).kw), ((ExplicitConstructorInvocationContext)_localctx).kw,
 				                                   _localctx.args, _localctx.targs);
 				}
 				break;
@@ -5964,6 +5964,7 @@ public class Java8Parser extends Parser {
 				            ((ExplicitConstructorInvocationContext)_localctx).ret =  new CallExpression(((ExplicitConstructorInvocationContext)_localctx).last,
 				                                      new AccessExpression(((ExplicitConstructorInvocationContext)_localctx).en.ret,
 				                                                           createTypeName(((ExplicitConstructorInvocationContext)_localctx).kw)),
+				                                      ((ExplicitConstructorInvocationContext)_localctx).kw,
 				                                      _localctx.args,
 				                                      _localctx.targs);
 				        
@@ -6010,6 +6011,7 @@ public class Java8Parser extends Parser {
 				            ((ExplicitConstructorInvocationContext)_localctx).ret =  new CallExpression(((ExplicitConstructorInvocationContext)_localctx).last,
 				                                      new AccessExpression(((ExplicitConstructorInvocationContext)_localctx).p.ret,
 				                                                           createTypeName(((ExplicitConstructorInvocationContext)_localctx).kw)),
+				                                      ((ExplicitConstructorInvocationContext)_localctx).kw,
 				                                      _localctx.args,
 				                                      _localctx.targs);
 				        
@@ -13330,7 +13332,7 @@ public class Java8Parser extends Parser {
 				match(LT);
 				setState(2956);
 				match(GT);
-				((TypeArgumentsOrDiamondContext)_localctx).ret =  new ArrayList<>(); _localctx.ret.add(new TypeArgument());
+				((TypeArgumentsOrDiamondContext)_localctx).ret =  new ArrayList<>();
 				}
 				break;
 			}
@@ -13930,6 +13932,7 @@ public class Java8Parser extends Parser {
 				            ((MethodInvocationContext)_localctx).ret =  new CallExpression(((MethodInvocationContext)_localctx).last,
 				                                      new AccessExpression(((MethodInvocationContext)_localctx).tn.ret,
 				                                                           createMethodName(((MethodInvocationContext)_localctx).id)),
+				                                      ((MethodInvocationContext)_localctx).id,
 				                                      _localctx.args,
 				                                      _localctx.targs);
 				        
@@ -13974,6 +13977,7 @@ public class Java8Parser extends Parser {
 				            ((MethodInvocationContext)_localctx).ret =  new CallExpression(((MethodInvocationContext)_localctx).last,
 				                                      new AccessExpression(((MethodInvocationContext)_localctx).en.ret,
 				                                                           createMethodName(((MethodInvocationContext)_localctx).id)),
+				                                      ((MethodInvocationContext)_localctx).id,
 				                                      _localctx.args,
 				                                      _localctx.targs);
 				        
@@ -14018,6 +14022,7 @@ public class Java8Parser extends Parser {
 				            ((MethodInvocationContext)_localctx).ret =  new CallExpression(((MethodInvocationContext)_localctx).last,
 				                                      new AccessExpression(((MethodInvocationContext)_localctx).p.ret,
 				                                                           createMethodName(((MethodInvocationContext)_localctx).id)),
+				                                      ((MethodInvocationContext)_localctx).id,
 				                                      _localctx.args,
 				                                      _localctx.targs);
 				        
@@ -14062,6 +14067,7 @@ public class Java8Parser extends Parser {
 				            ((MethodInvocationContext)_localctx).ret =  new CallExpression(((MethodInvocationContext)_localctx).last,
 				                                      new AccessExpression(createTypeName(((MethodInvocationContext)_localctx).kw),
 				                                                           createMethodName(((MethodInvocationContext)_localctx).id)),
+				                                      ((MethodInvocationContext)_localctx).id,
 				                                      _localctx.args,
 				                                      _localctx.targs);
 				        
@@ -14111,6 +14117,7 @@ public class Java8Parser extends Parser {
 				                                      new AccessExpression(new AccessExpression(((MethodInvocationContext)_localctx).tn.ret,
 				                                                                                createTypeName(((MethodInvocationContext)_localctx).kw)),
 				                                                           createMethodName(((MethodInvocationContext)_localctx).id)),
+				                                      ((MethodInvocationContext)_localctx).id,
 				                                      _localctx.args,
 				                                      _localctx.targs);
 				        
@@ -14302,6 +14309,7 @@ public class Java8Parser extends Parser {
 				            ((MethodInvocation_lfno_primaryContext)_localctx).ret =  new CallExpression(((MethodInvocation_lfno_primaryContext)_localctx).last,
 				                                      new AccessExpression(((MethodInvocation_lfno_primaryContext)_localctx).tn.ret,
 				                                                           createMethodName(((MethodInvocation_lfno_primaryContext)_localctx).id)),
+				                                      ((MethodInvocation_lfno_primaryContext)_localctx).id,
 				                                      _localctx.args,
 				                                      _localctx.targs);
 				        
@@ -14346,6 +14354,7 @@ public class Java8Parser extends Parser {
 				            ((MethodInvocation_lfno_primaryContext)_localctx).ret =  new CallExpression(((MethodInvocation_lfno_primaryContext)_localctx).last,
 				                                      new AccessExpression(((MethodInvocation_lfno_primaryContext)_localctx).en.ret,
 				                                                           createMethodName(((MethodInvocation_lfno_primaryContext)_localctx).id)),
+				                                      ((MethodInvocation_lfno_primaryContext)_localctx).id,
 				                                      _localctx.args,
 				                                      _localctx.targs);
 				        
@@ -14390,6 +14399,7 @@ public class Java8Parser extends Parser {
 				            ((MethodInvocation_lfno_primaryContext)_localctx).ret =  new CallExpression(((MethodInvocation_lfno_primaryContext)_localctx).last,
 				                                      new AccessExpression(createTypeName(((MethodInvocation_lfno_primaryContext)_localctx).kw),
 				                                                           createMethodName(((MethodInvocation_lfno_primaryContext)_localctx).id)),
+				                                      ((MethodInvocation_lfno_primaryContext)_localctx).id,
 				                                      _localctx.args,
 				                                      _localctx.targs);
 				        
@@ -14439,6 +14449,7 @@ public class Java8Parser extends Parser {
 				                                      new AccessExpression(new AccessExpression(((MethodInvocation_lfno_primaryContext)_localctx).tn.ret,
 				                                                                                createTypeName(((MethodInvocation_lfno_primaryContext)_localctx).kw)),
 				                                                           createMethodName(((MethodInvocation_lfno_primaryContext)_localctx).id)),
+				                                      ((MethodInvocation_lfno_primaryContext)_localctx).id,
 				                                      _localctx.args,
 				                                      _localctx.targs);
 				        

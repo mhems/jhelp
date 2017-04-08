@@ -10,7 +10,6 @@ public class ArrayAccessExpression extends QualifiableExpression {
     private QualifiableExpression qualExpr;
     private Expression indexExpr;
 
-
     public ArrayAccessExpression(Token last,
                                  QualifiableExpression arrayExpr,
                                  Expression indexExpr) {

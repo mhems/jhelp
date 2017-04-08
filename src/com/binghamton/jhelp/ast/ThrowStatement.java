@@ -6,7 +6,7 @@ import org.antlr.v4.runtime.Token;
  * A class representing a Java throws statement
  */
 public class ThrowStatement extends Statement {
-    private Expression expr;
+    private final Expression expr;
 
     /**
      * Construct a new throw statement

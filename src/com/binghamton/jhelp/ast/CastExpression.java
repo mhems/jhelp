@@ -58,7 +58,7 @@ public class CastExpression extends Expression {
     }
 
     public boolean hasBounds() {
-        return bounds.size() > 0;
+        return !bounds.isEmpty();
     }
 
     /**

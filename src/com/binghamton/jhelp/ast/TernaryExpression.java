@@ -4,9 +4,9 @@ package com.binghamton.jhelp.ast;
  * A class representing a Java ternary expression
  */
 public class TernaryExpression extends Expression {
-    private Expression condition;
-    private Expression thenExpr;
-    private Expression elseExpr;
+    private final Expression condition;
+    private final Expression thenExpr;
+    private final Expression elseExpr;
 
     /**
      * Construct a new ternary expression

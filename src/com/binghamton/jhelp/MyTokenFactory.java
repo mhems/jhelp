@@ -8,11 +8,9 @@ import org.antlr.v4.runtime.misc.Pair;
 
 
 public class MyTokenFactory implements TokenFactory<MyToken> {
-    private CharStream input;
-    private CommonTokenStream stream;
+    private final CommonTokenStream stream;
 
     public MyTokenFactory(CharStream input, CommonTokenStream stream) {
-        this.input = input;
         this.stream = stream;
     }
 

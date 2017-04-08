@@ -12,8 +12,8 @@ import com.binghamton.jhelp.MyVariableSymbol;
  * A class representing a constant in a Java enum
  */
 public class EnumConstant extends Declaration {
-    private List<Expression> arguments;
-    private ConcreteBodyDeclaration body = new ClassDeclaration();
+    private final List<Expression> arguments;
+    private final ConcreteBodyDeclaration body = new ClassDeclaration();
 
     /**
      * Construct an enum constant

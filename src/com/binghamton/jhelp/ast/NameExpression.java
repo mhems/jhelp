@@ -6,7 +6,6 @@ import java.util.List;
 import org.antlr.v4.runtime.Token;
 
 import com.binghamton.jhelp.Package;
-import com.binghamton.jhelp.Symbol;
 
 /**
  * A class representing Java identifiers over several categories.
@@ -23,7 +22,6 @@ public class NameExpression extends Expression {
     private Token name;
 
     private Package pkg;
-    private Symbol sym;
 
     public NameExpression(NameExpression qualifier, NameExpression expr) {
         super(qualifier.getFirstToken(), expr.getLastToken());
@@ -159,14 +157,6 @@ public class NameExpression extends Expression {
 
     public void setPackage(Package pkg) {
         this.pkg = pkg;
-    }
-
-    public Symbol getSymbol() {
-        return sym;
-    }
-
-    public void setSymbol(Symbol sym) {
-        this.sym = sym;
     }
 
     /**

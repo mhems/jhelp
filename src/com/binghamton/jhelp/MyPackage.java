@@ -13,9 +13,9 @@ public class MyPackage extends Package {
             }
         };
 
-    private NamedSymbolTable<ClassSymbol> classes = new NamedSymbolTable<>();
+    private final NamedSymbolTable<ClassSymbol> classes = new NamedSymbolTable<>();
     private MyPackage parent;
-    private List<MyPackage> children = new ArrayList<>();
+    private final List<MyPackage> children = new ArrayList<>();
     private AnnotationSymbol[] annotations = {};
 
     /**
@@ -82,7 +82,7 @@ public class MyPackage extends Package {
     }
 
     public boolean hasSubPackages() {
-        return children.size() > 0;
+        return !children.isEmpty();
     }
 
     public MyPackage getSubPackage(String name) {

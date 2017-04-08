@@ -12,7 +12,8 @@ public class CallExpression extends QualifiableExpression {
     private Expression methodExpr;
     private NameExpression nameExpr;
     private List<Expression> args;
-    private List<TypeArgument> typeArgs = new ArrayList<>();
+    private List<TypeArgument> typeArgs;
+    private Token name;
 
     /**
      * Construct a new call expression
@@ -23,30 +24,13 @@ public class CallExpression extends QualifiableExpression {
     public CallExpression(Token last,
                           Token id,
                           List<Expression> args) {
-        super(id, last);
-        this.nameExpr = NameExpression.createMethodName(id);
-        this.methodExpr = this.nameExpr;
-        this.args = args;
+        this(last, id, args, new ArrayList<>());
     }
 
     /**
      * Construct a new call expression
      * @param last the last token of this ASTNode
-     * @param methodExpr the expression yielding the method being called
-     * @param args the list of arguments to the method call
-     */
-    public CallExpression(Token last,
-                          Expression methodExpr,
-                          List<Expression> args) {
-        super(methodExpr.getFirstToken(), last);
-        this.methodExpr = methodExpr;
-        this.args = args;
-    }
-
-    /**
-     * Construct a new call expression
-     * @param last the last token of this ASTNode
-     * @param id the token of the methd being called
+     * @param id the token of the method being called
      * @param args the list of arguments to the method call
      * @param typeArgs the list of type arguments to the method call
      */
@@ -54,9 +38,9 @@ public class CallExpression extends QualifiableExpression {
                           Token id,
                           List<Expression> args,
                           List<TypeArgument> typeArgs) {
-        this(ASTNode.getFirstToken(id, typeArgs),
-             last,
+        this(last,
              NameExpression.createMethodName(id),
+             id,
              args,
              typeArgs);
     }
@@ -65,15 +49,18 @@ public class CallExpression extends QualifiableExpression {
      * Construct a new call expression
      * @param last the last token of this ASTNode
      * @param methodExpr the expression yielding the method being called
+     * @param name the Token holding the method name
      * @param args the list of arguments to the method call
      * @param typeArgs the list of type arguments to the method call
      */
     public CallExpression(Token last,
                           Expression methodExpr,
+                          Token name,
                           List<Expression> args,
                           List<TypeArgument> typeArgs) {
         super(methodExpr.getFirstToken(), last);
         this.methodExpr = methodExpr;
+        this.name = name;
         this.args = args;
         this.typeArgs = typeArgs;
     }
@@ -135,7 +122,7 @@ public class CallExpression extends QualifiableExpression {
      * @return true iff this call has any type arguments
      */
     public boolean hasTypeArguments() {
-        return typeArgs.size() > 0;
+        return !typeArgs.isEmpty();
     }
 
     /**
@@ -155,6 +142,10 @@ public class CallExpression extends QualifiableExpression {
             return typeArgs.size();
         }
         return 0;
+    }
+
+    public Token getName() {
+        return name;
     }
 
     /**

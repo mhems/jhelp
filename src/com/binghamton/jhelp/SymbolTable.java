@@ -1,6 +1,5 @@
 package com.binghamton.jhelp;
 
-import java.util.Arrays;
 import java.util.ArrayDeque;
 import java.util.Map;
 import java.util.HashMap;
@@ -12,6 +11,10 @@ import java.util.function.Function;
  */
 public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
 
+    protected SymbolTable<K, V> parent;
+    protected ArrayDeque<Map<K, V>> table = new ArrayDeque<>();
+    protected Function<V, K> valueToKey;
+
     private final class EmptyTable<S extends Symbol> extends SymbolTable<K, S> {
         private EmptyTable() {
             super(true);
@@ -19,10 +22,6 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
         public S get(K key) { return null; }
         public int totalSize() { return 0; }
     }
-
-    protected SymbolTable<K, V> parent;
-    protected ArrayDeque<Map<K, V>> table = new ArrayDeque<>();
-    protected Function<V, K> valueToKey;
 
         {
             // ensure table is non-empty
@@ -40,7 +39,7 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
 
     public SymbolTable(SymbolTable<K, V> parent) {
         this.valueToKey = parent.valueToKey;
-        setParent(parent);
+        this.parent = parent;
     }
 
     /**
@@ -188,7 +187,7 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
     }
 
     private class SymbolTableIterator implements Iterator<V> {
-        private Iterator<Map<K, V>> tableItr;
+        private final Iterator<Map<K, V>> tableItr;
         private Iterator<V> scopeItr;
 
         public SymbolTableIterator(ArrayDeque<Map<K, V>> table) {
@@ -241,11 +240,9 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
 
     public boolean importStaticMemberOnDemand(V[] members) {
         for (V member : members) {
-            if (member.isStatic()) {
-                if (!put(member)) {
-                    System.err.println("cannot import two members with same name");
-                    return false;
-                }
+            if (member.isStatic() && !put(member)) {
+                System.err.println("cannot import two members with same name");
+                return false;
             }
         }
         return true;

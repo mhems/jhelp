@@ -1,6 +1,6 @@
 package com.binghamton.jhelp;
 
-import java.util.Arrays;
+import java.util.List;
 
 import com.binghamton.jhelp.util.StringUtils;
 
@@ -16,6 +16,8 @@ public abstract class MethodSymbol extends Symbol {
         }
 
     private MethodType type;
+    private int arity;
+    private int typeArity;
 
     /**
      * Constructs a new named method symbol
@@ -46,6 +48,38 @@ public abstract class MethodSymbol extends Symbol {
      */
     public abstract Type[] getParameterTypes();
 
+    public Type[] getVariadicParameterTypesFor(int numArgs) {
+        Type[] paramTypes = getParameterTypes();
+        Type[] ret = new Type[numArgs];
+        int n = paramTypes.length - 1;
+        for (int i = 0; i < n; i++) {
+            ret[i] = paramTypes[i];
+        }
+        for (int i = n; i < numArgs; i++) {
+            ret[i] = paramTypes[n];
+        }
+        return ret;
+    }
+
+    public static MethodSymbol mostSpecificMethod(List<MethodSymbol> methods,
+                                                  int k,
+                                                  boolean variadic) {
+        if (methods.size() == 1) {
+            return methods.get(0);
+        }
+        // TODO
+        // if both non-variadic
+        return null;
+    }
+
+    public boolean isMoreSpecificThan(MethodSymbol other) {
+        return false;
+    }
+
+    public int arity() {
+        return arity;
+    }
+
     public int numParameters() {
         return getParameterTypes().length;
     }
@@ -69,6 +103,14 @@ public abstract class MethodSymbol extends Symbol {
     }
 
     public abstract TypeVariable[] getTypeParameters();
+
+    public int typeArity() {
+        return typeArity;
+    }
+
+    public boolean isGeneric() {
+        return typeArity > 0;
+    }
 
     public boolean hasTypeParameters() {
         return getTypeParameters().length > 0;
@@ -130,6 +172,8 @@ public abstract class MethodSymbol extends Symbol {
 
     public void constructType() {
         type = MethodType.fromMethod(this);
+        arity = getParameterTypes().length;
+        typeArity = getTypeParameters().length;
     }
 
     public MethodType getType() {

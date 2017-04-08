@@ -3,6 +3,7 @@ package com.binghamton.jhelp.ast;
 import org.antlr.v4.runtime.Token;
 
 import com.binghamton.jhelp.Type;
+import com.binghamton.jhelp.Symbol;
 
 /**
  * Base class representing a Java syntactic expression
@@ -10,6 +11,7 @@ import com.binghamton.jhelp.Type;
 public abstract class Expression extends Statement {
 
     protected Type type;
+    protected Symbol sym;
 
     /**
      * Construct an empty Expression
@@ -51,5 +53,13 @@ public abstract class Expression extends Statement {
 
     public void setType(Type type) {
         this.type = type;
+    }
+
+    public Symbol getSymbol() {
+        return sym;
+    }
+
+    public void setSymbol(Symbol sym) {
+        this.sym = sym;
     }
 }

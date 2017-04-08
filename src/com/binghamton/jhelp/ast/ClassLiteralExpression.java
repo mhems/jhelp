@@ -6,7 +6,7 @@ import org.antlr.v4.runtime.Token;
  * A class representing a Java class literal
  */
 public class ClassLiteralExpression extends Expression {
-    private Expression typeExpr;
+    private final Expression typeExpr;
 
     /**
      * Construct a new ClassLiteralExpression

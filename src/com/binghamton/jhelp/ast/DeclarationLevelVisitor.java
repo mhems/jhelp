@@ -1,20 +1,15 @@
 package com.binghamton.jhelp.ast;
 
 import java.util.List;
-import java.util.HashSet;
-import java.util.Set;
 
 import com.binghamton.jhelp.AnnotationSymbol;
 import com.binghamton.jhelp.ArrayType;
 import com.binghamton.jhelp.ClassSymbol;
-import com.binghamton.jhelp.ImportManager;
 import com.binghamton.jhelp.MyClassSymbol;
 import com.binghamton.jhelp.Modifier;
-import com.binghamton.jhelp.ReflectedClassSymbol;
 import com.binghamton.jhelp.Package;
 import com.binghamton.jhelp.ParameterizedType;
 import com.binghamton.jhelp.Program;
-import com.binghamton.jhelp.PrimitiveType;
 import com.binghamton.jhelp.ReferenceType;
 import com.binghamton.jhelp.Type;
 import com.binghamton.jhelp.TypeVariable;
@@ -122,15 +117,14 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
             enclosingSym = enclosingSym.getDeclaringClass();
         }
 
-        if (currentClass.isInner()) {
-            if (currentClass.getDeclaringClass().isInterfaceLike()) {
-                currentClass.addModifier(Modifier.PUBLIC);
-                currentClass.addModifier(Modifier.STATIC);
-                currentClass.setAccessLevel(ClassSymbol.AccessLevel.PUBLIC);
-                if (currentClass.hasModifier(Modifier.PROTECTED) ||
-                    currentClass.hasModifier(Modifier.PRIVATE)) {
-                    System.err.println("a member type in an interface cannot be protected or private");
-                }
+        if (currentClass.isInner() &&
+            currentClass.getDeclaringClass().isInterfaceLike()) {
+            currentClass.addModifier(Modifier.PUBLIC);
+            currentClass.addModifier(Modifier.STATIC);
+            currentClass.setAccessLevel(ClassSymbol.AccessLevel.PUBLIC);
+            if (currentClass.hasModifier(Modifier.PROTECTED) ||
+                currentClass.hasModifier(Modifier.PRIVATE)) {
+                System.err.println("a member type in an interface cannot be protected or private");
             }
         }
 
@@ -279,7 +273,7 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
     public void visit(LocalClassDeclaration ast) {
         MyClassSymbol decl = currentClass;
         ast.getDeclaration().accept(this);
-        System.out.println(ast.getSymbol().repr());
+        System.out.println(ast.getDeclaration().getSymbol().repr());
         currentClass = decl;
     }
 
@@ -305,7 +299,9 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
             if (!ast.isQualified()) {
                 type = currentClass.getType(name);
             } else {
-                qual.accept(this);
+                if (qual.getKind() == Kind.PACKAGE_OR_TYPE) {
+                    qual.accept(this);
+                }
                 if (qual.getKind() == Kind.PACKAGE) {
                     type = qual.getPackage().getClass(rName);
                 } else {

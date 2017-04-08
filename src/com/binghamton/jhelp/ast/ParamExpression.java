@@ -1,11 +1,10 @@
 package com.binghamton.jhelp.ast;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ParamExpression extends Expression {
-    private Expression expr;
-    private List<TypeArgument> targs;
+    private final Expression expr;
+    private final List<TypeArgument> targs;
 
     public ParamExpression(Expression expr, List<TypeArgument> targs) {
         super(expr.getFirstToken(), targs.get(targs.size()-1).getLastToken());

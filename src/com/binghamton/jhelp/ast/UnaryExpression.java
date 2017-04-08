@@ -6,8 +6,8 @@ import org.antlr.v4.runtime.Token;
  * A class representing a Java unary expression
  */
 public class UnaryExpression extends Expression {
-    private Expression expr;
-    private UnaryOperator op;
+    private final Expression expr;
+    private final UnaryOperator op;
 
     /**
      * Construct a new unary expression

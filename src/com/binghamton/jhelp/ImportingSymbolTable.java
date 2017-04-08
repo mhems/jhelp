@@ -3,10 +3,7 @@ package com.binghamton.jhelp;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -124,12 +121,10 @@ public class ImportingSymbolTable extends NamedSymbolTable<ClassSymbol> {
         } catch(ClassNotFoundException e) {
             System.err.println("could not import " + classname);
         }
-        if (cls != null) {
-            if (!put(cls)) {
-                if (!get(classname).equals(cls)) {
-                    System.err.println("cannot import two different classes with same name");
-                }
-            }
+        if (cls != null &&
+            !put(cls) &&
+            !get(classname).equals(cls)) {
+            System.err.println("cannot import two different classes with same name");
         }
         return cls != null;
     }

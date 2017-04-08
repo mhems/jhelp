@@ -1,17 +1,16 @@
 package com.binghamton.jhelp.util;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.TreeSet;
 
 public class DiGraph<E> {
 
     private static enum Color { WHITE, GRAY, BLACK };
+    private final Map<DiGraphNode, List<DiGraphNode>> edgeMap = new HashMap<>();
+    private final List<E> sorted = new ArrayList<>();
+    private boolean acyclic = true;
 
     private class DiGraphNode {
         public final E value;
@@ -25,11 +24,6 @@ public class DiGraph<E> {
             return value.toString();
         }
     }
-
-    // map nodes to nodes they connect to
-    private Map<DiGraphNode, List<DiGraphNode>> edgeMap = new HashMap<>();
-    private List<E> sorted = new ArrayList<>();
-    private boolean acyclic = true;
 
     public void addNode(E value) {
         addNode(new DiGraphNode(value));
@@ -63,14 +57,14 @@ public class DiGraph<E> {
     }
 
     public boolean isAcyclic() {
-        if (sorted.size() == 0) {
+        if (sorted.isEmpty()) {
             DFS();
         }
         return acyclic;
     }
 
     public List<E> topologicalSort() {
-        if (sorted.size() == 0) {
+        if (sorted.isEmpty()) {
             DFS();
         }
         if (!acyclic)

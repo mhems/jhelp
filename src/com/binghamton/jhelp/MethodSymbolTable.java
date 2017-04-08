@@ -1,6 +1,5 @@
 package com.binghamton.jhelp;
 
-import java.util.Map;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Function;
@@ -16,10 +15,8 @@ public class MethodSymbolTable extends SymbolTable<MethodType, MethodSymbol> {
         Set<MethodSymbol> ret = new HashSet<>();
         Set<MethodType> types = new HashSet<>();
         for (MethodSymbol sym : this) {
-            if (sym.getName().equals(name)) {
-                if (types.add(sym.getType())) {
-                    ret.add(sym);
-                }
+            if (sym.getName().equals(name) && types.add(sym.getType())) {
+                ret.add(sym);
             }
         }
         return ret;

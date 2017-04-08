@@ -11,15 +11,12 @@ import org.antlr.v4.runtime.Lexer;
 
 import com.binghamton.jhelp.antlr.Java8Lexer;
 import com.binghamton.jhelp.antlr.Java8Parser;
-import com.binghamton.jhelp.antlr.MyToken;
 import com.binghamton.jhelp.antlr.MyTokenFactory;
-import com.binghamton.jhelp.ast.ASTVisitor;
-import com.binghamton.jhelp.ast.CompilationUnit;
-import com.binghamton.jhelp.ast.FileLevelVisitor;
-import com.binghamton.jhelp.ast.DeclarationLevelVisitor;
 import com.binghamton.jhelp.ast.BodyLevelVisitor;
 import com.binghamton.jhelp.ast.CodeLevelVisitor;
-import com.binghamton.jhelp.ast.NonNullVisitor;
+import com.binghamton.jhelp.ast.CompilationUnit;
+import com.binghamton.jhelp.ast.DeclarationLevelVisitor;
+import com.binghamton.jhelp.ast.FileLevelVisitor;
 import com.binghamton.jhelp.error.ExceptionError;
 import com.binghamton.jhelp.error.JHelpError;
 
@@ -51,10 +48,6 @@ public class JavaValidator implements Validator {
                 lexer.setTokenFactory(factory);
                 parser = new Java8Parser(stream);
                 parser.setTokenFactory(factory);
-                if (false) {
-                    // parser.removeErrorListeners();
-                    parser.addErrorListener(new DiagnosticErrorListener(false));
-                }
                 parser.setBuildParseTree(false);
                 cu = parser.compilationUnit().ret;
                 if (parser.getNumberOfSyntaxErrors() == 0) {
@@ -72,10 +65,11 @@ public class JavaValidator implements Validator {
             program.topologicalSort();
 
             System.out.println("---------- BODY ----------");
-            new BodyLevelVisitor(program).visitInOrder();
+            BodyLevelVisitor bodyV = new BodyLevelVisitor(program);
+            bodyV.visitInOrder();
 
             System.out.println("---------- CODE ----------");
-            new CodeLevelVisitor(program).visitAll();
+            new CodeLevelVisitor(program, bodyV).visitAll();
 
         } catch (IOException e) {
             errors.add(new ExceptionError(e));

@@ -9,9 +9,9 @@ import org.antlr.v4.runtime.Token;
  * A class representing the use of Java annotation
  */
 public class Annotation extends Expression {
-// must extend Expression for element-value pairs
-    private Map<Token, Expression> nameValueMap = new HashMap<>();
-    private Expression expr;
+    // must extend Expression for element-value pairs
+    private final Map<Token, Expression> nameValueMap = new HashMap<>();
+    private final Expression expr;
 
     /**
      * Construct an annotation
@@ -41,7 +41,7 @@ public class Annotation extends Expression {
      * @return true iff this annotation is a marker annotation
      */
     public boolean isMarker() {
-        return nameValueMap.size() == 0;
+        return nameValueMap.isEmpty();
     }
 
     /**

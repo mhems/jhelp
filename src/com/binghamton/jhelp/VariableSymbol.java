@@ -1,7 +1,5 @@
 package com.binghamton.jhelp;
 
-import org.antlr.v4.runtime.Token;
-
 import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
 
 /**

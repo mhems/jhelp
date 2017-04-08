@@ -1,9 +1,7 @@
 package com.binghamton.jhelp;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * A class to manage imports in Java source programs.
@@ -13,6 +11,10 @@ import java.util.Set;
  */
 public class ImportManager {
     private static final Map<String, ReflectedClassSymbol> cache = new HashMap<>();
+
+    private ImportManager() {
+
+    }
 
     /**
      * Determines if a symbol has been explicity imported

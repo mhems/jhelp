@@ -1,14 +1,12 @@
 package com.binghamton.jhelp.ast;
 
-import org.antlr.v4.runtime.Token;
-
 /**
  * A class representing a Java assignment expression
  */
 public class AssignmentExpression extends Expression {
-    private Expression lhs;
-    private Expression rhs;
-    private BinaryOperator op;
+    private final Expression lhs;
+    private final Expression rhs;
+    private final BinaryOperator op;
 
     /**
      * Construct a new compound assignment expression

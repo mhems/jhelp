@@ -3,7 +3,6 @@ package com.binghamton.jhelp;
 import java.io.IOException;
 import java.io.File;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 import java.util.HashMap;
@@ -15,7 +14,6 @@ import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.Token;
 
 import com.binghamton.jhelp.antlr.Balance;
-import com.binghamton.jhelp.antlr.MyToken;
 import com.binghamton.jhelp.error.ExceptionError;
 import com.binghamton.jhelp.error.JHelpError;
 import com.binghamton.jhelp.error.UnbalancedBracesError;

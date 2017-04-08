@@ -1,7 +1,5 @@
 package com.binghamton.jhelp.antlr;
 
-import java.util.stream.IntStream;
-
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.Token;
@@ -81,6 +79,19 @@ public class MyToken extends CommonToken {
                              token.getCharPositionInLine(),
                              token.getText(),
                              token.getChannel());
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof MyToken) {
+            MyToken oT = (MyToken)other;
+            return type == oT.type &&
+                channel == oT.channel &&
+                start == oT.start &&
+                stop == oT.stop &&
+                stream.equals(oT.stream);
+        }
+        return false;
     }
 
     @Override

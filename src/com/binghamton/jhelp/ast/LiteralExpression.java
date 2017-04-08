@@ -8,7 +8,7 @@ import com.binghamton.jhelp.Type;
  * A class representing a Java literal
  */
 public class LiteralExpression extends Expression {
-    private String value;
+    private final String value;
 
     /**
      * Construct a new LiteralExpression

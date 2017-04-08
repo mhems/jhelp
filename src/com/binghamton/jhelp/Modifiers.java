@@ -1,6 +1,5 @@
 package com.binghamton.jhelp;
 
-import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -16,7 +15,7 @@ import com.binghamton.jhelp.util.StringUtils;
 public class Modifiers {
     private static final List<Modifier> ORDERED_MODIFIERS = new ArrayList<>();
     private static final Comparator<Modifier> BY_STANDARD;
-    private Set<Modifier> modifiers = new HashSet<>();
+    private final Set<Modifier> modifiers = new HashSet<>();
 
     static {
         BY_STANDARD = (a, b) ->

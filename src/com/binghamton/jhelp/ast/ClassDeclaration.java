@@ -57,7 +57,7 @@ public class ClassDeclaration extends ConcreteBodyDeclaration {
      * @return true iff this class has type parameters
      */
     public boolean hasTypeParameters() {
-        return typeParams.size() > 0;
+        return !typeParams.isEmpty();
     }
 
     /**

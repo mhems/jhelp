@@ -3,7 +3,7 @@ package com.binghamton.jhelp;
 import java.lang.reflect.Field;
 
 public class ReflectedVariableSymbol extends VariableSymbol {
-    private Field field = null;
+    private final Field field;
 
         {
             setVariableKind(VariableKind.FIELD);

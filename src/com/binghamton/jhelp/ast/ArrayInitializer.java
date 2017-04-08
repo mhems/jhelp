@@ -10,7 +10,7 @@ import com.binghamton.jhelp.ArrayType;
  * A class representing a Java array initializer
  */
 public class ArrayInitializer extends Expression {
-    private List<Expression> elements;
+    private final List<Expression> elements;
 
     /**
      * Construct a new Java array initializer

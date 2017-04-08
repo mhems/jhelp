@@ -1,7 +1,6 @@
 package com.binghamton.jhelp.ast;
 
 import java.util.List;
-import java.util.ArrayList;
 
 import org.antlr.v4.runtime.Token;
 

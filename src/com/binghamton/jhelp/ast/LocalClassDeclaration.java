@@ -1,10 +1,8 @@
 package com.binghamton.jhelp.ast;
 
-import com.binghamton.jhelp.MyClassSymbol;
-
 public class LocalClassDeclaration extends Statement {
 
-    private ConcreteBodyDeclaration cls;
+    private final ConcreteBodyDeclaration cls;
 
     public LocalClassDeclaration(ConcreteBodyDeclaration cls) {
         this.cls = cls;
@@ -13,10 +11,6 @@ public class LocalClassDeclaration extends Statement {
 
     public ConcreteBodyDeclaration getDeclaration() {
         return cls;
-    }
-
-    public MyClassSymbol getSymbol() {
-        return cls.getSymbol();
     }
 
     /**

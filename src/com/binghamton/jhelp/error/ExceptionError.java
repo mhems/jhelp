@@ -1,8 +1,7 @@
 package com.binghamton.jhelp.error;
 
-
 public class ExceptionError extends JHelpError {
-    private Exception ex;
+    private final Exception ex;
 
     public ExceptionError(Exception ex) {
         this.ex = ex;

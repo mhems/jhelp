@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 import com.binghamton.jhelp.util.StringUtils;
 
-public class MethodType extends Type {
+public final class MethodType extends Type {
     private ClassSymbol declarer;
     private Type[] typeParams = {};
     private Type[] paramTypes = {};
@@ -20,7 +20,7 @@ public class MethodType extends Type {
         paramTypes = method.getParameterTypes();
     }
 
-    public static MethodType fromParameters(String name, Type[] paramTypes) {
+    public static MethodType fromParameters(String name, Type... paramTypes) {
         MethodType type = new MethodType(name);
         type.paramTypes = paramTypes;
         return type;

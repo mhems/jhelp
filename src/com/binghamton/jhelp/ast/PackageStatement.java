@@ -9,7 +9,7 @@ import org.antlr.v4.runtime.Token;
  */
 public class PackageStatement extends Statement {
     private Annotation[] annotations = {};
-    private NameExpression name;
+    private final NameExpression name;
 
     /**
      * Construct a new package statement

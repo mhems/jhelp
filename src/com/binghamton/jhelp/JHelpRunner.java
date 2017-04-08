@@ -1,18 +1,11 @@
 package com.binghamton.jhelp;
 
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileFilter;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import com.binghamton.jhelp.error.ExceptionError;
 import com.binghamton.jhelp.error.JHelpError;
 
 /**
@@ -21,10 +14,10 @@ import com.binghamton.jhelp.error.JHelpError;
 public class JHelpRunner {
     public static final FileFilter JAVA_FILTER = pathname -> pathname.getName().endsWith(".java");
     private final String[] args;
-    private File[] files;
     private final boolean profiling = true;
-    private List<Validator> validators = new ArrayList<>();
-    private List<JHelpError> errors = new ArrayList<>();
+    private final List<Validator> validators = new ArrayList<>();
+    private final List<JHelpError> errors = new ArrayList<>();
+    private File[] files;
 
     /**
      * Construct a JHelpRunner from CLI input

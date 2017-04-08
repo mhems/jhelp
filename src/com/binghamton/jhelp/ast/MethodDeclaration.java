@@ -3,8 +3,6 @@ package com.binghamton.jhelp.ast;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.antlr.v4.runtime.Token;
-
 import com.binghamton.jhelp.Modifier;
 import com.binghamton.jhelp.MyMethodSymbol;
 
@@ -111,7 +109,7 @@ public class MethodDeclaration extends Declaration {
      * @return true iff this method has type parameters
      */
     public boolean hasTypeParameters() {
-        return typeParams.size() > 0;
+        return !typeParams.isEmpty();
     }
 
     /**
@@ -140,6 +138,10 @@ public class MethodDeclaration extends Declaration {
 
     public void setConstructor(boolean constructor) {
         this.constructor = constructor;
+    }
+
+    public boolean isVariadic() {
+        return !params.isEmpty() && params.get(params.size() - 1).isVariadic();
     }
 
     /**

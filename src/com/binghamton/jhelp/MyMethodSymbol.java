@@ -7,7 +7,7 @@ public class MyMethodSymbol extends MethodSymbol {
     private Type[] paramTypes = {};
     private TypeVariable[] typeVars = {};
     private Type[] exceptions = {};
-    private Token token;
+    private final Token token;
     private boolean variadic = false;
     private Type returnType;
     private boolean constructor = false;

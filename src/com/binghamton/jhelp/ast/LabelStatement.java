@@ -6,8 +6,8 @@ import org.antlr.v4.runtime.Token;
  * A class representing a Java label statement
  */
 public class LabelStatement extends Statement {
-    private Statement stmt;
-    private Token label;
+    private final Statement stmt;
+    private final Token label;
 
     /**
      * Construct a new labelled statement

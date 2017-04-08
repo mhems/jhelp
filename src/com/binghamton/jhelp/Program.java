@@ -9,8 +9,8 @@ import com.binghamton.jhelp.util.DiGraph;
 import com.binghamton.jhelp.util.StringUtils;
 
 public class Program {
-    private List<MyPackage> packages = new ArrayList<>();
-    private List<CompilationUnit> units = new ArrayList<>();
+    private final List<MyPackage> packages = new ArrayList<>();
+    private final List<CompilationUnit> units = new ArrayList<>();
     private List<ClassSymbol> classes;
 
         {

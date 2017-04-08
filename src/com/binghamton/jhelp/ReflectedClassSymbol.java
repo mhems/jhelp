@@ -7,8 +7,8 @@ import java.lang.reflect.Method;
 import com.binghamton.jhelp.ast.ASTVisitor;
 
 public class ReflectedClassSymbol extends ClassSymbol {
-    private Class<? extends Object> cls;
-    private String pkgName;
+    private final Class<? extends Object> cls;
+    private final String pkgName;
 
     public static ReflectedClassSymbol get(Class<?> cls) {
         ReflectedClassSymbol sym = null;

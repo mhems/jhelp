@@ -2,7 +2,6 @@ package com.binghamton.jhelp;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.HashSet;
 import java.util.Set;
 
 import com.binghamton.jhelp.ast.ASTVisitor;
@@ -126,6 +125,10 @@ public abstract class ClassSymbol extends ReferenceType {
         return ret;
     }
 
+    public boolean hasConstructor() {
+        return ctors.size() > 0;
+    }
+
     public void setClassKind(ClassKind kind) {
         classKind = kind;
     }
@@ -150,10 +153,12 @@ public abstract class ClassSymbol extends ReferenceType {
         return fields.get(name);
     }
 
-    public Set<MethodSymbol> getMethodsByName(String name) {
-        return methods.getAll(name);
+    public MethodSymbol[] getMethodsByName(String name) {
+        Set<MethodSymbol> tmp = methods.getAll(name);
+        return tmp.toArray(new MethodSymbol[tmp.size()]);
     }
 
+    // exact look-up
     public MethodSymbol getMethod(String name, Type... paramTypes) {
         return methods.get(MethodType.fromParameters(name, paramTypes));
     }
@@ -163,7 +168,7 @@ public abstract class ClassSymbol extends ReferenceType {
     }
 
     public MethodSymbol getConstructor(Type... paramTypes) {
-        return methods.get(MethodType.fromParameters(getName(), paramTypes));
+        return ctors.get(MethodType.fromParameters(getName(), paramTypes));
     }
 
     public MethodSymbol getConstructor(MethodSymbol sym) {
@@ -172,6 +177,14 @@ public abstract class ClassSymbol extends ReferenceType {
 
     public TypeVariable getTypeParameter(String name) {
         return params.get(name);
+    }
+
+    public boolean hasMember(String name) {
+        return fields.has(name) || methods.getAll(name).size() > 0;
+    }
+
+    public boolean hasMemberType(String name) {
+        return memberTypes.has(name);
     }
 
     public boolean isTop() {

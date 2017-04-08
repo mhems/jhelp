@@ -6,9 +6,9 @@ import org.antlr.v4.runtime.Token;
  * A class representing a Java import statement
  */
 public class ImportStatement extends Statement {
-    private NameExpression nameExpr;
-    private boolean isStatic;
-    private boolean onDemand;
+    private final NameExpression nameExpr;
+    private final boolean isStatic;
+    private final boolean onDemand;
 
     /**
      * Constructs a new import statement

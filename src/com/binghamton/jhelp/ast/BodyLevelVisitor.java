@@ -1,14 +1,11 @@
 package com.binghamton.jhelp.ast;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.HashSet;
 import java.util.Set;
 
 import com.binghamton.jhelp.antlr.MyToken;
 import com.binghamton.jhelp.AnnotationSymbol;
 import com.binghamton.jhelp.ArrayType;
-import com.binghamton.jhelp.ImportManager;
 import com.binghamton.jhelp.Modifier;
 import com.binghamton.jhelp.Modifiers;
 import com.binghamton.jhelp.MethodSymbol;
@@ -19,11 +16,9 @@ import com.binghamton.jhelp.MyVariableSymbol;
 import com.binghamton.jhelp.ParameterizedType;
 import com.binghamton.jhelp.PrimitiveType;
 import com.binghamton.jhelp.Program;
-import com.binghamton.jhelp.ReflectedClassSymbol;
 import com.binghamton.jhelp.Symbol;
 import com.binghamton.jhelp.Type;
 import com.binghamton.jhelp.TypeVariable;
-import com.binghamton.jhelp.VariableSymbol;
 
 import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
 import static com.binghamton.jhelp.ast.NameExpression.Kind;
@@ -86,10 +81,10 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
             for (VariableDeclaration v : ast.getFields()) {
                 v.accept(this);
                 currentClass.addField(v.getSymbol());
-                if (currentClass.isInner()) {
-                    if (v.getSymbol().isStatic() && !v.getSymbol().isConstant()) {
-                        System.err.println("inner class cannot declare non-constant static variable");
-                    }
+                if (currentClass.isInner() &&
+                    v.getSymbol().isStatic() &&
+                    !v.getSymbol().isConstant()) {
+                    System.err.println("inner class cannot declare non-constant static variable");
                 }
             }
             for (MethodDeclaration m : ast.getMethods()) {
@@ -128,7 +123,8 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
                 currentClass.addConstructor(ctor.getSymbol());
             }
 
-            if (currentClass.getConstructors().length == 0) {
+            if (currentClass.getConstructors().length == 0 &&
+                !currentClass.isAnonymous()) {
                 MyMethodSymbol emptyCtor = new MyMethodSymbol(new MyToken(0,
                                                                           currentClass.getName()));
                 Symbol.AccessLevel access = currentClass.getAccessLevel();
@@ -338,14 +334,13 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
                 }
                 v.accept(this);
                 paramTypes[pos] = v.getSymbol().getType();
-                if (v.isVariadic()) {
-                    method.setVariadic(true);
-                    paramTypes[pos] = new ArrayType(paramTypes[pos]);
-                }
                 ++pos;
             }
         }
         method.setParameterTypes(paramTypes);
+        if (ast.isVariadic()) {
+            method.setVariadic(true);
+        }
 
         Type[] excTypes = new Type[ast.getExceptions().size()];
         pos = 0;
@@ -382,10 +377,9 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
 
         if (method.isStatic()) {
             for (Type type : paramTypes) {
-                if (type instanceof TypeVariable) {
-                    if (!method.equals(((TypeVariable)type).getDeclaringSymbol())) {
-                        System.err.println("static method cannot use instance type variables");
-                    }
+                if (type instanceof TypeVariable &&
+                    !method.equals(((TypeVariable)type).getDeclaringSymbol())) {
+                    System.err.println("static method cannot use instance type variables");
                 }
             }
             if (currentClass.isInterfaceLike()) {

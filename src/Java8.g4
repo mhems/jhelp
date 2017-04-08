@@ -807,11 +807,11 @@ explicitConstructorInvocation returns [Expression ret]
             List<Expression> args = new ArrayList<>()]
     :   (t = typeArguments {$targs = $t.ret;})? kw = 'this'
         '(' (a = argumentList {$args = $a.ret;})? ')' last = ';'
-        {$ret = new CallExpression($last, createTypeName($kw),
+        {$ret = new CallExpression($last, createTypeName($kw), $kw,
                                    $args, $targs);}
     |   (t = typeArguments {$targs = $t.ret;})? kw = 'super'
         '(' (a = argumentList {$args = $a.ret;})? ')' last = ';'
-        {$ret = new CallExpression($last, createTypeName($kw),
+        {$ret = new CallExpression($last, createTypeName($kw), $kw,
                                    $args, $targs);}
     |   en = expressionName '.'
         (t = typeArguments {$targs = $t.ret;})? kw = 'super'
@@ -820,6 +820,7 @@ explicitConstructorInvocation returns [Expression ret]
             $ret = new CallExpression($last,
                                       new AccessExpression($en.ret,
                                                            createTypeName($kw)),
+                                      $kw,
                                       $args,
                                       $targs);
         }
@@ -830,6 +831,7 @@ explicitConstructorInvocation returns [Expression ret]
             $ret = new CallExpression($last,
                                       new AccessExpression($p.ret,
                                                            createTypeName($kw)),
+                                      $kw,
                                       $args,
                                       $targs);
         }
@@ -1789,7 +1791,7 @@ classInstanceCreationExpression_lfno_primary returns [InstantiationExpression re
 
 typeArgumentsOrDiamond returns [List<TypeArgument> ret]
     :   ta = typeArguments {$ret = $ta.ret;}
-    |   '<' '>' {$ret = new ArrayList<>(); $ret.add(new TypeArgument());}
+    |   '<' '>' {$ret = new ArrayList<>();}
     ;
 
 fieldAccess returns [AccessExpression ret]
@@ -1873,6 +1875,7 @@ methodInvocation returns [Expression ret]
             $ret = new CallExpression($last,
                                       new AccessExpression($tn.ret,
                                                            createMethodName($id)),
+                                      $id,
                                       $args,
                                       $targs);
         }
@@ -1882,6 +1885,7 @@ methodInvocation returns [Expression ret]
             $ret = new CallExpression($last,
                                       new AccessExpression($en.ret,
                                                            createMethodName($id)),
+                                      $id,
                                       $args,
                                       $targs);
         }
@@ -1891,6 +1895,7 @@ methodInvocation returns [Expression ret]
             $ret = new CallExpression($last,
                                       new AccessExpression($p.ret,
                                                            createMethodName($id)),
+                                      $id,
                                       $args,
                                       $targs);
         }
@@ -1900,6 +1905,7 @@ methodInvocation returns [Expression ret]
             $ret = new CallExpression($last,
                                       new AccessExpression(createTypeName($kw),
                                                            createMethodName($id)),
+                                      $id,
                                       $args,
                                       $targs);
         }
@@ -1910,6 +1916,7 @@ methodInvocation returns [Expression ret]
                                       new AccessExpression(new AccessExpression($tn.ret,
                                                                                 createTypeName($kw)),
                                                            createMethodName($id)),
+                                      $id,
                                       $args,
                                       $targs);
         }
@@ -1934,6 +1941,7 @@ methodInvocation_lfno_primary returns [Expression ret]
             $ret = new CallExpression($last,
                                       new AccessExpression($tn.ret,
                                                            createMethodName($id)),
+                                      $id,
                                       $args,
                                       $targs);
         }
@@ -1943,6 +1951,7 @@ methodInvocation_lfno_primary returns [Expression ret]
             $ret = new CallExpression($last,
                                       new AccessExpression($en.ret,
                                                            createMethodName($id)),
+                                      $id,
                                       $args,
                                       $targs);
         }
@@ -1952,6 +1961,7 @@ methodInvocation_lfno_primary returns [Expression ret]
             $ret = new CallExpression($last,
                                       new AccessExpression(createTypeName($kw),
                                                            createMethodName($id)),
+                                      $id,
                                       $args,
                                       $targs);
         }
@@ -1962,6 +1972,7 @@ methodInvocation_lfno_primary returns [Expression ret]
                                       new AccessExpression(new AccessExpression($tn.ret,
                                                                                 createTypeName($kw)),
                                                            createMethodName($id)),
+                                      $id,
                                       $args,
                                       $targs);
         }

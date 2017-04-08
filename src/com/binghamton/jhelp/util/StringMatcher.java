@@ -6,6 +6,16 @@ package com.binghamton.jhelp.util;
  */
 public abstract class StringMatcher {
 
+    public static final StringMatcher.CharEquater CASE_SENSITIVE_COMPARATOR;
+    public static final StringMatcher.CharEquater CASE_INSENSITIVE_COMPARATOR;
+    private StringMatcher.CharEquater charCmp;
+
+    static {
+        CASE_SENSITIVE_COMPARATOR = (c1, c2) -> c1 == c2;
+        CASE_INSENSITIVE_COMPARATOR = (c1, c2) -> Character.toLowerCase(c1) ==
+                                                  Character.toLowerCase(c2);
+    }
+
     public interface CharEquater {
         /**
          * Determines if two Characters are equivalent
@@ -16,16 +26,6 @@ public abstract class StringMatcher {
          */
         boolean areEquivalent(Character c1, Character c2);
     }
-
-    public static final StringMatcher.CharEquater CASE_SENSITIVE_COMPARATOR;
-    public static final StringMatcher.CharEquater CASE_INSENSITIVE_COMPARATOR;
-    private StringMatcher.CharEquater charCmp;
-
-    static {
-        CASE_SENSITIVE_COMPARATOR = (c1, c2) -> c1 == c2;
-        CASE_INSENSITIVE_COMPARATOR = (c1, c2) -> Character.toLowerCase(c1) ==
-                                                  Character.toLowerCase(c2);
-      }
 
     /**
      * Construct a case-(in)sensitive StringMatcher

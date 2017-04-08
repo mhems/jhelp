@@ -10,7 +10,7 @@ import org.antlr.v4.runtime.Token;
  */
 public class CatchBlock extends Block {
     private VariableDeclaration var;
-    private List<Expression> types = new ArrayList<>();
+    private final List<Expression> types = new ArrayList<>();
 
     /**
      * Construct an empty catch block

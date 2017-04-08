@@ -1,6 +1,6 @@
 package com.binghamton.jhelp;
 
-public class NilType extends Type {
+public final class NilType extends Type {
     public static final NilType TYPE = new NilType();
 
     private NilType() {

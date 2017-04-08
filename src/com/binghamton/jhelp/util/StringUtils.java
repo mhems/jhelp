@@ -11,6 +11,10 @@ import java.util.StringJoiner;
  */
 public class StringUtils {
 
+    private StringUtils() {
+
+    }
+
     /**
      * A utility method allowing any Collection's elements to be represented by
      * their toString, interspersed with a delimiting String

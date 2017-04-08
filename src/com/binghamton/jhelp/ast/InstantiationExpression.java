@@ -1,6 +1,5 @@
 package com.binghamton.jhelp.ast;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.antlr.v4.runtime.Token;
@@ -10,7 +9,7 @@ import org.antlr.v4.runtime.Token;
  * inner class.
  */
 public class InstantiationExpression extends CallExpression {
-    private ConcreteBodyDeclaration classBody = new ClassDeclaration();
+    private final ConcreteBodyDeclaration classBody = new ClassDeclaration();
 
     /**
      * Construct an instantiation expression

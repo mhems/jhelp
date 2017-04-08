@@ -1,16 +1,13 @@
 package com.binghamton.jhelp.ast;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import org.antlr.v4.runtime.Token;
 
 /**
  * A class representing a Java8 method reference
  */
 public class MethodReferenceExpression extends QualifiableExpression {
     private Expression lhs;
-    private Expression rhs;
+    private final Expression rhs;
     private List<TypeArgument> targs;
 
     /**

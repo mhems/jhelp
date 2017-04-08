@@ -3,7 +3,7 @@ package com.binghamton.jhelp;
 import java.lang.annotation.Annotation;
 
 public class AnnotationSymbol {
-    private ClassSymbol type;
+    private final ClassSymbol type;
 
     public AnnotationSymbol(ClassSymbol type) {
         this.type = type;

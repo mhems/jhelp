@@ -529,7 +529,7 @@ public class NonNullVisitor extends EmptyVisitor {
                 ast.getBoundType().accept(this);
             }
         }
-        else if (!ast.isDiamond()) {
+        else {
             ast.getTypeExpression().accept(this);
         }
     }

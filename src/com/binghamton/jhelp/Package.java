@@ -1,8 +1,5 @@
 package com.binghamton.jhelp;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * A base class representing a Java package
  */

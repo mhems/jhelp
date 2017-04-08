@@ -5,20 +5,17 @@ import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 
 public class ReflectedMethodSymbol extends MethodSymbol {
-    private Method method;
-    private Constructor<?> ctor;
-    private Executable exe;
-    private boolean constructor;
-    private Type returnType;
-    private TypeVariable[] params;
-    private Type[] argTypes;
-    private Type[] exceptions;
+    private final Executable exe;
+    private final boolean constructor;
+    private final Type returnType;
+    private final TypeVariable[] params;
+    private final Type[] argTypes;
+    private final Type[] exceptions;
 
     public ReflectedMethodSymbol(Method method) {
         super(method.getName(), method.getModifiers());
-        this.method = method;
-        this.constructor = false;
-        exe = this.method;
+        exe = method;
+        constructor = false;
         returnType = fromType(method.getAnnotatedReturnType());
         params = fromTypeParameters(method.getTypeParameters());
         argTypes = fromTypes(method.getAnnotatedParameterTypes());
@@ -28,9 +25,8 @@ public class ReflectedMethodSymbol extends MethodSymbol {
 
     public ReflectedMethodSymbol(Constructor<?> ctor) {
         super(ctor.getName(), ctor.getModifiers());
-        this.ctor = ctor;
-        this.constructor = true;
-        exe = this.ctor;
+        exe = ctor;
+        constructor = true;
         returnType = ReflectedClassSymbol.get(ctor.getDeclaringClass());
         params = fromTypeParameters(ctor.getTypeParameters());
         argTypes = fromTypes(ctor.getAnnotatedParameterTypes());
@@ -63,7 +59,7 @@ public class ReflectedMethodSymbol extends MethodSymbol {
     }
 
     public boolean isVariadic() {
-        return method.isVarArgs();
+        return exe.isVarArgs();
     }
 
     public boolean isConstructor() {

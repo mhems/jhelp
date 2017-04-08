@@ -1,11 +1,9 @@
 package com.binghamton.jhelp.util;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -24,8 +22,7 @@ public class SymbolFinder {
         };
     private static final List<String> EMPTY = new ArrayList<>();
     private static final String EXT = "class";
-    private JarFile rt_jar;
-    private Map<String, List<String>> cache = new HashMap<>();
+    private final Map<String, List<String>> cache = new HashMap<>();
 
     /**
      * Construct a SymbolFinder with the name of a jar file
@@ -33,7 +30,7 @@ public class SymbolFinder {
      * @throws IOException if an I/O exception occurs during processing
      */
     public SymbolFinder(Path path) throws IOException {
-        rt_jar = new JarFile(path.toFile());
+        JarFile rt_jar = new JarFile(path.toFile());
         if (rt_jar != null) {
             ArrayList<String> tokens = new ArrayList<>();
             String curname, cls, pkg, ext;

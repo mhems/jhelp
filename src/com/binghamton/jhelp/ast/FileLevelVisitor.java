@@ -2,8 +2,6 @@ package com.binghamton.jhelp.ast;
 
 import java.io.File;
 import java.util.List;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.antlr.v4.runtime.Token;
 
@@ -19,8 +17,6 @@ import com.binghamton.jhelp.MyPackage;
 import com.binghamton.jhelp.Program;
 import com.binghamton.jhelp.ReflectedClassSymbol;
 import com.binghamton.jhelp.Symbol;
-import com.binghamton.jhelp.SymbolTable;
-import com.binghamton.jhelp.Type;
 import com.binghamton.jhelp.TypeVariable;
 import com.binghamton.jhelp.VariableSymbol;
 
@@ -169,12 +165,11 @@ public class FileLevelVisitor extends EmptyVisitor {
                 System.err.printf("Body names should be capitalized, '%s' is not\n",
                                   ast.getName().getText());
             }
-            if (ast.getName().getText().equals(filename)) {
-                if (!ast.getModifiers().contains(Modifier.PUBLIC)) {
-                    System.err.printf("Body '%s' in file '%s.java' should be declared public\n",
-                                      ast.getName().getText(),
-                                      filename);
-                }
+            if (ast.getName().getText().equals(filename) &&
+                !ast.getModifiers().contains(Modifier.PUBLIC)) {
+                System.err.printf("Body '%s' in file '%s.java' should be declared public\n",
+                                  ast.getName().getText(),
+                                  filename);
             }
             sym = new MyClassSymbol(ast.getName(), ast.getModifiers());
         }
@@ -443,7 +438,7 @@ public class FileLevelVisitor extends EmptyVisitor {
      */
     public void visit(InterfaceDeclaration ast) {
         ast.getSymbol().setClassKind(ClassSymbol.ClassKind.INTERFACE);
-
+        ast.getSymbol().addModifier(Modifier.ABSTRACT);
         if (ast.hasTypeParameters()) {
             for (TypeVariable var : makeTypeParameters(ast.getTypeParameters())) {
                 currentClass.addTypeParameter(var);
@@ -475,7 +470,7 @@ public class FileLevelVisitor extends EmptyVisitor {
         MyClassSymbol decl = currentClass;
         ast.getDeclaration().setKind(BodyDeclaration.Kind.LOCAL);
         ast.getDeclaration().accept(this);
-        ast.getSymbol().setLocal();
+        ast.getDeclaration().getSymbol().setLocal();
         currentClass = decl;
     }
 

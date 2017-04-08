@@ -3,7 +3,6 @@ package com.binghamton.jhelp;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.GenericArrayType;
-import java.lang.reflect.GenericDeclaration;
 
 /**
  * A class representing the abstract notion of a Java symbol

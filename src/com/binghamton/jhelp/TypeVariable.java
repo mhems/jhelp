@@ -1,10 +1,6 @@
 package com.binghamton.jhelp;
 
 import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.antlr.v4.runtime.Token;
 
 import com.binghamton.jhelp.util.StringUtils;
 
@@ -26,7 +22,7 @@ public class TypeVariable extends ReferenceType {
      * @param name the name of this type
      * @param bounds the bounds of this type
      */
-    public TypeVariable(String name, Type[] bounds) {
+    public TypeVariable(String name, Type... bounds) {
         super(name);
         this.bounds = bounds;
     }

@@ -6,8 +6,8 @@ import org.antlr.v4.runtime.Token;
  * A class representing a Java if/else statement
  */
 public class IfElseStatement extends Statement {
-    private Expression condition;
-    private Block thenBody;
+    private final Expression condition;
+    private final Block thenBody;
     private Block elseBody = new NilBlock();
 
     /**

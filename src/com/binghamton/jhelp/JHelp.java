@@ -5,6 +5,10 @@ package com.binghamton.jhelp;
  */
 public class JHelp {
 
+    private JHelp() {
+
+    }
+
     /**
      * Main method to invoke jhelp application
      * @param args user-provided command-line arguments
