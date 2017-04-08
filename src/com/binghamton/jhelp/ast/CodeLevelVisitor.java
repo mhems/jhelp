@@ -1295,7 +1295,6 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
 
         ret = selectCandidates(choices,
                                argTypes,
-                               false,
                                (m, i) -> m.getParameterTypes(),
                                CodeLevelVisitor::strictCompatible);
         if (ret != null) {
@@ -1304,7 +1303,6 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
 
         ret = selectCandidates(choices,
                                argTypes,
-                               false,
                                (m, i) -> m.getParameterTypes(),
                                CodeLevelVisitor::looseCompatible);
 
@@ -1314,7 +1312,6 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
 
         ret = selectCandidates(choices,
                                argTypes,
-                               true,
                                (m, i) -> m.getVariadicParameterTypesFor(i),
                                CodeLevelVisitor::looseCompatible);
         return ret;
@@ -1322,7 +1319,6 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
 
     private MethodSymbol selectCandidates(MethodSymbol[] choices,
                                           Type[] argTypes,
-                                          boolean variadic,
                                           BiFunction<MethodSymbol, Integer, Type[]> getTypes,
                                           BiFunction<Type, Type, Boolean> isValid) {
         List<MethodSymbol> cands = new ArrayList<>();
@@ -1339,9 +1335,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         }
 
         if (!cands.isEmpty()) {
-            return MethodSymbol.mostSpecificMethod(cands,
-                                                   argTypes.length,
-                                                   variadic);
+            return MethodSymbol.mostSpecificMethod(cands);
         }
         return null;
     }

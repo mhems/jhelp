@@ -1,5 +1,6 @@
 package com.binghamton.jhelp;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.binghamton.jhelp.util.StringUtils;
@@ -55,25 +56,29 @@ public abstract class MethodSymbol extends Symbol {
         for (int i = 0; i < n; i++) {
             ret[i] = paramTypes[i];
         }
-        for (int i = n; i < numArgs; i++) {
-            ret[i] = paramTypes[n];
+        if (numArgs > n) {
+            ArrayType last = (ArrayType)paramTypes[paramTypes.length - 1];
+            for (int i = n; i < numArgs; i++) {
+                ret[i] = last.getBaseType();
+            }
         }
         return ret;
     }
 
-    public static MethodSymbol mostSpecificMethod(List<MethodSymbol> methods,
-                                                  int k,
-                                                  boolean variadic) {
-        if (methods.size() == 1) {
-            return methods.get(0);
-        }
-        // TODO
-        // if both non-variadic
-        return null;
+    public static MethodSymbol mostSpecificMethod(List<MethodSymbol> methods) {
+        Collections.sort(methods, MethodSymbol::isMoreSpecificThan);
+        return methods.get(0);
     }
 
-    public boolean isMoreSpecificThan(MethodSymbol other) {
-        return false;
+    private static int isMoreSpecificThan(MethodSymbol a, MethodSymbol b) {
+        Type[] thisTypes = a.getParameterTypes();
+        Type[] otherTypes = b.getParameterTypes();
+        for (int i = 0; i < thisTypes.length; i++) {
+            if (!thisTypes[i].isSubTypeOf(otherTypes[i])) {
+                return 1;
+            }
+        }
+        return -1;
     }
 
     public int arity() {

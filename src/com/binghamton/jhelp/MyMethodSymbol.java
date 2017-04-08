@@ -77,6 +77,10 @@ public class MyMethodSymbol extends MethodSymbol {
 
     public void setVariadic(boolean variadic) {
         this.variadic = variadic;
+        if (this.variadic) {
+            int last = paramTypes.length - 1;
+            paramTypes[last] = new ArrayType(paramTypes[last]);
+        }
     }
 
     public boolean isConstructor() {
