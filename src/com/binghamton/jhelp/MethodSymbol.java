@@ -1,5 +1,8 @@
 package com.binghamton.jhelp;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
+import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
 
@@ -10,22 +13,28 @@ import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
 /**
  * A class representing a Java method
  */
-public abstract class MethodSymbol extends Symbol {
+public class MethodSymbol extends Symbol {
 
         {
             kind = SymbolKind.METHOD;
         }
 
-    private MethodType type;
-    private int arity;
-    private int typeArity;
+    protected MethodType type;
+
+    protected ClassSymbol declarer;
+    protected Type[] paramTypes = {};
+    protected TypeVariable[] typeVars = {};
+    protected Type[] exceptions = {};
+    protected boolean variadic = false;
+    protected boolean constructor = false;
+    protected Type returnType;
 
     /**
      * Constructs a new named method symbol
-     * @param id the name of the method
+     * @param name the name of the method
      */
-    public MethodSymbol(String id) {
-        super(id);
+    public MethodSymbol(String name) {
+        super(name);
     }
 
     /**
@@ -37,20 +46,35 @@ public abstract class MethodSymbol extends Symbol {
         super(name, modifiers);
     }
 
-    public MethodSymbol(String name, int modifiers) {
-        super(name, modifiers);
+    public MethodSymbol(Method method) {
+        super(method.getName(), method.getModifiers());
+        constructor = false;
+        returnType = fromType(method.getAnnotatedReturnType());
+        commonInit(method);
+        constructType();
     }
 
-    public abstract boolean isVariadic();
+    public MethodSymbol(Constructor<?> ctor) {
+        super(ctor.getName(), ctor.getModifiers());
+        constructor = true;
+        returnType = ReflectedClassSymbol.get(ctor.getDeclaringClass());
+        commonInit(ctor);
+        constructType();
+    }
+
+    public boolean isVariadic() {
+        return variadic;
+    }
 
     /**
      * Gets the formal parameters of this Method
      * @return the formal parameters of this Method
      */
-    public abstract Type[] getParameterTypes();
+    public Type[] getParameterTypes() {
+        return paramTypes;
+    }
 
     public Type[] getVariadicParameterTypesFor(int numArgs) {
-        Type[] paramTypes = getParameterTypes();
         Type[] ret = new Type[numArgs];
         int n = paramTypes.length - 1;
         for (int i = 0; i < n; i++) {
@@ -82,23 +106,24 @@ public abstract class MethodSymbol extends Symbol {
     }
 
     public int arity() {
-        return arity;
+        return paramTypes.length;
     }
 
     public int numParameters() {
-        return getParameterTypes().length;
+        return paramTypes.length;
     }
 
-    public abstract Type[] getExceptionTypes();
+    public Type[] getExceptionTypes() {
+        return exceptions;
+    }
 
     public boolean hasExceptions() {
-        return getExceptionTypes().length > 0;
+        return exceptions.length > 0;
     }
 
     public boolean hasCheckedExceptions() {
-        Type[] excs = getExceptionTypes();
-        if (excs.length > 0)  {
-            for (Type exc : excs) {
+        if (exceptions.length > 0)  {
+            for (Type exc : exceptions) {
                 if (exc.getClassSymbol().extendsClass(fetch("Throwable"))) {
                     return true;
                 }
@@ -107,22 +132,24 @@ public abstract class MethodSymbol extends Symbol {
         return false;
     }
 
-    public abstract TypeVariable[] getTypeParameters();
+    public TypeVariable[] getTypeParameters() {
+        return typeVars;
+    }
 
-    public int typeArity() {
-        return typeArity;
+    public int numTypeParameters() {
+        return typeVars.length;
     }
 
     public boolean isGeneric() {
-        return typeArity > 0;
+        return typeVars.length > 0;
     }
 
     public boolean hasTypeParameters() {
-        return getTypeParameters().length > 0;
+        return typeVars.length > 0;
     }
 
     public ClassSymbol getDeclaringClass() {
-        return null;
+        return declarer;
     }
 
     public boolean hasOverrideAnnotation() {
@@ -139,7 +166,10 @@ public abstract class MethodSymbol extends Symbol {
     }
 
     @Override
-    public abstract MethodSymbol adapt(Type[] args);
+    public MethodSymbol adapt(Type[] args) {
+        // TODO
+        return null;
+    }
 
     public boolean equals(Object other) {
         return other instanceof MethodSymbol &&
@@ -150,8 +180,12 @@ public abstract class MethodSymbol extends Symbol {
         return type.hashCode();
     }
 
-    public abstract Type getReturnType();
-    public abstract boolean isConstructor();
+    public Type getReturnType() {
+        return returnType;
+    }
+    public boolean isConstructor() {
+        return constructor;
+    }
 
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -177,8 +211,6 @@ public abstract class MethodSymbol extends Symbol {
 
     public void constructType() {
         type = MethodType.fromMethod(this);
-        arity = getParameterTypes().length;
-        typeArity = getTypeParameters().length;
     }
 
     public MethodType getType() {
@@ -197,5 +229,13 @@ public abstract class MethodSymbol extends Symbol {
         }
         // TODO incomplete
         return false;
+    }
+
+    private void commonInit(Executable exe) {
+        declarer = ReflectedClassSymbol.get(exe.getDeclaringClass());
+        variadic = exe.isVarArgs();
+        typeVars = fromTypeParameters(exe.getTypeParameters());
+        paramTypes = fromTypes(exe.getAnnotatedParameterTypes());
+        exceptions = fromTypes(exe.getAnnotatedExceptionTypes());
     }
 }

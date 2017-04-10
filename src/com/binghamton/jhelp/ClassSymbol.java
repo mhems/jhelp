@@ -24,6 +24,8 @@ public abstract class ClassSymbol extends ReferenceType {
     protected Level level = Level.TOP;
     protected Type superClass = null;
     protected ClassSymbol declarer;
+    protected boolean boxed;
+    protected Package pkg;
 
     protected ImportingSymbolTable importedTypes = new ImportingSymbolTable();
     protected NamedSymbolTable<Type> interfaces = new NamedSymbolTable<>();
@@ -208,14 +210,13 @@ public abstract class ClassSymbol extends ReferenceType {
     }
 
     public boolean isClassLike() { return isEnum() || isClass(); }
-    public abstract boolean isEnum();
-    public abstract boolean isClass();
+    public boolean isEnum() { return classKind == ClassKind.ENUM; }
+    public boolean isClass() { return classKind == ClassKind.CLASS; }
     public boolean isInterfaceLike() { return isInterface() || isAnnotation(); }
-    public abstract boolean isInterface();
-    public abstract boolean isAnnotation();
-    public abstract boolean isBoxed();
-    public abstract String getPackageName();
-    public abstract Package getPackage();
+    public boolean isInterface() { return classKind == ClassKind.INTERFACE; }
+    public boolean isAnnotation() { return classKind == ClassKind.ANNOTATION; }
+    public boolean isBoxed() { return boxed; }
+    public Package getPackage() { return pkg; }
 
     public boolean equals(Object other) {
         if (other instanceof ClassSymbol) {
@@ -300,7 +301,15 @@ public abstract class ClassSymbol extends ReferenceType {
         return ret;
     }
 
-    public abstract String getQualifiedName();
+    public String getQualifiedName() {
+        StringBuilder sb = new StringBuilder();
+        if (!pkg.isDefault()) {
+            sb.append(pkg.getQualifiedName());
+            sb.append(".");
+        }
+        sb.append(getQualifiedClassName());
+        return sb.toString();
+    }
 
     protected String getQualifiedClassName() {
         StringBuilder sb = new StringBuilder();
@@ -481,5 +490,7 @@ public abstract class ClassSymbol extends ReferenceType {
         return sb.toString();
     }
 
-    public abstract void visit(ASTVisitor visitor);
+    public void visit(ASTVisitor visitor) {
+
+    }
 }

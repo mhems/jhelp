@@ -1,12 +1,13 @@
 package com.binghamton.jhelp;
 
 public class ReflectedPackage extends Package {
+
     /**
      * Constructs a new ReflectedPackage with name `name`
-     * @param name the name of the package
+     * @param pkg the existing package to reflect
      */
-    public ReflectedPackage(String name) {
-        super(name);
+    public ReflectedPackage(java.lang.Package pkg) {
+        super(pkg.getName());
     }
 
     public ClassSymbol getClass(String name) {

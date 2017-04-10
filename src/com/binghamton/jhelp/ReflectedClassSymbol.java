@@ -6,9 +6,44 @@ import java.lang.reflect.Method;
 
 import com.binghamton.jhelp.ast.ASTVisitor;
 
-public class ReflectedClassSymbol extends ClassSymbol {
+public final class ReflectedClassSymbol extends ClassSymbol {
     private final Class<? extends Object> cls;
-    private final String pkgName;
+
+    private ReflectedClassSymbol(Class<? extends Object> cls) {
+        super(cls.getSimpleName(), cls.getModifiers());
+        this.cls = cls;
+        boxed = cls.isPrimitive();
+        pkg = new ReflectedPackage(cls.getPackage());
+        if (cls.isInterface()) {
+            classKind = ClassKind.INTERFACE;
+        } else if (cls.isEnum()) {
+            classKind = ClassKind.ENUM;
+        } else if (cls.isAnnotation()) {
+            classKind = ClassKind.ANNOTATION;
+        } else {
+            classKind = ClassKind.CLASS;
+        }
+        if (cls.isAnonymousClass()) {
+            level = Level.ANONYMOUS;
+        } else if (cls.isLocalClass()) {
+            level = Level.LOCAL;
+        } else if (cls.getEnclosingClass() == null) {
+            level = Level.TOP;
+        } else if (isStatic()) {
+            level = Level.MEMBER;
+        } else {
+            level = Level.INNER;
+        }
+    }
+
+    public static ReflectedClassSymbol get(String name) {
+        try {
+            return get(Class.forName(name));
+        } catch (ClassNotFoundException e) {
+            System.err.println("could not retrieve existing class " + name);
+        }
+        return null;
+    }
 
     public static ReflectedClassSymbol get(Class<?> cls) {
         ReflectedClassSymbol sym = null;
@@ -18,13 +53,6 @@ public class ReflectedClassSymbol extends ClassSymbol {
             System.err.println("could not retrieve existing class " + cls.getName());
         }
         return sym;
-    }
-
-    public ReflectedClassSymbol(Class<? extends Object> cls) {
-        super(cls.getSimpleName(), cls.getModifiers());
-        this.cls = cls;
-        String name = cls.getName();
-        pkgName = name.substring(0, name.lastIndexOf('.'));
     }
 
     public void init() {
@@ -41,59 +69,17 @@ public class ReflectedClassSymbol extends ClassSymbol {
         }
         for (Method cur : cls.getDeclaredMethods()) {
             if (!cur.isSynthetic() && !cur.isBridge()) {
-                methods.put(new ReflectedMethodSymbol(cur));
+                methods.put(new MethodSymbol(cur));
             }
         }
         for (Constructor<?> cur : cls.getDeclaredConstructors()) {
             if (!cur.isSynthetic()) {
-                ctors.put(new ReflectedMethodSymbol(cur));
+                ctors.put(new MethodSymbol(cur));
             }
         }
         for (Field cur : cls.getDeclaredFields()) {
-            fields.put(new ReflectedVariableSymbol(cur));
+            fields.put(new VariableSymbol(cur));
         }
-    }
-
-    public boolean isEnum() {
-        return cls.isEnum();
-    }
-    public boolean isClass() {
-        return !isEnum() && !isInterface() && !isAnnotation();
-    }
-
-    public boolean isInterface() {
-        return cls.isInterface();
-    }
-
-    public boolean isAnnotation() {
-        return cls.isAnnotation();
-    }
-
-    @Override
-    public boolean isAnonymous() {
-        return cls.isAnonymousClass();
-    }
-
-    @Override
-    public boolean isInner() {
-        return cls.isMemberClass();
-    }
-
-    @Override
-    public boolean isLocal() {
-        return cls.isLocalClass();
-    }
-
-    public String getPackageName() {
-        return pkgName;
-    }
-
-    public Package getPackage() {
-        return null;
-    }
-
-    public boolean isBoxed() {
-        return cls.isPrimitive();
     }
 
     @Override
@@ -102,20 +88,5 @@ public class ReflectedClassSymbol extends ClassSymbol {
             return PrimitiveType.UNBOX_MAP.get(cls.getSimpleName());
         }
         return null;
-    }
-
-    public String getQualifiedName() {
-        StringBuilder sb = new StringBuilder();
-        String pkgName = getPackageName();
-        if (pkgName.length() > 0) {
-            sb.append(pkgName);
-            sb.append(".");
-        }
-        sb.append(getQualifiedClassName());
-        return sb.toString();
-    }
-
-    public void visit(ASTVisitor visitor) {
-        // cannot visit a pre-compiled class
     }
 }

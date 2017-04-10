@@ -1284,7 +1284,8 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         for (MethodSymbol m : choices) {
             if (((argTypes.length >= m.arity() - 1) &&
                  (m.isVariadic() || argTypes.length == m.arity())) &&
-                (!m.isGeneric() || m.typeArity() == typeArgTypes.size())) {
+                (!m.isGeneric() ||
+                 m.numTypeParameters() == typeArgTypes.size())) {
                 potCands.add(m);
             }
         }

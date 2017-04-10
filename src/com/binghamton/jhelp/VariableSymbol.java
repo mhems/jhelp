@@ -1,40 +1,49 @@
 package com.binghamton.jhelp;
 
+import java.lang.reflect.Field;
+
 import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
 
 /**
- * A base class representing a Java variable at any scope
+ * A class representing a Java variable at any scope
  */
-public abstract class VariableSymbol extends Symbol {
+public class VariableSymbol extends Symbol {
+
         {
             kind = SymbolKind.VARIABLE;
         }
 
     public enum VariableKind {FIELD, LOCAL, PARAMETER};
 
-    private VariableKind varKind;
+    protected ClassSymbol declarer;
+    protected VariableKind varKind;
     protected Type type;
-
-    public VariableSymbol(String name, int modifiers) {
-        super(name, modifiers);
-    }
 
     public VariableSymbol(String name, Modifiers modifiers) {
         super(name, modifiers);
+    }
+
+    public VariableSymbol(Field field) {
+        super(field.getName(), field.getModifiers());
+        declarer = ReflectedClassSymbol.get(field.getDeclaringClass());
+        varKind = VariableKind.FIELD;
+        type = fromType(field.getAnnotatedType());
     }
 
     /**
      * Gets the type of this variable
      * @return the type of this variable
      */
-    public abstract Type getType();
+    public Type getType() {
+        return type;
+    }
 
     public VariableKind getVariableKind() {
         return varKind;
     }
 
     public ClassSymbol getDeclaringClass() {
-        return null;
+        return declarer;
     }
 
     public boolean isConstant() {
@@ -44,10 +53,9 @@ public abstract class VariableSymbol extends Symbol {
     }
 
     @Override
-    public abstract VariableSymbol adapt(Type[] args);
-
-    public void setVariableKind(VariableKind kind) {
-        varKind = kind;
+    public VariableSymbol adapt(Type[] args) {
+        // TODO
+        return null;
     }
 
     public String toString() {

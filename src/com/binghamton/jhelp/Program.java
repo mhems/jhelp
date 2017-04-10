@@ -32,7 +32,7 @@ public class Program {
     public Package getPackage(String name) {
         java.lang.Package existingPkg = java.lang.Package.getPackage(name);
         if (existingPkg != null) {
-            return new ReflectedPackage(existingPkg.getName());
+            return new ReflectedPackage(existingPkg);
         }
         MyPackage pkg = null;
         List<MyPackage> pkgs = packages;

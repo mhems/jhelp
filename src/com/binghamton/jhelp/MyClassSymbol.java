@@ -10,7 +10,6 @@ import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
 
 public class MyClassSymbol extends ClassSymbol {
 
-    private MyPackage pkg = MyPackage.DEFAULT_PACKAGE;
     private BodyDeclaration AST;
     private Token token;
     private int anonCount = 1;
@@ -19,20 +18,26 @@ public class MyClassSymbol extends ClassSymbol {
         super(declarer.nextAnonName());
         this.declarer = declarer;
         level = Level.ANONYMOUS;
+        pkg = MyPackage.DEFAULT_PACKAGE;
     }
 
     public MyClassSymbol(Token token) {
-        super(token.getText());
-        this.token = token;
+        this(token, new Modifiers());
     }
 
     public MyClassSymbol(Token token, Modifiers modifiers) {
         super(token.getText(), modifiers);
         this.token = token;
+        pkg = MyPackage.DEFAULT_PACKAGE;
     }
 
     public Token getToken() {
         return token;
+    }
+
+    @Override
+    public MyPackage getPackage() {
+        return (MyPackage)pkg;
     }
 
     public void enterMethodScope(TypeVariable[] vars) {
@@ -43,14 +48,6 @@ public class MyClassSymbol extends ClassSymbol {
     public void exitMethodScope() {
         params.exitScope();
     }
-
-    public boolean isEnum() { return classKind == ClassKind.ENUM; }
-
-    public boolean isClass() { return classKind == ClassKind.CLASS; }
-
-    public boolean isInterface() { return classKind == ClassKind.INTERFACE; }
-
-    public boolean isAnnotation() { return classKind == ClassKind.ANNOTATION; }
 
     public boolean addInterface(Type sym) {
         if (!interfaces.put(sym)) {
@@ -191,36 +188,15 @@ public class MyClassSymbol extends ClassSymbol {
         superClass = declarer;
     }
 
-    public String getPackageName() {
-        return pkg.getQualifiedName();
-    }
-
-    public MyPackage getPackage() {
-        return pkg;
-    }
-
     public void setPackage(MyPackage pkg) {
         this.pkg = pkg;
-    }
-
-    public boolean isBoxed() {
-        return false;
-    }
-
-    public String getQualifiedName() {
-        StringBuilder sb = new StringBuilder();
-        if (!getPackage().isDefault()) {
-            sb.append(getPackage().getQualifiedName());
-            sb.append(".");
-        }
-        sb.append(getQualifiedClassName());
-        return sb.toString();
     }
 
     public void setAST(BodyDeclaration ast) {
         this.AST = ast;
     }
 
+    @Override
     public void visit(ASTVisitor visitor) {
         AST.accept(visitor);
         System.out.println(repr());

@@ -3,16 +3,11 @@ package com.binghamton.jhelp;
 import org.antlr.v4.runtime.Token;
 
 public class MyVariableSymbol extends VariableSymbol {
-    private ClassSymbol owningClass;
     private final Token token;
 
     public MyVariableSymbol(Token name, Modifiers modifiers) {
         super(name.getText(), modifiers);
         this.token = name;
-    }
-
-    public Type getType() {
-        return type;
     }
 
     /**
@@ -23,18 +18,7 @@ public class MyVariableSymbol extends VariableSymbol {
         this.type = type;
     }
 
-    @Override
-    public ClassSymbol getDeclaringClass() {
-        return owningClass;
-    }
-
     public void setDeclaringClass(ClassSymbol sym) {
-        owningClass = sym;
-    }
-
-    @Override
-    public MyVariableSymbol adapt(Type[] args) {
-        // TODO
-        return null;
+        this.declarer = sym;
     }
 }
