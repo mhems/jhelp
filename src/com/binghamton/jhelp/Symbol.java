@@ -209,7 +209,7 @@ public abstract class Symbol {
             ret = new ArrayType(ret);
         } else if (type instanceof java.lang.reflect.ParameterizedType) {
             java.lang.reflect.ParameterizedType ref = (java.lang.reflect.ParameterizedType)type;
-            ret = new ParameterizedType(fromType(ref.getRawType()),
+            ret = new ParameterizedType((ClassSymbol)fromType(ref.getRawType()),
                                         fromTypes(ref.getActualTypeArguments()));
         } else if (type instanceof java.lang.reflect.TypeVariable<?>) {
             ret = fromTypeVariable((java.lang.reflect.TypeVariable<?>)type);

@@ -339,19 +339,24 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         raw.accept(this);
         Type rawType = raw.getType();
 
-        if (!rawType.getClassSymbol().isGeneric()) {
-            System.err.println("cannot parameterize a non-generic class");
+        if (rawType instanceof ClassSymbol) {
+            ClassSymbol sym = (ClassSymbol)rawType;
+            if (sym.isGeneric()) {
+                List<TypeArgument> args = ast.getTypeArguments();
+                Type[] tArgs = new Type[args.size()];
+                int pos = 0;
+                for (TypeArgument arg : args) {
+                    arg.accept(this);
+                    tArgs[pos] = arg.getType();
+                    ++pos;
+                }
+                ast.setType(new ParameterizedType(sym, tArgs));
+            } else {
+                System.err.println("cannot parameterize a non-generic class");
+            }
+        } else {
+            System.err.println("only classes or interfaces may be parameterized");
         }
-
-        List<TypeArgument> args = ast.getTypeArguments();
-        Type[] tArgs = new Type[args.size()];
-        int pos = 0;
-        for (TypeArgument arg : args) {
-            arg.accept(this);
-            tArgs[pos] = arg.getType();
-            ++pos;
-        }
-        ast.setType(new ParameterizedType(rawType, tArgs));
     }
 
     /**

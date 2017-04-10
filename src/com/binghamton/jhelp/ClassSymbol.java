@@ -326,7 +326,10 @@ public abstract class ClassSymbol extends ReferenceType {
     }
 
     @Override
-    public abstract ClassSymbol adapt(Type[] args);
+    public ClassSymbol adapt(Type[] args) {
+        // TODO
+        return null;
+    }
 
     public String getTypeName() {
         StringBuilder sb = new StringBuilder();

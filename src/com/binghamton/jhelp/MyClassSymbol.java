@@ -226,12 +226,6 @@ public class MyClassSymbol extends ClassSymbol {
         System.out.println(repr());
     }
 
-    @Override
-    public MyClassSymbol adapt(Type[] args) {
-        // TODO
-        return null;
-    }
-
     private String nextAnonName() {
         return getName() + "$" + (anonCount++);
     }

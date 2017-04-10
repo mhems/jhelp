@@ -5,14 +5,15 @@ import java.util.Arrays;
 import com.binghamton.jhelp.util.StringUtils;
 
 public class ParameterizedType extends ReferenceType {
-    private Type wrapped;
+    private ClassSymbol wrapped;
+    private ClassSymbol adapted;
     private Type[] params;
 
-    public ParameterizedType(Type wrapped, Type parameter) {
+    public ParameterizedType(ClassSymbol wrapped, Type parameter) {
         this(wrapped, new Type[]{parameter});
     }
 
-    public ParameterizedType(Type wrapped, Type[] parameters) {
+    public ParameterizedType(ClassSymbol wrapped, Type[] parameters) {
         this.wrapped = wrapped;
         this.params = parameters;
         // isWellFormed(); // TODO infinite recursion?
@@ -39,7 +40,10 @@ public class ParameterizedType extends ReferenceType {
     }
 
     public ClassSymbol getClassSymbol() {
-        return wrapped.getClassSymbol();
+        if (adapted == null) {
+            adapted = wrapped.adapt(params);
+        }
+        return adapted;
     }
 
     public ClassSymbol getDeclaringClass() {
@@ -60,7 +64,8 @@ public class ParameterizedType extends ReferenceType {
 
     @Override
     public ParameterizedType adapt(Type[] args) {
-        throw new UnsupportedOperationException("cannot adapt a parameterized type");
+        // TODO
+        return null;
     }
 
     public boolean equals(Object other) {
@@ -97,9 +102,8 @@ public class ParameterizedType extends ReferenceType {
     public boolean isWellFormed() {
         boolean ret = false;
         if (wrapped instanceof ClassSymbol) {
-            ClassSymbol cls = (ClassSymbol)wrapped;
-            if (cls.isGeneric()) {
-                TypeVariable[] clsVars = cls.getTypeParameters();
+            if (wrapped.isGeneric()) {
+                TypeVariable[] clsVars = wrapped.getTypeParameters();
                 Type[] myArgs = captureConvert().getParameters();
                 if (clsVars.length == params.length) {
                     ret = true;
