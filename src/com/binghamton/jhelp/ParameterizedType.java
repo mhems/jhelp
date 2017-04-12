@@ -1,12 +1,12 @@
 package com.binghamton.jhelp;
 
 import java.util.Arrays;
+import java.util.Map;
 
 import com.binghamton.jhelp.util.StringUtils;
 
 public class ParameterizedType extends ReferenceType {
     private ClassSymbol wrapped;
-    private ClassSymbol adapted;
     private Type[] params;
 
     public ParameterizedType(ClassSymbol wrapped, Type parameter) {
@@ -40,10 +40,7 @@ public class ParameterizedType extends ReferenceType {
     }
 
     public ClassSymbol getClassSymbol() {
-        if (adapted == null) {
-            adapted = wrapped.adapt(params);
-        }
-        return adapted;
+        return wrapped.substitute(params);
     }
 
     public ClassSymbol getDeclaringClass() {
@@ -63,9 +60,12 @@ public class ParameterizedType extends ReferenceType {
     }
 
     @Override
-    public ParameterizedType adapt(Type[] args) {
-        // TODO
-        return null;
+    public ParameterizedType adapt(Map<TypeVariable, Type> map) {
+        Type[] newParams = new Type[params.length];
+        for (int i = 0; i < newParams.length; i++) {
+            newParams[i] = params[i].adapt(map);
+        }
+        return new ParameterizedType(wrapped.adapt(map), newParams);
     }
 
     public boolean equals(Object other) {

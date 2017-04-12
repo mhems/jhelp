@@ -129,8 +129,8 @@ public class PrimitiveType extends Type {
     }
 
     @Override
-    public PrimitiveType adapt(Type[] args) {
-        throw new UnsupportedOperationException("a primitive cannot be adapted");
+    public PrimitiveType adapt(Map<TypeVariable, Type> map) {
+        return this;
     }
 
     public ClassSymbol getDeclaringClass() {

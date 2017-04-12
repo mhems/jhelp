@@ -1,5 +1,7 @@
 package com.binghamton.jhelp;
 
+import java.util.Map;
+
 import org.antlr.v4.runtime.Token;
 
 import com.binghamton.jhelp.antlr.MyToken;
@@ -13,6 +15,13 @@ public class MyClassSymbol extends ClassSymbol {
     private BodyDeclaration AST;
     private Token token;
     private int anonCount = 1;
+
+    private MyClassSymbol(MyClassSymbol cls, boolean _unused) {
+        super(cls);
+        this.AST = cls.AST;
+        this.token = cls.token;
+        this.anonCount = cls.anonCount;
+    }
 
     public MyClassSymbol(MyClassSymbol declarer) {
         super(declarer.nextAnonName());
@@ -123,6 +132,7 @@ public class MyClassSymbol extends ClassSymbol {
             System.err.println("class cannot declare same type variable twice");
             return false;
         }
+        paramArr = params.toArray(new TypeVariable[params.size()]);
         return true;
     }
 
@@ -204,5 +214,12 @@ public class MyClassSymbol extends ClassSymbol {
 
     private String nextAnonName() {
         return getName() + "$" + (anonCount++);
+    }
+
+    @Override
+    protected MyClassSymbol adapt(Map<TypeVariable, Type> map, boolean first) {
+        MyClassSymbol ret = new MyClassSymbol(this, false);
+        adapt(ret, map, first);
+        return ret;
     }
 }

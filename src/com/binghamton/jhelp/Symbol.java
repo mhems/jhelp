@@ -1,5 +1,7 @@
 package com.binghamton.jhelp;
 
+import java.util.Map;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.GenericArrayType;
@@ -15,8 +17,8 @@ public abstract class Symbol {
     protected SymbolKind kind;
     protected String name;
     protected AnnotationSymbol[] annotations = {};
-    private AccessLevel access;
-    private Modifiers modifiers ;
+    protected AccessLevel access;
+    protected Modifiers modifiers ;
 
     public Symbol() {
         modifiers = new Modifiers();
@@ -97,7 +99,7 @@ public abstract class Symbol {
         return annotations;
     }
 
-    public abstract Symbol adapt(Type[] args);
+    public abstract Symbol adapt(Map<TypeVariable, Type> map);
 
     public boolean hasModifier(Modifier modifier) {
         return modifiers.contains(modifier);

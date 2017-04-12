@@ -3,6 +3,7 @@ package com.binghamton.jhelp;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.Map;
 
 import com.binghamton.jhelp.ast.ASTVisitor;
 
@@ -36,21 +37,20 @@ public final class ReflectedClassSymbol extends ClassSymbol {
         }
     }
 
-    public static ReflectedClassSymbol get(String name) {
-        try {
-            return get(Class.forName(name));
-        } catch (ClassNotFoundException e) {
-            System.err.println("could not retrieve existing class " + name);
-        }
-        return null;
+    public static ReflectedClassSymbol get(Class<?> cls) {
+        return new ReflectedClassSymbol(cls);
     }
 
-    public static ReflectedClassSymbol get(Class<?> cls) {
+    public static ReflectedClassSymbol get(String name) {
         ReflectedClassSymbol sym = null;
+        Class<?> cls = null;
         try {
-            sym = ImportManager.getOrImport(cls.getName());
+            cls = Class.forName(name);
         } catch (ClassNotFoundException e) {
-            System.err.println("could not retrieve existing class " + cls.getName());
+            System.err.println("could not retrieve class " + name);
+        }
+        if (cls != null) {
+            sym = get(cls);
         }
         return sym;
     }
@@ -63,7 +63,8 @@ public final class ReflectedClassSymbol extends ClassSymbol {
             superClass = fromType(cls.getAnnotatedSuperclass());
         }
         interfaces.putAll(fromTypes(cls.getAnnotatedInterfaces()));
-        params.putAll(fromTypeParameters(cls.getTypeParameters()));
+        paramArr = fromTypeParameters(cls.getTypeParameters());
+        params.putAll(paramArr);
         for (Class<?> cur : cls.getDeclaredClasses()) {
             innerClasses.put(ReflectedClassSymbol.get(cur));
         }
@@ -88,5 +89,13 @@ public final class ReflectedClassSymbol extends ClassSymbol {
             return PrimitiveType.UNBOX_MAP.get(cls.getSimpleName());
         }
         return null;
+    }
+
+    @Override
+    protected ReflectedClassSymbol adapt(Map<TypeVariable, Type> map,
+                                      boolean first) {
+        ReflectedClassSymbol ret = new ReflectedClassSymbol(cls);
+        adapt(ret, map, first);
+        return ret;
     }
 }

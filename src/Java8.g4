@@ -1620,6 +1620,7 @@ primaryNoNewArray_lfno_primary_lfno_arrayAccess_lfno_primary returns [Expression
 
 classInstanceCreationExpression returns [InstantiationExpression ret]
     locals [Expression methodExpr,
+            NameExpression prev,
             List<Annotation> ans = new ArrayList<>(),
             List<Annotation> ans2 = new ArrayList<>(),
             ConcreteBodyDeclaration anon,
@@ -1630,13 +1631,15 @@ classInstanceCreationExpression returns [InstantiationExpression ret]
         (a = annotation {$ans.add($a.ret);})*
         id = Identifier
         {
-            $methodExpr = createPackageOrTypeName($id, $ans);
+            $prev = createTypeName($id, $ans);
+            $methodExpr = $prev;
         }
 
         ('.' (a2 = annotation {$ans2.add($a2.ret);})* id2 = Identifier
             {
-                $methodExpr = new AccessExpression($methodExpr,
-                                                   createPackageOrTypeName($id2, $ans2));
+                $prev.setKind(NameExpression.Kind.PACKAGE_OR_TYPE);
+                $prev = createTypeName($id2, $ans2);
+                $methodExpr = new AccessExpression($methodExpr, $prev);
                 $ans2.clear();
             }
         )*
@@ -2015,8 +2018,8 @@ methodReference returns [Expression ret]
     |   tn = typeName '.' kw = 'super' '::'
         (t = typeArguments {$targs = $t.ret;})? id = Identifier
         {
-            $ret = new MethodReferenceExpression(new AccessExpression($tn.ret,
-                                                                      createTypeName($kw)),
+            $ret = new MethodReferenceExpression(new NameExpression($tn.ret,
+                                                                    createTypeName($kw)),
                                                  createMethodName($id),
                                                  $targs);
         }

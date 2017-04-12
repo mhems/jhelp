@@ -1,7 +1,11 @@
 package com.binghamton.jhelp;
 
+import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.binghamton.jhelp.ast.ASTVisitor;
@@ -35,6 +39,26 @@ public abstract class ClassSymbol extends ReferenceType {
     protected MethodSymbolTable methods = new MethodSymbolTable();
     protected MethodSymbolTable ctors = new MethodSymbolTable();
     protected NamedSymbolTable<TypeVariable> params = new NamedSymbolTable<>();
+    protected TypeVariable[] paramArr = {};
+    protected Map<List<Type>, ClassSymbol> adaptationCache = new HashMap<>();
+
+    protected ClassSymbol(ClassSymbol cls) {
+        classKind = cls.classKind;
+        level = cls.level;
+        superClass = cls.superClass;
+        declarer = cls.declarer;
+        boxed = cls.boxed;
+        pkg = cls.pkg;
+        importedTypes = cls.importedTypes;
+        interfaces = cls.interfaces;
+        innerClasses = cls.innerClasses;
+        memberTypes = cls.memberTypes;
+        fields = cls.fields;
+        methods = cls.methods;
+        ctors = cls.ctors;
+        params = cls.params;
+        paramArr = cls.paramArr;
+    }
 
     /**
      * Construct a new ClassSymbol
@@ -86,7 +110,7 @@ public abstract class ClassSymbol extends ReferenceType {
     }
 
     public TypeVariable[] getTypeParameters() {
-        return params.toArray(new TypeVariable[params.size()]);
+        return paramArr;
     }
 
     public ClassSymbol[] getInnerClasses() {
@@ -181,6 +205,10 @@ public abstract class ClassSymbol extends ReferenceType {
         return params.get(name);
     }
 
+    public TypeVariable getTypeParameter(int index) {
+        return paramArr[index];
+    }
+
     public boolean hasMember(String name) {
         return fields.has(name) || methods.getAll(name).size() > 0;
     }
@@ -231,7 +259,7 @@ public abstract class ClassSymbol extends ReferenceType {
     }
 
     public boolean hasTypeParameters() {
-        return params.size() > 0;
+        return paramArr.length > 0;
     }
 
     public boolean isGeneric() {
@@ -334,10 +362,49 @@ public abstract class ClassSymbol extends ReferenceType {
         return name;
     }
 
-    @Override
-    public ClassSymbol adapt(Type[] args) {
-        // TODO
+    public ClassSymbol substitute(Type[] args) {
+        List<Type> argList = Collections.unmodifiableList(Arrays.asList(args));
+        ClassSymbol adapted = adaptationCache.get(argList);
+        if (adapted == null) {
+            Map<TypeVariable, Type> subMap = new HashMap<>();
+            for (int i = 0; i < paramArr.length; i++) {
+                subMap.put(paramArr[i], args[i]);
+            }
+            adapted = this.adapt(subMap, true);
+            adaptationCache.put(argList, adapted);
+        }
+        return adapted;
+    }
+
+    protected static ClassSymbol adapt(ClassSymbol cls,
+                                       Map<TypeVariable, Type> map,
+                                       boolean first) {
+        if (!first) {
+            // allow type parameters to shadow outer scopes'
+            for (TypeVariable param : cls.paramArr) {
+                if (map.containsKey(param)) {
+                    map.remove(param);
+                }
+            }
+        }
+        if (cls.superClass != null){
+            cls.superClass = cls.superClass.adapt(map);
+        }
+        cls.interfaces = NamedSymbolTable.adaptTypes(cls.interfaces, map);
+        cls.innerClasses = NamedSymbolTable.adaptClasses(cls.innerClasses, map);
+        cls.memberTypes = NamedSymbolTable.adaptClasses(cls.memberTypes, map);
+        cls.fields = NamedSymbolTable.adaptVariables(cls.fields, map);
+        cls.methods = cls.methods.adapt(map);
+        cls.ctors = cls.ctors.adapt(map);
         return null;
+    }
+
+    protected abstract ClassSymbol adapt(Map<TypeVariable, Type> map,
+                                         boolean first);
+
+    @Override
+    public ClassSymbol adapt(Map<TypeVariable, Type> map) {
+        return adapt(map, false);
     }
 
     public String getTypeName() {
@@ -356,14 +423,14 @@ public abstract class ClassSymbol extends ReferenceType {
         if (hasTypeParameters()) {
             sb.append("<");
             sb.append(StringUtils.join(", ",
-                                       getTypeParameters(),
+                                       params,
                                        tp -> tp.getName()));
             sb.append(">");
         }
 
         if (hasSuperClass()) {
             sb.append(" extends ");
-            sb.append(getSuperClass().getName());
+            sb.append(superClass.getName());
         }
 
         if (hasInterfaces()) {
@@ -373,7 +440,7 @@ public abstract class ClassSymbol extends ReferenceType {
                 sb.append(" extends ");
             }
             sb.append(StringUtils.join(", ",
-                                       getInterfaces(),
+                                       interfaces,
                                        c -> c.getName()));
         }
 

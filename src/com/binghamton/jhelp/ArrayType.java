@@ -1,6 +1,11 @@
 package com.binghamton.jhelp;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
+import com.binghamton.jhelp.antlr.MyToken;
+import com.binghamton.jhelp.ast.ASTVisitor;
 
 import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
 
@@ -8,6 +13,7 @@ import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
  * Class representing an array type
  */
 public class ArrayType extends ReferenceType {
+    private static Map<Type, ArrayClassSymbol> cache = new HashMap<>();
     private final Type base;
 
     /**
@@ -15,12 +21,18 @@ public class ArrayType extends ReferenceType {
      * @param base the base Type of the array
      */
     public ArrayType(Type base) {
-        this.base = base;
+        this(base, new AnnotationSymbol[0]);
     }
 
     public ArrayType(Type base, AnnotationSymbol[] annotations) {
         super(annotations);
         this.base = base;
+        ArrayClassSymbol rep = cache.get(base);
+        if (rep == null) {
+            rep = new ArrayClassSymbol(base);
+            cache.put(base, rep);
+            rep.init();
+        }
     }
 
     public Type getBaseType() {
@@ -57,12 +69,12 @@ public class ArrayType extends ReferenceType {
     }
 
     @Override
-    public ArrayType adapt(Type[] args) {
-        return new ArrayType(base.adapt(args), annotations);
+    public ArrayType adapt(Map<TypeVariable, Type> map) {
+        return new ArrayType(base.adapt(map), annotations);
     }
 
     public ClassSymbol getClassSymbol() {
-        return base.getClassSymbol();
+        return cache.get(base);
     }
 
     public ClassSymbol getDeclaringClass() {
@@ -103,5 +115,86 @@ public class ArrayType extends ReferenceType {
             return base.canCastTo(targetBaseType);
         }
         return true;
+    }
+
+    private static final class ArrayClassSymbol extends ClassSymbol {
+
+        private static final MyVariableSymbol lengthField;
+        private Type baseType;
+
+        static {
+            lengthField = new MyVariableSymbol(new MyToken(0, "length"),
+                                               new Modifiers(Modifier.PUBLIC,
+                                                             Modifier.FINAL));
+            lengthField.setType(PrimitiveType.INT);
+        }
+
+        private ArrayClassSymbol(Type baseType) {
+            super("[" + baseType.getName());
+            this.baseType = baseType;
+            superClass = fetch("Object");
+        }
+
+        private void init() {
+            interfaces.put(fetch("java.io.Serializable"));
+            interfaces.put(fetch("Cloneable"));
+            fields.put(lengthField);
+            MyMethodSymbol cloneMethod = new MyMethodSymbol(new MyToken(0, "clone"),
+                                                            new Modifiers(Modifier.PUBLIC));
+            cloneMethod.setReturnType(new ArrayType(baseType));
+            methods.put(cloneMethod);
+        }
+
+        @Override
+        public ClassSymbol getDeclaringClass() {
+            throw new UnsupportedOperationException("a synthetic array class has no declaring class");
+        }
+
+        public boolean isEnum() {
+            return false;
+        }
+
+        public boolean isClass() {
+            return false;
+        }
+
+        public boolean isInterface() {
+            return false;
+        }
+
+        public boolean isAnnotation() {
+            return false;
+        }
+
+        public boolean isBoxed() {
+            return false;
+        }
+
+        public Package getPackage() {
+            return null;
+        }
+
+        public String getQualifiedName() {
+            return getName();
+        }
+
+        public String getTypeName() {
+            return getName();
+        }
+
+        @Override
+        public ArrayClassSymbol adapt(Map<TypeVariable, Type> map) {
+            return this;
+        }
+
+        @Override
+        protected ArrayClassSymbol adapt(Map<TypeVariable, Type> map,
+                                         boolean b) {
+            return adapt(map);
+        }
+
+        public void visit(ASTVisitor visitor) {
+            // wont be visited
+        }
     }
 }

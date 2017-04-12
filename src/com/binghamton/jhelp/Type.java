@@ -1,5 +1,7 @@
 package com.binghamton.jhelp;
 
+import java.util.Map;
+
 /**
  * A base class representing a Java type
  */
@@ -13,7 +15,7 @@ public abstract class Type extends Symbol {
     public abstract ClassSymbol getClassSymbol();
 
     @Override
-    public abstract Type adapt(Type[] args);
+    public abstract Type adapt(Map<TypeVariable, Type> map);
 
     public Type() {
 

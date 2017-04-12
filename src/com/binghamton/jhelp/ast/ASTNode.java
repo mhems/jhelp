@@ -77,7 +77,7 @@ public abstract class ASTNode implements Visitable, Comparable<ASTNode> {
      * Establishes whether this node is comprised of one or many Tokens
      */
     public final void setSingular() {
-        singular = first.equals(last);
+        singular = isNil() || first.equals(last);
     }
 
     /**

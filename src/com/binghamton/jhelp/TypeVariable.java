@@ -1,6 +1,7 @@
 package com.binghamton.jhelp;
 
 import java.util.Arrays;
+import java.util.Map;
 
 import com.binghamton.jhelp.util.StringUtils;
 
@@ -67,19 +68,24 @@ public class TypeVariable extends ReferenceType {
     }
 
     @Override
-    public TypeVariable adapt(Type[] args) {
-        throw new UnsupportedOperationException("a type variable cannot be adapted");
+    public ReferenceType adapt(Map<TypeVariable, Type> map) {
+        // TODO will present problems with wildcard arguments
+        ReferenceType ret = (ReferenceType)map.get(this);
+        return ret == null ? this : ret;
     }
 
     public void setBounds(Type[] bounds) {
         this.bounds = bounds;
     }
 
+    public boolean nameEquivalent(TypeVariable other) {
+        return name.equals(other.name);
+    }
+
     public boolean equals(Object other) {
         if (other instanceof TypeVariable) {
             TypeVariable type = (TypeVariable)other;
             return name.equals(type.name) &&
-                Arrays.equals(annotations, type.annotations) &&
                 Arrays.equals(bounds, type.bounds);
         }
         return false;

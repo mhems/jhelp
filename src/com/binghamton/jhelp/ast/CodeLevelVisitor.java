@@ -53,9 +53,42 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(AccessExpression ast) {
-        ast.getLHS().accept(this);
-        ast.getRHS().accept(this);
-        // TODO if this is field access, setSymbol with that field
+        Expression lhs = ast.getLHS();
+        NameExpression rhs = ast.getRHS();
+
+        lhs.accept(this);
+        Type lType = lhs.getType();
+
+        // rhs is guaranteed to be unqualified NameExpression
+        // instead of visiting, we just hoist its data
+        visitAnnotations(rhs.getAnnotations());
+        String rName = rhs.getName();
+        Kind rKind = rhs.getKind();
+
+        if (lType != null) {
+            if (rKind == Kind.TYPE) {
+                Type type = lType.getClassSymbol().getType(rName);
+                if (type != null) {
+                    ast.setType(type);
+                } else {
+                    System.err.println("unknown inner class");
+                }
+            } else if (rKind == Kind.EXPRESSION) {
+                VariableSymbol var = lType.getClassSymbol().getField(rName);
+                if (var != null) {
+                    ast.setSymbol(var);
+                    ast.setType(var.getType());
+                } else {
+                    System.err.println("unknown variable");
+                }
+            } else if (rKind == Kind.METHOD) {
+                // set type to type of lhs
+                // call will use that type when hoisting name in method resolution
+                ast.setType(lType);
+            }
+        } else {
+            super.visit(ast);
+        }
     }
 
     /**
@@ -205,7 +238,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         Type lType = ast.getLHS().getType();
         Symbol lval = ast.getLHS().getSymbol();
 
-        // array lval will be null since array elements can never be final
+        // lval will be null if lhs is array access since array elements can never be final
         if (lval != null && lval.isFinal()) {
             System.err.println("cannot assign to a final variable");
         }
@@ -336,7 +369,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(CallExpression ast) {
-        MethodSymbol m = resolveMethod(ast, ast.getName() != null);
+        MethodSymbol m = resolveMethod(ast, ast.getName() == null);
         // TODO check method appropriate (15.12.3)
         ast.setSymbol(m);
         if (m != null) {
@@ -550,7 +583,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
     public void visit(IfElseStatement ast) {
         ast.getCondition().accept(this);
         if (!isBooleanLike(ast.getCondition().getType())) {
-            System.out.println("an if condition must yield boolean");
+            System.err.println("an if condition must yield boolean");
         }
         ast.getThenBlock().accept(this);
         ast.getElseBlock().accept(this);
@@ -563,6 +596,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
     public void visit(InstantiationExpression ast) {
         Type consType = ast.getMethod().getType();
         ClassSymbol consCls = consType.getClassSymbol();
+        ast.setType(consType);
         if (consType instanceof ParameterizedType) {
             Type[] tArgs = ((ParameterizedType)consType).getParameters();
             if (tArgs.length == 0) {
@@ -748,11 +782,6 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                     }
                 }
             }
-        } else if (ast.getKind() != Kind.METHOD) {
-            // can anything go here?
-            // used on method invocations but I think they must hoist name up since only call knows arguments
-            // I think call has to hoist up method expr or that needs to be tweaked
-            // also on method references with "new" but that's another story
         }
 
         if (ast.getKind() == Kind.EXPRESSION) {
@@ -815,7 +844,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             if (!done) {
                 super.visit(ast);
             }
-        } else {
+        } else if (ast.getKind() != Kind.METHOD) {
             super.visit(ast);
         }
     }
@@ -975,7 +1004,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                 }
             }
             if (!good) {
-                System.out.println("throw statement must throw null, an unchecked exception, or be in a method that throws that exception type");
+                System.err.println("throw statement must throw null, an unchecked exception, or be in a method that throws that exception type");
             }
         }
     }
@@ -1236,7 +1265,6 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
 
     private MethodSymbol resolveMethod(CallExpression ast, boolean isCtor) {
         MethodSymbol ret = null;
-
         ast.getMethod().accept(this);
         Type owningType = ast.getMethod().getType();
         if (owningType == null) {
@@ -1245,6 +1273,16 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             owningType = currentClass;
         }
         ClassSymbol owningCls = owningType.getClassSymbol();
+
+        // early exit if anonymous subclass of interface,
+        // there is no constructor to be found
+        if (owningCls.isInterfaceLike() &&
+            ast instanceof InstantiationExpression) {
+            if (((InstantiationExpression)ast).hasAnonymousClass()) {
+                return null;
+            }
+        }
+
 
         Type[] argTypes = new Type[ast.getArguments().size()];
         for (int i = 0; i < argTypes.length; i++) {

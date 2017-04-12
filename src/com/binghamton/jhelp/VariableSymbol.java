@@ -1,6 +1,7 @@
 package com.binghamton.jhelp;
 
 import java.lang.reflect.Field;
+import java.util.Map;
 
 import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
 
@@ -30,6 +31,13 @@ public class VariableSymbol extends Symbol {
         type = fromType(field.getAnnotatedType());
     }
 
+    protected VariableSymbol(VariableSymbol var) {
+        this(var.name, var.modifiers);
+        this.declarer = var.declarer;
+        this.varKind = var.varKind;
+        this.type = var.type;
+    }
+
     /**
      * Gets the type of this variable
      * @return the type of this variable
@@ -53,9 +61,15 @@ public class VariableSymbol extends Symbol {
     }
 
     @Override
-    public VariableSymbol adapt(Type[] args) {
-        // TODO
-        return null;
+    public VariableSymbol adapt(Map<TypeVariable, Type> map) {
+        VariableSymbol ret = new VariableSymbol(this);
+        adapt(ret, map);
+        return ret;
+    }
+
+    protected static void adapt(VariableSymbol var,
+                                Map<TypeVariable, Type> map) {
+        var.type = var.type.adapt(map);
     }
 
     public String toString() {

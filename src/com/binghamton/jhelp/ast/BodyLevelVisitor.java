@@ -135,6 +135,7 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
                 emptyCtor.setAccessLevel(access);
                 emptyCtor.setConstructor(true);
                 emptyCtor.setDeclaringClass(currentClass);
+                emptyCtor.setReturnType(currentClass);
                 emptyCtor.constructType();
                 currentClass.addConstructor(emptyCtor);
             }

@@ -21,6 +21,9 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
         }
         public S get(K key) { return null; }
         public int totalSize() { return 0; }
+        public SymbolTable<K, S> adapt(Map<TypeVariable, Type> map) {
+            throw new UnsupportedOperationException("cannot adapt the empty table");
+        }
     }
 
         {

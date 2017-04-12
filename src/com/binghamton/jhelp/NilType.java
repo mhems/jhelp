@@ -1,5 +1,7 @@
 package com.binghamton.jhelp;
 
+import java.util.Map;
+
 public final class NilType extends Type {
     public static final NilType TYPE = new NilType();
 
@@ -29,8 +31,8 @@ public final class NilType extends Type {
     }
 
     @Override
-    public Type adapt(Type[] args) {
-        throw new UnsupportedOperationException("the nil type cannot be adapted");
+    public Type adapt(Map<TypeVariable, Type> map) {
+        return this;
     }
 
     public boolean equals(Object other) {

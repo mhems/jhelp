@@ -1,5 +1,7 @@
 package com.binghamton.jhelp;
 
+import java.util.Map;
+
 /**
  * A base class representing Java reference types:
  *   arrays, classes/interfaces, type variables
@@ -27,7 +29,7 @@ public abstract class ReferenceType extends Type {
     }
 
     @Override
-    public abstract ReferenceType adapt(Type[] args);
+    public abstract ReferenceType adapt(Map<TypeVariable, Type> map);
 
     @Override
     public boolean canWidenTo(Type type) {

@@ -12520,6 +12520,7 @@ public class Java8Parser extends Parser {
 	public static class ClassInstanceCreationExpressionContext extends ParserRuleContext {
 		public InstantiationExpression ret;
 		public Expression methodExpr;
+		public NameExpression prev;
 		public List<Annotation> ans = new ArrayList<>();
 		public List<Annotation> ans2 = new ArrayList<>();
 		public ConcreteBodyDeclaration anon;
@@ -12612,7 +12613,8 @@ public class Java8Parser extends Parser {
 				setState(2731);
 				((ClassInstanceCreationExpressionContext)_localctx).id = match(Identifier);
 
-				            ((ClassInstanceCreationExpressionContext)_localctx).methodExpr =  createPackageOrTypeName(((ClassInstanceCreationExpressionContext)_localctx).id, _localctx.ans);
+				            ((ClassInstanceCreationExpressionContext)_localctx).prev =  createTypeName(((ClassInstanceCreationExpressionContext)_localctx).id, _localctx.ans);
+				            ((ClassInstanceCreationExpressionContext)_localctx).methodExpr =  _localctx.prev;
 				        
 				setState(2746);
 				_errHandler.sync(this);
@@ -12640,8 +12642,9 @@ public class Java8Parser extends Parser {
 					setState(2742);
 					((ClassInstanceCreationExpressionContext)_localctx).id2 = match(Identifier);
 
-					                ((ClassInstanceCreationExpressionContext)_localctx).methodExpr =  new AccessExpression(_localctx.methodExpr,
-					                                                   createPackageOrTypeName(((ClassInstanceCreationExpressionContext)_localctx).id2, _localctx.ans2));
+					                _localctx.prev.setKind(NameExpression.Kind.PACKAGE_OR_TYPE);
+					                ((ClassInstanceCreationExpressionContext)_localctx).prev =  createTypeName(((ClassInstanceCreationExpressionContext)_localctx).id2, _localctx.ans2);
+					                ((ClassInstanceCreationExpressionContext)_localctx).methodExpr =  new AccessExpression(_localctx.methodExpr, _localctx.prev);
 					                _localctx.ans2.clear();
 					            
 					}
@@ -14709,8 +14712,8 @@ public class Java8Parser extends Parser {
 				setState(3316);
 				((MethodReferenceContext)_localctx).id = match(Identifier);
 
-				            ((MethodReferenceContext)_localctx).ret =  new MethodReferenceExpression(new AccessExpression(((MethodReferenceContext)_localctx).tn.ret,
-				                                                                      createTypeName(((MethodReferenceContext)_localctx).kw)),
+				            ((MethodReferenceContext)_localctx).ret =  new MethodReferenceExpression(new NameExpression(((MethodReferenceContext)_localctx).tn.ret,
+				                                                                    createTypeName(((MethodReferenceContext)_localctx).kw)),
 				                                                 createMethodName(((MethodReferenceContext)_localctx).id),
 				                                                 _localctx.targs);
 				        

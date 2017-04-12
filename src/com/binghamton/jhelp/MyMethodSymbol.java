@@ -1,9 +1,16 @@
 package com.binghamton.jhelp;
 
+import java.util.Map;
+
 import org.antlr.v4.runtime.Token;
 
 public class MyMethodSymbol extends MethodSymbol {
     private final Token token;
+
+    private MyMethodSymbol(MyMethodSymbol method) {
+        super(method);
+        this.token = method.token;
+    }
 
     public MyMethodSymbol(Token token) {
         super(token.getText());
@@ -53,5 +60,12 @@ public class MyMethodSymbol extends MethodSymbol {
 
     public void setConstructor(boolean constructor) {
         this.constructor = constructor;
+    }
+
+    @Override
+    public MyMethodSymbol adapt(Map<TypeVariable, Type> map) {
+        MyMethodSymbol ret = new MyMethodSymbol(this);
+        adapt(ret, map);
+        return ret;
     }
 }

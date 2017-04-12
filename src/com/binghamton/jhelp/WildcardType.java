@@ -1,6 +1,7 @@
 package com.binghamton.jhelp;
 
 import java.util.Arrays;
+import java.util.Map;
 
 import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
 
@@ -54,8 +55,8 @@ public class WildcardType extends Type {
     }
 
     @Override
-    public WildcardType adapt(Type[] args) {
-        return new WildcardType(upper, bound.adapt(args));
+    public WildcardType adapt(Map<TypeVariable, Type> map) {
+        return new WildcardType(upper, bound.adapt(map));
     }
 
     public boolean equals(Object other) {

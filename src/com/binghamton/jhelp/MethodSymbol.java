@@ -5,6 +5,7 @@ import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import com.binghamton.jhelp.util.StringUtils;
 
@@ -28,6 +29,17 @@ public class MethodSymbol extends Symbol {
     protected boolean variadic = false;
     protected boolean constructor = false;
     protected Type returnType;
+
+    protected MethodSymbol(MethodSymbol method) {
+        this.type = method.type;
+        this.declarer = method.declarer;
+        this.paramTypes = method.paramTypes;
+        this.typeVars = method.typeVars;
+        this.exceptions = method.exceptions;
+        this.variadic = method.variadic;
+        this.constructor = method.constructor;
+        this.returnType = method.returnType;
+    }
 
     /**
      * Constructs a new named method symbol
@@ -165,10 +177,28 @@ public class MethodSymbol extends Symbol {
         return type.overrideEquivalent(other.type);
     }
 
+    protected static void adapt(MethodSymbol method,
+                                Map<TypeVariable, Type> map){
+        // allow method type parameters to shadow outer scopes'
+        for (TypeVariable mParam : method.typeVars) {
+            if (map.containsKey(mParam)) {
+                map.remove(mParam);
+            }
+        }
+        for (int i = 0; i < method.paramTypes.length; i++) {
+            method.paramTypes[i] = method.paramTypes[i].adapt(map);
+        }
+        for (int i = 0; i < method.exceptions.length; i++) {
+            method.exceptions[i] = method.exceptions[i].adapt(map);
+        }
+        method.returnType = method.returnType.adapt(map);
+    }
+
     @Override
-    public MethodSymbol adapt(Type[] args) {
-        // TODO
-        return null;
+    public MethodSymbol adapt(Map<TypeVariable, Type> map) {
+        MethodSymbol ret = new MethodSymbol(this);
+        adapt(ret, map);
+        return ret;
     }
 
     public boolean equals(Object other) {

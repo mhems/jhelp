@@ -1,12 +1,13 @@
 package com.binghamton.jhelp;
 
 import java.util.Arrays;
+import java.util.Map;
 
 import com.binghamton.jhelp.util.StringUtils;
 
 public final class MethodType extends Type {
     private ClassSymbol declarer;
-    private Type[] typeParams = {};
+    private TypeVariable[] typeParams = {};
     private Type[] paramTypes = {};
 
     private MethodType(String name) {
@@ -58,7 +59,7 @@ public final class MethodType extends Type {
     public MethodType erase() {
         MethodType erased = new MethodType(name);
         erased.declarer = declarer;
-        erased.typeParams = new Type[0];
+        erased.typeParams = new TypeVariable[0];
         erased.paramTypes = new Type[paramTypes.length];
         for (int i = 0; i < paramTypes.length; i++) {
             erased.paramTypes[i] = paramTypes[i].erase();
@@ -76,12 +77,12 @@ public final class MethodType extends Type {
     }
 
     @Override
-    public MethodType adapt(Type[] args) {
+    public MethodType adapt(Map<TypeVariable, Type> map) {
         MethodType ret = new MethodType(name);
         ret.declarer = declarer;
         ret.paramTypes = new Type[paramTypes.length];
         for (int i = 0; i < ret.paramTypes.length; i++) {
-            ret.paramTypes[i] = paramTypes[i].adapt(args);
+            ret.paramTypes[i] = paramTypes[i].adapt(map);
         }
         return ret;
     }
