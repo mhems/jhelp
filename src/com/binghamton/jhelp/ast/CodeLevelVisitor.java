@@ -185,6 +185,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             baseType = new ArrayType(baseType);
         }
         if (ast.hasInitializer()) {
+            ast.getInitializer().setInferredType(baseType);
             ast.getInitializer().accept(this);
             if (!baseType.equals(ast.getInitializer().getType())) {
                 System.err.println("array must be initialized with array of same type as declared");
@@ -198,7 +199,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(ArrayInitializer ast) {
-        Type baseType = null; // TODO must be "inferred" (passed-down)
+        Type baseType = ((ArrayType)ast.getInferredType()).getBaseType();
         if (!baseType.isReifiable()) {
             System.err.println("base type of array initializer must be reifiable");
         }
@@ -234,6 +235,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
      */
     public void visit(AssignmentExpression ast) {
         ast.getLHS().accept(this);
+        ast.getRHS().setInferredType(ast.getLHS().getType());
         ast.getRHS().accept(this);
         Type lType = ast.getLHS().getType();
         Symbol lval = ast.getLHS().getSymbol();
@@ -755,7 +757,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         NameExpression qual = ast.getQualifyingName();
         VariableSymbol var;
         Type type;
-
+        System.out.println("code name: " + ast.getText() + " (" + ast.getKind() + ")");
         if (ast.getKind() == Kind.AMBIGUOUS) {
             if (!ast.isQualified()) {
                 var = currentScope.get(rName);
@@ -1085,17 +1087,24 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(VariableDeclaration ast) {
+        System.out.println("*****> var decl" + ast);
         MyVariableSymbol var = ast.getSymbol();
         if (var == null) {
+            System.out.println("encountered new variable");
             var = new MyVariableSymbol(ast.getName(), ast.getModifiers());
             ast.setSymbol(var);
             var.setDeclaringClass(currentClass);
             ast.getExpression().accept(this);
             var.setType(ast.getExpression().getType());
+            System.out.println("added to scope");
             currentScope.put(var);
+        } else {
+            currentScope.put(var);
+            System.out.println(var.getName() + " " + var.getType());
         }
         visitAnnotations(ast.getAnnotations());
         Expression init = ast.getInitializer();
+        init.setInferredType(var.getType());
         init.accept(this);
         if (!init.isNil() && !isAssignable(var.getType(), init.getType())) {
             System.err.println("cannot initialize a variable of one type with an expression of another type");
@@ -1264,9 +1273,13 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
     }
 
     private MethodSymbol resolveMethod(CallExpression ast, boolean isCtor) {
+
+        System.out.println("attempting to resolve method: " + ast);
+        ast.getMethod().setInferredType(ast.getInferredType());
         MethodSymbol ret = null;
         ast.getMethod().accept(this);
         Type owningType = ast.getMethod().getType();
+        System.out.println("owning type is " + owningType.getName());
         if (owningType == null) {
             // unqualified method
             assert(!isCtor);

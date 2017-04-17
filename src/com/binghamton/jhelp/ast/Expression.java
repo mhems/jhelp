@@ -11,6 +11,7 @@ import com.binghamton.jhelp.Symbol;
 public abstract class Expression extends Statement {
 
     protected Type type;
+    protected Type inferredType;
     protected Symbol sym;
 
     /**
@@ -53,6 +54,14 @@ public abstract class Expression extends Statement {
 
     public void setType(Type type) {
         this.type = type;
+    }
+
+    public Type getInferredType() {
+        return inferredType;
+    }
+
+    public void setInferredType(Type type) {
+        this.inferredType = type;
     }
 
     public Symbol getSymbol() {

@@ -2,12 +2,16 @@ package com.binghamton.jhelp.ast;
 
 import java.util.List;
 
+import org.antlr.v4.runtime.Token;
+
 public class ParamExpression extends Expression {
     private final Expression expr;
     private final List<TypeArgument> targs;
 
-    public ParamExpression(Expression expr, List<TypeArgument> targs) {
-        super(expr.getFirstToken(), targs.get(targs.size()-1).getLastToken());
+    public ParamExpression(Expression expr,
+                           List<TypeArgument> targs,
+                           Token last) {
+        super(expr.getFirstToken(), last);
         this.expr = expr;
         this.targs = targs;
     }

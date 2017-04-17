@@ -31,6 +31,7 @@ public class MethodSymbol extends Symbol {
     protected Type returnType;
 
     protected MethodSymbol(MethodSymbol method) {
+        super(method.name, method.modifiers);
         this.type = method.type;
         this.declarer = method.declarer;
         this.paramTypes = method.paramTypes;

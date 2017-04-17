@@ -32,7 +32,7 @@ public class VariableSymbol extends Symbol {
     }
 
     protected VariableSymbol(VariableSymbol var) {
-        this(var.name, var.modifiers);
+        super(var.name, var.modifiers);
         this.declarer = var.declarer;
         this.varKind = var.varKind;
         this.type = var.type;

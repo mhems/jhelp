@@ -10,6 +10,11 @@ import com.binghamton.jhelp.ast.ASTVisitor;
 public final class ReflectedClassSymbol extends ClassSymbol {
     private final Class<? extends Object> cls;
 
+    private ReflectedClassSymbol(ReflectedClassSymbol sym) {
+        super(sym);
+        this.cls = sym.cls;
+    }
+
     private ReflectedClassSymbol(Class<? extends Object> cls) {
         super(cls.getSimpleName(), cls.getModifiers());
         this.cls = cls;
@@ -56,6 +61,7 @@ public final class ReflectedClassSymbol extends ClassSymbol {
     }
 
     public void init() {
+
         if (cls.getDeclaringClass() != null) {
             declarer = get(cls.getDeclaringClass());
         }
@@ -94,7 +100,7 @@ public final class ReflectedClassSymbol extends ClassSymbol {
     @Override
     protected ReflectedClassSymbol adapt(Map<TypeVariable, Type> map,
                                       boolean first) {
-        ReflectedClassSymbol ret = new ReflectedClassSymbol(cls);
+        ReflectedClassSymbol ret = new ReflectedClassSymbol(this);
         adapt(ret, map, first);
         return ret;
     }

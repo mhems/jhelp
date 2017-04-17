@@ -288,7 +288,7 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         Kind kind = ast.getKind();
         Type type;
         NameExpression qual = ast.getQualifyingName();
-
+        System.out.println("decl name: " + ast.getText() + " (" + ast.getKind() + ")");
         if (kind == Kind.PACKAGE) {
             Package pkg = program.getPackage(name);
             if (pkg != null) {
@@ -343,14 +343,22 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
             ClassSymbol sym = (ClassSymbol)rawType;
             if (sym.isGeneric()) {
                 List<TypeArgument> args = ast.getTypeArguments();
-                Type[] tArgs = new Type[args.size()];
-                int pos = 0;
-                for (TypeArgument arg : args) {
-                    arg.accept(this);
-                    tArgs[pos] = arg.getType();
-                    ++pos;
+                if (args.size() > 0) {
+                    Type[] tArgs = new Type[args.size()];
+                    int pos = 0;
+                    for (TypeArgument arg : args) {
+                        arg.accept(this);
+                        tArgs[pos] = arg.getType();
+                        ++pos;
+                    }
+                    ast.setType(new ParameterizedType(sym, tArgs));
+                } else {
+                    Type iType = ast.getInferredType();
+                    if (iType != null) {
+                        ast.setType(new ParameterizedType(sym,
+                                                          ((ParameterizedType)iType).getParameters()));
+                    }
                 }
-                ast.setType(new ParameterizedType(sym, tArgs));
             } else {
                 System.err.println("cannot parameterize a non-generic class");
             }

@@ -43,6 +43,7 @@ public abstract class ClassSymbol extends ReferenceType {
     protected Map<List<Type>, ClassSymbol> adaptationCache = new HashMap<>();
 
     protected ClassSymbol(ClassSymbol cls) {
+        super(cls.name, cls.modifiers);
         classKind = cls.classKind;
         level = cls.level;
         superClass = cls.superClass;

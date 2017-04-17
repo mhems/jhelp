@@ -408,6 +408,7 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
         Kind kind = ast.getKind();
         NameExpression qual = ast.getQualifyingName();
         Type type = null;
+        System.out.println("body name: " + ast.getText() + " (" + ast.getKind() + ")");
         if (kind == Kind.TYPE) {
             type = PrimitiveType.UNBOX_MAP.get(name);
         }

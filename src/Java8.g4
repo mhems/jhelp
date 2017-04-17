@@ -157,7 +157,7 @@ classOrInterfaceType returns [Expression ret]
         {
             $ret = $co.ret;
             if ($co.targs != null) {
-                $ret = new ParamExpression($ret, $co.targs);
+                $ret = new ParamExpression($ret, $co.targs, $co.last);
             }
         }
         (   '.'
@@ -165,7 +165,7 @@ classOrInterfaceType returns [Expression ret]
             {
                 $ret = new AccessExpression($ret, $c.ret);
                 if ($c.targs != null) {
-                    $ret = new ParamExpression($ret, $c.targs);
+                    $ret = new ParamExpression($ret, $c.targs, $c.last);
                 }
             }
         )*
@@ -177,7 +177,9 @@ classType returns [Expression ret]
     :   (a = annotation {$anns.add($a.ret);})*
         id = Identifier
         {$ret = createPackageOrTypeName($id, $anns);}
-        (targs = typeArguments {$ret = new ParamExpression($ret, $targs.ret);})?
+        (targs = typeArguments {$ret = new ParamExpression($ret,
+                                                           $targs.ret,
+                                                           $targs.last);})?
     |   st = classOrInterfaceType '.'
         (a = annotation {$anns.add($a.ret);})*
         id = Identifier
@@ -185,16 +187,19 @@ classType returns [Expression ret]
             $ret = new AccessExpression($st.ret,
                                         createPackageOrTypeName($id, $anns));
         }
-        (targs = typeArguments {$ret = new ParamExpression($ret, $targs.ret);})?
+        (targs = typeArguments {$ret = new ParamExpression($ret,
+                                                           $targs.ret,
+                                                           $targs.last);})?
     ;
 
 classType_lfno_classOrInterfaceType returns [NameExpression ret,
-                                             List<TypeArgument> targs]
+                                             List<TypeArgument> targs,
+                                             Token last]
     locals [List<Annotation> ans = new ArrayList<>()]
     :   (a = annotation {$ans.add($a.ret);})*
         id = Identifier
         {$ret = createPackageOrTypeName($id, $ans);}
-        (ta = typeArguments {$targs = $ta.ret;})?
+        (ta = typeArguments {$targs = $ta.ret; $last = $ta.last;})?
     ;
 
 typeVariable returns [NameExpression ret]
@@ -249,8 +254,8 @@ additionalBound returns [Expression ret]
     :   '&' i = classType {$ret = $i.ret;}
     ;
 
-typeArguments returns [List<TypeArgument> ret]
-    :   '<' ls = typeArgumentList '>' {$ret = $ls.ret;}
+typeArguments returns [List<TypeArgument> ret, Token last]
+    :   '<' ls = typeArgumentList end = '>' {$ret = $ls.ret; $last = $end;}
     ;
 
 typeArgumentList returns [List<TypeArgument> ret]
@@ -570,7 +575,7 @@ unannClassOrInterfaceType returns [Expression ret]
             {
                 $ret = new AccessExpression($ret, $c.ret);
                 if ($c.targs != null) {
-                    $ret = new ParamExpression($ret, $c.targs);
+                    $ret = new ParamExpression($ret, $c.targs, $c.last);
                 }
             }
         )*
@@ -583,7 +588,7 @@ unannClassType returns [Expression ret]
         {
             $ret = new AccessExpression($a.ret, $b.ret);
             if ($b.targs != null) {
-                $ret = new ParamExpression($ret, $b.targs);
+                $ret = new ParamExpression($ret, $b.targs, $b.last);
             }
         }
     ;
@@ -593,7 +598,7 @@ unannClassType_lfno_unannClassOrInterfaceType returns [Expression ret]
         {$ret = createPackageOrTypeName($id);}
         (
             targs = typeArguments
-            {$ret = new ParamExpression($ret, $targs.ret);}
+            {$ret = new ParamExpression($ret, $targs.ret, $targs.last);}
         )?
     ;
 
@@ -1646,7 +1651,7 @@ classInstanceCreationExpression returns [InstantiationExpression ret]
         (
             ta = typeArgumentsOrDiamond
             {
-                $methodExpr = new ParamExpression($methodExpr, $ta.ret);
+                $methodExpr = new ParamExpression($methodExpr, $ta.ret, $ta.last);
             }
         )?
         '(' (l = argumentList {$args = $l.ret;})? last = ')'
@@ -1670,7 +1675,7 @@ classInstanceCreationExpression returns [InstantiationExpression ret]
         (
             ta = typeArgumentsOrDiamond
             {
-                $methodExpr = new ParamExpression($methodExpr, $ta.ret);
+                $methodExpr = new ParamExpression($methodExpr, $ta.ret, $ta.last);
             }
         )?
         '(' (l = argumentList {$args = $l.ret;})? last = ')'
@@ -1692,7 +1697,7 @@ classInstanceCreationExpression returns [InstantiationExpression ret]
         (
             ta = typeArgumentsOrDiamond
             {
-                $methodExpr = new ParamExpression($methodExpr, $ta.ret);
+                $methodExpr = new ParamExpression($methodExpr, $ta.ret, $ta.last);
             }
         )?
         '(' (l = argumentList {$args = $l.ret;})? last = ')'
@@ -1721,7 +1726,7 @@ classInstanceCreationExpression_lf_primary returns [InstantiationExpression ret]
         (
             ta = typeArgumentsOrDiamond
             {
-                $methodExpr = new ParamExpression($methodExpr, $ta.ret);
+                $methodExpr = new ParamExpression($methodExpr, $ta.ret, $ta.last);
             }
         )?
         '(' (l = argumentList {$args = $l.ret;})? last = ')'
@@ -1757,7 +1762,7 @@ classInstanceCreationExpression_lfno_primary returns [InstantiationExpression re
         (
             ta = typeArgumentsOrDiamond
             {
-                $methodExpr = new ParamExpression($methodExpr, $ta.ret);
+                $methodExpr = new ParamExpression($methodExpr, $ta.ret, $ta.last);
             }
         )?
         '(' (l = argumentList {$args = $l.ret;})? last = ')'
@@ -1779,7 +1784,7 @@ classInstanceCreationExpression_lfno_primary returns [InstantiationExpression re
         (
             ta = typeArgumentsOrDiamond
             {
-                $methodExpr = new ParamExpression($methodExpr, $ta.ret);
+                $methodExpr = new ParamExpression($methodExpr, $ta.ret, $ta.last);
             }
         )?
         '(' (l = argumentList {$args = $l.ret;})? last = ')'
@@ -1792,9 +1797,9 @@ classInstanceCreationExpression_lfno_primary returns [InstantiationExpression re
         (classBody[$anon])?
     ;
 
-typeArgumentsOrDiamond returns [List<TypeArgument> ret]
-    :   ta = typeArguments {$ret = $ta.ret;}
-    |   '<' '>' {$ret = new ArrayList<>();}
+typeArgumentsOrDiamond returns [List<TypeArgument> ret, Token last]
+    :   ta = typeArguments {$ret = $ta.ret; $last = $ta.last;}
+    |   '<' end = '>' {$ret = new ArrayList<>(); $last = $end;}
     ;
 
 fieldAccess returns [AccessExpression ret]
@@ -1872,21 +1877,11 @@ methodInvocation returns [Expression ret]
             List<TypeArgument> targs = new ArrayList<>()]
     :   mn = Identifier '(' (a = argumentList {$args = $a.ret;})? last = ')'
         {$ret = new CallExpression($last, $mn, $args);}
-    |   tn = typeName '.' (t = typeArguments {$targs = $t.ret;})?
+    |   amb = ambiguousName '.' (t = typeArguments {$targs = $t.ret;})?
         id = Identifier '(' (a = argumentList {$args = $a.ret;})? last = ')'
         {
             $ret = new CallExpression($last,
-                                      new AccessExpression($tn.ret,
-                                                           createMethodName($id)),
-                                      $id,
-                                      $args,
-                                      $targs);
-        }
-    |   en = expressionName '.' (t = typeArguments {$targs = $t.ret;})?
-        id = Identifier '(' (a = argumentList {$args = $a.ret;})? last = ')'
-        {
-            $ret = new CallExpression($last,
-                                      new AccessExpression($en.ret,
+                                      new AccessExpression($amb.ret,
                                                            createMethodName($id)),
                                       $id,
                                       $args,
@@ -1938,21 +1933,11 @@ methodInvocation_lfno_primary returns [Expression ret]
             List<TypeArgument> targs = new ArrayList<>()]
     :   mn = Identifier '(' (a = argumentList {$args = $a.ret;})? last = ')'
         {$ret = new CallExpression($last, $mn, $args);}
-    |   tn = typeName '.' (t = typeArguments {$targs = $t.ret;})?
+    |   amb = ambiguousName '.' (t = typeArguments {$targs = $t.ret;})?
         id = Identifier '(' (a = argumentList {$args = $a.ret;})? last = ')'
         {
             $ret = new CallExpression($last,
-                                      new AccessExpression($tn.ret,
-                                                           createMethodName($id)),
-                                      $id,
-                                      $args,
-                                      $targs);
-        }
-    |   en = expressionName '.' (t = typeArguments {$targs = $t.ret;})?
-        id = Identifier '(' (a = argumentList {$args = $a.ret;})? last = ')'
-        {
-            $ret = new CallExpression($last,
-                                      new AccessExpression($en.ret,
+                                      new AccessExpression($amb.ret,
                                                            createMethodName($id)),
                                       $id,
                                       $args,

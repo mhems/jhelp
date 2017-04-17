@@ -14,12 +14,14 @@ public class ParameterizedType extends ReferenceType {
     }
 
     public ParameterizedType(ClassSymbol wrapped, Type[] parameters) {
+        if (wrapped == null)  throw new IllegalArgumentException("cannot wrap a null type");
         this.wrapped = wrapped;
         this.params = parameters;
         // isWellFormed(); // TODO infinite recursion?
     }
 
     public String getName() {
+        System.out.println("wrapped: " + wrapped);
         StringBuilder sb = new StringBuilder(wrapped.getName());
         sb.append("<");
         if (params.length > 0) {
@@ -40,6 +42,7 @@ public class ParameterizedType extends ReferenceType {
     }
 
     public ClassSymbol getClassSymbol() {
+        System.out.println("getting class symbol for " + getName());
         return wrapped.substitute(params);
     }
 

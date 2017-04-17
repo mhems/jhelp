@@ -32,7 +32,7 @@ public class InstantiationExpression extends CallExpression {
      * @return true iff this instantiation has an anonymous class
      */
     public boolean hasAnonymousClass() {
-        return classBody != null;
+        return !classBody.isEmpty();
     }
 
     /**
