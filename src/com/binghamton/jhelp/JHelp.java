@@ -5,8 +5,11 @@ package com.binghamton.jhelp;
  */
 public class JHelp {
 
+    /**
+     * Construct a new JHelp instance
+     */
     private JHelp() {
-
+	// prevent public instantiation
     }
 
     /**

@@ -641,7 +641,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             ast.getAnonymousClass().accept(superVisitor);
             currentClass = tmp;
 
-            if (existingCls.hasConstructor()) {
+            if (ast.getAnonymousClass().numConstructors() > 0) {
                 System.err.println("anonymous classes cannot declare constructors");
             }
             // don't think I need to synthesize anon. class' constructor
