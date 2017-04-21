@@ -75,7 +75,10 @@ public class SymbolFinder {
         return ret;
     }
 
+    /**
+     * Default constructor
+     */
     private SymbolFinder() {
-
+        // prevent public instantiation
     }
 }

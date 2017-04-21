@@ -16,7 +16,11 @@ public abstract class StringMatcher {
                                                   Character.toLowerCase(c2);
     }
 
+    /**
+     * Characterizes the ability to equate two Characters
+     */
     public interface CharEquater {
+
         /**
          * Determines if two Characters are equivalent
          * @param c1 a Character
