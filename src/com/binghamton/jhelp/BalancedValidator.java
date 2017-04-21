@@ -58,6 +58,11 @@ public class BalancedValidator implements Validator {
         return errors;
     }
 
+    /**
+     * Checks a stream of Tokens for balanced punctuation
+     * @param tokenStream the stream of Tokens to check
+     * @return a possibly empty List of JHelpErrors present
+     */
     private static List<JHelpError> check(CommonTokenStream tokenStream) {
         Stack<Token> delims = new Stack<>();
         List<JHelpError> errors = Validator.buildErrors();

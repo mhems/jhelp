@@ -10,6 +10,10 @@ import java.util.function.Function;
 
 import com.binghamton.jhelp.util.SymbolFinder;
 
+/**
+ * A SymbolTable where ClassSymbols that are not found are attempted to be
+ * imported.
+ */
 public class ImportingSymbolTable extends NamedSymbolTable<ClassSymbol> {
     private static final ImportingSymbolTable ROOT = new ImportingSymbolTable(cls -> cls.getQualifiedName());
     private static SymbolFinder FINDER;
@@ -27,14 +31,28 @@ public class ImportingSymbolTable extends NamedSymbolTable<ClassSymbol> {
 
     private final Set<String> onDemandPackages = new HashSet<>();
 
+    /**
+     * Constructs a new ImportingSymbolTable
+     */
     public ImportingSymbolTable() {
 
     }
 
+
+    /**
+     * Constructs a new ImportingSymbolTable
+     * @param valueToKey that function that maps a symbol to its key
+     */
     private ImportingSymbolTable(Function<ClassSymbol, String> valueToKey) {
         super(valueToKey);
     }
 
+    /**
+     * Fetch a pre-compiled class's ClassSymbol
+     * @param name the name of pre-compiled class. May be unqualified
+     *        if the class is imported on-demand.
+     * @return the ClassSymbol reflecting the pre-compiled class
+     */
     public static ClassSymbol fetch(String name) {
         return ROOT.get(name);
     }
@@ -115,6 +133,11 @@ public class ImportingSymbolTable extends NamedSymbolTable<ClassSymbol> {
         return onDemandPackages.contains(pkg);
     }
 
+    /**
+     * Imports a class type into this table
+     * @param classname the name of the class to try to import
+     * @return true iff the import was successful
+     */
     public boolean importType(String classname) {
         ReflectedClassSymbol cls = null;
         try {
@@ -130,6 +153,11 @@ public class ImportingSymbolTable extends NamedSymbolTable<ClassSymbol> {
         return cls != null;
     }
 
+    /**
+     * Imports a class type on demand.
+     * @param classname the name of the class to import-on-demand
+     * @return true; this operation always succeeds
+     */
     public boolean importTypesOnDemand(String classname) {
         onDemandPackages.add(classname);
         return true;
