@@ -9,7 +9,7 @@ import org.antlr.v4.runtime.Token;
  * inner class.
  */
 public class InstantiationExpression extends CallExpression {
-    private final ConcreteBodyDeclaration classBody = new ClassDeclaration();
+    private final ClassDeclaration classBody = new ClassDeclaration();
 
     /**
      * Construct an instantiation expression
@@ -39,7 +39,7 @@ public class InstantiationExpression extends CallExpression {
      * Gets this instantiation's anonymous class, if any
      * @return this instantiation's anonymous class, if any
      */
-    public ConcreteBodyDeclaration getAnonymousClass() {
+    public ClassDeclaration getAnonymousClass() {
         return classBody;
     }
 

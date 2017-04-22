@@ -101,10 +101,12 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         Set<String> needed = new HashSet<>();
         ClassSymbol ann;
 
-        if (ast.getType() == null) {
-            super.visit(ast);
+        ast.getTypeExpression().accept(this);
+        ann = ast.getTypeExpression().getType().getClassSymbol();
+        if (!ann.isAnnotation()) {
+            System.err.println("can only annotate with an annotation");
         }
-        ann = ast.getType().getClassSymbol();
+        ast.setType(ann);
 
         for (MethodSymbol m : ann.getMethods()) {
             if (!m.hasModifier(Modifier.DEFAULT)) {
@@ -452,6 +454,9 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         // otherwise must be local or anon, or inner of the one of the former
         // add to appropriate tables and visit and establish member decl.s
 
+        // TODO local/anonymous but not enum constant anonymous
+
+
         for (MethodDeclaration ctor : ast.getConstructors()) {
             ctor.accept(this);
         }
@@ -466,10 +471,6 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             iB.accept(this);
         }
 
-    }
-
-    public void visit(ClassDeclaration ast) {
-        // override to do nothing
     }
 
     /**
@@ -503,12 +504,34 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(EnumConstant ast) {
+        Type[] ctorParamTypes = new Type[ast.getArguments().size()];
+        int pos = 0;
         for (Expression arg : ast.getArguments()) {
             arg.accept(this);
+            ctorParamTypes[pos] = arg.getType();
+            ++pos;
         }
+
+        MethodSymbol ctor = resolveCtorForAnonymousClass(ast.getSymbol().getType().getClassSymbol(),
+                                                         ctorParamTypes,
+                                                         new ArrayList<Type>());
+        if (ctor == null) {
+            System.err.println("cannot find constructor for enum constant");
+        }
+
         if (!ast.isEmpty()) {
             MyClassSymbol tmp = currentClass;
-            ast.getBody().accept(this);
+            ClassDeclaration bodyAST = ast.getBody();
+            bodyAST.setAnonymousParameterTypes(ctor.getParameterTypes());
+            MyClassSymbol constant = new MyClassSymbol(currentClass);
+            constant.setSuperClassForEnumConstant();
+            bodyAST.setSymbol(constant);
+            bodyAST.accept(superVisitor);
+            if (constant.hasAbstractMethod()) {
+                System.err.println("an enum constant body cannot declare abstract methods");
+            }
+
+            bodyAST.accept(this);
             currentClass = tmp;
         }
     }
@@ -632,21 +655,29 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             if (consCls.isFinal()) {
                 System.err.println("cannot subclass a final class with an anonymous class");
             }
-            MyClassSymbol existingCls = ast.getAnonymousClass().getSymbol();
+            MyClassSymbol anonCls = new MyClassSymbol(currentClass);
             if (consCls.isInterfaceLike()) {
-                existingCls.addInterface(consCls);
+                anonCls.setSuperClassForClass();
+                anonCls.addInterface(consCls);
             } else {
-                existingCls.setSuperClass(consCls);
+                anonCls.setSuperClass(consCls);
             }
+
+            ClassDeclaration bodyAST = ast.getAnonymousClass();
+            bodyAST.setSymbol(anonCls);
+            MethodSymbol ctor = ast.getSymbol();
+            bodyAST.setAnonymousParameterTypes(ctor.getParameterTypes());
 
             MyClassSymbol tmp = currentClass;
-            ast.getAnonymousClass().accept(superVisitor);
-            currentClass = tmp;
-
-            if (existingCls.hasConstructor()) {
+            bodyAST.accept(superVisitor);
+            if (anonCls.hasConstructor()) {
                 System.err.println("anonymous classes cannot declare constructors");
             }
-            // don't think I need to synthesize anon. class' constructor
+
+            bodyAST.accept(this);
+            currentClass = tmp;
+
+
         }
     }
 
@@ -705,6 +736,25 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
     }
 
     /**
+     * Visit a LocalClassDeclaration node
+     * @param ast the AST node being visited
+     */
+    public void visit(LocalClassDeclaration ast) {
+        MyClassSymbol decl = currentClass;
+        ConcreteBodyDeclaration cls = ast.getDeclaration();
+        cls.setKind(BodyDeclaration.Kind.LOCAL);
+        cls.accept(this); // TODO
+        cls.getSymbol().setLocal();
+        if (cls.getSymbol().hasModifier(Modifier.STATIC)) {
+            System.err.println("local class cannot be static");
+        }
+        if (cls.getSymbol().getAccessLevel() != Symbol.AccessLevel.PACKAGE_PRIVATE) {
+            System.err.println("local class cannot have access modifier");
+        }
+        currentClass = decl;
+    }
+
+    /**
      * Visit a LocalVariableStatement node
      * @param ast the AST node being visited
      */
@@ -757,7 +807,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         NameExpression qual = ast.getQualifyingName();
         VariableSymbol var;
         Type type;
-        System.out.println("code name: " + ast.getText() + " (" + ast.getKind() + ")");
+        // System.out.println("code name: " + ast.getText() + " (" + ast.getKind() + ")");
         if (ast.getKind() == Kind.AMBIGUOUS) {
             if (!ast.isQualified()) {
                 var = currentScope.get(rName);
@@ -1087,20 +1137,20 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(VariableDeclaration ast) {
-        System.out.println("*****> var decl" + ast);
+        // System.out.println("*****> var decl" + ast);
         MyVariableSymbol var = ast.getSymbol();
         if (var == null) {
-            System.out.println("encountered new variable");
+            // System.out.println("encountered new variable");
             var = new MyVariableSymbol(ast.getName(), ast.getModifiers());
             ast.setSymbol(var);
             var.setDeclaringClass(currentClass);
             ast.getExpression().accept(this);
             var.setType(ast.getExpression().getType());
-            System.out.println("added to scope");
+            // System.out.println("added to scope");
             currentScope.put(var);
         } else {
             currentScope.put(var);
-            System.out.println(var.getName() + " " + var.getType());
+            // System.out.println(var.getName() + " " + var.getType());
         }
         visitAnnotations(ast.getAnnotations());
         Expression init = ast.getInitializer();
@@ -1272,14 +1322,30 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         }
     }
 
+    private MethodSymbol resolveCtorForAnonymousClass(ClassSymbol superCls,
+                                                      Type[] argTypes,
+                                                      List<Type> typeArgTypes) {
+        MethodSymbol ret = null;
+        if (typeArgTypes.isEmpty()) {
+            ret = superCls.getConstructor(argTypes);
+            if (ret != null) {
+                return ret;
+            }
+        }
+        return resolveMethodFromChoices(superCls.getConstructors(),
+                                        argTypes,
+                                        typeArgTypes);
+
+    }
+
     private MethodSymbol resolveMethod(CallExpression ast, boolean isCtor) {
 
-        System.out.println("attempting to resolve method: " + ast);
+        // System.out.println("attempting to resolve method: " + ast);
         ast.getMethod().setInferredType(ast.getInferredType());
         MethodSymbol ret = null;
         ast.getMethod().accept(this);
         Type owningType = ast.getMethod().getType();
-        System.out.println("owning type is " + owningType.getName());
+        // System.out.println("owning type is " + owningType.getName());
         if (owningType == null) {
             // unqualified method
             assert(!isCtor);
@@ -1295,7 +1361,6 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                 return null;
             }
         }
-
 
         Type[] argTypes = new Type[ast.getArguments().size()];
         for (int i = 0; i < argTypes.length; i++) {
@@ -1331,6 +1396,13 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             choices = owningCls.getMethodsByName(ast.getName().getText());
         }
 
+        return resolveMethodFromChoices(choices, argTypes, typeArgTypes);
+    }
+
+    private MethodSymbol resolveMethodFromChoices(MethodSymbol[] choices,
+                                                  Type[] argTypes,
+                                                  List<Type> typeArgTypes) {
+        MethodSymbol ret = null;
         List<MethodSymbol> potCands = new ArrayList<>();
         for (MethodSymbol m : choices) {
             if (((argTypes.length >= m.arity() - 1) &&

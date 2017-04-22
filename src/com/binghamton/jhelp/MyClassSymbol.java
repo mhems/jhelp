@@ -26,8 +26,9 @@ public class MyClassSymbol extends ClassSymbol {
     public MyClassSymbol(MyClassSymbol declarer) {
         super(declarer.nextAnonName());
         this.declarer = declarer;
-        level = Level.ANONYMOUS;
-        pkg = MyPackage.DEFAULT_PACKAGE;
+        this.level = Level.ANONYMOUS;
+        this.pkg = declarer.pkg;
+        addModifier(Modifier.FINAL);
     }
 
     public MyClassSymbol(Token token) {
@@ -209,7 +210,7 @@ public class MyClassSymbol extends ClassSymbol {
     @Override
     public void visit(ASTVisitor visitor) {
         AST.accept(visitor);
-        System.out.println(repr());
+        // System.out.println(repr());
     }
 
     private String nextAnonName() {

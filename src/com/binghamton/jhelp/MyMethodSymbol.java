@@ -34,15 +34,15 @@ public class MyMethodSymbol extends MethodSymbol {
         returnType = type;
     }
 
-    public void setParameterTypes(Type[] types) {
+    public void setParameterTypes(Type... types) {
         paramTypes = types;
     }
 
-    public void setExceptionTypes(Type[] types) {
+    public void setExceptionTypes(Type... types) {
         exceptions = types;
     }
 
-    public void setTypeParameters(TypeVariable[] vars) {
+    public void setTypeParameters(TypeVariable... vars) {
         typeVars = vars;
     }
 

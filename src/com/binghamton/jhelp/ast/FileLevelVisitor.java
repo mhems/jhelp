@@ -53,29 +53,6 @@ public class FileLevelVisitor extends EmptyVisitor {
     }
 
     /**
-     * Visit a AccessExpression node
-     * @param ast the AST node being visited
-     */
-    public void visit(AccessExpression ast) {
-        ast.getLHS().accept(this);
-        ast.getRHS().accept(this);
-    }
-
-    /**
-     * Visit a Annotation node
-     * @param ast the AST node being visited
-     */
-    public void visit(Annotation ast) {
-        if (ast.isSingleElement()) {
-            ast.getSingleValue().accept(this);
-        } else {
-            for (Token id : ast.getArguments().keySet()) {
-                ast.getValue(id).accept(this);
-            }
-        }
-    }
-
-    /**
      * Visit a AnnotationDeclaration node
      * @param ast the AST node being visited
      */
@@ -85,94 +62,22 @@ public class FileLevelVisitor extends EmptyVisitor {
     }
 
     /**
-     * Visit a ArrayAccessExpression node
-     * @param ast the AST node being visited
-     */
-    public void visit(ArrayAccessExpression ast) {
-        ast.getArrayExpression().accept(this);
-        ast.getIndexExpression().accept(this);
-    }
-
-    /**
-     * Visit a ArrayConstruction node
-     * @param ast the AST node being visited
-     */
-    public void visit(ArrayConstruction ast) {
-        ast.getElementTypeExpression().accept(this);
-        for (DimensionExpression e : ast.getDimensionExpressions())
-            e.accept(this);
-        if (ast.hasInitializer())
-            ast.getInitializer().accept(this);
-    }
-
-    /**
-     * Visit a ArrayInitializer node
-     * @param ast the AST node being visited
-     */
-    public void visit(ArrayInitializer ast) {
-        for (Expression e : ast.getInitializers())
-            e.accept(this);
-    }
-
-    /**
-     * Visit a AssertStatement node
-     * @param ast the AST node being visited
-     */
-    public void visit(AssertStatement ast) {
-        ast.getCondition().accept(this);
-        ast.getMessage().accept(this);
-    }
-
-    /**
-     * Visit a AssignmentExpression node
-     * @param ast the AST node being visited
-     */
-    public void visit(AssignmentExpression ast) {
-        ast.getLHS().accept(this);
-        ast.getRHS().accept(this);
-    }
-
-    /**
-     * Visit a BinaryExpression node
-     * @param ast the AST node being visited
-     */
-    public void visit(BinaryExpression ast) {
-        ast.getLHS().accept(this);
-        ast.getRHS().accept(this);
-    }
-
-    /**
-     * Visit a Block node
-     * @param ast the AST node being visited
-     */
-    public void visit(Block ast) {
-        for (Statement s : ast.getStatements()) {
-            s.accept(this);
-        }
-    }
-
-    /**
      * Visit a BodyDeclaration node
      * @param ast the AST node being visited
      */
     public void visit(BodyDeclaration ast) {
-        MyClassSymbol sym;
-        if (ast.isAnonymous()) {
-            sym = new MyClassSymbol(currentClass);
-            sym.addModifier(Modifier.FINAL);
-        } else {
-            if (!Character.isUpperCase(ast.getName().getText().charAt(0))) {
-                System.err.printf("Body names should be capitalized, '%s' is not\n",
-                                  ast.getName().getText());
-            }
-            if (ast.getName().getText().equals(filename) &&
-                !ast.getModifiers().contains(Modifier.PUBLIC)) {
-                System.err.printf("Body '%s' in file '%s.java' should be declared public\n",
-                                  ast.getName().getText(),
-                                  filename);
-            }
-            sym = new MyClassSymbol(ast.getName(), ast.getModifiers());
+        if (!Character.isUpperCase(ast.getName().getText().charAt(0))) {
+            System.err.printf("Body names should be capitalized, '%s' is not\n",
+                              ast.getName().getText());
         }
+        if (ast.getName().getText().equals(filename) &&
+            !ast.getModifiers().contains(Modifier.PUBLIC)) {
+            System.err.printf("Body '%s' in file '%s.java' should be declared public\n",
+                              ast.getName().getText(),
+                              filename);
+        }
+
+        MyClassSymbol sym = new MyClassSymbol(ast.getName(), ast.getModifiers());
 
         if (ast.isTop()) {
             if (!pkg.addClass(sym)) {
@@ -197,12 +102,6 @@ public class FileLevelVisitor extends EmptyVisitor {
                 sym.addInnerClass(body.getSymbol());
             }
         }
-        for (VariableDeclaration v : ast.getFields()) {
-            v.accept(this);
-        }
-        for (MethodDeclaration m : ast.getMethods()){
-            m.accept(this);
-        }
     }
 
     /**
@@ -218,25 +117,6 @@ public class FileLevelVisitor extends EmptyVisitor {
                 currentClass.addTypeParameter(var);
             }
         }
-    }
-
-    /**
-     * Visit a CallExpression node
-     * @param ast the AST node being visited
-     */
-    public void visit(CallExpression ast) {
-        ast.getMethod().accept(this);
-        for (Expression e : ast.getArguments()) {
-            e.accept(this);
-        }
-    }
-
-    /**
-     * Visit a CastExpression node
-     * @param ast the AST node being visited
-     */
-    public void visit(CastExpression ast) {
-        ast.getSourceExpression().accept(this);
     }
 
     /**
@@ -274,95 +154,12 @@ public class FileLevelVisitor extends EmptyVisitor {
     }
 
     /**
-     * Visit a ConcreteBodyDeclaration node
-     * @param ast the AST node being visited
-     */
-    public void visit(ConcreteBodyDeclaration ast) {
-        if (ast.isLocal()) {
-            if (currentClass.isStatic()) {
-                System.err.println("local class cannot be static");
-            }
-            if (currentClass.getAccessLevel() != Symbol.AccessLevel.PACKAGE_PRIVATE) {
-                System.err.println("local class cannot have access modifier");
-            }
-        }
-
-        for (MethodDeclaration ctor : ast.getConstructors())
-            ctor.accept(this);
-        for (Block sb : ast.getStaticInitializers())
-            sb.accept(this);
-        for (Block ib : ast.getInstanceInitializers())
-            ib.accept(this);
-    }
-
-    /**
-     * Visit a DimensionExpression node
-     * @param ast the AST node being visited
-     */
-    public void visit(DimensionExpression ast) {
-        for (Annotation a : ast.getAnnotations()) {
-            a.accept(this);
-        }
-        ast.getExpression().accept(this);
-    }
-
-    /**
-     * Visit a EnumConstant node
-     * @param ast the AST node being visited
-     */
-    public void visit(EnumConstant ast) {
-        for (Expression e : ast.getArguments()) {
-            e.accept(this);
-        }
-        if (!ast.isEmpty()) {
-            MyClassSymbol tmp = currentClass;
-            ast.getBody().accept(this);
-            ast.getBody().getSymbol().setSuperClassForEnumConstant();
-            currentClass = tmp;
-        }
-    }
-
-    /**
      * Visit a EnumDeclaration node
      * @param ast the AST node being visited
      */
     public void visit(EnumDeclaration ast) {
         ast.getSymbol().setClassKind(ClassSymbol.ClassKind.ENUM);
         ast.getSymbol().setSuperClassForEnum();
-
-        for (EnumConstant c : ast.getConstants()) {
-            c.accept(this);
-        }
-    }
-
-    /**
-     * Visit a ForEachStatement node
-     * @param ast the AST node being visited
-     */
-    public void visit(ForEachStatement ast) {
-        ast.getIterable().accept(this);
-    }
-
-    /**
-     * Visit a ForStatement node
-     * @param ast the AST node being visited
-     */
-    public void visit(ForStatement ast) {
-        for (Statement s : ast.getInitializers())
-            s.accept(this);
-        ast.getCondition().accept(this);
-        for (Statement e : ast.getUpdaters())
-            e.accept(this);
-    }
-
-    /**
-     * Visit a IfElseStatement node
-     * @param ast the AST node being visited
-     */
-    public void visit(IfElseStatement ast) {
-        ast.getCondition().accept(this);
-        ast.getThenBlock().accept(this);
-        ast.getElseBlock().accept(this);
     }
 
     /**
@@ -420,19 +217,6 @@ public class FileLevelVisitor extends EmptyVisitor {
     }
 
     /**
-     * Visit a InstantiationExpression node
-     * @param ast the AST node being visited
-     */
-    public void visit(InstantiationExpression ast) {
-        if (ast.hasAnonymousClass()) {
-            MyClassSymbol decl = currentClass;
-            ast.getAnonymousClass().accept(this);
-            System.out.println(ast.getAnonymousClass().getSymbol().repr());
-            currentClass = decl;
-        }
-    }
-
-    /**
      * Visit a InterfaceDeclaration node
      * @param ast the AST node being visited
      */
@@ -444,61 +228,6 @@ public class FileLevelVisitor extends EmptyVisitor {
                 currentClass.addTypeParameter(var);
             }
         }
-    }
-
-    /**
-     * Visit a LabelStatement node
-     * @param ast the AST node being visited
-     */
-    public void visit(LabelStatement ast) {
-        ast.getStatement().accept(this);
-    }
-
-    /**
-     * Visit a LambdaExpression node
-     * @param ast the AST node being visited
-     */
-    public void visit(LambdaExpression ast) {
-        ast.getBody().accept(this);
-    }
-
-    /**
-     * Visit a LocalClassDeclaration node
-     * @param ast the AST node being visited
-     */
-    public void visit(LocalClassDeclaration ast) {
-        MyClassSymbol decl = currentClass;
-        ast.getDeclaration().setKind(BodyDeclaration.Kind.LOCAL);
-        ast.getDeclaration().accept(this);
-        ast.getDeclaration().getSymbol().setLocal();
-        currentClass = decl;
-    }
-
-    /**
-     * Visit a LocalVariableStatement node
-     * @param ast the AST node being visited
-     */
-    public void visit(LocalVariableStatement ast) {
-        for (VariableDeclaration var : ast.getVariables()) {
-            var.accept(this);
-        }
-    }
-
-    /**
-     * Visit a MethodDeclaration node
-     * @param ast the AST node being visited
-     */
-    public void visit(MethodDeclaration ast) {
-        ast.getBody().accept(this);
-    }
-
-    /**
-     * Visit a MethodReferenceExpression node
-     * @param ast the AST node being visited
-     */
-    public void visit(MethodReferenceExpression ast) {
-        ast.getLHS().accept(this);
-        ast.getRHS().accept(this);
     }
 
     /**
@@ -529,66 +258,6 @@ public class FileLevelVisitor extends EmptyVisitor {
     }
 
     /**
-     * Visit a ReturnStatement node
-     * @param ast the AST node being visited
-     */
-    public void visit(ReturnStatement ast) {
-        ast.getExpression().accept(this);
-    }
-
-    /**
-     * Visit a SwitchStatement node
-     * @param ast the AST node being visited
-     */
-    public void visit(SwitchStatement ast) {
-        ast.getSwitchExpression().accept(this);
-        for (CaseBlock b : ast.getCases()) {
-            b.accept(this);
-        }
-    }
-
-    /**
-     * Visit a SynchronizedBlock node
-     * @param ast the AST node being visited
-     */
-    public void visit(SynchronizedBlock ast) {
-        ast.getLock().accept(this);
-    }
-
-    /**
-     * Visit a TernaryExpression node
-     * @param ast the AST node being visited
-     */
-    public void visit(TernaryExpression ast) {
-        ast.getCondition().accept(this);
-        ast.getThenExpression().accept(this);
-        ast.getElseExpression().accept(this);
-    }
-
-    /**
-     * Visit a ThrowStatement node
-     * @param ast the AST node being visited
-     */
-    public void visit(ThrowStatement ast) {
-        ast.getExpression().accept(this);
-    }
-
-    /**
-     * Visit a TryCatchBlock node
-     * @param ast the AST node being visited
-     */
-    public void visit(TryCatchBlock ast) {
-        ast.getTryBody().accept(this);
-        for (VariableDeclaration d : ast.getResources()) {
-            d.accept(this);
-        }
-        for (CatchBlock b : ast.getCatches()) {
-            b.accept(this);
-        }
-        ast.getFinallyBody().accept(this);
-    }
-
-    /**
      * Visit a TypeParameter node
      * @param ast the AST node being visited
      */
@@ -597,30 +266,6 @@ public class FileLevelVisitor extends EmptyVisitor {
         TypeVariable type = new TypeVariable(name);
         type.setDeclaringSymbol(currentClass);
         ast.setType(type);
-    }
-
-    /**
-     * Visit a UnaryExpression node
-     * @param ast the AST node being visited
-     */
-    public void visit(UnaryExpression ast) {
-        ast.getExpression().accept(this);
-    }
-
-    /**
-     * Visit a VariableDeclaration node
-     * @param ast the AST node being visited
-     */
-    public void visit(VariableDeclaration ast) {
-        ast.getInitializer().accept(this);
-    }
-
-    /**
-     * Visit a WhileStatement node
-     * @param ast the AST node being visited
-     */
-    public void visit(WhileStatement ast) {
-        ast.getCondition().accept(this);
     }
 
     protected TypeVariable[] makeTypeParameters(List<TypeParameter> params) {

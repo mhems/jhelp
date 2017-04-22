@@ -21,7 +21,7 @@ public class ParameterizedType extends ReferenceType {
     }
 
     public String getName() {
-        System.out.println("wrapped: " + wrapped);
+        // System.out.println("wrapped: " + wrapped);
         StringBuilder sb = new StringBuilder(wrapped.getName());
         sb.append("<");
         if (params.length > 0) {
@@ -42,7 +42,7 @@ public class ParameterizedType extends ReferenceType {
     }
 
     public ClassSymbol getClassSymbol() {
-        System.out.println("getting class symbol for " + getName());
+        // System.out.println("getting class symbol for " + getName());
         return wrapped.substitute(params);
     }
 

@@ -67,24 +67,11 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
     }
 
     /**
-     * Visit a Annotation node
-     * @param ast the AST node being visited
-     */
-    public void visit(Annotation ast) {
-        ast.getTypeExpression().accept(this);
-        ClassSymbol ann = ast.getTypeExpression().getType().getClassSymbol();
-        if (!ann.isAnnotation()) {
-            System.err.println("can only annotate with an annotation");
-        }
-        ast.setType(ann);
-    }
-
-    /**
      * Visit a AnnotationDeclaration node
      * @param ast the AST node being visited
      */
     public void visit(AnnotationDeclaration ast) {
-
+        // override to do nothing
     }
 
     /**
@@ -119,26 +106,22 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
 
         if (currentClass.isInner() &&
             currentClass.getDeclaringClass().isInterfaceLike()) {
+
             currentClass.addModifier(Modifier.PUBLIC);
             currentClass.addModifier(Modifier.STATIC);
             currentClass.setAccessLevel(ClassSymbol.AccessLevel.PUBLIC);
+
             if (currentClass.hasModifier(Modifier.PROTECTED) ||
                 currentClass.hasModifier(Modifier.PRIVATE)) {
                 System.err.println("a member type in an interface cannot be protected or private");
             }
         }
 
-        for (VariableDeclaration v : ast.getFields()) {
-            v.accept(this);
-        }
-        for (MethodDeclaration m : ast.getMethods()){
-            m.accept(this);
-        }
         MyClassSymbol tmp = currentClass;
         for (BodyDeclaration body : ast.getInnerBodies()) {
             body.accept(this);
             currentClass = tmp;
-            System.out.println(body.getSymbol().repr());
+            // System.out.println(body.getSymbol().repr());
         }
     }
 
@@ -174,7 +157,7 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
 
         for (BodyDeclaration decl : ast.getBodyDeclarations()) {
             decl.accept(this);
-            System.out.println(decl.getSymbol().repr());
+            // System.out.println(decl.getSymbol().repr());
         }
     }
 
@@ -186,12 +169,6 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         if (ast.hasSuperInterfaces()) {
             addInterfaces(ast.getSuperInterfaces());
         }
-        for (MethodDeclaration ctor : ast.getConstructors())
-            ctor.accept(this);
-        for (Block sb : ast.getStaticInitializers())
-            sb.accept(this);
-        for (Block ib : ast.getInstanceInitializers())
-            ib.accept(this);
     }
 
     /**
@@ -201,21 +178,6 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
     public void visit(Dimension ast) {
         for (Annotation a : ast.getAnnotations()) {
             a.accept(this);
-        }
-    }
-
-    /**
-     * Visit a EnumConstant node
-     * @param ast the AST node being visited
-     */
-    public void visit(EnumConstant ast) {
-        for (Expression e : ast.getArguments()) {
-            e.accept(this);
-        }
-        if (!ast.isEmpty()) {
-            MyClassSymbol tmp = currentClass;
-            ast.getBody().accept(this);
-            currentClass = tmp;
         }
     }
 
@@ -240,7 +202,6 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         boolean isFinal = true;
         MyClassSymbol decl = currentClass;
         for (EnumConstant c : ast.getConstants()) {
-            c.accept(this);
             if (!c.isEmpty()) {
                 isFinal = false;
             }
@@ -249,13 +210,6 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         if (isFinal) {
             currentClass.addModifier(Modifier.FINAL);
         }
-
-        for (EnumConstant c : ast.getConstants()) {
-            if (!c.isEmpty()) {
-                System.out.println(c.getBody().getSymbol().repr());
-            }
-        }
-
     }
 
     /**
@@ -263,18 +217,7 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(InterfaceDeclaration ast) {
-
-    }
-
-    /**
-     * Visit a LocalClassDeclaration node
-     * @param ast the AST node being visited
-     */
-    public void visit(LocalClassDeclaration ast) {
-        MyClassSymbol decl = currentClass;
-        ast.getDeclaration().accept(this);
-        System.out.println(ast.getDeclaration().getSymbol().repr());
-        currentClass = decl;
+        // override to do nothing
     }
 
     /**
@@ -288,7 +231,7 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         Kind kind = ast.getKind();
         Type type;
         NameExpression qual = ast.getQualifyingName();
-        System.out.println("decl name: " + ast.getText() + " (" + ast.getKind() + ")");
+        // System.out.println("decl name: " + ast.getText() + " (" + ast.getKind() + ")");
         if (kind == Kind.PACKAGE) {
             Package pkg = program.getPackage(name);
             if (pkg != null) {

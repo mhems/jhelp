@@ -103,7 +103,6 @@ public abstract class ASTNode implements Visitable, Comparable<ASTNode> {
      */
     public final void setFirstToken(Token first) {
         if (first != null && !(first instanceof MyToken)) {
-            System.out.println(first);
             throw new IllegalArgumentException("AST Node tokens must be MyTokens");
         }
         this.first = (MyToken)first;

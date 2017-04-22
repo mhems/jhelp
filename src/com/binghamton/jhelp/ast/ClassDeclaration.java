@@ -6,6 +6,7 @@ import java.util.List;
 import org.antlr.v4.runtime.Token;
 
 import com.binghamton.jhelp.Modifier;
+import com.binghamton.jhelp.Type;
 
 /**
  * A class representing a Java class declaration
@@ -13,6 +14,7 @@ import com.binghamton.jhelp.Modifier;
 public class ClassDeclaration extends ConcreteBodyDeclaration {
     private List<TypeParameter> typeParams = new ArrayList<>();
     private Expression superClass = new NilExpression();
+    private Type[] paramTypes = {};
 
     /**
      * Construct an anonymous class declaration
@@ -74,6 +76,25 @@ public class ClassDeclaration extends ConcreteBodyDeclaration {
      */
     public boolean hasSuperClass() {
         return !superClass.isNil();
+    }
+
+    /**
+     * Gets the parameter types of the instantiation expression this anonymous
+     * class is declared in.
+     * @return the parameter types of the instantiation expression of this
+     *         anonymous class
+     */
+    public Type[] getAnonymousParameterTypes() {
+        return paramTypes;
+    }
+
+    /**
+     * Sets the parameter types of the instantiation expression this anonymous
+     * class is declared in.
+     * @return the parameter types of the instantiation expression
+     */
+    public void setAnonymousParameterTypes(Type[] paramTypes) {
+        this.paramTypes = paramTypes;
     }
 
     /**

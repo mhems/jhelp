@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
+import com.binghamton.jhelp.MethodSymbol;
+
 /**
  * A class representing a Java method call, including explicit constructor calls
  */
@@ -146,6 +148,11 @@ public class CallExpression extends QualifiableExpression {
 
     public Token getName() {
         return name;
+    }
+
+    @Override
+    public MethodSymbol getSymbol() {
+        return (MethodSymbol)sym;
     }
 
     /**

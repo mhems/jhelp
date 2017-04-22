@@ -30,7 +30,7 @@ public class NameExpression extends Expression {
         }
         this.qualifier = qualifier;
         this.annotations = expr.annotations;
-        System.out.println("ctor 1 with " + expr.getKind());
+        // System.out.println("ctor 1 with " + expr.getKind());
         this.kind = expr.kind;
         this.name = expr.name;
     }
@@ -38,21 +38,21 @@ public class NameExpression extends Expression {
     public NameExpression(Token name, Kind kind) {
         super(name);
         this.kind = kind;
-        System.out.println("ctor 2 with " + kind);
+        // System.out.println("ctor 2 with " + kind);
         this.name = name;
     }
 
     public NameExpression(Token name, Kind kind, List<Annotation> annotations) {
         super(name);
         this.kind = kind;
-        System.out.println("ctor 3 with " + kind);
+        // System.out.println("ctor 3 with " + kind);
         this.name = name;
         this.annotations = annotations.toArray(new Annotation[annotations.size()]);
     }
 
     protected NameExpression(Token first, Token last) {
         super(first, last);
-        System.out.println("ctor 4");
+        // System.out.println("ctor 4");
     }
 
     public static NameExpression createTypeName(Token token) {
@@ -130,7 +130,7 @@ public class NameExpression extends Expression {
     }
 
     public void setKind(Kind kind) {
-        System.out.println("setting kind to " + kind);
+        // System.out.println("setting kind to " + kind);
         this.kind = kind;
     }
 

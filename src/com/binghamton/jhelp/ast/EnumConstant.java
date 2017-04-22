@@ -13,7 +13,7 @@ import com.binghamton.jhelp.MyVariableSymbol;
  */
 public class EnumConstant extends Declaration {
     private final List<Expression> arguments;
-    private final ConcreteBodyDeclaration body = new ClassDeclaration();
+    private final ClassDeclaration body = new ClassDeclaration();
 
     /**
      * Construct an enum constant
@@ -28,7 +28,7 @@ public class EnumConstant extends Declaration {
         this.arguments = arguments;
     }
 
-    public ConcreteBodyDeclaration getBody() {
+    public ClassDeclaration getBody() {
         return body;
     }
 

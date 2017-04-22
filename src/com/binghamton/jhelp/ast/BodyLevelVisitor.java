@@ -74,26 +74,10 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
         currentClass = ast.getSymbol();
         pkg = currentClass.getPackage();
 
-        // delay visiting non-enum anonymous classes as instantiation type
+        // delay visiting anonymous classes as instantiation type
         // cannot be determined until code-level visitor
-        if (!currentClass.isAnonymous() ||
-            currentClass.getDeclaringClass().isEnum()) {
-            for (VariableDeclaration v : ast.getFields()) {
-                v.accept(this);
-                currentClass.addField(v.getSymbol());
-                if (currentClass.isInner() &&
-                    v.getSymbol().isStatic() &&
-                    !v.getSymbol().isConstant()) {
-                    System.err.println("inner class cannot declare non-constant static variable");
-                }
-            }
-            for (MethodDeclaration m : ast.getMethods()) {
-                m.accept(this);
-                currentClass.addMethod(m.getSymbol());
-                if (currentClass.isInner() && m.getSymbol().isStatic()) {
-                    System.err.println("inner class cannot declare static method");
-                }
-            }
+        if (!currentClass.isAnonymous()) {
+            visitMembers(ast, this);
         }
         MyClassSymbol tmp = currentClass;
         for (BodyDeclaration body : ast.getInnerBodies()) {
@@ -102,7 +86,7 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
             if (currentClass.isInner() && body.getSymbol().isStatic()) {
                 System.err.println("inner class cannot declare static body");
             }
-            System.out.println(body.getSymbol().repr());
+            // System.out.println(body.getSymbol().repr());
         }
     }
 
@@ -111,34 +95,25 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(ConcreteBodyDeclaration ast) {
-        for (Block sb : ast.getStaticInitializers())
-            sb.accept(this);
-        for (Block ib : ast.getInstanceInitializers())
-            ib.accept(this);
+        for (MethodDeclaration ctor : ast.getConstructors()) {
+            ctor.accept(this);
+            currentClass.addConstructor(ctor.getSymbol());
+        }
 
-        if (!currentClass.isAnonymous() ||
-            currentClass.getDeclaringClass().isEnum()) {
-            for (MethodDeclaration ctor : ast.getConstructors()) {
-                ctor.accept(this);
-                currentClass.addConstructor(ctor.getSymbol());
+        if (currentClass.getConstructors().length == 0 &&
+            !currentClass.isAnonymous()) {
+            MyMethodSymbol emptyCtor = new MyMethodSymbol(new MyToken(0,
+                                                                      currentClass.getName()));
+            if (currentClass.getAccessLevel() != Symbol.AccessLevel.PRIVATE &&
+                currentClass.isMember()) {
+                emptyCtor.setParameterTypes(currentClass.getDeclaringClass());
             }
-
-            if (currentClass.getConstructors().length == 0 &&
-                !currentClass.isAnonymous()) {
-                MyMethodSymbol emptyCtor = new MyMethodSymbol(new MyToken(0,
-                                                                          currentClass.getName()));
-                Symbol.AccessLevel access = currentClass.getAccessLevel();
-                if (currentClass.isAnonymous() &&
-                    currentClass.getDeclaringClass().isEnum()) {
-                    access = Symbol.AccessLevel.PRIVATE;
-                }
-                emptyCtor.setAccessLevel(access);
-                emptyCtor.setConstructor(true);
-                emptyCtor.setDeclaringClass(currentClass);
-                emptyCtor.setReturnType(currentClass);
-                emptyCtor.constructType();
-                currentClass.addConstructor(emptyCtor);
-            }
+            emptyCtor.setAccessLevel(currentClass.getAccessLevel());
+            emptyCtor.setConstructor(true);
+            emptyCtor.setDeclaringClass(currentClass);
+            emptyCtor.setReturnType(currentClass);
+            emptyCtor.constructType();
+            currentClass.addConstructor(emptyCtor);
         }
 
         if (currentClass.isClassLike() && !currentClass.isAbstract()) {
@@ -153,7 +128,28 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(ClassDeclaration ast) {
+        if (currentClass.isAnonymous()) {
+            MyMethodSymbol emptyCtor = new MyMethodSymbol(new MyToken(0,
+                                                                      currentClass.getName()));
 
+            Type[] paramTypes = ast.getAnonymousParameterTypes();
+            ClassSymbol superCls = currentClass.getDeclaringClass();
+            if (superCls.isInner() || superCls.isMember()) {
+                Type[] newParamTypes = new Type[paramTypes.length + 1];
+                newParamTypes[0] = superCls.getDeclaringClass();
+                System.arraycopy(paramTypes, 0,
+                                 newParamTypes, 1,
+                                 paramTypes.length);
+                paramTypes = newParamTypes;
+            }
+            emptyCtor.setAccessLevel(Symbol.AccessLevel.PRIVATE);
+            emptyCtor.setConstructor(true);
+            emptyCtor.setDeclaringClass(currentClass);
+            emptyCtor.setReturnType(currentClass);
+            emptyCtor.setParameterTypes(paramTypes);
+            emptyCtor.constructType();
+            currentClass.addConstructor(emptyCtor);
+        }
     }
 
     /**
@@ -168,14 +164,8 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
         var.setDeclaringClass(currentClass);
         var.setType(currentClass);
         ast.setSymbol(var);
-        if (!ast.isEmpty()) {
-            MyClassSymbol tmp = currentClass;
-            ast.getBody().accept(this);
-            currentClass = tmp;
-            if (ast.getBody().getSymbol().hasAbstractMethod()) {
-                System.err.println("an enum constant body cannot declare abstract methods");
-            }
-        }
+        // delay visiting potential body until code-level, where we will
+        // determine which constructor of superclass is being invoked
     }
 
     /**
@@ -208,12 +198,6 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
         }
         if (hasAbstract && (ast.getConstants().size() == 0 || !allEmpty)) {
             System.err.println("enum with implemented constants cannot have abstract methods");
-        }
-
-        for (EnumConstant c : ast.getConstants()) {
-            if (!c.isEmpty()) {
-                System.out.println(c.getBody().getSymbol().repr());
-            }
         }
     }
 
@@ -393,8 +377,6 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
                 }
             }
         }
-
-        ast.getBody().accept(this);
     }
 
     /**
@@ -408,7 +390,7 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
         Kind kind = ast.getKind();
         NameExpression qual = ast.getQualifyingName();
         Type type = null;
-        System.out.println("body name: " + ast.getText() + " (" + ast.getKind() + ")");
+        // System.out.println("body name: " + ast.getText() + " (" + ast.getKind() + ")");
         if (kind == Kind.TYPE) {
             type = PrimitiveType.UNBOX_MAP.get(name);
         }
@@ -425,7 +407,7 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(PackageStatement ast) {
-
+        // override to do nothing
     }
 
     /**
@@ -482,6 +464,25 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
         for (ClassSymbol cls : program.getAllClasses()) {
             if (cls.isTop()) {
                 cls.visit(this);
+            }
+        }
+    }
+
+    protected void visitMembers(BodyDeclaration ast, ASTVisitor visitor) {
+        for (VariableDeclaration v : ast.getFields()) {
+            v.accept(visitor);
+            currentClass.addField(v.getSymbol());
+            if (currentClass.isInner() &&
+                v.getSymbol().isStatic() &&
+                !v.getSymbol().isConstant()) {
+                System.err.println("inner class cannot declare non-constant static variable");
+            }
+        }
+        for (MethodDeclaration m : ast.getMethods()) {
+            m.accept(visitor);
+            currentClass.addMethod(m.getSymbol());
+            if (currentClass.isInner() && m.getSymbol().isStatic()) {
+                System.err.println("inner class cannot declare static method");
             }
         }
     }
