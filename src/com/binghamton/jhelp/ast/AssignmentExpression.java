@@ -47,6 +47,10 @@ public class AssignmentExpression extends Expression {
         return rhs;
     }
 
+    /**
+     * Determines if this assignment is simple
+     * @return true iff this assignment is simple
+     */
     public boolean isSimple() {
         return op == null;
     }

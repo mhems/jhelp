@@ -29,10 +29,18 @@ public class CompilationUnit extends ASTNode {
         this.bodies = bodies;
     }
 
+    /**
+     * Sets the filename this CompilationUnit is located in
+     * @param name the filename this CompilationUnit is located in
+     */
     public void setFilename(String name) {
         this.filename = name;
     }
 
+    /**
+     * Gets the filename this CompilationUnit is located in
+     * @return the filename this CompilationUnit is located in
+     */
     public String getFilename() {
         return filename;
     }
@@ -69,10 +77,18 @@ public class CompilationUnit extends ASTNode {
         return bodies;
     }
 
+    /**
+     * Gets the Package this unit is located in
+     * @return the Package this unit is located in
+     */
     public MyPackage getPackage() {
         return declaringPackage;
     }
 
+    /**
+     * Sets the Package this unit is located in
+     * @param pkg the Package this unit is located in
+     */
     public void setPackage(MyPackage pkg) {
         declaringPackage = pkg;
     }

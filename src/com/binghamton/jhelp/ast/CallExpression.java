@@ -144,6 +144,10 @@ public class CallExpression extends QualifiableExpression {
         return 0;
     }
 
+    /**
+     * Gets the Token holding the name of the method being called
+     * @return the Token holding the name of the method being called
+     */
     public Token getName() {
         return name;
     }

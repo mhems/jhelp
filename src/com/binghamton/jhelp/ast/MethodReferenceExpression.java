@@ -48,6 +48,10 @@ public class MethodReferenceExpression extends QualifiableExpression {
         return rhs;
     }
 
+    /**
+     * Gets the type arguments to this Expression
+     * @return the List of type arguments to this Expression
+     */
     public List<TypeArgument> getTypeArguments() {
         return targs;
     }

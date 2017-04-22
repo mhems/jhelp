@@ -52,6 +52,10 @@ public class ArrayConstruction extends Expression {
         this.initializer = initializer;
     }
 
+    /**
+     * Gets the Expression yielding the element type
+     * @return the Expression yielding the element type
+     */
     public Expression getElementTypeExpression() {
         return expr;
     }

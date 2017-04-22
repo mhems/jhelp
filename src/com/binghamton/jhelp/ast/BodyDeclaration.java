@@ -13,6 +13,9 @@ import com.binghamton.jhelp.MyClassSymbol;
  * This includes interfaces, annotations, classes, and enums.
  */
 public abstract class BodyDeclaration extends Declaration {
+    /**
+     * An enum enumerating the kinds of BodyDeclarations
+     */
     public enum Kind {TOP, INNER, ANONYMOUS, LOCAL};
 
     protected List<VariableDeclaration> fields = new ArrayList<>();
@@ -41,26 +44,50 @@ public abstract class BodyDeclaration extends Declaration {
         super(name, keyword, modifiers, annotations);
     }
 
+    /**
+     * Gets the Kind of this Declaration
+     * @return the Kind of this Declaration
+     */
     public Kind getKind() {
         return kind;
     }
 
+    /**
+     * Sets the Kind of this Declaration
+     * @param kind the Kind of this Declaration
+     */
     public void setKind(Kind kind) {
         this.kind = kind;
     }
 
+    /**
+     * Determines if this Declaration is top-level
+     * @return true iff this Declaration is top-level
+     */
     public boolean isTop() {
         return kind == Kind.TOP;
     }
 
+    /**
+     * Determines if this Declaration is declared inside another
+     * @return true iff this Declaration is declared inside another
+     */
     public boolean isInner() {
         return kind == Kind.INNER;
     }
 
+    /**
+     * Determines if this Declaration is anonymous
+     * @return true iff this Declaration is anonymous
+     */
     public boolean isAnonymous() {
         return kind == Kind.ANONYMOUS;
     }
 
+    /**
+     * Determines if this Declaration is a local class
+     * @return true iff this Declaration is a local class
+     */
     public boolean isLocal() {
         return kind == Kind.LOCAL;
     }

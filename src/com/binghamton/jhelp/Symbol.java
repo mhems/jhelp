@@ -11,7 +11,15 @@ import java.lang.reflect.GenericArrayType;
  * Java symbols include classes, enums, interfaces, methods, and variables
  */
 public abstract class Symbol {
+
+    /**
+     * An enum enumerating the kinds of Symbols
+     */
     public static enum SymbolKind {CLASS, CONSTRUCTOR, METHOD, TYPE, VARIABLE};
+
+    /**
+     * An enum enumerating the access levels of a Symbol
+     */
     public static enum AccessLevel {PUBLIC, PROTECTED, PACKAGE_PRIVATE, PRIVATE};
 
     protected SymbolKind kind;

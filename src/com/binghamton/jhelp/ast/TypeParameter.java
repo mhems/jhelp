@@ -49,6 +49,10 @@ public class TypeParameter extends ASTNode {
         this.superTypes = superTypes;
     }
 
+    /**
+     * Gets the Annotations on this TypeParameter
+     * @return the Annotations on this TypeParameter
+     */
     public Annotation[] getAnnotations() {
         return annotations;
     }
@@ -61,6 +65,10 @@ public class TypeParameter extends ASTNode {
         return name.getText();
     }
 
+    /**
+     * Gets the Token holding the name of this TypeParameter
+     * @return the Token holding the name of this TypeParameter
+     */
     public Token getToken() {
         return name;
     }
@@ -107,10 +115,18 @@ public class TypeParameter extends ASTNode {
         v.visit(this);
     }
 
+    /**
+     * Gets the TypeVariable this TypeParameter evaluates to
+     * @return the TypeVariable this TypeParameter evaluates to
+     */
     public TypeVariable getType() {
         return type;
     }
 
+    /**
+     * Sets the TypeVariable this TypeParameter evaluates to
+     * @param type the TypeVariable this TypeParameter evaluates to
+     */
     public void setType(TypeVariable type) {
         this.type = type;
     }

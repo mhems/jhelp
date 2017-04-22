@@ -17,7 +17,15 @@ import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
  * A base class representing a Java class and its members
  */
 public abstract class ClassSymbol extends ReferenceType {
+
+    /**
+     * An enum enumerating the kinds of classes
+     */
     public enum ClassKind {CLASS, INTERFACE, ENUM, ANNOTATION};
+
+    /**
+     * An enum enumerating the declaration levels a class can occur
+     */
     public enum Level {TOP, MEMBER, INNER, ANONYMOUS, LOCAL};
 
         {

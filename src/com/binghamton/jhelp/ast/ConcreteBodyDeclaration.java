@@ -113,6 +113,10 @@ public abstract class ConcreteBodyDeclaration extends BodyDeclaration {
         staticInitializers.add(init);
     }
 
+    /**
+     * Determines if this Declaration declares anything
+     * @return true iff this Declaration declares nothing
+     */
     public boolean isEmpty() {
         return getFields().isEmpty() &&
             getInnerBodies().isEmpty() &&

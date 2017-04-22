@@ -48,26 +48,51 @@ public abstract class Expression extends Statement {
         v.visit(this);
     }
 
+    /**
+     * Gets the Type this Expression evaluates to
+     * @return the Type this Expression evaluates to
+     */
     public Type getType() {
         return type;
     }
 
+    /**
+     * Sets the Type this Expression evaluates to
+     * @param type the Type this Expression evaluates to
+     */
     public void setType(Type type) {
         this.type = type;
     }
 
+    /**
+     * Gets the inferred Type of this Expression
+     * @return the inferred Type of this Expression
+     */
     public Type getInferredType() {
         return inferredType;
     }
 
+    /**
+     * Sets the inferred Type of this Expression
+     * @param type the inferred Type of this Expression
+     */
     public void setInferredType(Type type) {
         this.inferredType = type;
     }
 
+    /**
+     * Gets the Symbol this Expression may yield
+     * @return the Symbol this Expression yields if it yields one, otherwise
+     *         null
+     */
     public Symbol getSymbol() {
         return sym;
     }
 
+    /**
+     * Sets the Symbol this Expression yields
+     * @param sym the Symbol this Expression yields
+     */
     public void setSymbol(Symbol sym) {
         this.sym = sym;
     }

@@ -28,14 +28,26 @@ public class EnumConstant extends Declaration {
         this.arguments = arguments;
     }
 
+    /**
+     * Gets the anonymous body of this EnumConstant
+     * @return the anonymous body of this EnumConstant
+     */
     public ConcreteBodyDeclaration getBody() {
         return body;
     }
 
+    /**
+     * Gets the field associated with this declaration
+     * @return the field associated with this declaration
+     */
     public MyVariableSymbol getSymbol() {
         return (MyVariableSymbol)sym;
     }
 
+    /**
+     * Determines if this constant has a body
+     * @return true iff this constant has no body
+     */
     public boolean isEmpty() {
         return body.isEmpty();
     }
