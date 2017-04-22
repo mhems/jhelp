@@ -5,6 +5,10 @@ package com.binghamton.jhelp.util;
  * formatting and coloring via terminal codes.
  */
 public class ColorStringBuffer {
+
+    /**
+     * An enum enumerating available formats
+     */
     public static enum Format {
         NORMAL(0), BOLD(1), DIM(2), UNDERSCORE(4), INVERSE(7);
 
@@ -17,6 +21,10 @@ public class ColorStringBuffer {
             this.resetCode = code + DELTA;
         }
     };
+
+    /**
+     * An enum enumerating available colors
+     */
     public static enum Color {
         DEFAULT(39), BLACK(30), RED(31), GREEN(32), YELLOW(33), BLUE(34),
         MAGENTA(35), CYAN(36), LIGHT_GRAY(37), DARK_GRAY(90), LIGHT_RED(91),

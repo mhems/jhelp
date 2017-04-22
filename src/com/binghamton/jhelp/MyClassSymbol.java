@@ -10,12 +10,20 @@ import com.binghamton.jhelp.ast.BodyDeclaration;
 
 import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
 
+/**
+ * A ClassSymbol to represent a user-created class
+ */
 public class MyClassSymbol extends ClassSymbol {
 
     private BodyDeclaration AST;
     private Token token;
     private int anonCount = 1;
 
+    /**
+     * Copy construct a new MyClassSymbol
+     * @param cls the MyClassSymbol to construct from
+     * @param _unused unused, used to distinguish from anonymous class
+     */
     private MyClassSymbol(MyClassSymbol cls, boolean _unused) {
         super(cls);
         this.AST = cls.AST;
@@ -23,6 +31,10 @@ public class MyClassSymbol extends ClassSymbol {
         this.anonCount = cls.anonCount;
     }
 
+    /**
+     * Construct a new anonymous class
+     * @param declarer the class this anonymous class is declared in
+     */
     public MyClassSymbol(MyClassSymbol declarer) {
         super(declarer.nextAnonName());
         this.declarer = declarer;
@@ -31,16 +43,29 @@ public class MyClassSymbol extends ClassSymbol {
         addModifier(Modifier.FINAL);
     }
 
+    /**
+     * Construct a new named class
+     * @param token the Token holding this class's name
+     */
     public MyClassSymbol(Token token) {
         this(token, new Modifiers());
     }
 
+    /**
+     * Construct a new named, modified class
+     * @param token the Token holding this class's name
+     * @param modifiers this class's declared Modifiers
+     */
     public MyClassSymbol(Token token, Modifiers modifiers) {
         super(token.getText(), modifiers);
         this.token = token;
         pkg = MyPackage.DEFAULT_PACKAGE;
     }
 
+    /**
+     * Gets the Token holding this class's name
+     * @return the Token holding this class's name
+     */
     public Token getToken() {
         return token;
     }
@@ -50,15 +75,27 @@ public class MyClassSymbol extends ClassSymbol {
         return (MyPackage)pkg;
     }
 
+    /**
+     * Enters a new scope for the type variables a method declares
+     * @param vars the type variables to place into the new scope
+     */
     public void enterMethodScope(TypeVariable[] vars) {
         params.enterScope();
         params.putAll(vars);
     }
 
+    /**
+     * Exits scope for type variables
+     */
     public void exitMethodScope() {
         params.exitScope();
     }
 
+    /**
+     * Adds an interface that this class implements
+     * @param sym the interface this class implements
+     * @return true iff the interface was successfully added
+     */
     public boolean addInterface(Type sym) {
         if (!interfaces.put(sym)) {
             System.err.println("class cannot implement same interface twice");
@@ -67,6 +104,11 @@ public class MyClassSymbol extends ClassSymbol {
         return true;
     }
 
+    /**
+     * Adds a method that this class declares
+     * @param sym the method this class declares
+     * @return true iff the method was successfully added
+     */
     public boolean addMethod(MethodSymbol sym) {
         MethodSymbol parentMethod = null;
         if (superClass != null) {
@@ -112,6 +154,11 @@ public class MyClassSymbol extends ClassSymbol {
         return false;
     }
 
+    /**
+     * Adds a constructor that this class declares
+     * @param sym the constructor this class declares
+     * @return true iff the constructor was successfully added
+     */
     public boolean addConstructor(MethodSymbol sym) {
         if (!ctors.put(sym)) {
             System.err.println("class cannot declare same constructor twice");
@@ -120,6 +167,11 @@ public class MyClassSymbol extends ClassSymbol {
         return true;
     }
 
+    /**
+     * Adds a field that this class declares
+     * @param sym the field this class declares
+     * @return true iff the field was successfully added
+     */
     public boolean addField(VariableSymbol sym) {
         if (!fields.put(sym)) {
             System.err.println("class cannot declare same field twice");
@@ -128,6 +180,11 @@ public class MyClassSymbol extends ClassSymbol {
         return true;
     }
 
+    /**
+     * Adds a type parameter that this class declares
+     * @param sym the type parameter this class declares
+     * @return true iff the type parameter was successfully added
+     */
     public boolean addTypeParameter(TypeVariable sym) {
         if (!params.put(sym)) {
             System.err.println("class cannot declare same type variable twice");
@@ -137,6 +194,11 @@ public class MyClassSymbol extends ClassSymbol {
         return true;
     }
 
+    /**
+     * Adds an inner class that this class declares
+     * @param sym the inner class this class declares
+     * @return true iff the inner class was successfully added
+     */
     public boolean addInnerClass(MyClassSymbol sym) {
         sym.level = Level.INNER;
         if (!innerClasses.put(sym)) {
@@ -147,6 +209,11 @@ public class MyClassSymbol extends ClassSymbol {
         return true;
     }
 
+    /**
+     * Adds a member type that this class declares
+     * @param sym the member type this class declares
+     * @return true iff the member type was successfully added
+     */
     public boolean addMemberType(MyClassSymbol sym) {
         sym.level = Level.MEMBER;
         if (!memberTypes.put(sym)) {
@@ -157,18 +224,32 @@ public class MyClassSymbol extends ClassSymbol {
         return true;
     }
 
+    /**
+     * Establishes this class as a local class
+     */
     public void setLocal() {
         this.level = Level.LOCAL;
     }
 
+    /**
+     * Sets the superclass of this class
+     * @param cls the superclass this class extends
+     */
     public void setSuperClass(Type cls) {
         superClass = cls;
     }
 
+    /**
+     * Sets the class this class is declared in
+     * @param cls the enclosing class of this class
+     */
     public void setDeclaringClass(ClassSymbol cls) {
         declarer = cls;
     }
 
+    /**
+     * Sets the superclass for a class declared as an enum
+     */
     public void setSuperClassForEnum() {
         superClass = new ParameterizedType(fetch("Enum"), this);
         MyMethodSymbol values = new MyMethodSymbol(new MyToken(0, "values"),
@@ -187,32 +268,57 @@ public class MyClassSymbol extends ClassSymbol {
         addMethod(valueOf);
     }
 
+    /**
+     * Sets the superclass for a class declared as an annotation
+     */
     public void setSuperClassForAnnotation() {
         superClass = fetch("java.lang.annotation.Annotation");
     }
 
+    /**
+     * Sets the superclass for a class declared as an class
+     */
     public void setSuperClassForClass() {
         superClass = fetch("Object");
     }
 
+    /**
+     * Sets the superclass for an enum constant's body
+     */
     public void setSuperClassForEnumConstant() {
         superClass = declarer;
     }
 
+    /**
+     * Sets the Package this class is declared in
+     * @param pkg the Package that declares this class
+     */
     public void setPackage(MyPackage pkg) {
         this.pkg = pkg;
     }
 
+    /**
+     * Sets the AST that declares this class
+     * @param ast the AST that declares this class
+     */
     public void setAST(BodyDeclaration ast) {
         this.AST = ast;
     }
 
+    /**
+     * Visits the AST that declares this class with a given visitor
+     * @param visitor the visitor to visit the AST with
+     */
     @Override
     public void visit(ASTVisitor visitor) {
         AST.accept(visitor);
         // System.out.println(repr());
     }
 
+    /**
+     * Determines the name of a new anonymous class
+     * @return the name of a new anonymous class
+     */
     private String nextAnonName() {
         return getName() + "$" + (anonCount++);
     }

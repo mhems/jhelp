@@ -91,7 +91,7 @@ public class ClassDeclaration extends ConcreteBodyDeclaration {
     /**
      * Sets the parameter types of the instantiation expression this anonymous
      * class is declared in.
-     * @return the parameter types of the instantiation expression
+     * @param paramTypes the parameter types of the instantiation expression
      */
     public void setAnonymousParameterTypes(Type[] paramTypes) {
         this.paramTypes = paramTypes;

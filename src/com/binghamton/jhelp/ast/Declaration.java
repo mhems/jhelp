@@ -60,8 +60,16 @@ public abstract class Declaration extends Statement {
         this.annotations = annotations.toArray(this.annotations);
     }
 
+    /**
+     * Gets the Symbol this Declaration declares
+     * @return the Symbol this Declaration declares
+     */
     public abstract Symbol getSymbol();
 
+    /**
+     * Sets the Symbol this Declaration declares
+     * @param sym the Symbol this Declaration declares
+     */
     public void setSymbol(Symbol sym) {
         this.sym = sym;
     }
@@ -90,6 +98,10 @@ public abstract class Declaration extends Statement {
         return modifiers;
     }
 
+    /**
+     * Gets the Annotations of this Declaration
+     * @return the Annotations of this Declaration
+     */
     public Annotation[] getAnnotations() {
         return annotations;
     }

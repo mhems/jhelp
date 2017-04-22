@@ -24,6 +24,10 @@ public class Modifier extends ASTNode {
 
     protected String name;
 
+    /**
+     * Construct a Modifier by name
+     * @param name the name of the Modifier
+     */
     public Modifier(String name) {
         super();
         this.name = name;
@@ -46,6 +50,7 @@ public class Modifier extends ASTNode {
         return name;
     }
 
+    @Override
     public String toString() {
         return name;
     }

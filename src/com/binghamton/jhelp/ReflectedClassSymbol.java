@@ -7,14 +7,25 @@ import java.util.Map;
 
 import com.binghamton.jhelp.ast.ASTVisitor;
 
+/**
+ * A class to represent a pre-compiled class
+ */
 public final class ReflectedClassSymbol extends ClassSymbol {
     private final Class<? extends Object> cls;
 
+    /**
+     * Copy construct a new ReflectedClassSymbol
+     * @param sym the class to copy
+     */
     private ReflectedClassSymbol(ReflectedClassSymbol sym) {
         super(sym);
         this.cls = sym.cls;
     }
 
+    /**
+     * Construct a new ReflectedClassSymbol
+     * @param cls the pre-compiled class to construct with
+     */
     private ReflectedClassSymbol(Class<? extends Object> cls) {
         super(cls.getSimpleName(), cls.getModifiers());
         this.cls = cls;
@@ -42,10 +53,20 @@ public final class ReflectedClassSymbol extends ClassSymbol {
         }
     }
 
+    /**
+     * Gets the ClassSymbol reflecting a pre-compiled class
+     * @param cls the pre-compiled class instance
+     * @return the ClassSymbol reflecting the pre-compiled class
+     */
     public static ReflectedClassSymbol get(Class<?> cls) {
         return new ReflectedClassSymbol(cls);
     }
 
+    /**
+     * Gets the ClassSymbol reflecting a pre-compiled class
+     * @param name the qualified name of the pre-compiled class
+     * @return the ClassSymbol reflecting the pre-compiled class
+     */
     public static ReflectedClassSymbol get(String name) {
         ReflectedClassSymbol sym = null;
         Class<?> cls = null;
@@ -60,8 +81,11 @@ public final class ReflectedClassSymbol extends ClassSymbol {
         return sym;
     }
 
+    /**
+     * Initializes the attributes of this ClassSymbol. Must be called once per
+     * instance before any other operations.
+     */
     public void init() {
-
         if (cls.getDeclaringClass() != null) {
             declarer = get(cls.getDeclaringClass());
         }

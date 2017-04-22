@@ -18,6 +18,10 @@ public class ClassLiteralExpression extends Expression {
         this.typeExpr = expr;
     }
 
+    /**
+     * Gets the Expression yielding the type of this literal
+     * @return the Expression yielding the type of this literal
+     */
     public Expression getTypeExpression() {
         return typeExpr;
     }

@@ -10,6 +10,12 @@ public class ArrayAccessExpression extends QualifiableExpression {
     private QualifiableExpression qualExpr;
     private Expression indexExpr;
 
+    /**
+     * Constructs a qualifiable array access expression
+     * @param last the terminating Token
+     * @param arrayExpr the expression yielding the array being accessed
+     * @param indexExpr the expression yielding the array index
+     */
     public ArrayAccessExpression(Token last,
                                  QualifiableExpression arrayExpr,
                                  Expression indexExpr) {
@@ -18,7 +24,7 @@ public class ArrayAccessExpression extends QualifiableExpression {
     }
 
     /**
-     * Construct an array access expression
+     * Constructs an array access expression
      * @param last the terminating Token
      * @param arrayExpr the expression yielding the array being accessed
      * @param indexExpr the expression yielding the array index

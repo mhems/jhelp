@@ -142,10 +142,18 @@ public class VariableDeclaration extends Declaration {
         return receiver;
     }
 
+    /**
+     * Determines if this variable denotes a variadic formal parameter
+     * @return true iff this variable denotes a variadic formal parameter
+     */
     public boolean isVariadic() {
         return ellipsis != null;
     }
 
+    /**
+     * Gets the VariableSymbol this declaration declares
+     * @return the VariableSymbol this declaration declares
+     */
     public MyVariableSymbol getSymbol() {
         return (MyVariableSymbol)sym;
     }

@@ -50,6 +50,10 @@ public class UnaryExpression extends Expression {
         v.visit(this);
     }
 
+    /**
+     * Determines if this Expression is a prefix Expression
+     * @return true iff this Expression is a prefix Expression
+     */
     private static boolean isPrefix(UnaryOperator op) {
         return op == UnaryOperator.PRE_DECREMENT ||
             op == UnaryOperator.PRE_INCREMENT;

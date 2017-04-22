@@ -20,10 +20,19 @@ public class VariableSymbol extends Symbol {
     protected VariableKind varKind;
     protected Type type;
 
+    /**
+     * Constructs a new named VariableSymbol
+     * @param name the name of the VariableSymbol
+     * @param modifiers the Modifiers of the VariableSymbol
+     */
     public VariableSymbol(String name, Modifiers modifiers) {
         super(name, modifiers);
     }
 
+    /**
+     * Constructs a new reflected VariableSymbol
+     * @param field the pre-compiled Field to reflect
+     */
     public VariableSymbol(Field field) {
         super(field.getName(), field.getModifiers());
         declarer = ReflectedClassSymbol.get(field.getDeclaringClass());
@@ -31,6 +40,10 @@ public class VariableSymbol extends Symbol {
         type = fromType(field.getAnnotatedType());
     }
 
+    /**
+     * Copy constructs a VariableSymbol
+     * @param var the VariableSymbol to copy
+     */
     protected VariableSymbol(VariableSymbol var) {
         super(var.name, var.modifiers);
         this.declarer = var.declarer;
@@ -46,14 +59,23 @@ public class VariableSymbol extends Symbol {
         return type;
     }
 
+    /**
+     * Gets the kind of variable this VariableSymbol is
+     * @return the kind of variable this VariableSymbol is
+     */
     public VariableKind getVariableKind() {
         return varKind;
     }
 
+    @Override
     public ClassSymbol getDeclaringClass() {
         return declarer;
     }
 
+    /**
+     * Determines if this variable is a constant variable
+     * @return true iff this variable is a constant variable
+     */
     public boolean isConstant() {
         return isFinal() && (
             (type instanceof PrimitiveType) ||
@@ -67,11 +89,17 @@ public class VariableSymbol extends Symbol {
         return ret;
     }
 
+    /**
+     * Helper method to adapt a variable
+     * @param var the variable to adapt
+     * @param map the substitution map
+     */
     protected static void adapt(VariableSymbol var,
                                 Map<TypeVariable, Type> map) {
         var.type = var.type.adapt(map);
     }
 
+    @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         if (hasModifiers()) {
@@ -84,6 +112,7 @@ public class VariableSymbol extends Symbol {
         return sb.toString();
     }
 
+    @Override
     public boolean equals(Object other) {
         if (other instanceof VariableSymbol) {
             VariableSymbol sym = (VariableSymbol)other;
@@ -95,6 +124,7 @@ public class VariableSymbol extends Symbol {
         return false;
     }
 
+    @Override
     public int hashCode() {
         return getName().hashCode() ^
             getDeclaringClass().hashCode() ^

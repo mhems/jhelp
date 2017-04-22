@@ -49,14 +49,26 @@ public class CastExpression extends Expression {
         return source;
     }
 
+    /**
+     * Gets the Expression yielding the type this cast is to
+     * @return the Expression yielding the type this cast is to
+     */
     public Expression getTargetExpression() {
         return target;
     }
 
+    /**
+     * Gets the Expressions yielding the bounds of this cast
+     * @return the List of Expressions yielding the bounds of this cast
+     */
     public List<Expression> getBoundExpressions() {
         return bounds;
     }
 
+    /**
+     * Determines if this CastExpression is bounded
+     * @return true iff this CastExpression is bounded
+     */
     public boolean hasBounds() {
         return !bounds.isEmpty();
     }

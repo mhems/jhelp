@@ -10,10 +10,6 @@ import org.antlr.v4.runtime.Token;
 public class Dimension extends ASTNode {
     private Annotation[] annotations = {};
 
-    public Dimension(Token ellipsis) {
-        this(ellipsis, ellipsis);
-    }
-
     /**
      * Construct a new Dimension object
      * @param first the opening brace Token

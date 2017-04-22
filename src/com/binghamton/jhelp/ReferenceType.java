@@ -8,23 +8,44 @@ import java.util.Map;
  */
 public abstract class ReferenceType extends Type {
 
-    public ReferenceType() {
-
+    /**
+     * Construct an empty ReferenceType
+     */
+    protected ReferenceType() {
+        // no-op
     }
 
-    public ReferenceType(String name) {
+    /**
+     * Construct a named ReferenceType
+     * @param name the name of this Type
+     */
+    protected ReferenceType(String name) {
         super(name);
     }
 
-    public ReferenceType(String name, int modifiers) {
+    /**
+     * Construct an named ReferenceType
+     * @param name the name of this Type
+     * @param modifiers a bit-mask of this Type's Modifiers
+     */
+    protected ReferenceType(String name, int modifiers) {
         super(name, modifiers);
     }
 
-    public ReferenceType(String name, Modifiers modifiers) {
+    /**
+     * Construct an named ReferenceType
+     * @param name the name of this Type
+     * @param modifiers the Modifiers of this Type
+     */
+    protected ReferenceType(String name, Modifiers modifiers) {
         super(name, modifiers);
     }
 
-    public ReferenceType(AnnotationSymbol[] annotations) {
+    /**
+     * Construct an annotated ReferenceType
+     * @param annotations the annotations of this Type
+     */
+    protected ReferenceType(AnnotationSymbol[] annotations) {
         super(annotations);
     }
 
@@ -35,8 +56,6 @@ public abstract class ReferenceType extends Type {
     public boolean canWidenTo(Type type) {
         return this.isSubTypeOf(type);
     }
-
-
 
     @Override
     public boolean canNarrowTo(Type type) {

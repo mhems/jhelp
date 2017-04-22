@@ -14,6 +14,11 @@ public abstract class Package {
         this.name = name;
     }
 
+    /**
+     * Gets a class of this Package by name
+     * @param name the name of the class to get
+     * @return the class this Package declares with the given name
+     */
     public abstract ClassSymbol getClass(String name);
 
     /**
@@ -24,6 +29,10 @@ public abstract class Package {
         return name;
     }
 
+    /**
+     * Builds the qualified name of this Package
+     * @return the qualified name of this Package
+     */
     public String getQualifiedName() {
         return getName();
     }
@@ -59,6 +68,10 @@ public abstract class Package {
         return false;
     }
 
+    /**
+     * Builds the String representation of this Package
+     * @return the String representation of this Package
+     */
     public String repr() {
         return getName();
     }

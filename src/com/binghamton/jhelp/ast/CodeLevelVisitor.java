@@ -43,6 +43,12 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
     private NamedSymbolTable<VariableSymbol> currentScope;
     private final BodyLevelVisitor superVisitor;
 
+    /**
+     * Constructs a CodeLevelVisitor for a given Program
+     * @param program the Program to visit
+     * @param superVisitor the BodyLevelVisitor to use to visit the bodies of
+     *        anonymous classes
+     */
     public CodeLevelVisitor(Program program, BodyLevelVisitor superVisitor) {
         super(program);
         this.superVisitor = superVisitor;
@@ -670,7 +676,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
 
             MyClassSymbol tmp = currentClass;
             bodyAST.accept(superVisitor);
-            if (anonCls.hasConstructor()) {
+            if (bodyAST.numConstructors() > 0) {
                 System.err.println("anonymous classes cannot declare constructors");
             }
 

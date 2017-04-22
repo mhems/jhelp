@@ -48,6 +48,10 @@ public class FileLevelVisitor extends EmptyVisitor {
     private NamedSymbolTable<VariableSymbol> importedFields;
     private CompilationUnit currentUnit;
 
+    /**
+     * Constructs a FileLevelVisitor for a given Program
+     * @param program the Program to visit
+     */
     public FileLevelVisitor(Program program) {
         this.program = program;
     }

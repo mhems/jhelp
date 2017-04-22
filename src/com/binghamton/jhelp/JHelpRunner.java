@@ -77,6 +77,13 @@ public class JHelpRunner {
         return num - 1;
     }
 
+    /**
+     * Expands all directory files to include all of its contained
+     * files.
+     * @param files the list of Files to expand
+     * @return a list of all Files contained within the Files in
+     *         `files`
+     */
     private static List<File> expandFiles(File[] files) {
         List<File> ret = new ArrayList<>();
         for (File file : files) {

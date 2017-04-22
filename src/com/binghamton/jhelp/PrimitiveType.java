@@ -87,6 +87,7 @@ public class PrimitiveType extends Type {
         this.primitive = PRIMITIVE_MAP.get(token.getText());
     }
 
+    @Override
     public boolean equals(Object other) {
         if (other instanceof PrimitiveType) {
             return primitive == ((PrimitiveType)other).primitive;
@@ -94,10 +95,12 @@ public class PrimitiveType extends Type {
         return false;
     }
 
+    @Override
     public int hashCode() {
         return primitive.hashCode();
     }
 
+    @Override
     public ClassSymbol getClassSymbol() {
         return box();
     }
@@ -107,18 +110,25 @@ public class PrimitiveType extends Type {
         return fetch(primitive.classname);
     }
 
+    @Override
     public String getName() {
         return primitive.name;
     }
 
+    @Override
     public boolean isReifiable() {
         return true;
     }
 
+    @Override
     public String getTypeName() {
         return getName();
     }
 
+    /**
+     * Determines if this primitive is numeric
+     * @return true iff this primitive is numeric
+     */
     public boolean isNumeric() {
         return primitive != Primitive.VOID && primitive != Primitive.BOOLEAN;
     }
@@ -133,6 +143,7 @@ public class PrimitiveType extends Type {
         return this;
     }
 
+    @Override
     public ClassSymbol getDeclaringClass() {
         throw new UnsupportedOperationException("a primitive has no declaring class");
     }
@@ -163,6 +174,9 @@ public class PrimitiveType extends Type {
         return false;
     }
 
+    /**
+     * An enum to enumerate the Java primitive types
+     */
     private enum Primitive {
         BOOLEAN("boolean", "Boolean"),
         BYTE("byte", "Byte"),
@@ -177,12 +191,22 @@ public class PrimitiveType extends Type {
         protected final String name;
         protected final String classname;
 
+        /**
+         * Constructs a named primitive
+         * @param name the name of this Primitive
+         * @param classname the name of the class representing the boxed type of
+         *        this Primitive
+         */
         Primitive(String name, String classname) {
             this.name = name;
             this.classname = classname;
         }
     }
 
+    /**
+     * Constructs a PrimitiveType from an underlying Primitive
+     * @param primitive the underlying Primitive
+     */
     private PrimitiveType(Primitive primitive) {
         this.primitive = primitive;
     }

@@ -24,6 +24,10 @@ import static com.binghamton.jhelp.ast.NameExpression.Kind;
  */
 public class DeclarationLevelVisitor extends FileLevelVisitor {
 
+    /**
+     * Constructs a DeclarationLevelVisitor for a given Program
+     * @param program the Program to visit
+     */
     public DeclarationLevelVisitor(Program program) {
         super(program);
     }

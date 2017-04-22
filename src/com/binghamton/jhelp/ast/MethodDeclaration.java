@@ -44,6 +44,10 @@ public class MethodDeclaration extends Declaration {
         return returnType;
     }
 
+    /**
+     * Determines if this method has a return type
+     * @return true if this method has a return type (i.e. is not a constructor)
+     */
     public boolean hasReturnType() {
         return returnType != null;
     }
@@ -96,10 +100,18 @@ public class MethodDeclaration extends Declaration {
         this.typeParams = typeParams;
     }
 
+    /**
+     * Gets the annotations on the return type
+     * @return the annotations on the return type
+     */
     public Annotation[] getReturnTypeAnnotations() {
         return returnTypeAnnotations;
     }
 
+    /**
+     * Sets the annotations on the return type
+     * @param annotations the annotations on the return type
+     */
     public void setReturnTypeAnnotations(List<Annotation> annotations) {
          returnTypeAnnotations = annotations.toArray(returnTypeAnnotations);
     }
@@ -128,18 +140,34 @@ public class MethodDeclaration extends Declaration {
         return body;
     }
 
+    /**
+     * Gets the MethodSymbol associated with this declaration
+     * @return the MethodSymbol associated with this declaration
+     */
     public MyMethodSymbol getSymbol() {
         return (MyMethodSymbol)sym;
     }
 
+    /**
+     * Determines if this method is a constructor
+     * @return true iff this method is a constructor
+     */
     public boolean isConstructor() {
         return constructor;
     }
 
+    /**
+     * Establishes whether this class is a constructor
+     * @param constructor true iff this class is a constructor
+     */
     public void setConstructor(boolean constructor) {
         this.constructor = constructor;
     }
 
+    /**
+     * Determines if this method is variadic
+     * @return true iff this method is variadic
+     */
     public boolean isVariadic() {
         return !params.isEmpty() && params.get(params.size() - 1).isVariadic();
     }

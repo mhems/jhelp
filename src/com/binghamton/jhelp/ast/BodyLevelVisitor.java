@@ -36,10 +36,15 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
                                                  Modifier.STRICT_FP,
                                                  Modifier.SYNCHRONIZED};
     private static MethodSymbol FINALIZE;
+
     static {
         FINALIZE = fetch("Object").getMethod("finalize");
     }
 
+    /**
+     * Constructs a BodyLevelVisitor for a given Program
+     * @param program the Program to visit
+     */
     public BodyLevelVisitor(Program program) {
         super(program);
     }

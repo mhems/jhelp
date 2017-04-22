@@ -20,6 +20,10 @@ public class LabelStatement extends Statement {
         this.label = label;
     }
 
+    /**
+     * Gets the Statement this Statement labels
+     * @return the Statement this Statement labels
+     */
     public Statement getStatement() {
         return stmt;
     }

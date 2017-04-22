@@ -62,8 +62,12 @@ public class TypeArgument extends ASTNode {
         return isWildcard;
     }
 
+    /**
+     * Determines if this TypeArgument is a wildcard with an explicit bound
+     * @return true iff this TypeArgument is a wildcard with an explicit bound
+     */
     public boolean hasExplicitBound() {
-        return typeExpr.isNil();
+        return !typeExpr.isNil();
     }
 
     /**
@@ -112,10 +116,18 @@ public class TypeArgument extends ASTNode {
         v.visit(this);
     }
 
+    /**
+     * Gets the Type this TypeArgument evaluates to
+     * @return the Type this TypeArgument evaluates to
+     */
     public Type getType() {
         return type;
     }
 
+    /**
+     * Sets the Type this TypeArgument evaluates to
+     * @param type the Type this TypeArgument evaluates to
+     */
     public void setType(Type type) {
         this.type = type;
     }

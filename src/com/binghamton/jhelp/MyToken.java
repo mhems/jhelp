@@ -73,6 +73,11 @@ public class MyToken extends CommonToken {
         return stream.getText(this, stop);
     }
 
+    /**
+     * Builds a format string of a Token
+     * @param token the Token to format
+     * @return a formatted string of the given Token
+     */
     public static String format(Token token) {
         return String.format("line %d, col %d - '%s' (channel %d)",
                              token.getLine(),
