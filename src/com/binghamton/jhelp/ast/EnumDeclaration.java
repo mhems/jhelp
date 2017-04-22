@@ -11,7 +11,7 @@ import com.binghamton.jhelp.Modifier;
  * A class representing enum declarations
  */
 public class EnumDeclaration extends ConcreteBodyDeclaration {
-    private List<EnumConstant> constants = new ArrayList<>();
+    private final List<EnumConstant> constants = new ArrayList<>();
 
     /**
      * Construct a new enum declaration

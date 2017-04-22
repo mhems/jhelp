@@ -9,7 +9,7 @@ import org.antlr.v4.runtime.Token;
  */
 public class DimensionExpression extends Expression {
     private Annotation[] annotations = {};
-    private Expression expr;
+    private final Expression expr;
 
     /**
      * Construct an annotated dimension expression

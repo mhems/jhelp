@@ -3,7 +3,6 @@ package com.binghamton.jhelp;
 import java.io.IOException;
 import java.io.File;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 import java.util.HashMap;
@@ -15,7 +14,6 @@ import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.Token;
 
 import com.binghamton.jhelp.antlr.Balance;
-import com.binghamton.jhelp.antlr.MyToken;
 import com.binghamton.jhelp.error.ExceptionError;
 import com.binghamton.jhelp.error.JHelpError;
 import com.binghamton.jhelp.error.UnbalancedBracesError;
@@ -60,6 +58,11 @@ public class BalancedValidator implements Validator {
         return errors;
     }
 
+    /**
+     * Checks a stream of Tokens for balanced punctuation
+     * @param tokenStream the stream of Tokens to check
+     * @return a possibly empty List of JHelpErrors present
+     */
     private static List<JHelpError> check(CommonTokenStream tokenStream) {
         Stack<Token> delims = new Stack<>();
         List<JHelpError> errors = Validator.buildErrors();

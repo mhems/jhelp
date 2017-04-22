@@ -1,7 +1,6 @@
 package com.binghamton.jhelp;
 
 import java.io.File;
-import java.io.InputStream;
 import java.util.List;
 
 import com.binghamton.jhelp.error.InvalidUsageError;
@@ -46,9 +45,6 @@ public class EnvironmentValidator implements Validator {
                          " " +
                          System.getProperty("os.version") +
                          "\n");
-        // TODO
-        // System.out.println("Detected Java Home is " + System.getProperty("java.home"));
-        // rt.jar is at $JAVA_HOME/lib/rt.jar
         return errors;
     }
 }

@@ -61,8 +61,7 @@ public class CaseBlock extends Block {
      */
     @Override
     public void accept(ASTVisitor v) {
-        // Case block is not really a scope-delimiting Block, just a sequence of
-        // Statements. Thus do not visit Block superclass.
+        super.accept(v);
         v.visit(this);
     }
 }

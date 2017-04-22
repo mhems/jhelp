@@ -10,7 +10,8 @@ import org.antlr.v4.runtime.Token;
  */
 public class CastExpression extends Expression {
     private Expression source;
-    private List<Expression> targets = new ArrayList<>();
+    private Expression target;
+    private List<Expression> bounds;
 
     /**
      * Construct a new cast expression
@@ -19,23 +20,25 @@ public class CastExpression extends Expression {
      * @param target the Expression yielding the type to cast to
      */
     public CastExpression(Token first, Expression source, Expression target) {
-        super(first, source.getLastToken());
-        this.source = source;
-        targets.add(target);
+        this(first, source, target, new ArrayList<>());
     }
 
     /**
      * Construct a new bounded cast expression
      * @param first the first token of this ASTNode
      * @param source the expression to cast
-     * @param targets the Expressions yielding the types to cast to
+     * @param target the Expression yielding the type to cast to
+     * @param bounds the Expressions yielding additional bounds on the type to
+     * cast to
      */
     public CastExpression(Token first,
                           Expression source,
-                          List<Expression> targets) {
+                          Expression target,
+                          List<Expression> bounds) {
         super(first, source.getLastToken());
         this.source = source;
-        this.targets = targets;
+        this.target = target;
+        this.bounds = bounds;
     }
 
     /**
@@ -46,8 +49,28 @@ public class CastExpression extends Expression {
         return source;
     }
 
-    public List<Expression> getTargetExpressions() {
-        return targets;
+    /**
+     * Gets the Expression yielding the type this cast is to
+     * @return the Expression yielding the type this cast is to
+     */
+    public Expression getTargetExpression() {
+        return target;
+    }
+
+    /**
+     * Gets the Expressions yielding the bounds of this cast
+     * @return the List of Expressions yielding the bounds of this cast
+     */
+    public List<Expression> getBoundExpressions() {
+        return bounds;
+    }
+
+    /**
+     * Determines if this CastExpression is bounded
+     * @return true iff this CastExpression is bounded
+     */
+    public boolean hasBounds() {
+        return !bounds.isEmpty();
     }
 
     /**

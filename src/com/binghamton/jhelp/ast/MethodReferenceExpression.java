@@ -1,35 +1,24 @@
 package com.binghamton.jhelp.ast;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import org.antlr.v4.runtime.Token;
 
 /**
  * A class representing a Java8 method reference
  */
-public class MethodReferenceExpression extends Expression {
+public class MethodReferenceExpression extends QualifiableExpression {
     private Expression lhs;
-    private Expression rhs;
-
-    /**
-     * Construct a incomplete reference by method name
-     * @param identifier the name of the method being referenced
-     * @param typeArgs the type arguments to this reference
-     */
-    // public MethodReferenceExpression(Token identifier,
-    //                                  List<TypeArgument> typeArgs) {
-    //     this(new NilExpression(),
-    //          new IdentifierExpression(identifier),
-    //          typeArgs);
-    // }
+    private final Expression rhs;
+    private List<TypeArgument> targs;
 
     /**
      * Construct a new parameterized reference
      * @param lhs the left hand side of the method reference
      * @param rhs the right hand side of the method reference
+     * @param targs any TypeArguments to the method being referenced
      */
-    public MethodReferenceExpression(Expression lhs, Expression rhs) {
+    public MethodReferenceExpression(Expression lhs,
+                                     Expression rhs,
+                                     List<TypeArgument> targs) {
         super(lhs.getFirstToken(), rhs.getLastToken());
         this.lhs = lhs;
         this.rhs = rhs;
@@ -60,6 +49,14 @@ public class MethodReferenceExpression extends Expression {
     }
 
     /**
+     * Gets the type arguments to this Expression
+     * @return the List of type arguments to this Expression
+     */
+    public List<TypeArgument> getTypeArguments() {
+        return targs;
+    }
+
+    /**
      * Double dispatch this class on parameter
      * @param v the visitor to accept
      */
@@ -67,5 +64,10 @@ public class MethodReferenceExpression extends Expression {
     public void accept(ASTVisitor v) {
         super.accept(v);
         v.visit(this);
+    }
+
+    @Override
+    public void qualifyWith(Expression expr) {
+        lhs = expr;
     }
 }

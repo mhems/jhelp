@@ -6,8 +6,8 @@ import org.antlr.v4.runtime.Token;
  * A class representing a Java (do) while statement
  */
 public class WhileStatement extends Block {
-    private Expression condition;
-    private boolean isDo;
+    private final Expression condition;
+    private final boolean isDo;
 
     /**
      * Construct a new while statement

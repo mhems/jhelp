@@ -6,20 +6,8 @@ import org.antlr.v4.runtime.Token;
  * A class representing a Java unary expression
  */
 public class UnaryExpression extends Expression {
-    private Expression expr;
-    private UnaryOperator op;
-
-    /**
-     * Construct a new unary expression
-     * @param token the operator token
-     * @param identifier the name of the variable being operated on
-     * @param op the operation being performed upon expression
-     */
-    public UnaryExpression(Token token,
-                           Token identifier,
-                           UnaryOperator op) {
-        this(token, new IdentifierExpression(identifier), op);
-    }
+    private final Expression expr;
+    private final UnaryOperator op;
 
     /**
      * Construct a new unary expression
@@ -62,6 +50,10 @@ public class UnaryExpression extends Expression {
         v.visit(this);
     }
 
+    /**
+     * Determines if this Expression is a prefix Expression
+     * @return true iff this Expression is a prefix Expression
+     */
     private static boolean isPrefix(UnaryOperator op) {
         return op == UnaryOperator.PRE_DECREMENT ||
             op == UnaryOperator.PRE_INCREMENT;

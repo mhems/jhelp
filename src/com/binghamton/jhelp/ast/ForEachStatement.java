@@ -2,8 +2,6 @@ package com.binghamton.jhelp.ast;
 
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.VariableSymbol;
-
 /**
  * A class representing a Java for-each statement
  */
@@ -64,7 +62,7 @@ public class ForEachStatement extends Block {
      */
     @Override
     public void accept(ASTVisitor v) {
-        super.accept(v);
         v.visit(this);
+        // must visit block statements explicitly
     }
 }

@@ -12,8 +12,8 @@ import com.binghamton.jhelp.MyVariableSymbol;
  * A class representing a constant in a Java enum
  */
 public class EnumConstant extends Declaration {
-    private List<Expression> arguments;
-    private ConcreteBodyDeclaration body = new ClassDeclaration();
+    private final List<Expression> arguments;
+    private final ClassDeclaration body = new ClassDeclaration();
 
     /**
      * Construct an enum constant
@@ -28,14 +28,26 @@ public class EnumConstant extends Declaration {
         this.arguments = arguments;
     }
 
-    public ConcreteBodyDeclaration getBody() {
+    /**
+     * Gets the anonymous body of this EnumConstant
+     * @return the anonymous body of this EnumConstant
+     */
+    public ClassDeclaration getBody() {
         return body;
     }
 
+    /**
+     * Gets the field associated with this declaration
+     * @return the field associated with this declaration
+     */
     public MyVariableSymbol getSymbol() {
         return (MyVariableSymbol)sym;
     }
 
+    /**
+     * Determines if this constant has a body
+     * @return true iff this constant has no body
+     */
     public boolean isEmpty() {
         return body.isEmpty();
     }

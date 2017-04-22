@@ -6,6 +6,13 @@ package com.binghamton.jhelp;
 public class JHelp {
 
     /**
+     * Construct a new JHelp instance
+     */
+    private JHelp() {
+	// prevent public instantiation
+    }
+
+    /**
      * Main method to invoke jhelp application
      * @param args user-provided command-line arguments
      */

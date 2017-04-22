@@ -6,9 +6,9 @@ import org.antlr.v4.runtime.Token;
  * A class representing a Java import statement
  */
 public class ImportStatement extends Statement {
-    private Expression nameExpr;
-    private boolean isStatic;
-    private boolean onDemand;
+    private final NameExpression nameExpr;
+    private final boolean isStatic;
+    private final boolean onDemand;
 
     /**
      * Constructs a new import statement
@@ -20,7 +20,7 @@ public class ImportStatement extends Statement {
      */
     public ImportStatement(Token keyword,
                            Token last,
-                           Expression nameExpr,
+                           NameExpression nameExpr,
                            boolean isStatic,
                            boolean onDemand) {
         super(keyword, last);
@@ -33,7 +33,7 @@ public class ImportStatement extends Statement {
      * Gets the expression yielding the name to import
      * @return the expression yielding the name to import
      */
-    public Expression getNameExpression() {
+    public NameExpression getNameExpression() {
         return nameExpr;
     }
 
@@ -41,19 +41,9 @@ public class ImportStatement extends Statement {
      * Gets the name of the symbol being imported
      * @return the name of the symbol being imported
      */
-    public String getName() {
-        return getText();
-    }
-
     public String getImportName() {
         return nameExpr.getText();
     }
-
-    public String getRightmostIdentifier() {
-        String name = getImportName();
-        return name.substring(name.indexOf('.') + 1);
-    }
-
 
     /**
      * Determines if this import is static

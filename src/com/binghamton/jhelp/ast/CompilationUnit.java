@@ -2,14 +2,17 @@ package com.binghamton.jhelp.ast;
 
 import java.util.List;
 
+import com.binghamton.jhelp.MyPackage;
+
 /**
  * A class representing a Java compilation unit (file)
  */
 public class CompilationUnit extends ASTNode {
     private String filename;
-    private PackageStatement pkg;
-    private List<ImportStatement> imports;
-    private List<BodyDeclaration> bodies;
+    private final PackageStatement pkg;
+    private final List<ImportStatement> imports;
+    private final List<BodyDeclaration> bodies;
+    private MyPackage declaringPackage;
 
     /**
      * Construct a new compilation unit
@@ -26,10 +29,18 @@ public class CompilationUnit extends ASTNode {
         this.bodies = bodies;
     }
 
+    /**
+     * Sets the filename this CompilationUnit is located in
+     * @param name the filename this CompilationUnit is located in
+     */
     public void setFilename(String name) {
         this.filename = name;
     }
 
+    /**
+     * Gets the filename this CompilationUnit is located in
+     * @return the filename this CompilationUnit is located in
+     */
     public String getFilename() {
         return filename;
     }
@@ -38,7 +49,7 @@ public class CompilationUnit extends ASTNode {
      * Gets the unit's package statement
      * @return the unit's package statement
      */
-    public PackageStatement getPackage() {
+    public PackageStatement getPackageStatement() {
         return pkg;
     }
 
@@ -64,6 +75,22 @@ public class CompilationUnit extends ASTNode {
      */
     public List<BodyDeclaration> getBodyDeclarations() {
         return bodies;
+    }
+
+    /**
+     * Gets the Package this unit is located in
+     * @return the Package this unit is located in
+     */
+    public MyPackage getPackage() {
+        return declaringPackage;
+    }
+
+    /**
+     * Sets the Package this unit is located in
+     * @param pkg the Package this unit is located in
+     */
+    public void setPackage(MyPackage pkg) {
+        declaringPackage = pkg;
     }
 
     /**

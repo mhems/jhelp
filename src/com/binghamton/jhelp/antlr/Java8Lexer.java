@@ -9,6 +9,9 @@ package com.binghamton.jhelp.antlr;
     import com.binghamton.jhelp.*;
     import com.binghamton.jhelp.ast.*;
 
+    import static com.binghamton.jhelp.ast.NameExpression.*;
+    import static com.binghamton.jhelp.ast.BodyDeclaration.Kind.*;
+
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.Token;

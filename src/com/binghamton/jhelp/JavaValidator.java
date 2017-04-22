@@ -11,14 +11,12 @@ import org.antlr.v4.runtime.Lexer;
 
 import com.binghamton.jhelp.antlr.Java8Lexer;
 import com.binghamton.jhelp.antlr.Java8Parser;
-import com.binghamton.jhelp.antlr.MyToken;
 import com.binghamton.jhelp.antlr.MyTokenFactory;
-import com.binghamton.jhelp.ast.ASTVisitor;
-import com.binghamton.jhelp.ast.CompilationUnit;
-import com.binghamton.jhelp.ast.FileLevelVisitor;
-import com.binghamton.jhelp.ast.DeclarationLevelVisitor;
 import com.binghamton.jhelp.ast.BodyLevelVisitor;
 import com.binghamton.jhelp.ast.CodeLevelVisitor;
+import com.binghamton.jhelp.ast.CompilationUnit;
+import com.binghamton.jhelp.ast.DeclarationLevelVisitor;
+import com.binghamton.jhelp.ast.FileLevelVisitor;
 import com.binghamton.jhelp.error.ExceptionError;
 import com.binghamton.jhelp.error.JHelpError;
 
@@ -39,7 +37,6 @@ public class JavaValidator implements Validator {
         CommonTokenStream stream;
         Java8Parser parser;
         CompilationUnit cu;
-        ASTVisitor visitor;
         List<JHelpError> errors = Validator.buildErrors();
         try {
             Program program = new Program();
@@ -51,10 +48,6 @@ public class JavaValidator implements Validator {
                 lexer.setTokenFactory(factory);
                 parser = new Java8Parser(stream);
                 parser.setTokenFactory(factory);
-                if (false) {
-                    // parser.removeErrorListeners();
-                    parser.addErrorListener(new DiagnosticErrorListener(false));
-                }
                 parser.setBuildParseTree(false);
                 cu = parser.compilationUnit().ret;
                 if (parser.getNumberOfSyntaxErrors() == 0) {
@@ -62,26 +55,21 @@ public class JavaValidator implements Validator {
                     program.addCompilationUnit(cu);
                 }
             }
-            System.out.println("---------- FILE ----------");
-            visitor = new FileLevelVisitor(program);
-            System.out.println(program.getPackage("foo.bar.baz").repr());
 
-            System.out.println("---------- DECLARATION ----------");
-            visitor = new DeclarationLevelVisitor(program);
-            System.out.println(program.getPackage("foo.bar.baz").repr());
+            // System.out.println("---------- FILE ----------");
+            new FileLevelVisitor(program).visitAll();
 
-            System.out.println("---------- BODY ----------");
-            visitor = new BodyLevelVisitor(program);
+            // System.out.println("---------- DECLARATION ----------");
+            new DeclarationLevelVisitor(program).visitAll();
+
+            program.topologicalSort();
+
+            // System.out.println("---------- BODY ----------");
+            BodyLevelVisitor bodyV = new BodyLevelVisitor(program);
+            bodyV.visitInOrder();
 
             // System.out.println("---------- CODE ----------");
-            // visitor = new CodeLevelVisitor(program);
-
-            System.out.println(">>>>>>>>>>>>>>>>>>>>");
-            for (Package p : program.getPackages()) {
-                System.out.println(p.repr());
-                System.out.println();
-            }
-            System.out.println("<<<<<<<<<<<<<<<<<<<<");
+            new CodeLevelVisitor(program, bodyV).visitAll();
 
         } catch (IOException e) {
             errors.add(new ExceptionError(e));

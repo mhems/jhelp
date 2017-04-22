@@ -1,30 +1,17 @@
 package com.binghamton.jhelp;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * A class to manage imports in Java source programs.
  * Lazily populates cache associating symbol names to Class reflection Objects.
- * If a class is not found in the cache or by the ClassLoader, it is searched
- * for in the on demand packages, of which java.lang is contained in.
  */
 public class ImportManager {
     private static final Map<String, ReflectedClassSymbol> cache = new HashMap<>();
 
-    static {
-        String[] names = {"java.lang.Object", "java.lang.String",
-                          "java.lang.Enum", "java.lang.annotation.Annotation",
-                          "java.lang.Throwable"};
-        for (String name : names) {
-            try {
-                getOrImport(name);
-            } catch (ClassNotFoundException e) {
-                System.err.println("error initializing established class: " + name);
-            }
-        }
+    private ImportManager() {
+	// prevent public instantiation
     }
 
     /**
@@ -37,6 +24,13 @@ public class ImportManager {
         return cache.containsKey(name);
     }
 
+    /**
+     * Retrieve the already imported class with a given qualified name
+     * @param name the qualified name of the class to retrieve
+     * @return the ReflectedClassSymbol reflecting the existing class
+     * @throws IllegalArgumentException if the class has not been
+     * imported yet.
+     */
     public static ReflectedClassSymbol get(String name) {
         if (!isImported(name)) {
             throw new IllegalArgumentException(name + " is not in the cache");
@@ -44,10 +38,15 @@ public class ImportManager {
         return cache.get(name);
     }
 
+    /**
+     * Retrieve or import the class with a given qualified name.
+     * @param name the qualified name of the class to retrieve or import
+     * @return the ReflectedClassSymbol reflecting the existing class
+     * @throws ClassNotFoundException if the class could not be imported
+     */
     public static ReflectedClassSymbol getOrImport(String name) throws ClassNotFoundException {
         if (!isImported(name)) {
-            cache.put(name, new ReflectedClassSymbol(Class.forName(name)));
-
+            cache.put(name, ReflectedClassSymbol.get(Class.forName(name)));
             cache.get(name).init();
         }
         return cache.get(name);

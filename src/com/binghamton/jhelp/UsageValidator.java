@@ -1,7 +1,6 @@
 package com.binghamton.jhelp;
 
 import java.io.File;
-import java.io.InputStream;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

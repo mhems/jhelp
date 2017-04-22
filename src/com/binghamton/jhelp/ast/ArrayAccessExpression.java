@@ -5,24 +5,26 @@ import org.antlr.v4.runtime.Token;
 /**
  * A class representing a Java array access
  */
-public class ArrayAccessExpression extends Expression {
+public class ArrayAccessExpression extends QualifiableExpression {
     private Expression arrayExpr;
+    private QualifiableExpression qualExpr;
     private Expression indexExpr;
 
     /**
-     * Construct an array access expression
+     * Constructs a qualifiable array access expression
      * @param last the terminating Token
-     * @param token the token of the symbol being accessed
+     * @param arrayExpr the expression yielding the array being accessed
      * @param indexExpr the expression yielding the array index
      */
     public ArrayAccessExpression(Token last,
-                                 Token token,
+                                 QualifiableExpression arrayExpr,
                                  Expression indexExpr) {
-        this(last, new IdentifierExpression(token), indexExpr);
+        this(last, (Expression)arrayExpr, indexExpr);
+        this.qualExpr = arrayExpr;
     }
 
     /**
-     * Construct an array access expression
+     * Constructs an array access expression
      * @param last the terminating Token
      * @param arrayExpr the expression yielding the array being accessed
      * @param indexExpr the expression yielding the array index
@@ -59,5 +61,11 @@ public class ArrayAccessExpression extends Expression {
     public void accept(ASTVisitor v) {
         super.accept(v);
         v.visit(this);
+    }
+
+    @Override
+    public void qualifyWith(Expression expr) {
+        qualExpr.qualifyWith(expr);
+        arrayExpr = qualExpr;
     }
 }

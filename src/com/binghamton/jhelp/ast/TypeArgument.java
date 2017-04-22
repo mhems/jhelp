@@ -18,13 +18,6 @@ public class TypeArgument extends ASTNode {
     private Type type;
 
     /**
-     * Construct an empty (diamond) type argument
-     */
-    public TypeArgument() {
-        super();
-    }
-
-    /**
      * Construct a type argument of a reference type
      * @param type the reference type
      */
@@ -70,15 +63,11 @@ public class TypeArgument extends ASTNode {
     }
 
     /**
-     * Determines if this argument is empty (i.e. the diamond operator)
-     * @return true iff this argument is empty
+     * Determines if this TypeArgument is a wildcard with an explicit bound
+     * @return true iff this TypeArgument is a wildcard with an explicit bound
      */
-    public boolean isDiamond() {
-        return typeExpr.isNil() && !isWildcard();
-    }
-
     public boolean hasExplicitBound() {
-        return typeExpr.isNil();
+        return !typeExpr.isNil();
     }
 
     /**
@@ -127,10 +116,18 @@ public class TypeArgument extends ASTNode {
         v.visit(this);
     }
 
+    /**
+     * Gets the Type this TypeArgument evaluates to
+     * @return the Type this TypeArgument evaluates to
+     */
     public Type getType() {
         return type;
     }
 
+    /**
+     * Sets the Type this TypeArgument evaluates to
+     * @param type the Type this TypeArgument evaluates to
+     */
     public void setType(Type type) {
         this.type = type;
     }

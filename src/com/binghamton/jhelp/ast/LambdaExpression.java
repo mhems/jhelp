@@ -4,14 +4,12 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.VariableSymbol;
-
 /**
  * A class representing a Java lambda expression
  */
 public class LambdaExpression extends Expression {
-    private List<VariableDeclaration> params;
-    private Block body;
+    private final List<VariableDeclaration> params;
+    private final Block body;
 
     /**
      * Construct a new lambda expression

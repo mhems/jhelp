@@ -6,7 +6,7 @@ import org.antlr.v4.runtime.Token;
  * A class representing a Java assert statement
  */
 public class AssertStatement extends Statement {
-    private Expression condition;
+    private final Expression condition;
     private Expression message = new NilExpression();
 
     /**

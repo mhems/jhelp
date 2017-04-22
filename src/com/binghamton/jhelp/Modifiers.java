@@ -1,6 +1,5 @@
 package com.binghamton.jhelp;
 
-import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -14,10 +13,9 @@ import com.binghamton.jhelp.util.StringUtils;
  * A class abstracting a set of Java modifiers
  */
 public class Modifiers {
-    public static final Modifiers NO_MODIFIERS = new Modifiers();
     private static final List<Modifier> ORDERED_MODIFIERS = new ArrayList<>();
     private static final Comparator<Modifier> BY_STANDARD;
-    private Set<Modifier> modifiers = new HashSet<>();
+    private final Set<Modifier> modifiers = new HashSet<>();
 
     static {
         BY_STANDARD = (a, b) ->
@@ -52,6 +50,11 @@ public class Modifiers {
         this.modifiers.addAll(modifiers);
     }
 
+    /**
+     * Construct a collection of modifiers from a variable number of
+     * Modifiers
+     * @param modifiers a variable amount of Modifier instances
+     */
     public Modifiers(Modifier... modifiers) {
         for (Modifier m : modifiers) {
             this.modifiers.add(m);
@@ -59,27 +62,45 @@ public class Modifiers {
     }
 
     /**
-     * Gets the Set of Modifiers
-     * @return the Set of Modifiers
+     * Gets the Set of underlying Modifiers in this instance
+     * @return the Set of underlying Modifiers in this instance
      */
     public Set<Modifier> getModifiers() {
         return modifiers;
     }
 
+    /**
+     * Determines if a Modifier is present
+     * @param modifier to Modifier to inquire about
+     * @return true iff this Modifiers contains `modifier`
+     */
     public boolean contains(Modifier modifier) {
         return modifiers.contains(modifier);
     }
 
+    /**
+     * Builds a space separated String of each Modifier's text
+     * @return a space separated String of each Modifier's text
+     */
     public String getText() {
         return toString();
     }
 
+    /**
+     * Builds a space separated String of each Modifier's text
+     * @return a space separated String of each Modifier's text
+     */
     public String toString() {
         List<Modifier> mods = new ArrayList<>(modifiers);
         Collections.sort(mods, BY_STANDARD);
         return StringUtils.join(" ", mods);
     }
 
+    /**
+     * Adds a modifier to this Modifiers collection
+     * @param modifier the Modifier to add
+     * @return true iff `modifier` was not present prior to this call
+     */
     public boolean addModifier(Modifier modifier) {
         return modifiers.add(modifier);
     }

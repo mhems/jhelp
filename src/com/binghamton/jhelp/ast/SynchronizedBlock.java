@@ -6,7 +6,7 @@ import org.antlr.v4.runtime.Token;
  * A class representing a Java synchronized block
  */
 public class SynchronizedBlock extends Block {
-    private Expression lock;
+    private final Expression lock;
 
     /**
      * Construct a new synchronized block

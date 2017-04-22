@@ -8,6 +8,8 @@ import java.util.Map;
 
 import org.antlr.v4.runtime.Token;
 
+import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
+
 /**
  * Class representing valid Java primitive types
  */
@@ -26,6 +28,7 @@ public class PrimitiveType extends Type {
     private static final Map<String, Primitive> PRIMITIVE_MAP = new HashMap<>();
     private static final Map<PrimitiveType, PrimitiveType> SUBTYPE_MAP = new HashMap<>();
     private static final Map<PrimitiveType, List<PrimitiveType>> WIDENING_MAP = new HashMap<>();
+    private static final Map<PrimitiveType, List<PrimitiveType>> NARROWING_MAP = new HashMap<>();
     public static final Map<String, PrimitiveType> UNBOX_MAP = new HashMap<>();
 
     static {
@@ -58,6 +61,18 @@ public class PrimitiveType extends Type {
         WIDENING_MAP.put(INT, new ArrayList<>(Arrays.asList(LONG, FLOAT, DOUBLE)));
         WIDENING_MAP.put(LONG, new ArrayList<>(Arrays.asList(FLOAT, DOUBLE)));
         WIDENING_MAP.put(FLOAT, new ArrayList<>(Arrays.asList(DOUBLE)));
+
+
+        NARROWING_MAP.put(SHORT, new ArrayList<>(Arrays.asList(BYTE, CHAR)));
+        NARROWING_MAP.put(CHAR, new ArrayList<>(Arrays.asList(BYTE, SHORT)));
+        NARROWING_MAP.put(INT, NARROWING_MAP.get(CHAR));
+        NARROWING_MAP.get(INT).add(CHAR);
+        NARROWING_MAP.put(LONG, NARROWING_MAP.get(INT));
+        NARROWING_MAP.get(LONG).add(INT);
+        NARROWING_MAP.put(FLOAT, NARROWING_MAP.get(LONG));
+        NARROWING_MAP.get(FLOAT).add(LONG);
+        NARROWING_MAP.put(DOUBLE, NARROWING_MAP.get(FLOAT));
+        NARROWING_MAP.get(DOUBLE).add(FLOAT);
     }
 
     private Primitive primitive;
@@ -72,6 +87,7 @@ public class PrimitiveType extends Type {
         this.primitive = PRIMITIVE_MAP.get(token.getText());
     }
 
+    @Override
     public boolean equals(Object other) {
         if (other instanceof PrimitiveType) {
             return primitive == ((PrimitiveType)other).primitive;
@@ -79,26 +95,55 @@ public class PrimitiveType extends Type {
         return false;
     }
 
+    @Override
     public int hashCode() {
         return primitive.hashCode();
     }
 
+    @Override
     public ClassSymbol getClassSymbol() {
         return box();
     }
 
+    @Override
     public ClassSymbol box() {
-        return ImportManager.get("java.lang." + primitive.classname);
+        return fetch(primitive.classname);
     }
 
+    @Override
     public String getName() {
         return primitive.name;
     }
 
+    @Override
+    public boolean isReifiable() {
+        return true;
+    }
+
+    @Override
     public String getTypeName() {
         return getName();
     }
 
+    /**
+     * Determines if this primitive is numeric
+     * @return true iff this primitive is numeric
+     */
+    public boolean isNumeric() {
+        return primitive != Primitive.VOID && primitive != Primitive.BOOLEAN;
+    }
+
+    @Override
+    public boolean isReference() {
+        return false;
+    }
+
+    @Override
+    public PrimitiveType adapt(Map<TypeVariable, Type> map) {
+        return this;
+    }
+
+    @Override
     public ClassSymbol getDeclaringClass() {
         throw new UnsupportedOperationException("a primitive has no declaring class");
     }
@@ -113,10 +158,25 @@ public class PrimitiveType extends Type {
         return false;
     }
 
-    public boolean canWidenTo(PrimitiveType target) {
-        return WIDENING_MAP.get(this).contains(target);
+    @Override
+    public boolean canWidenTo(Type type) {
+        if (type instanceof PrimitiveType) {
+            return WIDENING_MAP.get(this).contains((PrimitiveType)type);
+        }
+        return false;
     }
 
+    @Override
+    public boolean canNarrowTo(Type type) {
+        if (type instanceof PrimitiveType) {
+            return NARROWING_MAP.get(this).contains((PrimitiveType)type);
+        }
+        return false;
+    }
+
+    /**
+     * An enum to enumerate the Java primitive types
+     */
     private enum Primitive {
         BOOLEAN("boolean", "Boolean"),
         BYTE("byte", "Byte"),
@@ -131,12 +191,22 @@ public class PrimitiveType extends Type {
         protected final String name;
         protected final String classname;
 
+        /**
+         * Constructs a named primitive
+         * @param name the name of this Primitive
+         * @param classname the name of the class representing the boxed type of
+         *        this Primitive
+         */
         Primitive(String name, String classname) {
             this.name = name;
             this.classname = classname;
         }
     }
 
+    /**
+     * Constructs a PrimitiveType from an underlying Primitive
+     * @param primitive the underlying Primitive
+     */
     private PrimitiveType(Primitive primitive) {
         this.primitive = primitive;
     }

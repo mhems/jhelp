@@ -9,9 +9,8 @@ import com.binghamton.jhelp.BalancedValidator;
  * This includes mismatched braces as well as missing or extra braces.
  */
 public class UnbalancedBracesError extends JHelpError {
-
-    private Token left;
-    private Token right;
+    private final Token left;
+    private final Token right;
 
     /**
      * Construct an UnbalancedBracesError with the offending Tokens

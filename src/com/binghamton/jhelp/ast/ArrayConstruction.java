@@ -5,15 +5,15 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.Type;
+import com.binghamton.jhelp.ArrayType;
 
 /**
  * A class representing the construction of a new array
  */
 public class ArrayConstruction extends Expression {
-    private Expression expr;
+    private final Expression expr;
     private List<DimensionExpression> dimExprs = new ArrayList<>();
-    private List<Dimension> dims;
+    private final List<Dimension> dims;
     private ArrayInitializer initializer;
 
     /**
@@ -28,7 +28,7 @@ public class ArrayConstruction extends Expression {
                              List<DimensionExpression> dimExprs,
                              List<Dimension> dims) {
         super(first,
-              dims.size() > 0 ? dims.get(dims.size()-1).getLastToken()
+              !dims.isEmpty() ? dims.get(dims.size()-1).getLastToken()
                               : dimExprs.get(dimExprs.size()-1).getLastToken());
         this.expr = expr;
         this.dimExprs = dimExprs;
@@ -52,6 +52,10 @@ public class ArrayConstruction extends Expression {
         this.initializer = initializer;
     }
 
+    /**
+     * Gets the Expression yielding the element type
+     * @return the Expression yielding the element type
+     */
     public Expression getElementTypeExpression() {
         return expr;
     }
@@ -77,7 +81,7 @@ public class ArrayConstruction extends Expression {
      * @return true iff this construction has dimension expressions
      */
     public boolean hasDimensionExpressions() {
-        return dimExprs.size() > 0;
+        return !dimExprs.isEmpty();
     }
 
     /**
@@ -94,6 +98,11 @@ public class ArrayConstruction extends Expression {
      */
     public List<DimensionExpression> getDimensionExpressions() {
         return dimExprs;
+    }
+
+    @Override
+    public ArrayType getType() {
+        return (ArrayType)type;
     }
 
     /**

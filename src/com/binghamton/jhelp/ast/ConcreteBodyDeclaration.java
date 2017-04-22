@@ -46,7 +46,7 @@ public abstract class ConcreteBodyDeclaration extends BodyDeclaration {
      * @return true iff this declaration implements any interfaces
      */
     public boolean hasSuperInterfaces() {
-        return implementees.size() > 0;
+        return !implementees.isEmpty();
     }
 
     /**
@@ -113,10 +113,13 @@ public abstract class ConcreteBodyDeclaration extends BodyDeclaration {
         staticInitializers.add(init);
     }
 
+    /**
+     * Determines if this Declaration declares anything
+     * @return true iff this Declaration declares nothing
+     */
     public boolean isEmpty() {
         return getFields().isEmpty() &&
             getInnerBodies().isEmpty() &&
-            getInnerInterfaces().isEmpty() &&
             getStaticInitializers().isEmpty() &&
             getInstanceInitializers().isEmpty() &&
             getMethods().isEmpty() &&

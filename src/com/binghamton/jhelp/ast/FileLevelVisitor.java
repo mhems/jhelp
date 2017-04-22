@@ -2,8 +2,6 @@ package com.binghamton.jhelp.ast;
 
 import java.io.File;
 import java.util.List;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.antlr.v4.runtime.Token;
 
@@ -15,12 +13,10 @@ import com.binghamton.jhelp.MethodSymbolTable;
 import com.binghamton.jhelp.Modifier;
 import com.binghamton.jhelp.MethodSymbol;
 import com.binghamton.jhelp.MyClassSymbol;
-import com.binghamton.jhelp.Package;
+import com.binghamton.jhelp.MyPackage;
 import com.binghamton.jhelp.Program;
 import com.binghamton.jhelp.ReflectedClassSymbol;
 import com.binghamton.jhelp.Symbol;
-import com.binghamton.jhelp.SymbolTable;
-import com.binghamton.jhelp.Type;
 import com.binghamton.jhelp.TypeVariable;
 import com.binghamton.jhelp.VariableSymbol;
 
@@ -30,7 +26,7 @@ import com.binghamton.jhelp.VariableSymbol;
  *
  * This visitor is responsible for:
  * - establishing the package hierarchy
- * - importing establised symbols as necessary into the proper bodies
+ * - importing established symbols as necessary into the proper bodies
  * - adding bodies' names to the class symbol table
  *
  * This visitor does not visit declarations, just their names.
@@ -42,33 +38,22 @@ import com.binghamton.jhelp.VariableSymbol;
  * - more than one public body per file
  */
 public class FileLevelVisitor extends EmptyVisitor {
+    protected MyPackage pkg;
+    protected Program program;
+    protected MyClassSymbol currentClass;
+
     private String filename;
     private ImportingSymbolTable importedClasses;
     private MethodSymbolTable importedMethods;
     private NamedSymbolTable<VariableSymbol> importedFields;
+    private CompilationUnit currentUnit;
 
-    protected Package pkg;
-    protected Program program;
-    protected MyClassSymbol currentClass;
-
-    protected void visitAll() {
-        for (CompilationUnit unit : program.getCompilationUnits()) {
-            filename = new File(unit.getFilename()).getName();
-            filename = filename.substring(0,
-                                          filename.length() - ".java".length());
-            unit.accept(this);
-        }
-    }
-
+    /**
+     * Constructs a FileLevelVisitor for a given Program
+     * @param program the Program to visit
+     */
     public FileLevelVisitor(Program program) {
         this.program = program;
-        visitAll();
-    }
-
-    public FileLevelVisitor(Program program, String filename) {
-        this.program = program;
-
-        visitAll();
     }
 
     /**
@@ -76,7 +61,7 @@ public class FileLevelVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(AnnotationDeclaration ast) {
-        ast.getSymbol().setClassKind(MyClassSymbol.ClassKind.ANNOTATION);
+        ast.getSymbol().setClassKind(ClassSymbol.ClassKind.ANNOTATION);
         ast.getSymbol().setSuperClassForAnnotation();
     }
 
@@ -89,52 +74,38 @@ public class FileLevelVisitor extends EmptyVisitor {
             System.err.printf("Body names should be capitalized, '%s' is not\n",
                               ast.getName().getText());
         }
-        if (ast.getName().getText().equals(filename)) {
-            if (!ast.getModifiers().contains(Modifier.PUBLIC)) {
-                System.err.printf("Body '%s' in file '%s.java' should be declared public",
-                                  ast.getName().getText(),
-                                  filename);
-            }
+        if (ast.getName().getText().equals(filename) &&
+            !ast.getModifiers().contains(Modifier.PUBLIC)) {
+            System.err.printf("Body '%s' in file '%s.java' should be declared public\n",
+                              ast.getName().getText(),
+                              filename);
         }
 
         MyClassSymbol sym = new MyClassSymbol(ast.getName(), ast.getModifiers());
-        currentClass = sym;
-        currentClass.setPackage(pkg);
-        ast.setSymbol(sym);
 
-        if (!ast.isInnerDeclaration()) {
-            if (!pkg.addClass(currentClass)) {
+        if (ast.isTop()) {
+            if (!pkg.addClass(sym)) {
                 System.err.println("duplicate declaration of body");
             }
+        } else {
+            sym.setDeclaringClass(currentClass);
         }
 
-        MyClassSymbol[] innerSyms = new MyClassSymbol[ast.getInnerBodies().size() +
-                                                      ast.getInnerInterfaces().size()];
-        int pos = 0;
-        MyClassSymbol cur;
-        for (ConcreteBodyDeclaration c : ast.getInnerBodies()) {
-            currentClass = sym;
-            c.setInnerDeclaration(true);
-            c.accept(this);
-            cur = c.getSymbol();
-            cur.setDeclaringClass(sym);
-            cur.setInnerClass(true);
-            sym.addInnerClass(cur);
-            innerSyms[pos] = cur;
-            ++pos;
-        }
-        for (AbstractBodyDeclaration a : ast.getInnerInterfaces()) {
-            currentClass = sym;
-            a.setInnerDeclaration(true);
-            a.accept(this);
-            cur = a.getSymbol();
-            cur.setDeclaringClass(sym);
-            cur.setInnerClass(true);
-            sym.addInnerClass(cur);
-            innerSyms[pos] = cur;
-            ++pos;
-        }
         currentClass = sym;
+        sym.setPackage(pkg);
+        sym.setAST(ast);
+        ast.setSymbol(sym);
+
+        MyClassSymbol cur;
+        for (BodyDeclaration body : ast.getInnerBodies()) {
+            body.accept(this);
+            currentClass = sym;
+            if (body.getSymbol().isStatic()) {
+                sym.addMemberType(body.getSymbol());
+            } else {
+                sym.addInnerClass(body.getSymbol());
+            }
+        }
     }
 
     /**
@@ -142,7 +113,7 @@ public class FileLevelVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(ClassDeclaration ast) {
-        ast.getSymbol().setClassKind(MyClassSymbol.ClassKind.CLASS);
+        ast.getSymbol().setClassKind(ClassSymbol.ClassKind.CLASS);
         ast.getSymbol().setSuperClassForClass();
 
         if (ast.hasTypeParameters()) {
@@ -157,13 +128,15 @@ public class FileLevelVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(CompilationUnit ast) {
-        pkg = Package.DEFAULT_PACKAGE;
+        pkg = MyPackage.DEFAULT_PACKAGE;
         importedClasses = new ImportingSymbolTable();
         importedMethods = new MethodSymbolTable();
         importedFields = new NamedSymbolTable<>();
 
         if (ast.hasPackage()) {
-            ast.getPackage().accept(this);
+            ast.getPackageStatement().accept(this);
+        } else {
+            System.err.println("WARNING - class without package");
         }
 
         for (BodyDeclaration decl : ast.getBodyDeclarations()) {
@@ -176,7 +149,6 @@ public class FileLevelVisitor extends EmptyVisitor {
             for (ImportStatement s : ast.getImports()) {
                 s.accept(this);
             }
-            pkg.getClassTable().enterScope();
         }
 
         if (pkg.getClassTable().get(filename) == null) {
@@ -190,7 +162,7 @@ public class FileLevelVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(EnumDeclaration ast) {
-        ast.getSymbol().setClassKind(MyClassSymbol.ClassKind.ENUM);
+        ast.getSymbol().setClassKind(ClassSymbol.ClassKind.ENUM);
         ast.getSymbol().setSuperClassForEnum();
     }
 
@@ -253,8 +225,8 @@ public class FileLevelVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(InterfaceDeclaration ast) {
-        ast.getSymbol().setClassKind(MyClassSymbol.ClassKind.INTERFACE);
-
+        ast.getSymbol().setClassKind(ClassSymbol.ClassKind.INTERFACE);
+        ast.getSymbol().addModifier(Modifier.ABSTRACT);
         if (ast.hasTypeParameters()) {
             for (TypeVariable var : makeTypeParameters(ast.getTypeParameters())) {
                 currentClass.addTypeParameter(var);
@@ -267,12 +239,12 @@ public class FileLevelVisitor extends EmptyVisitor {
      * @param ast the AST node being visited
      */
     public void visit(PackageStatement ast) {
-        List<Token> parts = ast.getIdentifiers();
+        List<Token> parts = ast.getName().getTokens();
         Token token = parts.get(0);
-        Package pkg = program.getPackage(token.getText());
-        Package sub;
+        MyPackage pkg = (MyPackage)program.getPackage(token.getText());
+        MyPackage sub;
         if (pkg == null) {
-            pkg = new Package(token.getText());
+            pkg = new MyPackage(token.getText());
             program.addPackage(pkg);
         }
 
@@ -286,6 +258,7 @@ public class FileLevelVisitor extends EmptyVisitor {
         }
 
         this.pkg = pkg;
+        currentUnit.setPackage(this.pkg);
     }
 
     /**
@@ -295,6 +268,7 @@ public class FileLevelVisitor extends EmptyVisitor {
     public void visit(TypeParameter ast) {
         String name = ast.getName();
         TypeVariable type = new TypeVariable(name);
+        type.setDeclaringSymbol(currentClass);
         ast.setType(type);
     }
 
@@ -305,5 +279,15 @@ public class FileLevelVisitor extends EmptyVisitor {
             ret[i] = params.get(i).getType();
         }
         return ret;
+    }
+
+    public void visitAll() {
+        for (CompilationUnit unit : program.getCompilationUnits()) {
+            currentUnit = unit;
+            filename = new File(unit.getFilename()).getName();
+            filename = filename.substring(0,
+                                          filename.length() - ".java".length());
+            unit.accept(this);
+        }
     }
 }

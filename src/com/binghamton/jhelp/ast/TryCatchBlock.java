@@ -84,7 +84,7 @@ public class TryCatchBlock extends Statement {
      * @return true iff this statement has any resources
      */
     public boolean hasResources() {
-        return numResources() > 0;
+        return !resources.isEmpty();
     }
 
     /**
@@ -117,7 +117,7 @@ public class TryCatchBlock extends Statement {
      * @return true iff this statement has any catch blocks
      */
     public boolean hasCatches() {
-        return catches.size() > 0;
+        return !catches.isEmpty();
     }
 
     /**

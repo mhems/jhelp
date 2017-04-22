@@ -12,22 +12,48 @@ import java.util.StringJoiner;
 public class StringUtils {
 
     /**
+     * Default constructor
+     */
+    private StringUtils() {
+        // prevent public instantiation
+    }
+
+    /**
      * A utility method allowing any Collection's elements to be represented by
      * their toString, interspersed with a delimiting String
      * @param <T> the type of the Collection's elements
      * @param delimiter the String to delimit the Collection's elements with
-     * @param iterable the Collection of Objects to join
+     * @param iterable the Iterable over the Objects to join
      * @return a String holding each element in `iterable`'s toString, delimited
      * by `delimiter`
      */
-    public static <T> String join(String delimiter, Collection<T> iterable) {
+    public static <T> String join(String delimiter, Iterable<T> iterable) {
         return join(delimiter, iterable, e -> e.toString());
     }
 
+    /**
+     * A utility method allowing any array's elements to be represented by
+     * their toString, interspersed with a delimiting String
+     * @param <T> the type of the array's elements
+     * @param delimiter the String to delimit the Collection's elements with
+     * @param iterable the array holding the Objects to join
+     * @return a String holding each element in `iterable`'s toString, delimited
+     * by `delimiter`
+     */
     public static <T> String join(String delimiter, T[] iterable) {
         return join(delimiter, iterable, e -> e.toString());
     }
 
+    /**
+     * A utility method allowing any array's elements to be mapped to Strings,
+     * interspersed with a delimiting String
+     * @param <T> the type of the Collection's elements
+     * @param delimiter the String to delimit the Collection's elements with
+     * @param iterable the array holding the Objects to join
+     * @param toString a Function taking a T and returning it as a String
+     * @return a String holding each element in `iterable`'s as a String,
+     * delimited by `delimiter`
+     */
     public static <T> String join(String delimiter,
                                   T[] iterable,
                                   Function<T, String> toString) {
@@ -43,13 +69,13 @@ public class StringUtils {
      * Strings and then interspersed with a delimiting String
      * @param <T> the type of the Collection's elements
      * @param delimiter the String to delimit the Collection's elements with
-     * @param iterable the Collection of Objects to join
+     * @param iterable the Iterable over the Objects to join
      * @param toString a Function taking a T and returning it as a String
      * @return a String holding each element in `iterable` as a String,
      * delimited by `delimiter`
      */
     public static <T> String join(String delimiter,
-                                  Collection<T> iterable,
+                                  Iterable<T> iterable,
                                   Function<T, String> toString) {
         List<String> strings = new ArrayList<>();
         for (T e : iterable) {

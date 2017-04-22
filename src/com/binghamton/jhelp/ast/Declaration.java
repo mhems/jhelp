@@ -12,10 +12,10 @@ import com.binghamton.jhelp.Symbol;
  * Abstract base class for all Java declarations
  */
 public abstract class Declaration extends Statement {
-    protected Token name;
-    protected Modifiers modifiers = Modifiers.NO_MODIFIERS;
-    protected Annotation[] annotations = {};
     protected Symbol sym;
+    protected Token name;
+    protected Modifiers modifiers = new Modifiers();
+    protected Annotation[] annotations = {};
 
     /**
      * Construct an empty declaration
@@ -60,14 +60,18 @@ public abstract class Declaration extends Statement {
         this.annotations = annotations.toArray(this.annotations);
     }
 
+    /**
+     * Gets the Symbol this Declaration declares
+     * @return the Symbol this Declaration declares
+     */
     public abstract Symbol getSymbol();
 
+    /**
+     * Sets the Symbol this Declaration declares
+     * @param sym the Symbol this Declaration declares
+     */
     public void setSymbol(Symbol sym) {
         this.sym = sym;
-    }
-
-    public boolean isAnonymous() {
-        return name == null;
     }
 
     /**
@@ -94,6 +98,10 @@ public abstract class Declaration extends Statement {
         return modifiers;
     }
 
+    /**
+     * Gets the Annotations of this Declaration
+     * @return the Annotations of this Declaration
+     */
     public Annotation[] getAnnotations() {
         return annotations;
     }

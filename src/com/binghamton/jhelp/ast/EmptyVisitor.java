@@ -120,6 +120,12 @@ public abstract class EmptyVisitor implements ASTVisitor {
     public void visit(ClassDeclaration ast) { }
 
     /**
+     * Visit a ClassLiteralExpression node
+     * @param ast the AST node being visited
+     */
+    public void visit(ClassLiteralExpression ast) { }
+
+    /**
      * Visit a CompilationUnit node
      * @param ast the AST node being visited
      */
@@ -186,12 +192,6 @@ public abstract class EmptyVisitor implements ASTVisitor {
     public void visit(ForStatement ast) { }
 
     /**
-     * Visit a IdentifierExpression node
-     * @param ast the AST node being visited
-     */
-    public void visit(IdentifierExpression ast) { }
-
-    /**
      * Visit a IfElseStatement node
      * @param ast the AST node being visited
      */
@@ -222,12 +222,6 @@ public abstract class EmptyVisitor implements ASTVisitor {
     public void visit(JumpStatement ast) { }
 
     /**
-     * Visit a KeywordExpression node
-     * @param ast the AST node being visited
-     */
-    public void visit(KeywordExpression ast) { }
-
-    /**
      * Visit a LabelStatement node
      * @param ast the AST node being visited
      */
@@ -244,6 +238,12 @@ public abstract class EmptyVisitor implements ASTVisitor {
      * @param ast the AST node being visited
      */
     public void visit(LiteralExpression ast) { }
+
+    /**
+     * Visit a LocalClassDeclaration node
+     * @param ast the AST node being visited
+     */
+    public void visit(LocalClassDeclaration ast) { }
 
     /**
      * Visit a LocalVariableStatement node
@@ -264,6 +264,12 @@ public abstract class EmptyVisitor implements ASTVisitor {
     public void visit(MethodReferenceExpression ast) { }
 
     /**
+     * Visit a NameExpression node
+     * @param ast the AST node being visited
+     */
+    public void visit(NameExpression ast) { }
+
+    /**
      * Visit a NilBlock node
      * @param ast the AST node being visited
      */
@@ -280,6 +286,12 @@ public abstract class EmptyVisitor implements ASTVisitor {
      * @param ast the AST node being visited
      */
     public void visit(PackageStatement ast) { }
+
+    /**
+     * Visit a ParamExpression node
+     * @param ast the AST node being visited
+     */
+    public void visit(ParamExpression ast) { }
 
     /**
      * Visit a ReturnStatement node
@@ -328,12 +340,6 @@ public abstract class EmptyVisitor implements ASTVisitor {
      * @param ast the AST node being visited
      */
     public void visit(TypeArgument ast) { }
-
-    /**
-     * Visit a TypeExpression node
-     * @param ast the AST node being visited
-     */
-    public void visit(TypeExpression ast) { }
 
     /**
      * Visit a TypeParameter node

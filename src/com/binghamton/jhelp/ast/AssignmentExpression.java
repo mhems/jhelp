@@ -1,23 +1,21 @@
 package com.binghamton.jhelp.ast;
 
-import org.antlr.v4.runtime.Token;
-
 /**
  * A class representing a Java assignment expression
  */
 public class AssignmentExpression extends Expression {
-    private Expression lhs;
-    private Expression rhs;
-    private AssignmentOperator op;
+    private final Expression lhs;
+    private final Expression rhs;
+    private final BinaryOperator op;
 
     /**
-     * Construct a new assignment expression
+     * Construct a new compound assignment expression
      * @param lhs the l-value (destination) of the assignment
-     * @param op the assignment operation being performed
+     * @param op the binary operation being performed
      * @param rhs the r-value (source) of the assignment
      */
     public AssignmentExpression(Expression lhs,
-                                AssignmentOperator op,
+                                BinaryOperator op,
                                 Expression rhs) {
         super(lhs.getFirstToken(), rhs.getLastToken());
         this.lhs = lhs;
@@ -37,7 +35,7 @@ public class AssignmentExpression extends Expression {
      * Gets the operation being executed
      * @return the operation being executed
      */
-    public AssignmentOperator getOperator() {
+    public BinaryOperator getOperator() {
         return op;
     }
 
@@ -47,6 +45,14 @@ public class AssignmentExpression extends Expression {
      */
     public Expression getRHS() {
         return rhs;
+    }
+
+    /**
+     * Determines if this assignment is simple
+     * @return true iff this assignment is simple
+     */
+    public boolean isSimple() {
+        return op == null;
     }
 
     /**

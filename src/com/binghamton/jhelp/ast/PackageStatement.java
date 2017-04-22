@@ -9,21 +9,21 @@ import org.antlr.v4.runtime.Token;
  */
 public class PackageStatement extends Statement {
     private Annotation[] annotations = {};
-    private List<Token> ids;
+    private final NameExpression name;
 
     /**
      * Construct a new package statement
-     * @param ids a list of package identifiers
+     * @param name the name of this package
      * @param keyword the package keyword
      * @param last the terminating semi-colon Token
      * @param annotations list of package annotations, if any
      */
-    public PackageStatement(List<Token> ids,
+    public PackageStatement(NameExpression name,
                             Token keyword,
                             Token last,
                             List<Annotation> annotations) {
         super(ASTNode.getFirstToken(keyword, annotations), last);
-        this.ids = ids;
+        this.name = name;
         this.annotations = annotations.toArray(this.annotations);
     }
 
@@ -36,20 +36,11 @@ public class PackageStatement extends Statement {
     }
 
     /**
-     * Gets the elements that comprise this package declaration
-     * @return the elements that comprise this package declaration
-     */
-    public List<Token> getIdentifiers() {
-        return ids;
-    }
-
-    /**
      * Gets the period-separated name of the declared package
      * @return the period-separated name of the declared package
      */
-    public String getName() {
-        String[] names = ids.stream().map(t -> t.getText()).toArray(i -> new String[i]);
-        return String.join(".", names);
+    public NameExpression getName() {
+        return name;
     }
 
     /**

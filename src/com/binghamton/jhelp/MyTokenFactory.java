@@ -6,13 +6,18 @@ import org.antlr.v4.runtime.TokenFactory;
 import org.antlr.v4.runtime.TokenSource;
 import org.antlr.v4.runtime.misc.Pair;
 
-
+/**
+ * A TokenFactory that produces MyTokens
+ */
 public class MyTokenFactory implements TokenFactory<MyToken> {
-    private CharStream input;
-    private CommonTokenStream stream;
+    private final CommonTokenStream stream;
 
+    /**
+     * Constructs a new factory for a given TokenStream
+     * @param input the input stream the Tokens are made from
+     * @param stream the TokenStream that produces these Tokens
+     */
     public MyTokenFactory(CharStream input, CommonTokenStream stream) {
-        this.input = input;
         this.stream = stream;
     }
 

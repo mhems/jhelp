@@ -1,6 +1,5 @@
 package com.binghamton.jhelp.ast;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.antlr.v4.runtime.Token;
@@ -10,7 +9,7 @@ import org.antlr.v4.runtime.Token;
  * inner class.
  */
 public class InstantiationExpression extends CallExpression {
-    private ConcreteBodyDeclaration classBody = new ClassDeclaration();
+    private final ClassDeclaration classBody = new ClassDeclaration();
 
     /**
      * Construct an instantiation expression
@@ -33,14 +32,14 @@ public class InstantiationExpression extends CallExpression {
      * @return true iff this instantiation has an anonymous class
      */
     public boolean hasAnonymousClass() {
-        return classBody != null;
+        return !classBody.isEmpty();
     }
 
     /**
      * Gets this instantiation's anonymous class, if any
      * @return this instantiation's anonymous class, if any
      */
-    public ConcreteBodyDeclaration getAnonymousClass() {
+    public ClassDeclaration getAnonymousClass() {
         return classBody;
     }
 

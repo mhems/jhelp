@@ -63,7 +63,7 @@ public class InterfaceDeclaration extends AbstractBodyDeclaration {
      * @return true iff this interface has type parameters
      */
     public boolean hasTypeParameters() {
-        return typeParams.size() > 0;
+        return !typeParams.isEmpty();
     }
 
     /**
@@ -71,7 +71,7 @@ public class InterfaceDeclaration extends AbstractBodyDeclaration {
      * @return true iff this declaration implements any interfaces
      */
     public boolean hasSuperInterfaces() {
-        return implementees.size() > 0;
+        return !implementees.isEmpty();
     }
 
     /**
