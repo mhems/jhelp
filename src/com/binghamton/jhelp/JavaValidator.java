@@ -49,7 +49,7 @@ public class JavaValidator implements Validator {
         List<JHelpError> errors = Validator.buildErrors();
         Program program = new Program();
         try {
-            System.out.println("Compiling " + files.length + " files");
+            System.out.println("Compiling " + files.length + " files...");
             for (File file : files) {
                 input = new ANTLRFileStream(file.getAbsolutePath());
                 lexer = new Java8Lexer(input);

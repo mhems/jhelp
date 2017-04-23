@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.binghamton.jhelp.error.JHelpError;
-import com.binghamton.jhelp.util.ColorStringBuffer;
+import com.binghamton.jhelp.util.ColorStringBuilder;
 
 /**
  * A class responsible for validating input and tracking errors.
@@ -55,14 +55,30 @@ public class JHelpRunner {
      * @return the number of errors reported
      */
     public int report() {
+        ColorStringBuilder sb = new ColorStringBuilder();
         int num = 1;
+        sb.append("*** ");
+        if (errors.isEmpty()) {
+            sb.append("NO ERRORS DETECTED",
+                      ColorStringBuilder.Color.GREEN,
+                      null);
+        } else {
+            sb.setForegroundColor(ColorStringBuilder.Color.RED);
+            sb.append("" + errors.size(), ColorStringBuilder.Format.BOLD);
+            sb.append(" ERRORS DETECTED");
+            sb.resetForegroundColor();
+        }
+        sb.append(" ***");
+        System.out.println(sb);
         for (JHelpError error : errors) {
-            ColorStringBuffer sb = new ColorStringBuffer();
-            sb.append(num + ".)", ColorStringBuffer.Color.WHITE, null);
+            sb = new ColorStringBuilder();
+            sb.append(num + ".)", ColorStringBuilder.Color.WHITE, null);
             sb.append(" ");
-            sb.append(error.getClass().getSimpleName(), ColorStringBuffer.Color.GREEN, null);
+            sb.append(error.getClass().getSimpleName(),
+                      ColorStringBuilder.Color.GREEN,
+                      null);
             sb.append(": ");
-            sb.append(error.getMessage(), ColorStringBuffer.Color.RED, null);
+            sb.append(error.getMessage(), ColorStringBuilder.Color.RED, null);
             System.out.println(sb);
             ++num;
         }

@@ -1,10 +1,10 @@
 package com.binghamton.jhelp.util;
 
 /**
- * Class composing a `StringBuffer` with the additional API of basic terminal
+ * Class composing a `StringBuilder` with the additional API of basic terminal
  * formatting and coloring via terminal codes.
  */
-public class ColorStringBuffer {
+public class ColorStringBuilder {
 
     /**
      * An enum enumerating available formats
@@ -43,33 +43,33 @@ public class ColorStringBuffer {
 
     private final static char ESCAPE_CHAR = 27;
 
-    private StringBuffer buffer;
+    private StringBuilder builder;
     private boolean allow;
 
     /**
-     * Construct a new ColorStringBuffer object
+     * Construct a new ColorStringBuilder object
      */
-    public ColorStringBuffer() {
+    public ColorStringBuilder() {
         this(true);
     }
 
     /**
-     * Construct a new ColorStringBuffer object
+     * Construct a new ColorStringBuilder object
      * @param allow true iff formatting allowed, false iff formatting prevented
      */
-    public ColorStringBuffer(boolean allow) {
+    public ColorStringBuilder(boolean allow) {
         this.allow = allow;
-        buffer = new StringBuffer();
+        builder = new StringBuilder();
     }
 
     /**
-     * Internal subroutine to append formatting code to internal buffer, if
+     * Internal subroutine to append formatting code to internal builder, if
      * allowed
      * @param code the format code to append
      */
     private void appendCode(int code) {
         if (allow) {
-            buffer.append(String.format("%c[%dm", ESCAPE_CHAR, code));
+            builder.append(String.format("%c[%dm", ESCAPE_CHAR, code));
         }
     }
 
@@ -138,25 +138,25 @@ public class ColorStringBuffer {
     }
 
     /**
-     * Return formatted buffer contents
-     * @return the formatted buffer contents
+     * Return formatted builder contents
+     * @return the formatted builder contents
      */
     @Override
     public String toString() {
         clearAll();
-        return buffer.toString();
+        return builder.toString();
     }
 
     /**
-     * Append text to the buffer
+     * Append text to the builder
      * @param string the text to append
      */
     public void append(String string) {
-        buffer.append(string);
+        builder.append(string);
     }
 
     /**
-     * Appends formatted text to the buffer
+     * Appends formatted text to the builder
      * @param string the String to format and append
      * @param format the format to format the String with.
      *               Ignored if null.
@@ -166,7 +166,7 @@ public class ColorStringBuffer {
     }
 
     /**
-     * Appends colored text to the buffer
+     * Appends colored text to the builder
      * @param string the String to format and append
      * @param foregroundColor the color to make the foreground of the String.
      *                        Ignored if null.
@@ -180,7 +180,7 @@ public class ColorStringBuffer {
     }
 
     /**
-     * Appends colored and/or formatted text to the buffer
+     * Appends colored and/or formatted text to the builder
      * @param string the String to format and append
      * @param foregroundColor the color to make the foreground of the String.
      *                        Ignored if null.
