@@ -36,12 +36,21 @@ public class BalancedValidator implements Validator {
         PAIRS.put("]", "[");
     }
 
+    private File[] files;
+
+    /**
+     * Construct a new BalancedValidator over a set of Files
+     * @param files the Files to validate for balanced punctuation
+     */
+    public BalancedValidator(File[] files) {
+        this.files = files;
+    }
+
     /**
      * Validates the files' contents by checking for unbalanced braces
-     * @param files the files to validate
      * @return a List of JHelpErrors, if any, that occured during validation
      */
-    public List<JHelpError> validate(File[] files) {
+    public List<JHelpError> validate() {
         Lexer lexer;
         CommonTokenStream stream;
         List<JHelpError> errors = Validator.buildErrors();

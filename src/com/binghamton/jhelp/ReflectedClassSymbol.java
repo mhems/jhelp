@@ -31,12 +31,13 @@ public final class ReflectedClassSymbol extends ClassSymbol {
         this.cls = cls;
         boxed = cls.isPrimitive();
         pkg = new ReflectedPackage(cls.getPackage());
-        if (cls.isInterface()) {
-            classKind = ClassKind.INTERFACE;
-        } else if (cls.isEnum()) {
+
+        if (cls.isEnum()) {
             classKind = ClassKind.ENUM;
         } else if (cls.isAnnotation()) {
             classKind = ClassKind.ANNOTATION;
+        } else if (cls.isInterface()) {
+            classKind = ClassKind.INTERFACE;
         } else {
             classKind = ClassKind.CLASS;
         }
@@ -53,13 +54,23 @@ public final class ReflectedClassSymbol extends ClassSymbol {
         }
     }
 
+    public static ReflectedClassSymbol make(Class<?> cls) {
+        return new ReflectedClassSymbol(cls);
+    }
+
     /**
      * Gets the ClassSymbol reflecting a pre-compiled class
      * @param cls the pre-compiled class instance
      * @return the ClassSymbol reflecting the pre-compiled class
      */
     public static ReflectedClassSymbol get(Class<?> cls) {
-        return new ReflectedClassSymbol(cls);
+        ReflectedClassSymbol ret = null;
+        try {
+            ret = ImportManager.getOrImport(cls.getName());
+        } catch(ClassNotFoundException e) {
+            // class will always be found as it was passed in
+        }
+        return ret;
     }
 
     /**
@@ -68,17 +79,13 @@ public final class ReflectedClassSymbol extends ClassSymbol {
      * @return the ClassSymbol reflecting the pre-compiled class
      */
     public static ReflectedClassSymbol get(String name) {
-        ReflectedClassSymbol sym = null;
-        Class<?> cls = null;
+        ReflectedClassSymbol ret = null;
         try {
-            cls = Class.forName(name);
-        } catch (ClassNotFoundException e) {
+            ret = ImportManager.getOrImport(name);
+        } catch(ClassNotFoundException e) {
             System.err.println("could not retrieve class " + name);
         }
-        if (cls != null) {
-            sym = get(cls);
-        }
-        return sym;
+        return ret;
     }
 
     /**
@@ -125,6 +132,7 @@ public final class ReflectedClassSymbol extends ClassSymbol {
     protected ReflectedClassSymbol adapt(Map<TypeVariable, Type> map,
                                       boolean first) {
         ReflectedClassSymbol ret = new ReflectedClassSymbol(this);
+        ret.init();
         adapt(ret, map, first);
         return ret;
     }

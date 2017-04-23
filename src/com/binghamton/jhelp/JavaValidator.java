@@ -25,12 +25,21 @@ import com.binghamton.jhelp.error.JHelpError;
  */
 public class JavaValidator implements Validator {
 
+    private File[] files;
+
+    /*
+     * Constructs a new JavaValidator
+     * @param files the names of the files to validate
+     */
+    public JavaValidator(File[] files) {
+        this.files = files;
+    }
+
     /**
      * Validates the files' contents for syntactic and semantic errors
-     * @param files the names of the files to validate
      * @return a List of JHelpErrors, if any, that occured during validation
      */
-    public List<JHelpError> validate(File[] files) {
+    public List<JHelpError> validate() {
         ANTLRFileStream input;
         Lexer lexer;
         MyTokenFactory factory;
@@ -38,8 +47,9 @@ public class JavaValidator implements Validator {
         Java8Parser parser;
         CompilationUnit cu;
         List<JHelpError> errors = Validator.buildErrors();
+        Program program = new Program();
         try {
-            Program program = new Program();
+            System.out.println("Compiling " + files.length + " files");
             for (File file : files) {
                 input = new ANTLRFileStream(file.getAbsolutePath());
                 lexer = new Java8Lexer(input);
@@ -55,12 +65,27 @@ public class JavaValidator implements Validator {
                     program.addCompilationUnit(cu);
                 }
             }
+        } catch (IOException e) {
+            errors.add(new ExceptionError(e));
+        }
+
+            if (!errors.isEmpty()) {
+                // return errors;
+            }
 
             // System.out.println("---------- FILE ----------");
             new FileLevelVisitor(program).visitAll();
 
+            if (program.hasFatalErrors()) {
+                return program.getErrors();
+            }
+
             // System.out.println("---------- DECLARATION ----------");
             new DeclarationLevelVisitor(program).visitAll();
+
+            if (program.hasFatalErrors()) {
+                return program.getErrors();
+            }
 
             program.topologicalSort();
 
@@ -68,12 +93,13 @@ public class JavaValidator implements Validator {
             BodyLevelVisitor bodyV = new BodyLevelVisitor(program);
             bodyV.visitInOrder();
 
+            if (program.hasFatalErrors()) {
+                return program.getErrors();
+            }
+
             // System.out.println("---------- CODE ----------");
             new CodeLevelVisitor(program, bodyV).visitAll();
 
-        } catch (IOException e) {
-            errors.add(new ExceptionError(e));
-        }
-        return errors;
+            return program.getErrors();
     }
 }

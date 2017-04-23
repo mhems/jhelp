@@ -210,6 +210,7 @@ public class ArrayType extends ReferenceType {
 	/**
 	 * Initializes the members of this ClassSymbol.
 	 * Must be called once per instance before any other operations.
+     * Automatically called by all constructors.
 	 */
         private void init() {
             interfaces.put(fetch("java.io.Serializable"));

@@ -50,7 +50,7 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         if (lType != null) {
             Type type = lType.getClassSymbol().getType(rName);
             if (type == null) {
-                System.err.println("unknown type " + ast.getText());
+                addError("unknown type " + ast.getText());
             } else {
                 ast.setType(type);
             }
@@ -89,6 +89,7 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         for (Dimension dim : ast.getDimensions()) {
             arrayType = new ArrayType(arrayType,
                                       makeAnnotations(dim.getAnnotations()));
+            arrayType.setProgram(program);
         }
         ast.setType(arrayType);
     }
@@ -102,7 +103,7 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         ClassSymbol enclosingSym = currentClass.getDeclaringClass();
         while (enclosingSym != null) {
             if (enclosingSym.getName().equals(currentClass.getName())) {
-                System.err.println("inner body cannot have same name as one of its enclosing classes");
+                addError("inner body cannot have same name as one of its enclosing classes");
                 break;
             }
             enclosingSym = enclosingSym.getDeclaringClass();
@@ -117,7 +118,7 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
 
             if (currentClass.hasModifier(Modifier.PROTECTED) ||
                 currentClass.hasModifier(Modifier.PRIVATE)) {
-                System.err.println("a member type in an interface cannot be protected or private");
+                addError("a member type in an interface cannot be protected or private");
             }
         }
 
@@ -125,7 +126,6 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         for (BodyDeclaration body : ast.getInnerBodies()) {
             body.accept(this);
             currentClass = tmp;
-            // System.out.println(body.getSymbol().repr());
         }
     }
 
@@ -138,11 +138,11 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
             ast.getSuperClass().accept(this);
             ClassSymbol superCls = ast.getSuperClass().getType().getClassSymbol();
             if (superCls.equals(fetch("Enum"))) {
-                System.err.println("cannot directly subclass java.lang.Enum");
+                addError("cannot directly subclass java.lang.Enum");
             } else if (superCls.isInterfaceLike()) {
-                System.err.println("cannot subclass interface or annotation");
+                addError("cannot subclass interface or annotation");
             } else if (superCls.hasModifier(Modifier.FINAL)) {
-                System.err.println("cannot subclass a final class or simple enum");
+                addError("cannot subclass a final class or simple enum");
             } else {
                 currentClass.setSuperClass(ast.getSuperClass().getType());
             }
@@ -161,7 +161,6 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
 
         for (BodyDeclaration decl : ast.getBodyDeclarations()) {
             decl.accept(this);
-            // System.out.println(decl.getSymbol().repr());
         }
     }
 
@@ -194,7 +193,7 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
 
         if (currentClass.hasModifier(Modifier.FINAL) ||
             currentClass.hasModifier(Modifier.ABSTRACT)) {
-            System.err.println("an enum cannot be final nor abstract");
+            addError("an enum cannot be final nor abstract");
         }
 
         if (currentClass.isInner() &&
@@ -235,11 +234,11 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         Kind kind = ast.getKind();
         Type type;
         NameExpression qual = ast.getQualifyingName();
-        // System.out.println("decl name: " + ast.getText() + " (" + ast.getKind() + ")");
         if (kind == Kind.PACKAGE) {
             Package pkg = program.getPackage(name);
             if (pkg != null) {
                 ast.setPackage(pkg);
+            } else if (!ast.isQualified()) {
             }
             // cannot throw error yet, must wait and hoist from Access
         } else {
@@ -260,8 +259,8 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
                 type.setAnnotations(anns);
                 ast.setType(type);
             } else {
-                if (kind == Kind.TYPE) {
-                    System.err.println("unknown type " + name);
+                if (kind == Kind.TYPE || !ast.isQualified()) {
+                    addError("unknown type " + name);
                 } else {
                     ast.setKind(Kind.PACKAGE);
                 }
@@ -299,18 +298,20 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
                         ++pos;
                     }
                     ast.setType(new ParameterizedType(sym, tArgs));
+                    ast.getType().setProgram(program);
                 } else {
                     Type iType = ast.getInferredType();
                     if (iType != null) {
                         ast.setType(new ParameterizedType(sym,
                                                           ((ParameterizedType)iType).getParameters()));
+                        ast.getType().setProgram(program);
                     }
                 }
             } else {
-                System.err.println("cannot parameterize a non-generic class");
+                addError("cannot parameterize a non-generic class");
             }
         } else {
-            System.err.println("only classes or interfaces may be parameterized");
+            addError("only classes or interfaces may be parameterized");
         }
     }
 
@@ -320,7 +321,7 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
      */
     public void visit(TypeArgument ast) {
         if (ast.isWildcard()) {
-            WildcardType type = new WildcardType();
+            WildcardType type;
             if (ast.hasExplicitBound()) {
                 ast.getBoundType().accept(this);
                 type = new WildcardType(ast.isUpperBounded(),
@@ -328,6 +329,7 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
             } else {
                 type = new WildcardType();
             }
+            type.setProgram(program);
             type.setAnnotations(makeAnnotations(ast.getAnnotations()));
             ast.setType(type);
         }
@@ -362,7 +364,7 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
             expr.accept(this);
             cur = expr.getType();
             if (cur.getClassSymbol().isClassLike()) {
-                System.err.println("cannot implement a class or enum");
+                addError("cannot implement a class or enum");
             } else {
                 currentClass.addInterface(cur);
             }

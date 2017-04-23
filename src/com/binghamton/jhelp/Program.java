@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 
 import com.binghamton.jhelp.ast.CompilationUnit;
+import com.binghamton.jhelp.error.SemanticError;
+import com.binghamton.jhelp.error.JHelpError;
 import com.binghamton.jhelp.util.DiGraph;
 import com.binghamton.jhelp.util.StringUtils;
 
@@ -15,6 +17,7 @@ public class Program {
     private final List<MyPackage> packages = new ArrayList<>();
     private final List<CompilationUnit> units = new ArrayList<>();
     private List<ClassSymbol> classes;
+    private List<JHelpError> errors = new ArrayList<>();
 
         {
             packages.add(MyPackage.DEFAULT_PACKAGE);
@@ -87,6 +90,22 @@ public class Program {
         return packages;
     }
 
+    public boolean hasErrors() {
+        return !errors.isEmpty();
+    }
+
+    public List<JHelpError> getErrors() {
+        return errors;
+    }
+
+    public void addError(JHelpError error) {
+        errors.add(error);
+    }
+
+    public boolean hasFatalErrors() {
+        return JHelpError.hasFatalErrors(errors);
+    }
+
     /**
      * Builds the String representation of this Program
      * @return the String representation of this Program
@@ -155,7 +174,7 @@ public class Program {
         constructGraph(graph);
         List<ClassSymbol> ret = graph.topologicalSort();
         if (ret == null) {
-            System.err.println("cyclic inheritance hierarchy");
+            addError(new SemanticError("cyclic inheritance hierarchy"));
         } else {
             Collections.reverse(ret);
             classes = ret;

@@ -7,6 +7,7 @@ import org.antlr.v4.runtime.Token;
 import com.binghamton.jhelp.antlr.MyToken;
 import com.binghamton.jhelp.ast.ASTVisitor;
 import com.binghamton.jhelp.ast.BodyDeclaration;
+import com.binghamton.jhelp.error.SemanticError;
 
 import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
 
@@ -98,7 +99,7 @@ public class MyClassSymbol extends ClassSymbol {
      */
     public boolean addInterface(Type sym) {
         if (!interfaces.put(sym)) {
-            System.err.println("class cannot implement same interface twice");
+            addError(new SemanticError("class cannot implement same interface twice"));
             return false;
         }
         return true;
@@ -125,28 +126,28 @@ public class MyClassSymbol extends ClassSymbol {
         if (parentMethod != null &&
             parentMethod.getAccessLevel() != AccessLevel.PRIVATE) {
             if (parentMethod.isFinal()) {
-                System.err.println("cannot override a final method");
+                addError(new SemanticError("cannot override a final method"));
                 good = false;
             } else if (parentMethod.isStatic() && !sym.isStatic()) {
-                System.err.println("an instance method cannot override a static method");
+                addError(new SemanticError("an instance method cannot override a static method"));
                 good = false;
             } else if (sym.isStatic() && !parentMethod.isStatic()) {
-                System.err.println("a static method cannot hide an instance method");
+                addError(new SemanticError("a static method cannot hide an instance method"));
                 good = false;
             }
             if (sym.hasCheckedExceptions() && !parentMethod.hasExceptions()) {
-                System.err.println("cannot override a method without any exceptions with a method that throws a checked exception");
+                addError(new SemanticError("cannot override a method without any exceptions with a method that throws a checked exception"));
                 good = false;
             }
             if (sym.getAccessLevel().compareTo(parentMethod.getAccessLevel()) > 0) {
-                System.err.println("cannot override a method with a method that has more restrictive access than the method it is overriding");
+                addError(new SemanticError("cannot override a method with a method that has more restrictive access than the method it is overriding"));
             }
         } else if (sym.hasOverrideAnnotation()){
-            System.err.println("method is not being overridden!");
+            addError(new SemanticError("method is not being overridden!"));
         }
         if (good) {
             if (!methods.put(sym)) {
-                System.err.println("class cannot declare same method twice");
+                addError(new SemanticError("class cannot declare same method twice"));
                 return false;
             }
             return true;
@@ -161,7 +162,7 @@ public class MyClassSymbol extends ClassSymbol {
      */
     public boolean addConstructor(MethodSymbol sym) {
         if (!ctors.put(sym)) {
-            System.err.println("class cannot declare same constructor twice");
+            addError(new SemanticError("class cannot declare same constructor twice"));
             return false;
         }
         return true;
@@ -174,7 +175,7 @@ public class MyClassSymbol extends ClassSymbol {
      */
     public boolean addField(VariableSymbol sym) {
         if (!fields.put(sym)) {
-            System.err.println("class cannot declare same field twice");
+            addError(new SemanticError("class cannot declare same field twice"));
             return false;
         }
         return true;
@@ -187,7 +188,7 @@ public class MyClassSymbol extends ClassSymbol {
      */
     public boolean addTypeParameter(TypeVariable sym) {
         if (!params.put(sym)) {
-            System.err.println("class cannot declare same type variable twice");
+            addError(new SemanticError("class cannot declare same type variable twice"));
             return false;
         }
         paramArr = params.toArray(new TypeVariable[params.size()]);
@@ -202,7 +203,7 @@ public class MyClassSymbol extends ClassSymbol {
     public boolean addInnerClass(MyClassSymbol sym) {
         sym.level = Level.INNER;
         if (!innerClasses.put(sym)) {
-            System.err.println("class cannot declare same inner class twice");
+            addError(new SemanticError("class cannot declare same inner class twice"));
             return false;
         }
         sym.declarer = this;
@@ -217,7 +218,7 @@ public class MyClassSymbol extends ClassSymbol {
     public boolean addMemberType(MyClassSymbol sym) {
         sym.level = Level.MEMBER;
         if (!memberTypes.put(sym)) {
-            System.err.println("class cannot declare same member class twice");
+            addError(new SemanticError("class cannot declare same member class twice"));
             return false;
         }
         sym.declarer = this;
@@ -312,7 +313,6 @@ public class MyClassSymbol extends ClassSymbol {
     @Override
     public void visit(ASTVisitor visitor) {
         AST.accept(visitor);
-        // System.out.println(repr());
     }
 
     /**

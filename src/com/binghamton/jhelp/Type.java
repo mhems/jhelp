@@ -54,8 +54,8 @@ public abstract class Type extends Symbol {
         return null;
     }
 
-    public ParameterizedType captureConvert() {
-        return null;
+    public Type captureConvert() {
+        return this;
     }
 
     public boolean canWidenTo(Type type) {

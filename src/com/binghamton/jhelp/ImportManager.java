@@ -46,7 +46,7 @@ public class ImportManager {
      */
     public static ReflectedClassSymbol getOrImport(String name) throws ClassNotFoundException {
         if (!isImported(name)) {
-            cache.put(name, ReflectedClassSymbol.get(Class.forName(name)));
+            cache.put(name, ReflectedClassSymbol.make(Class.forName(name)));
             cache.get(name).init();
         }
         return cache.get(name);

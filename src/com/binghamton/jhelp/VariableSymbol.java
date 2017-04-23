@@ -14,10 +14,13 @@ public class VariableSymbol extends Symbol {
             kind = SymbolKind.VARIABLE;
         }
 
-    public enum VariableKind {FIELD, LOCAL, PARAMETER};
+    /**
+     * An enum enumerating the kinds of variables that can occur
+     */
+    public enum VariableKind {FIELD, LOCAL};
 
     protected ClassSymbol declarer;
-    protected VariableKind varKind;
+    protected VariableKind varKind = VariableKind.LOCAL;
     protected Type type;
 
     /**
@@ -65,6 +68,14 @@ public class VariableSymbol extends Symbol {
      */
     public VariableKind getVariableKind() {
         return varKind;
+    }
+
+    /**
+     * Determines if this VariableSymbol is a field
+     * @return true iff this VariableSymbol is a field
+     */
+    public boolean isField() {
+        return varKind == VariableKind.FIELD;
     }
 
     @Override

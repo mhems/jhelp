@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.function.Function;
 
+import com.binghamton.jhelp.error.SemanticError;
+
 /**
  * A class encapsulating a symbol table over a Java compilation unit
  */
@@ -137,7 +139,7 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
     public boolean put(V symbol) {
         K key = valueToKey.apply(symbol);
         if (hasInCurrentScope(key)) {
-            System.err.println("table put failed (class " + symbol.getDeclaringClass().getName() + ") - " + symbol.getName() + " already exists in current scope");
+            symbol.addError(new SemanticError("table put failed (class " + symbol.getDeclaringClass().getName() + ") - " + symbol.getName() + " already exists in current scope"));
             return false;
         }
         table.peekFirst().put(key, symbol);
@@ -349,7 +351,7 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
                 member.getName().equals(memberName)) {
                 added = true;
                 if (!put(member)) {
-                    System.err.println("cannot import two members with same name");
+                    member.addError(new SemanticError("cannot import two members with same name"));
                     return false;
                 }
             }
@@ -365,7 +367,7 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
     public boolean importStaticMemberOnDemand(V[] members) {
         for (V member : members) {
             if (member.isStatic() && !put(member)) {
-                System.err.println("cannot import two members with same name");
+                member.addError(new SemanticError("cannot import two members with same name"));
                 return false;
             }
         }

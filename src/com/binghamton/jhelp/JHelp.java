@@ -9,7 +9,7 @@ public class JHelp {
      * Construct a new JHelp instance
      */
     private JHelp() {
-	// prevent public instantiation
+        // prevent public instantiation
     }
 
     /**
@@ -17,11 +17,13 @@ public class JHelp {
      * @param args user-provided command-line arguments
      */
     public static void main(String[] args) {
-        JHelpRunner runner = new JHelpRunner(args);
+        JHelpRunner runner = new JHelpRunner();
         runner.addValidator(new EnvironmentValidator());
-        runner.addValidator(new UsageValidator());
-        runner.addValidator(new BalancedValidator());
-        runner.addValidator(new JavaValidator());
+        UsageValidator uV = new UsageValidator(args);
+        runner.addValidator(uV);
+        runner.addValidator(new BalancedValidator(uV.getFiles()));
+        runner.addValidator(new JavaValidator(uV.getFiles()));
+        System.out.println("JHelp Version 0.3");
         System.exit(runner.run());
     }
 }

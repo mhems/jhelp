@@ -3,6 +3,7 @@ package com.binghamton.jhelp;
 import java.util.Arrays;
 import java.util.Map;
 
+import com.binghamton.jhelp.error.SemanticError;
 import com.binghamton.jhelp.util.StringUtils;
 
 /**
@@ -144,19 +145,19 @@ public class ParameterizedType extends ReferenceType {
                     for (int i = 0; i < clsVars.length; i++) {
                         for (Type bound : clsVars[i].getBounds()) {
                             if (!myArgs[i].isSubTypeOf(bound)) {
-                                System.err.println("invalid arg, not a subtype");
+                                addError(new SemanticError("invalid arg, not a subtype"));
                                 ret = false;
                             }
                         }
                     }
                 } else {
-                    System.err.println("class number of parameters does not match with number of arguments given");
+                    addError(new SemanticError("class number of parameters does not match with number of arguments given"));
                 }
             } else {
-                System.err.println("can only parameterize a generic class");
+                addError(new SemanticError("can only parameterize a generic class"));
             }
         } else {
-            System.err.println("can only parameterize a class");
+            addError(new SemanticError("can only parameterize a class"));
         }
         return ret;
     }

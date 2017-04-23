@@ -19,6 +19,9 @@ import com.binghamton.jhelp.ReflectedClassSymbol;
 import com.binghamton.jhelp.Symbol;
 import com.binghamton.jhelp.TypeVariable;
 import com.binghamton.jhelp.VariableSymbol;
+import com.binghamton.jhelp.error.JHelpError;
+import com.binghamton.jhelp.error.SemanticError;
+import com.binghamton.jhelp.error.StyleWarning;
 
 /**
  * The file (highest) level Visitor for visiting packages, imports, and
@@ -71,21 +74,22 @@ public class FileLevelVisitor extends EmptyVisitor {
      */
     public void visit(BodyDeclaration ast) {
         if (!Character.isUpperCase(ast.getName().getText().charAt(0))) {
-            System.err.printf("Body names should be capitalized, '%s' is not\n",
-                              ast.getName().getText());
+            addError("Body names should be capitalized, '%s' is not\n",
+                     ast.getName().getText());
         }
         if (ast.getName().getText().equals(filename) &&
             !ast.getModifiers().contains(Modifier.PUBLIC)) {
-            System.err.printf("Body '%s' in file '%s.java' should be declared public\n",
-                              ast.getName().getText(),
-                              filename);
+            addError("Body '%s' in file '%s.java' should be declared public\n",
+                     ast.getName().getText(),
+                     filename);
         }
 
         MyClassSymbol sym = new MyClassSymbol(ast.getName(), ast.getModifiers());
+        sym.setProgram(program);
 
         if (ast.isTop()) {
             if (!pkg.addClass(sym)) {
-                System.err.println("duplicate declaration of body");
+                addError("duplicate declaration of body");
             }
         } else {
             sym.setDeclaringClass(currentClass);
@@ -136,7 +140,7 @@ public class FileLevelVisitor extends EmptyVisitor {
         if (ast.hasPackage()) {
             ast.getPackageStatement().accept(this);
         } else {
-            System.err.println("WARNING - class without package");
+            addError(new StyleWarning("class without package"));
         }
 
         for (BodyDeclaration decl : ast.getBodyDeclarations()) {
@@ -152,8 +156,8 @@ public class FileLevelVisitor extends EmptyVisitor {
         }
 
         if (pkg.getClassTable().get(filename) == null) {
-            System.err.printf("file '%s.java' must declare a body with name of this file\n",
-                              filename);
+            addError("file '%s.java' must declare a body with name of this file\n",
+                     filename);
         }
     }
 
@@ -180,7 +184,7 @@ public class FileLevelVisitor extends EmptyVisitor {
             try {
                 cls = ImportManager.getOrImport(name);
             } catch(ClassNotFoundException e) {
-                System.err.println("static import must name existing class");
+                addError("static import must name existing class");
             }
             if (cls != null) {
                 ClassSymbol[] inners = cls.getInnerClasses();
@@ -195,7 +199,7 @@ public class FileLevelVisitor extends EmptyVisitor {
                     if (importedClasses.importStaticMember(memberName, inners)) {
                         added = true;
                         if (pkg.getClassTable().has(memberName)) {
-                            System.err.println("cannot import something with same name as class you've made");
+                            addError("cannot import something with same name as class you've made");
                         }
                     }
                     added |= importedMethods.importStaticMember(memberName,
@@ -203,7 +207,7 @@ public class FileLevelVisitor extends EmptyVisitor {
                     added |= importedFields.importStaticMember(memberName,
                                                                fields);
                     if (!added) {
-                        System.err.println(ast.getText() + " must import at least one member");
+                        addError(ast.getText() + " must import at least one member");
                     }
                 }
             }
@@ -212,7 +216,7 @@ public class FileLevelVisitor extends EmptyVisitor {
                 importedClasses.importTypesOnDemand(name);
             } else { // single type import
                 if (pkg.getClassTable().has(name)) {
-                    System.err.println("cannot import something with same name as class you've made");
+                    addError("cannot import something with same name as class you've made");
                 } else {
                     importedClasses.importType(name);
                 }
@@ -268,6 +272,7 @@ public class FileLevelVisitor extends EmptyVisitor {
     public void visit(TypeParameter ast) {
         String name = ast.getName();
         TypeVariable type = new TypeVariable(name);
+        type.setProgram(program);
         type.setDeclaringSymbol(currentClass);
         ast.setType(type);
     }
@@ -289,5 +294,17 @@ public class FileLevelVisitor extends EmptyVisitor {
                                           filename.length() - ".java".length());
             unit.accept(this);
         }
+    }
+
+    public void addError(String msg) {
+        program.addError(new SemanticError(msg));
+    }
+
+    public void addError(String msg, Object... args) {
+        program.addError(new SemanticError(msg, args));
+    }
+
+    public void addError(JHelpError error) {
+        program.addError(error);
     }
 }

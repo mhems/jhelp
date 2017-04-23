@@ -27,17 +27,7 @@ public interface Validator {
 
     /**
      * Validates the files on some criterion
-     * @param files the  the files to validate
      * @return a List of JHelpErrors, if any, that occured during validation
      */
-    List<JHelpError> validate(File[] files);
-
-    /**
-     * Signifies if any errors this Validator produces are fatal
-     * @return true iff any errors this Validator produces are fatal and should
-     * halt execution
-     */
-    default boolean isFatal() {
-        return true;
-    }
+    List<JHelpError> validate();
 }

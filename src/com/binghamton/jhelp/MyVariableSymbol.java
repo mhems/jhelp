@@ -38,6 +38,14 @@ public class MyVariableSymbol extends VariableSymbol {
     }
 
     /**
+     * Sets this variable's kind
+     * @param kind the kind of this variable
+     */
+    public void setKind(VariableKind kind) {
+        varKind = kind;
+    }
+
+    /**
      * Sets the class that declares this variable
      * @param sym the class that declares this variable
      */

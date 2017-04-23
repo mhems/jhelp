@@ -6,6 +6,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.GenericArrayType;
 
+import com.binghamton.jhelp.error.JHelpError;
+
 /**
  * A class representing the abstract notion of a Java symbol
  * Java symbols include classes, enums, interfaces, methods, and variables
@@ -22,6 +24,7 @@ public abstract class Symbol {
      */
     public static enum AccessLevel {PUBLIC, PROTECTED, PACKAGE_PRIVATE, PRIVATE};
 
+    protected Program program;
     protected SymbolKind kind;
     protected String name;
     protected AnnotationSymbol[] annotations = {};
@@ -248,6 +251,18 @@ public abstract class Symbol {
      */
     public abstract ClassSymbol getDeclaringClass();
 
+    public Program getProgram() {
+        return program;
+    }
+
+    public void setProgram(Program program) {
+        this.program = program;
+    }
+
+    public void addError(JHelpError error) {
+        program.addError(error);
+    }
+
     /**
      * Transforms reflected annotations into AnnotationSymbols
      * @param annotations the reflected annotations
@@ -330,7 +345,7 @@ public abstract class Symbol {
             } else if (cls.isArray()) {
                 ret = new ArrayType(fromType(cls.getComponentType()));
             } else {
-                ret = ReflectedClassSymbol.get((Class<?>)type);
+                ret = ReflectedClassSymbol.get(cls);
             }
         } else {
             throw new IllegalArgumentException();

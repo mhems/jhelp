@@ -15,12 +15,13 @@ public class EnvironmentValidator implements Validator {
         //     java.home, java.class.path, java.library.path
         //     user.home, user.name, user.dir
 
+    private static final boolean QUIET = true;
+
     /**
      * Validates the user's environment
-     * @param files unused
      * @return a List of JHelpErrors, if any, that occured during validation
      */
-    public List<JHelpError> validate(File[] files) {
+    public List<JHelpError> validate() {
         List<JHelpError> errors = Validator.buildErrors();
 
         String version = System.getProperty("java.specification.version");
@@ -29,22 +30,19 @@ public class EnvironmentValidator implements Validator {
         final int minor = Integer.parseInt(versionNums[1]);
 
         if (minor < 8) {
-            errors.add(new InvalidUsageError(){
-                    @Override
-                    public String getMessage() {
-                        return String.format("Java 1.8 or higher must be used, Java %d.%d was detected",
+            errors.add(new InvalidUsageError("Java 1.8 or higher must be used, Java %d.%d was detected",
                                              major,
-                                             minor);
-                    }
-                });
+                                             minor));
         }
 
-        System.out.println("Detected Java " + System.getProperty("java.version"));
-        System.out.print("Detected OS is " +
-                         System.getProperty("os.name") +
-                         " " +
-                         System.getProperty("os.version") +
-                         "\n");
+        if (!QUIET) {
+            System.out.println("Detected Java " + System.getProperty("java.version"));
+            System.out.print("Detected OS is " +
+                             System.getProperty("os.name") +
+                             " " +
+                             System.getProperty("os.version") +
+                             "\n");
+        }
         return errors;
     }
 }
