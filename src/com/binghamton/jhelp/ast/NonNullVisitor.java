@@ -119,8 +119,8 @@ public class NonNullVisitor extends EmptyVisitor {
      */
     public void visit(ASTNode ast) {
         if (!ast.isNil()) {
-        //     System.out.println("<" + ast.getFirstToken() + ", " +
-        //                              ast.getLastToken() + ">");
+            //     System.out.println("<" + ast.getFirstToken() + ", " +
+            //                              ast.getLastToken() + ">");
         }
     }
 

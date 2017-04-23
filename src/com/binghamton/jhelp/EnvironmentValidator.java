@@ -11,9 +11,9 @@ import com.binghamton.jhelp.error.JHelpError;
  */
 public class EnvironmentValidator implements Validator {
 
-        // also of interest:
-        //     java.home, java.class.path, java.library.path
-        //     user.home, user.name, user.dir
+    // also of interest:
+    //     java.home, java.class.path, java.library.path
+    //     user.home, user.name, user.dir
 
     private static final boolean QUIET = true;
 

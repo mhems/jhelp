@@ -20,8 +20,8 @@ public abstract class ASTNode implements Visitable, Comparable<ASTNode> {
      */
     protected static final Comparator<MyToken> tokenComparator =
         Comparator.<MyToken>comparingInt(t -> t.getLine())
-              .thenComparingInt(t -> t.getCharPositionInLine())
-              .thenComparingInt(t -> t.getStopIndex());
+        .thenComparingInt(t -> t.getCharPositionInLine())
+        .thenComparingInt(t -> t.getStopIndex());
 
     /**
      * Construct a new empty ASTNode, to be used sparingly

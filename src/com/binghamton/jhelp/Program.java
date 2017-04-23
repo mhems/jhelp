@@ -19,9 +19,9 @@ public class Program {
     private List<ClassSymbol> classes;
     private List<JHelpError> errors = new ArrayList<>();
 
-        {
-            packages.add(MyPackage.DEFAULT_PACKAGE);
-        }
+    {
+        packages.add(MyPackage.DEFAULT_PACKAGE);
+    }
 
     /**
      * Adds a CompilationUnit to this Program

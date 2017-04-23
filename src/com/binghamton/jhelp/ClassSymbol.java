@@ -28,9 +28,9 @@ public abstract class ClassSymbol extends ReferenceType {
      */
     public enum Level {TOP, MEMBER, INNER, ANONYMOUS, LOCAL};
 
-        {
-            kind = SymbolKind.CLASS;
-        }
+    {
+        kind = SymbolKind.CLASS;
+    }
 
     protected ClassKind classKind;
     protected Level level = Level.TOP;
@@ -325,9 +325,9 @@ public abstract class ClassSymbol extends ReferenceType {
      *         this ClassSymbol declares such a constructor, otherwise null
      */
     public MethodSymbol getConstructor(MethodSymbol sym) {
-	if (!sym.isConstructor()) {
-	    throw new IllegalArgumentException("must give a constructor method");
-	}
+        if (!sym.isConstructor()) {
+            throw new IllegalArgumentException("must give a constructor method");
+        }
         return ctors.get(sym.getType());
     }
 
@@ -421,7 +421,7 @@ public abstract class ClassSymbol extends ReferenceType {
      * @return true iff this ClassSymbol is a class or enum.
      */
     public boolean isClassLike() {
-	return isEnum() || isClass();
+        return isEnum() || isClass();
     }
 
     /**
@@ -429,7 +429,7 @@ public abstract class ClassSymbol extends ReferenceType {
      * @return true iff this ClassSymbol is an enum.
      */
     public boolean isEnum() {
-	return classKind == ClassKind.ENUM;
+        return classKind == ClassKind.ENUM;
     }
 
     /**
@@ -437,7 +437,7 @@ public abstract class ClassSymbol extends ReferenceType {
      * @return true iff this ClassSymbol is a class.
      */
     public boolean isClass() {
-	return classKind == ClassKind.CLASS;
+        return classKind == ClassKind.CLASS;
     }
 
     /**
@@ -445,7 +445,7 @@ public abstract class ClassSymbol extends ReferenceType {
      * @return true iff this ClassSymbol is an interface or annotation.
      */
     public boolean isInterfaceLike() {
-	return isInterface() || isAnnotation();
+        return isInterface() || isAnnotation();
     }
 
     /**
@@ -453,7 +453,7 @@ public abstract class ClassSymbol extends ReferenceType {
      * @return true iff this ClassSymbol is an interface.
      */
     public boolean isInterface() {
-	return classKind == ClassKind.INTERFACE;
+        return classKind == ClassKind.INTERFACE;
     }
 
     /**
@@ -461,7 +461,7 @@ public abstract class ClassSymbol extends ReferenceType {
      * @return true iff this ClassSymbol is an annotation.
      */
     public boolean isAnnotation() {
-	return classKind == ClassKind.ANNOTATION;
+        return classKind == ClassKind.ANNOTATION;
     }
 
     /**
@@ -469,7 +469,7 @@ public abstract class ClassSymbol extends ReferenceType {
      * @return true iff this ClassSymbol is boxed
      */
     public boolean isBoxed() {
-	return boxed;
+        return boxed;
     }
 
     /**
@@ -477,7 +477,7 @@ public abstract class ClassSymbol extends ReferenceType {
      * @return the Package this ClassSymbol is declared in
      */
     public Package getPackage() {
-	return pkg;
+        return pkg;
     }
 
     @Override
@@ -673,8 +673,8 @@ public abstract class ClassSymbol extends ReferenceType {
      * @param first true iff this substitution is top-level
      */
     protected static void adapt(ClassSymbol cls,
-				Map<TypeVariable, Type> map,
-				boolean first) {
+                                Map<TypeVariable, Type> map,
+                                boolean first) {
         if (!first) {
             // allow type parameters to shadow outer scopes'
             for (TypeVariable param : cls.paramArr) {
@@ -871,6 +871,6 @@ public abstract class ClassSymbol extends ReferenceType {
      * @param visitor the ASTVisitor to visit this ClassSymbol
      */
     public void visit(ASTVisitor visitor) {
-	// reflected classes are not visited
+        // reflected classes are not visited
     }
 }

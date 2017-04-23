@@ -11,7 +11,7 @@ public class ImportManager {
     private static final Map<String, ReflectedClassSymbol> cache = new HashMap<>();
 
     private ImportManager() {
-	// prevent public instantiation
+        // prevent public instantiation
     }
 
     /**

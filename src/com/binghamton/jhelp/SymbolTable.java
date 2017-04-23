@@ -58,10 +58,10 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
         }
     }
 
-        {
-            // ensure table is non-empty
-            enterScope();
-        }
+    {
+        // ensure table is non-empty
+        enterScope();
+    }
 
     /**
      * Constructs an empty SymbolTable without a parent

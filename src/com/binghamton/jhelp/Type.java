@@ -7,9 +7,9 @@ import java.util.Map;
  */
 public abstract class Type extends Symbol {
 
-        {
-            kind = SymbolKind.TYPE;
-        }
+    {
+        kind = SymbolKind.TYPE;
+    }
 
     public abstract String getTypeName();
 

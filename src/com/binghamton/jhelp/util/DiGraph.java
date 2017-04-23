@@ -139,11 +139,11 @@ public class DiGraph<E> {
     private void visit(DiGraphNode node) {
         node.color = Color.GRAY;
         for (DiGraphNode adj : edgeMap.get(node)) {
-             if (adj.color == Color.WHITE) {
+            if (adj.color == Color.WHITE) {
                 visit(adj);
-             } else if (adj.color == Color.GRAY) {
-                 acyclic = false;
-             }
+            } else if (adj.color == Color.GRAY) {
+                acyclic = false;
+            }
         }
         node.color = Color.BLACK;
         sorted.add(0, node.value);

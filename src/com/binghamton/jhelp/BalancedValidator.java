@@ -83,7 +83,7 @@ public class BalancedValidator implements Validator {
             case "{":
             case "[":
                 delims.push(token);
-                break;
+            break;
             case ")":
             case "}":
             case "]":
@@ -101,7 +101,7 @@ public class BalancedValidator implements Validator {
                         delims.pop();
                     }
                 }
-                break;
+            break;
             }
         }
         int index = errors.size();

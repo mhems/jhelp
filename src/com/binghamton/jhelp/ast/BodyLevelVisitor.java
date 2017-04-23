@@ -290,7 +290,7 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
 
             if (ast.getBody().isNil() &&
                 (method.hasModifier(Modifier.DEFAULT) || method.isStatic())) {
-                    addError("a default or static method in an interface must have a body");
+                addError("a default or static method in an interface must have a body");
             }
 
             if (method.isAbstract() && !ast.getBody().isNil()) {
@@ -363,7 +363,7 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
                 !validAnnotationReturnType(type) &&
                 (type instanceof ArrayType &&
                  !validAnnotationReturnType(((ArrayType)type).getBaseType()))) {
-                    addError("invalid annotation method return type");
+                addError("invalid annotation method return type");
             }
         }
 

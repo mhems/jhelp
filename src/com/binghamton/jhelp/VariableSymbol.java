@@ -10,9 +10,9 @@ import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
  */
 public class VariableSymbol extends Symbol {
 
-        {
-            kind = SymbolKind.VARIABLE;
-        }
+    {
+        kind = SymbolKind.VARIABLE;
+    }
 
     /**
      * An enum enumerating the kinds of variables that can occur
@@ -89,8 +89,8 @@ public class VariableSymbol extends Symbol {
      */
     public boolean isConstant() {
         return isFinal() && (
-            (type instanceof PrimitiveType) ||
-            type.equals(fetch("String")));
+                             (type instanceof PrimitiveType) ||
+                             type.equals(fetch("String")));
     }
 
     @Override

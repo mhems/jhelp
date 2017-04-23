@@ -359,11 +359,11 @@ public abstract class Symbol {
      * @return the TypeVariable corresponding to the reflected type variable
      */
     protected static
-    TypeVariable fromTypeVariable(java.lang.reflect.TypeVariable<?> type) {
-            // TODO fix cyclic recursion
+        TypeVariable fromTypeVariable(java.lang.reflect.TypeVariable<?> type) {
+        // TODO fix cyclic recursion
         // creation of type variable must not create bounds ???
         return new TypeVariable(type.getName());
-                                // fromTypes(type.getAnnotatedBounds()));
+        // fromTypes(type.getAnnotatedBounds()));
     }
 
     /**
@@ -372,7 +372,7 @@ public abstract class Symbol {
      * @return the TypeVariables corresponding to the reflected type variables
      */
     protected static
-    TypeVariable[] fromTypeParameters(java.lang.reflect.TypeVariable<?>[] params) {
+        TypeVariable[] fromTypeParameters(java.lang.reflect.TypeVariable<?>[] params) {
         TypeVariable[] syms = new TypeVariable[params.length];
         for (int i = 0; i < syms.length; i++) {
             syms[i] = fromTypeVariable(params[i]);

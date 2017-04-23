@@ -1040,7 +1040,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                        (ulType.equals(PrimitiveType.SHORT) ||
                         urType.equals(PrimitiveType.SHORT))) {
                 ast.setType(PrimitiveType.SHORT);
-            // skipped over 15.25.2, if int representable in T ...
+                // skipped over 15.25.2, if int representable in T ...
             } else {
                 ast.setType(binaryPromotion(ast.getThenExpression(),
                                             ast.getElseExpression()));

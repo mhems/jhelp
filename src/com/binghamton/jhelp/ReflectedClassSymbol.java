@@ -130,7 +130,7 @@ public final class ReflectedClassSymbol extends ClassSymbol {
 
     @Override
     protected ReflectedClassSymbol adapt(Map<TypeVariable, Type> map,
-                                      boolean first) {
+                                         boolean first) {
         ReflectedClassSymbol ret = new ReflectedClassSymbol(this);
         ret.init();
         adapt(ret, map, first);

@@ -40,8 +40,8 @@ public class NamedSymbolTable<T extends Symbol> extends SymbolTable<String, T> {
      * @return a new SymbolTable with adapted contents
      */
     public static NamedSymbolTable<ClassSymbol>
-    adaptClasses(NamedSymbolTable<ClassSymbol> symTab,
-                 Map<TypeVariable, Type> map) {
+        adaptClasses(NamedSymbolTable<ClassSymbol> symTab,
+                     Map<TypeVariable, Type> map) {
         NamedSymbolTable<ClassSymbol> ret = new NamedSymbolTable<>(symTab);
         for (ClassSymbol sym : symTab.table.peekFirst().values()) {
             ret.put(sym.adapt(map));
@@ -57,8 +57,8 @@ public class NamedSymbolTable<T extends Symbol> extends SymbolTable<String, T> {
      * @return a new SymbolTable with adapted contents
      */
     public static NamedSymbolTable<Type>
-    adaptTypes(NamedSymbolTable<Type> symTab,
-               Map<TypeVariable, Type> map) {
+        adaptTypes(NamedSymbolTable<Type> symTab,
+                   Map<TypeVariable, Type> map) {
         NamedSymbolTable<Type> ret = new NamedSymbolTable<>(symTab);
         for (Type sym : symTab.table.peekFirst().values()) {
             ret.put(sym.adapt(map));
@@ -74,8 +74,8 @@ public class NamedSymbolTable<T extends Symbol> extends SymbolTable<String, T> {
      * @return a new SymbolTable with adapted contents
      */
     public static NamedSymbolTable<VariableSymbol>
-    adaptVariables(NamedSymbolTable<VariableSymbol> symTab,
-                   Map<TypeVariable, Type> map) {
+        adaptVariables(NamedSymbolTable<VariableSymbol> symTab,
+                       Map<TypeVariable, Type> map) {
         NamedSymbolTable<VariableSymbol> ret = new NamedSymbolTable<>(symTab);
         for (VariableSymbol sym : symTab.table.peekFirst().values()) {
             ret.put(sym.adapt(map));

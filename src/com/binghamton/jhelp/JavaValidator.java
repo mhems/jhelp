@@ -69,37 +69,37 @@ public class JavaValidator implements Validator {
             errors.add(new ExceptionError(e));
         }
 
-            if (!errors.isEmpty()) {
-                // return errors;
-            }
+        if (!errors.isEmpty()) {
+            // return errors;
+        }
 
-            // System.out.println("---------- FILE ----------");
-            new FileLevelVisitor(program).visitAll();
+        // System.out.println("---------- FILE ----------");
+        new FileLevelVisitor(program).visitAll();
 
-            if (program.hasFatalErrors()) {
-                return program.getErrors();
-            }
-
-            // System.out.println("---------- DECLARATION ----------");
-            new DeclarationLevelVisitor(program).visitAll();
-
-            if (program.hasFatalErrors()) {
-                return program.getErrors();
-            }
-
-            program.topologicalSort();
-
-            // System.out.println("---------- BODY ----------");
-            BodyLevelVisitor bodyV = new BodyLevelVisitor(program);
-            bodyV.visitInOrder();
-
-            if (program.hasFatalErrors()) {
-                return program.getErrors();
-            }
-
-            // System.out.println("---------- CODE ----------");
-            new CodeLevelVisitor(program, bodyV).visitAll();
-
+        if (program.hasFatalErrors()) {
             return program.getErrors();
+        }
+
+        // System.out.println("---------- DECLARATION ----------");
+        new DeclarationLevelVisitor(program).visitAll();
+
+        if (program.hasFatalErrors()) {
+            return program.getErrors();
+        }
+
+        program.topologicalSort();
+
+        // System.out.println("---------- BODY ----------");
+        BodyLevelVisitor bodyV = new BodyLevelVisitor(program);
+        bodyV.visitInOrder();
+
+        if (program.hasFatalErrors()) {
+            return program.getErrors();
+        }
+
+        // System.out.println("---------- CODE ----------");
+        new CodeLevelVisitor(program, bodyV).visitAll();
+
+        return program.getErrors();
     }
 }

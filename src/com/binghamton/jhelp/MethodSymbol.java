@@ -16,9 +16,9 @@ import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
  */
 public class MethodSymbol extends Symbol {
 
-        {
-            kind = SymbolKind.METHOD;
-        }
+    {
+        kind = SymbolKind.METHOD;
+    }
 
     protected MethodType type;
 

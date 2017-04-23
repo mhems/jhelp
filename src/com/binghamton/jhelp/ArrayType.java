@@ -197,21 +197,21 @@ public class ArrayType extends ReferenceType {
             lengthField.setType(PrimitiveType.INT);
         }
 
-	/**
-	 * Construct a new ArrayClassSymbol from its base Type
-	 * @param baseType the base Type of the array
-	 */
+        /**
+         * Construct a new ArrayClassSymbol from its base Type
+         * @param baseType the base Type of the array
+         */
         private ArrayClassSymbol(Type baseType) {
             super("[" + baseType.getName());
             this.baseType = baseType;
             superClass = fetch("Object");
         }
 
-	/**
-	 * Initializes the members of this ClassSymbol.
-	 * Must be called once per instance before any other operations.
-     * Automatically called by all constructors.
-	 */
+        /**
+         * Initializes the members of this ClassSymbol.
+         * Must be called once per instance before any other operations.
+         * Automatically called by all constructors.
+         */
         private void init() {
             interfaces.put(fetch("java.io.Serializable"));
             interfaces.put(fetch("Cloneable"));
@@ -227,42 +227,42 @@ public class ArrayType extends ReferenceType {
             throw new UnsupportedOperationException("a synthetic array class has no declaring class");
         }
 
-	@Override
+        @Override
         public boolean isEnum() {
             return false;
         }
 
-	@Override
+        @Override
         public boolean isClass() {
             return false;
         }
 
-	@Override
+        @Override
         public boolean isInterface() {
             return false;
         }
 
-	@Override
+        @Override
         public boolean isAnnotation() {
             return false;
         }
 
-	@Override
+        @Override
         public boolean isBoxed() {
             return false;
         }
 
-	@Override
+        @Override
         public Package getPackage() {
             return null;
         }
 
-	@Override
+        @Override
         public String getQualifiedName() {
             return getName();
         }
 
-	@Override
+        @Override
         public String getTypeName() {
             return getName();
         }
