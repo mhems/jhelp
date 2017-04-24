@@ -3,6 +3,7 @@ package com.binghamton.jhelp;
 import java.io.IOException;
 import java.io.File;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 import java.util.HashMap;
@@ -36,35 +37,23 @@ public class BalancedValidator implements Validator {
         PAIRS.put("]", "[");
     }
 
-    private File[] files;
-
-    /**
-     * Construct a new BalancedValidator over a set of Files
-     * @param files the Files to validate for balanced punctuation
-     */
-    public BalancedValidator(File[] files) {
-        this.files = files;
-    }
-
     /**
      * Validates the files' contents by checking for unbalanced braces
-     * @return a List of JHelpErrors, if any, that occured during validation
      */
-    public List<JHelpError> validate() {
+    @Override
+    public void validate(Program program) {
         Lexer lexer;
         CommonTokenStream stream;
-        List<JHelpError> errors = Validator.buildErrors();
-        try {
-            for (File file : files) {
+        for (File file : program.getFiles()) {
+            try {
                 lexer = new Balance(new ANTLRFileStream(file.getAbsolutePath()));
                 lexer.removeErrorListeners();
                 stream = new CommonTokenStream(lexer);
-                errors.addAll(check(stream));
+                program.addErrors(check(stream));
+            } catch (IOException e) {
+                program.addError(new ExceptionError(e));
             }
-        } catch (IOException e) {
-            errors.add(new ExceptionError(e));
         }
-        return errors;
     }
 
     /**
@@ -73,8 +62,8 @@ public class BalancedValidator implements Validator {
      * @return a possibly empty List of JHelpErrors present
      */
     private static List<JHelpError> check(CommonTokenStream tokenStream) {
+        List<JHelpError> errors = new ArrayList<>();
         Stack<Token> delims = new Stack<>();
-        List<JHelpError> errors = Validator.buildErrors();
         Token token;
         for (int i = 0; i < tokenStream.getNumberOfOnChannelTokens(); i++) {
             token = tokenStream.get(i);

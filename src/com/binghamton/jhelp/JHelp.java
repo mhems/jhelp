@@ -17,13 +17,15 @@ public class JHelp {
      * @param args user-provided command-line arguments
      */
     public static void main(String[] args) {
-        JHelpRunner runner = new JHelpRunner();
+        JHelpRunner runner = new JHelpRunner(args);
         runner.addValidator(new EnvironmentValidator());
-        UsageValidator uV = new UsageValidator(args);
-        runner.addValidator(uV);
-        runner.addValidator(new BalancedValidator(uV.getFiles()));
-        runner.addValidator(new JavaValidator(uV.getFiles()));
-        System.out.println("JHelp Version 0.3");
+        runner.addValidator(new UsageValidator());
+        runner.addValidator(new BalancedValidator());
+        runner.addValidator(new SyntaxValidator());
+        runner.addValidator(new TopLevelValidator());
+        MemberLevelValidator mV = new MemberLevelValidator();
+        runner.addValidator(mV);
+        runner.addValidator(new CodeLevelValidator(mV.getVisitor()));
         System.exit(runner.run());
     }
 }

@@ -13,21 +13,8 @@ import com.binghamton.jhelp.error.JHelpError;
 public interface Validator {
 
     /**
-     * Utility method to build a List of JHelpErrors
-     * @param errors the errors to make the List from
-     * @return a List of JHelpErrors
+     * Validates a Program on some criterion.
+     * @param program the Program to validate
      */
-    static List<JHelpError> buildErrors(JHelpError... errors) {
-        List<JHelpError> errs = new ArrayList<>();
-        for (JHelpError error : errors) {
-            errs.add(error);
-        }
-        return errs;
-    }
-
-    /**
-     * Validates the files on some criterion
-     * @return a List of JHelpErrors, if any, that occured during validation
-     */
-    List<JHelpError> validate();
+    void validate(Program program);
 }

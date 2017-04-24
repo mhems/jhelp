@@ -471,7 +471,6 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
     }
 
     public void visitInOrder() {
-        program.topologicalSort();
         for (ClassSymbol cls : program.getAllClasses()) {
             if (cls.isTop()) {
                 cls.visit(this);

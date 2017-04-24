@@ -1,10 +1,6 @@
 package com.binghamton.jhelp;
 
-import java.io.File;
-import java.util.List;
-
 import com.binghamton.jhelp.error.InvalidUsageError;
-import com.binghamton.jhelp.error.JHelpError;
 
 /**
  * A class to validate the user's system environment
@@ -19,20 +15,18 @@ public class EnvironmentValidator implements Validator {
 
     /**
      * Validates the user's environment
-     * @return a List of JHelpErrors, if any, that occured during validation
      */
-    public List<JHelpError> validate() {
-        List<JHelpError> errors = Validator.buildErrors();
-
+    @Override
+    public void validate(Program program) {
         String version = System.getProperty("java.specification.version");
         String[] versionNums = version.split("\\.");
         final int major = Integer.parseInt(versionNums[0]);
         final int minor = Integer.parseInt(versionNums[1]);
 
         if (minor < 8) {
-            errors.add(new InvalidUsageError("Java 1.8 or higher must be used, Java %d.%d was detected",
-                                             major,
-                                             minor));
+            program.addError(new InvalidUsageError("Java 1.8 or higher must be used, Java %d.%d was detected",
+                                                   major,
+                                                   minor));
         }
 
         if (!QUIET) {
@@ -43,6 +37,5 @@ public class EnvironmentValidator implements Validator {
                              System.getProperty("os.version") +
                              "\n");
         }
-        return errors;
     }
 }

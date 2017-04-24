@@ -1,6 +1,8 @@
 package com.binghamton.jhelp;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -16,11 +18,23 @@ import com.binghamton.jhelp.util.StringUtils;
 public class Program {
     private final List<MyPackage> packages = new ArrayList<>();
     private final List<CompilationUnit> units = new ArrayList<>();
+    private final List<JHelpError> errors = new ArrayList<>();
+    private final String[] args;
     private List<ClassSymbol> classes;
-    private List<JHelpError> errors = new ArrayList<>();
+    private File[] files;
 
     {
         packages.add(MyPackage.DEFAULT_PACKAGE);
+    }
+
+    public Program(String[] args) {
+        this.args = args;
+        // TODO
+        // for now, just copy directly
+        files = new File[args.length];
+        for (int i = 0; i < files.length; i++) {
+            files[i] = new File(args[i]);
+        }
     }
 
     /**
@@ -94,6 +108,10 @@ public class Program {
         return !errors.isEmpty();
     }
 
+    public int numErrors() {
+        return errors.size();
+    }
+
     public List<JHelpError> getErrors() {
         return errors;
     }
@@ -102,8 +120,34 @@ public class Program {
         errors.add(error);
     }
 
+    public void addErrors(JHelpError... errors) {
+        for (JHelpError error: errors) {
+            this.errors.add(error);
+        }
+    }
+
+    public void addErrors(Collection<JHelpError> errors) {
+        this.errors.addAll(errors);
+    }
+
     public boolean hasFatalErrors() {
         return JHelpError.hasFatalErrors(errors);
+    }
+
+    public File[] getFiles() {
+        return files;
+    }
+
+    public void setFiles(File[] files) {
+        this.files = files;
+    }
+
+    public int numFiles() {
+        return files.length;
+    }
+
+    public String[] getArguments() {
+        return args;
     }
 
     /**
@@ -167,17 +211,19 @@ public class Program {
     }
 
     /**
-     * Topologically sorts this Program's class hierarchy
+     * Determines if this Program's inheritance hierarchy constitutes a directed
+     * acyclic graph.
+     * @return true iff this Program's inheritance hierarchy is acyclical
      */
-    public void topologicalSort() {
+    public boolean isDAG() {
         DiGraph<ClassSymbol> graph = new DiGraph<>();
         constructGraph(graph);
         List<ClassSymbol> ret = graph.topologicalSort();
         if (ret == null) {
-            addError(new SemanticError("cyclic inheritance hierarchy"));
-        } else {
-            Collections.reverse(ret);
-            classes = ret;
+            return false;
         }
+        Collections.reverse(ret);
+        classes = ret;
+        return true;
     }
 }
