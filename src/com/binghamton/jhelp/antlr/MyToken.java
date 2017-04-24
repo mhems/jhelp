@@ -2,17 +2,21 @@ package com.binghamton.jhelp.antlr;
 
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonToken;
-import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenSource;
 import org.antlr.v4.runtime.misc.Pair;
+import org.antlr.v4.runtime.misc.Interval;
+
+import com.binghamton.jhelp.util.FileBuffer;
 
 /**
- * A class wrapping ANTLR's CommonToken with a reference to the TokenStream it
+ * A class wrapping ANTLR's CommonToken with a reference to the FileBuffer it
  * originated from.
  */
 public class MyToken extends CommonToken {
     private static final long serialVersionUID = 1L;
+    private FileBuffer buffer;
     private CommonTokenStream stream;
 
     /**
@@ -54,6 +58,18 @@ public class MyToken extends CommonToken {
      */
     public void setTokenStream(CommonTokenStream stream) {
         this.stream = stream;
+    }
+
+    public FileBuffer getFileBuffer() {
+        return buffer;
+    }
+
+    public void setFileBuffer(FileBuffer buffer) {
+        this.buffer = buffer;
+    }
+
+    public String getLineText() {
+        return buffer.getLine(line);
     }
 
     /**

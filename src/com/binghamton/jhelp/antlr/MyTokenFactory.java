@@ -6,19 +6,23 @@ import org.antlr.v4.runtime.TokenFactory;
 import org.antlr.v4.runtime.TokenSource;
 import org.antlr.v4.runtime.misc.Pair;
 
+import com.binghamton.jhelp.util.FileBuffer;
+
 /**
  * A TokenFactory that produces MyTokens
  */
 public class MyTokenFactory implements TokenFactory<MyToken> {
     private final CommonTokenStream stream;
+    private final FileBuffer buffer;
 
     /**
      * Constructs a new factory for a given TokenStream
-     * @param input the input stream the Tokens are made from
      * @param stream the TokenStream that produces these Tokens
+     * @param buffer the FileBuffer that these Tokens originated from
      */
-    public MyTokenFactory(CharStream input, CommonTokenStream stream) {
+    public MyTokenFactory(CommonTokenStream stream, FileBuffer buffer) {
         this.stream = stream;
+        this.buffer = buffer;
     }
 
     @Override
@@ -40,6 +44,7 @@ public class MyTokenFactory implements TokenFactory<MyToken> {
         MyToken token = new MyToken(source, type, channel, start, stop);
         token.setLine(line);
         token.setCharPositionInLine(charPositionInLine);
+        token.setFileBuffer(buffer);
         token.setTokenStream(stream);
         return token;
     }

@@ -12,6 +12,7 @@ import org.antlr.v4.runtime.Lexer;
 import com.binghamton.jhelp.antlr.Java8Lexer;
 import com.binghamton.jhelp.antlr.Java8Parser;
 import com.binghamton.jhelp.antlr.MyTokenFactory;
+import com.binghamton.jhelp.antlr.SyntaxErrorListener;
 import com.binghamton.jhelp.ast.BodyLevelVisitor;
 import com.binghamton.jhelp.ast.CodeLevelVisitor;
 import com.binghamton.jhelp.ast.CompilationUnit;
@@ -19,6 +20,7 @@ import com.binghamton.jhelp.ast.DeclarationLevelVisitor;
 import com.binghamton.jhelp.ast.FileLevelVisitor;
 import com.binghamton.jhelp.error.ExceptionError;
 import com.binghamton.jhelp.error.JHelpError;
+import com.binghamton.jhelp.util.FileBuffer;
 
 /**
  * A class for validating Java files for syntactic and semantic errors
@@ -48,19 +50,24 @@ public class JavaValidator implements Validator {
         CompilationUnit cu;
         List<JHelpError> errors = Validator.buildErrors();
         Program program = new Program();
+        FileBuffer buffer;
         try {
             System.out.println("Compiling " + files.length + " files...");
             for (File file : files) {
+                buffer = new FileBuffer(file);
                 input = new ANTLRFileStream(file.getAbsolutePath());
                 lexer = new Java8Lexer(input);
                 stream = new CommonTokenStream(lexer);
-                factory = new MyTokenFactory(input, stream);
+                factory = new MyTokenFactory(stream, buffer);
                 lexer.setTokenFactory(factory);
                 parser = new Java8Parser(stream);
                 parser.setTokenFactory(factory);
+                parser.removeErrorListeners();
+                parser.addErrorListener(new SyntaxErrorListener(program));
                 parser.setBuildParseTree(false);
                 cu = parser.compilationUnit().ret;
-                if (parser.getNumberOfSyntaxErrors() == 0) {
+                if (parser.getNumberOfSyntaxErrors() == 0 &&
+                    !program.hasErrors()) {
                     cu.setFilename(file.getAbsolutePath());
                     program.addCompilationUnit(cu);
                 }

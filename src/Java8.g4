@@ -71,7 +71,9 @@ grammar Java8;
         Set<Modifier> modSet = new HashSet<>();
         for (Modifier mod : modifiers) {
             if (!modSet.add(mod)) {
-                // TODO throw error (notifyErrorListeners)
+                notifyErrorListeners(mod.getToken(),
+                                     "duplicate modifier",
+                                     null);
             }
         }
     }
