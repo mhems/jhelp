@@ -937,7 +937,23 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(ReturnStatement ast) {
-        ast.getExpression().accept(this);
+        if (currentMethod == null) {
+            addError("return statements can only go in methods or constructors");
+        } else {
+            Type expRetType = currentMethod.getReturnType();
+            if (ast.getExpression().isNil()) {
+                if (!currentMethod.isConstructor() &&
+                    !expRetType.equals(PrimitiveType.VOID)) {
+                    addError("empty return can only go in constructor or methods that return void");
+                }
+            } else {
+                ast.getExpression().accept(this);
+                Type retType = ast.getExpression().getType();
+                if (!isAssignable(expRetType, retType)) {
+                    addError("return type does not match method's");
+                }
+            }
+        }
     }
 
     /**
