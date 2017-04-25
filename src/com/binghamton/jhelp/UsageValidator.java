@@ -28,20 +28,21 @@ public class UsageValidator implements Validator {
         File[] files = program.getFiles();
         if (files.length == 0) {
             program.addError(new InvalidUsageError("must specify at least one file or directory to compile"));
-        }
-        for (File file : files) {
-            if (file.exists() &&
-                file.isFile() &&
-                !file.getName().endsWith(".java")) {
-                program.addError(new InvalidUsageError("cannot compile a non-Java file"));
+        } else {
+            for (File file : files) {
+                if (file.exists() &&
+                    file.isFile() &&
+                    !file.getName().endsWith(".java")) {
+                    program.addError(new InvalidUsageError("cannot compile a non-Java file"));
+                }
             }
+            validate(program, files);
+            File[] newFiles = fileList.toArray(new File[fileList.size()]);
+            if (newFiles.length == 0) {
+                program.addError(new InvalidUsageError("no Java files to compile were found"));
+            }
+            program.setFiles(newFiles);
         }
-        validate(program, files);
-        File[] newFiles = fileList.toArray(new File[fileList.size()]);
-        if (newFiles.length == 0) {
-            program.addError(new InvalidUsageError("no Java files to compile were found"));
-        }
-        program.setFiles(newFiles);
     }
 
     /**
@@ -72,5 +73,10 @@ public class UsageValidator implements Validator {
                 fileList.add(file);
             }
         }
+    }
+
+    @Override
+    public String getExitExplanation() {
+        return "Invalid command-line arguments were supplied";
     }
 }

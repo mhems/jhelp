@@ -3,8 +3,12 @@ package com.binghamton.jhelp.antlr;
 import org.antlr.v4.runtime.ConsoleErrorListener;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
+import org.antlr.v4.runtime.InputMismatchException;
+import org.antlr.v4.runtime.LexerNoViableAltException;
+import org.antlr.v4.runtime.NoViableAltException;
 
 import com.binghamton.jhelp.Program;
+import com.binghamton.jhelp.error.JHelpError;
 import com.binghamton.jhelp.util.ColorStringBuilder;
 
 public class SyntaxErrorListener extends ConsoleErrorListener {
@@ -22,25 +26,21 @@ public class SyntaxErrorListener extends ConsoleErrorListener {
                             int charPositionInLine,
                             String msg,
                             RecognitionException ex) {
-        super.syntaxError(recognizer, offendingSymbol, line, charPositionInLine,
-                          msg, ex);
-        System.err.println("error detected!");
-        System.err.println("offender: " + offendingSymbol);
-        System.err.println("line: " + line);
-        System.err.println("column: " + charPositionInLine);
-        System.err.println("msg: " + msg);
-        System.err.println("exception: " + ex);
-        if (offendingSymbol instanceof MyToken) {
-            MyToken token = (MyToken)offendingSymbol;
-            String lineText = token.getLineText();
-            ColorStringBuilder sb = new ColorStringBuilder();
-            sb.append(lineText.substring(0, charPositionInLine));
-            int stop = charPositionInLine + token.getText().length();
-            sb.append(lineText.substring(charPositionInLine, stop),
-                      ColorStringBuilder.Color.RED,
-                      null);
-            sb.append(lineText.substring(stop));
-            System.err.println(sb);
+        MyToken token = (MyToken)offendingSymbol;
+        String suggestion = null;
+        if (ex instanceof MyRecognitionException) {
+            suggestion = ((MyRecognitionException)ex).getSuggestion();
+        } else if (ex == null) {
+            suggestion = "Try removing the highlighted duplicate modifier";
         }
+        // } else if (ex instanceof InputMismatchException) {
+        //     suggestion = "provide an expected token, (e.g. one of ";
+        //     suggestion += ex.getExpectedTokens();
+        //     suggestion += ");"
+        // } else if (ex instanceof NoViableAltException ||
+        //            ex instanceof LexerNoViableAltException) {
+        //     suggestion = "provide an unambiguous token";
+        // }
+        program.addError(new JHelpError(token, msg, suggestion));
     }
 }

@@ -10,4 +10,9 @@ public class TopLevelValidator implements Validator {
         new FileLevelVisitor(program).visitAll();
         new DeclarationLevelVisitor(program).visitAll();
     }
+
+    @Override
+    public String getExitExplanation() {
+        return "There were errors with top-level declarations (e.g. classes, interfaces) in your file(s)";
+    }
 }

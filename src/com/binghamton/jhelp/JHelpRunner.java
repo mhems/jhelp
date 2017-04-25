@@ -46,7 +46,9 @@ public class JHelpRunner {
                 System.out.printf("validator %d took '%f' ms\n", i, (stop - start)/1e6);
             }
             if (program.hasFatalErrors()) {
-                return report();
+                int num = report();
+                System.out.println(v.getExitExplanation() + ", exiting now");
+                return num;
             }
             ++i;
         }
@@ -60,30 +62,21 @@ public class JHelpRunner {
     public int report() {
         ColorStringBuilder sb = new ColorStringBuilder();
         int num = 1;
-        sb.append("*** ");
         if (program.hasErrors()) {
+            for (JHelpError error : program.getErrors()) {
+                sb = new ColorStringBuilder();
+                sb.append(num + ".)", ColorStringBuilder.Color.WHITE, null);
+                sb.append(" ");
+                sb.append(error.getMessage());
+                System.out.println(sb);
+                System.out.println();
+                ++num;
+            }
+        } else {
             sb.append("NO ERRORS DETECTED",
                       ColorStringBuilder.Color.GREEN,
                       null);
-        } else {
-            sb.setForegroundColor(ColorStringBuilder.Color.RED);
-            sb.append("" + program.numErrors(), ColorStringBuilder.Format.BOLD);
-            sb.append(" ERRORS DETECTED");
-            sb.resetForegroundColor();
-        }
-        sb.append(" ***");
-        System.out.println(sb);
-        for (JHelpError error : program.getErrors()) {
-            sb = new ColorStringBuilder();
-            sb.append(num + ".)", ColorStringBuilder.Color.WHITE, null);
-            sb.append(" ");
-            sb.append(error.getClass().getSimpleName(),
-                      ColorStringBuilder.Color.GREEN,
-                      null);
-            sb.append(": ");
-            sb.append(error.getMessage(), ColorStringBuilder.Color.RED, null);
             System.out.println(sb);
-            ++num;
         }
         return num - 1;
     }

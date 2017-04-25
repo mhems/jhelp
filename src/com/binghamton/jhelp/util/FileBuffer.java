@@ -14,6 +14,10 @@ public class FileBuffer {
         lines = Files.readAllLines(Paths.get(file.getAbsolutePath())).toArray(new String[0]);
     }
 
+    public String getName() {
+        return file.getName();
+    }
+
     public String getLine(int line) {
         return lines[line-1];
     }

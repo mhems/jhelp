@@ -19,4 +19,9 @@ public class MemberLevelValidator implements Validator {
             visitor.visitInOrder();
         }
     }
+
+    @Override
+    public String getExitExplanation() {
+        return "There were errors with field/method members in your file(s)";
+    }
 }

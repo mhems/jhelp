@@ -4,15 +4,33 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
+import com.binghamton.jhelp.antlr.MyToken;
+
 /**
  * The base class for all JHelp errors
  */
 public class JHelpError {
 
+    private MyToken token;
     private String msg;
+    private String suggestion;
 
     protected JHelpError() {
         super();
+    }
+
+    public JHelpError(Token token, String msg, String suggestion) {
+        if (token instanceof MyToken) {
+            this.token = (MyToken)token;
+        } else {
+            throw new IllegalArgumentException("must use MyTokens");
+        }
+        this.msg = msg;
+        this.suggestion = suggestion;
+    }
+
+    public JHelpError(Token token, String msg) {
+        this(token, msg, null);
     }
 
     /**
@@ -45,25 +63,26 @@ public class JHelpError {
     }
 
     /**
-     * Utility method to determine if any fatal errors have occured
-     * @param errors the JHelpErrors to examine for fatal status
-     * @return true iff any JHelpErrors in errors are fatal
-     */
-    public static boolean hasFatalErrors(List<JHelpError> errors) {
-        for (JHelpError error : errors) {
-            if (error.isFatal()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
      * Gets the error message
      * @return the error message
      */
     public String getMessage() {
-        return msg;
+        if (token == null) {
+            return msg;
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append(token.getLocationString());
+        sb.append(": ");
+        sb.append(msg);
+        sb.append("\n");
+        sb.append("\n");
+        sb.append(token.getHighlightedLine());
+        if (suggestion != null) {
+            sb.append("\n");
+            sb.append("\n");
+            sb.append(suggestion);
+        }
+        return sb.toString();
     }
 
     /**

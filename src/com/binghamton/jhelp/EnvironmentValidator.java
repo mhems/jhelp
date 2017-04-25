@@ -38,4 +38,9 @@ public class EnvironmentValidator implements Validator {
                              "\n");
         }
     }
+
+    @Override
+    public String getExitExplanation() {
+        return "Your environment does not meet expectations";
+    }
 }

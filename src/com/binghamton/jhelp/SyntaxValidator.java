@@ -44,18 +44,21 @@ public class SyntaxValidator implements Validator {
                 parser.removeErrorListeners();
                 parser.addErrorListener(new SyntaxErrorListener(program));
                 parser.setBuildParseTree(false);
-                cu = parser.compilationUnit().ret;
                 int old = program.numErrors();
+                cu = parser.compilationUnit().ret;
                 if (parser.getNumberOfSyntaxErrors() == 0 &&
                     program.numErrors() == old) {
                     cu.setFilename(file.getAbsolutePath());
                     program.addCompilationUnit(cu);
-                } else {
-                    program.addError(new SyntacticError("file has syntax errors, not compiling"));
                 }
             } catch (IOException e) {
                 program.addError(new ExceptionError(e));
             }
         }
+    }
+
+    @Override
+    public String getExitExplanation() {
+        return "There were syntax errors in your file(s)";
     }
 }

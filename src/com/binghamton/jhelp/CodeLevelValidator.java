@@ -14,4 +14,9 @@ public class CodeLevelValidator implements Validator {
     public void validate(Program program) {
         new CodeLevelVisitor(program, visitor).visitAll();
     }
+
+    @Override
+    public String getExitExplanation() {
+        return "There were errors with the source code in your file(s)";
+    }
 }

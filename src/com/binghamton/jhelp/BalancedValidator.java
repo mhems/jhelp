@@ -100,4 +100,9 @@ public class BalancedValidator implements Validator {
         }
         return errors;
     }
+
+    @Override
+    public String getExitExplanation() {
+        return "There was unbalanced punctuation (e.g. (), [], or {}) in your file(s)";
+    }
 }

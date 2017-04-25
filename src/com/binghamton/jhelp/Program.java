@@ -131,7 +131,12 @@ public class Program {
     }
 
     public boolean hasFatalErrors() {
-        return JHelpError.hasFatalErrors(errors);
+        for (JHelpError error : errors) {
+            if (error.isFatal()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public File[] getFiles() {

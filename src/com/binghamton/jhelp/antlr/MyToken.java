@@ -9,6 +9,7 @@ import org.antlr.v4.runtime.misc.Pair;
 import org.antlr.v4.runtime.misc.Interval;
 
 import com.binghamton.jhelp.util.FileBuffer;
+import com.binghamton.jhelp.util.ColorStringBuilder;
 
 /**
  * A class wrapping ANTLR's CommonToken with a reference to the FileBuffer it
@@ -90,16 +91,26 @@ public class MyToken extends CommonToken {
     }
 
     /**
-     * Builds a format string of a Token
-     * @param token the Token to format
-     * @return a formatted string of the given Token
+     * Builds a format string of this Token
+     * @return a formatted string of this Token
      */
-    public static String format(Token token) {
-        return String.format("line %d, col %d - '%s' (channel %d)",
-                             token.getLine(),
-                             token.getCharPositionInLine(),
-                             token.getText(),
-                             token.getChannel());
+    public String getLocationString() {
+        return String.format("%s, line %d, col %d",
+                             buffer.getName(),
+                             line,
+                             charPositionInLine);
+    }
+
+    public String getHighlightedLine() {
+        ColorStringBuilder sb = new ColorStringBuilder();
+        String line = getLineText();
+        sb.append(line.substring(0, charPositionInLine));
+        int stop = charPositionInLine + getText().length();
+        sb.append(line.substring(charPositionInLine, stop),
+                  ColorStringBuilder.Color.RED,
+                  null);
+        sb.append(line.substring(stop));
+        return sb.toString();
     }
 
     @Override
