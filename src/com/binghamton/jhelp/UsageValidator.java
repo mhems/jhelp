@@ -33,7 +33,7 @@ public class UsageValidator implements Validator {
                 if (file.exists() &&
                     file.isFile() &&
                     !file.getName().endsWith(".java")) {
-                    program.addError(new InvalidUsageError("cannot compile a non-Java file"));
+                    program.addError(new InvalidUsageError("The filename '%s' must be a Java file"));
                 }
             }
             validate(program, files);

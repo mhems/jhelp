@@ -1,16 +1,18 @@
 package com.binghamton.jhelp.error;
 
-import org.antlr.v4.runtime.Token;
-
 import com.binghamton.jhelp.BalancedValidator;
+import com.binghamton.jhelp.antlr.MyToken;
 
 /**
  * A class representing the class of syntax errors due to unbalanced tokens
  * This includes mismatched braces as well as missing or extra braces.
  */
 public class UnbalancedBracesError extends JHelpError {
-    private final Token left;
-    private final Token right;
+    private final MyToken primary, secondary;
+    private final MyToken left;
+    private final MyToken right;
+    private final String msg;
+    private final String suggestion;
 
     /**
      * Construct an UnbalancedBracesError with the offending Tokens
@@ -19,9 +21,24 @@ public class UnbalancedBracesError extends JHelpError {
      * @param closing either the mismatching closing Token or null iff too many
      * opening braces
      */
-    public UnbalancedBracesError(Token opening, Token closing) {
+    public UnbalancedBracesError(MyToken opening, MyToken closing) {
         left = opening;
         right = closing;
+        if (left != null && right != null) {
+            primary = left;
+            secondary = right;
+            msg = String.format("a '%s' brace is closing a '%s' brace",
+                                closing.getText(),
+                                opening.getText());
+            suggestion = "Correct the typo or add/delete a brace between the two";
+        } else {
+            primary = (left == null ? right : left);
+            secondary = null;
+            msg = String.format("there is an extra '%s'",
+                                primary.getText());
+            suggestion = String.format("Delete the extra brace or add the missing '%s' brace",
+                                       BalancedValidator.PAIRS.get(primary.getText()));
+        }
     }
 
     /**
@@ -30,27 +47,6 @@ public class UnbalancedBracesError extends JHelpError {
      */
     @Override
     public String getMessage() {
-        String leftError, rightError;
-        StringBuilder b = new StringBuilder();
-        b.append("Unbalanced braces error ");
-        b.append(JHelpError.getTokenErrorString(left == null ? right : left));
-        b.append(":\n");
-
-        if (left == null || right == null) {
-            b.append("there is an extra ");
-            String first = (left == null ? right : left).getText();
-            b.append(String.format("'%s' ", first));
-            b.append(left == null ? "closing" : "opening");
-            b.append(" brace, either delete it or add a ");
-            b.append(String.format("'%s' ", BalancedValidator.PAIRS.get(first)));
-            b.append(left == null ? "opening" : "closing");
-            b.append(" brace\n");
-        } else {
-            b.append(String.format("a '%s' opening brace is being closed by a '%s' closing brace\n",
-                                   left.getText(),
-                                   right.getText()));
-        }
-        return b.toString();
+        return makeMultiTokenMessage(primary, secondary, msg, suggestion);
     }
-
 }

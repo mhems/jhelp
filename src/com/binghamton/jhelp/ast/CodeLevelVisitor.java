@@ -739,7 +739,8 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(LambdaExpression ast) {
-        addError(new UnimplementedFeatureWarning("I'm too dumb for lambda expressions"));
+        addError(new UnimplementedFeatureWarning(ast.getFirstToken(),
+                                                 "Lambda expressions"));
     }
 
     /**
@@ -815,7 +816,8 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(MethodReferenceExpression ast) {
-        addError(new UnimplementedFeatureWarning("I'm too dumb for method references"));
+        addError(new UnimplementedFeatureWarning(ast.getFirstToken(),
+                                                 "Method references"));
     }
 
     /**

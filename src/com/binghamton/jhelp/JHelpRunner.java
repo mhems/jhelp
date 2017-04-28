@@ -37,7 +37,7 @@ public class JHelpRunner {
     public int run() {
         long start, stop;
         int i = 1;
-        System.out.println("JHelp Version 0.3");
+        System.out.println("JHelp Version " + JHelp.VERSION);
         for (Validator v : validators) {
             start = System.nanoTime();
             v.validate(program);
@@ -47,6 +47,7 @@ public class JHelpRunner {
             }
             if (program.hasFatalErrors()) {
                 int num = report();
+                System.out.println("----------------------------------------");
                 System.out.println(v.getExitExplanation() + ", exiting now");
                 return num;
             }

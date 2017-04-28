@@ -14,7 +14,6 @@ import com.binghamton.jhelp.antlr.Java8Parser;
 import com.binghamton.jhelp.antlr.MyTokenFactory;
 import com.binghamton.jhelp.antlr.SyntaxErrorListener;
 import com.binghamton.jhelp.ast.CompilationUnit;
-import com.binghamton.jhelp.error.ExceptionError;
 import com.binghamton.jhelp.error.JHelpError;
 import com.binghamton.jhelp.error.SyntacticError;
 import com.binghamton.jhelp.util.FileBuffer;
@@ -52,7 +51,8 @@ public class SyntaxValidator implements Validator {
                     program.addCompilationUnit(cu);
                 }
             } catch (IOException e) {
-                program.addError(new ExceptionError(e));
+                program.addError(new JHelpError("An IO error occured while processing '%s'",
+                                                file.getName()));
             }
         }
     }

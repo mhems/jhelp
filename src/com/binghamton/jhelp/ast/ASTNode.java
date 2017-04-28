@@ -1,6 +1,5 @@
 package com.binghamton.jhelp.ast;
 
-import java.util.Comparator;
 import java.util.List;
 
 import org.antlr.v4.runtime.Token;
@@ -14,14 +13,6 @@ public abstract class ASTNode implements Visitable, Comparable<ASTNode> {
     private MyToken first;
     private MyToken last;
     private boolean singular;
-
-    /**
-     * A comparator that orders Tokens from the same source lexicographically
-     */
-    protected static final Comparator<MyToken> tokenComparator =
-        Comparator.<MyToken>comparingInt(t -> t.getLine())
-        .thenComparingInt(t -> t.getCharPositionInLine())
-        .thenComparingInt(t -> t.getStopIndex());
 
     /**
      * Construct a new empty ASTNode, to be used sparingly
@@ -199,7 +190,7 @@ public abstract class ASTNode implements Visitable, Comparable<ASTNode> {
      */
     @Override
     public int compareTo(ASTNode other) {
-        return tokenComparator.compare(first, other.first);
+        return first.compareTo(other.first);
     }
 
     /**

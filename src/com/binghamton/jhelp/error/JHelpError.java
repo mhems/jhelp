@@ -50,17 +50,35 @@ public class JHelpError {
         this(String.format(fmt, args));
     }
 
-    /**
-     * Builds a formatted error string for a Token
-     * @param token the Token where the error occured
-     * @return the formatted error String for `token`
-     */
-    public static String getTokenErrorString(Token token) {
-        return String.format("from %s on line %d, column %d",
-                             token.getTokenSource().getSourceName(),
-                             token.getLine(),
-                             token.getCharPositionInLine());
+    public static String makeMultiTokenMessage(MyToken first,
+                                               MyToken second,
+                                               String message,
+                                               String suggestion) {
+        StringBuilder b = new StringBuilder();
+        b.append(first.getLocationString());
+        b.append(": ");
+        b.append(message);
+        b.append("\n");
+        b.append("\n");
+        if (second == null) {
+            b.append(first.getHighlightedLine());
+        }
+        else if (first.onSameLine(second)) {
+            b.append(MyToken.getHighlightedLine(first, second));
+        } else {
+            b.append("\n");
+            b.append("\n");
+            b.append(second.getLocationString());
+            b.append(":");
+            b.append("\n");
+            b.append(second.getHighlightedLine());
+        }
+        b.append("\n");
+        b.append("\n");
+        b.append(suggestion);
+        return b.toString();
     }
+
 
     /**
      * Gets the error message

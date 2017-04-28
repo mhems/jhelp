@@ -55,12 +55,11 @@ grammar Java8;
 
 @header {
     import java.util.ArrayList;
-    import java.util.HashSet;
     import java.util.List;
-    import java.util.Set;
 
     import com.binghamton.jhelp.*;
     import com.binghamton.jhelp.ast.*;
+    import com.binghamton.jhelp.error.SyntacticError;
 
     import static com.binghamton.jhelp.ast.NameExpression.*;
     import static com.binghamton.jhelp.ast.BodyDeclaration.Kind.*;
@@ -68,12 +67,17 @@ grammar Java8;
 
 @parser::members {
     private void checkModifiers(List<Modifier> modifiers) {
-        Set<Modifier> modSet = new HashSet<>();
+        List<Modifier> mods = new ArrayList<>();
         for (Modifier mod : modifiers) {
-            if (!modSet.add(mod)) {
+            if (mods.contains(mod)) {
                 notifyErrorListeners(mod.getToken(),
-                                     "duplicate modifier",
-                                     null);
+                                     null,
+                                     new RepeatModifierException(this,
+                                                                 getInputStream(),
+                                                                 getRuleContext(),
+                                                                 (MyToken)mods.get(mods.indexOf(mod)).getToken()));
+            } else {
+                mods.add(mod);
             }
         }
     }

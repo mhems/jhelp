@@ -5,6 +5,8 @@ package com.binghamton.jhelp;
  */
 public class JHelp {
 
+    public static final String VERSION = "0.3";
+
     /**
      * Construct a new JHelp instance
      */

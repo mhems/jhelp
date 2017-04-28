@@ -1,5 +1,7 @@
 package com.binghamton.jhelp.antlr;
 
+import java.util.Comparator;
+
 import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonToken;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -15,7 +17,11 @@ import com.binghamton.jhelp.util.ColorStringBuilder;
  * A class wrapping ANTLR's CommonToken with a reference to the FileBuffer it
  * originated from.
  */
-public class MyToken extends CommonToken {
+public class MyToken extends CommonToken implements Comparable<MyToken> {
+    private static final Comparator<MyToken> TOKEN_COMPARATOR =
+        Comparator.<MyToken>comparingInt(t -> t.getLine())
+        .thenComparingInt(t -> t.getCharPositionInLine())
+        .thenComparingInt(t -> t.getStopIndex());
     private static final long serialVersionUID = 1L;
     private FileBuffer buffer;
     private CommonTokenStream stream;
@@ -73,6 +79,14 @@ public class MyToken extends CommonToken {
         return buffer.getLine(line);
     }
 
+    public int getColStart() {
+        return charPositionInLine;
+    }
+
+    public int getColStop() {
+        return charPositionInLine + getText().length();
+    }
+
     /**
      * Returns the name of this Object's source file
      * @return the name of this Object's source file
@@ -102,11 +116,53 @@ public class MyToken extends CommonToken {
     }
 
     public String getHighlightedLine() {
+        return highlight(getLineText(),
+                         charPositionInLine,
+                         charPositionInLine + getText().length());
+    }
+
+    public boolean onSameLine(MyToken... tokens) {
+        for (MyToken tok : tokens) {
+            if (tok.line != this.line) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    public static String getHighlightedLine(MyToken first, MyToken... tokens) {
+        int line = first.line;
+        int start = first.getColStart();
+        int stop = first.getColStop();
+        String text = first.getLineText();
         ColorStringBuilder sb = new ColorStringBuilder();
-        String line = getLineText();
-        sb.append(line.substring(0, charPositionInLine));
-        int stop = charPositionInLine + getText().length();
-        sb.append(line.substring(charPositionInLine, stop),
+        sb.append(text.substring(0, start));
+        sb.append(text.substring(start, stop),
+                  ColorStringBuilder.Color.RED,
+                  null);
+        for (int i = 0; i < tokens.length; i++) {
+            if (line != tokens[i].line) {
+                throw new IllegalArgumentException("cannot highlight tokens on different lines");
+            }
+            if (tokens[i].getColStart() < start ||
+                tokens[i].getColStop() < stop) {
+                throw new IllegalArgumentException("tokens must be in order");
+            }
+            start = tokens[i].getColStart();
+            sb.append(text.substring(stop, start));
+            stop = tokens[i].getColStop();
+            sb.append(text.substring(start, stop),
+                      ColorStringBuilder.Color.RED,
+                      null);
+        }
+        sb.append(text.substring(stop));
+        return sb.toString();
+    }
+
+    private static String highlight(String line, int start, int stop) {
+        ColorStringBuilder sb = new ColorStringBuilder();
+        sb.append(line.substring(0, start));
+        sb.append(line.substring(start, stop),
                   ColorStringBuilder.Color.RED,
                   null);
         sb.append(line.substring(stop));
@@ -132,5 +188,13 @@ public class MyToken extends CommonToken {
             Integer.hashCode(channel) ^
             Integer.hashCode(start) ^
             Integer.hashCode(stop);
+    }
+
+    @Override
+    public int compareTo(MyToken other) {
+        if (!buffer.equals(other.buffer)) {
+            throw new IllegalArgumentException("only Tokens from the same file are Comparable");
+        }
+        return TOKEN_COMPARATOR.compare(this, other);
     }
 }

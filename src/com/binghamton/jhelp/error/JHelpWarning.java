@@ -1,9 +1,21 @@
 package com.binghamton.jhelp.error;
 
+import org.antlr.v4.runtime.Token;
+
 /**
  * A base class representing non-fatal JHelpErrors
  */
 public abstract class JHelpWarning extends JHelpError {
+
+    /**
+     * Constructs a new JHelpWarning on a specific Token
+     * @param token the Token the warning is issued on
+     * @param msg the message explaining the error
+     * @param suggestion a suggestion to fix the warning
+     */
+    protected JHelpWarning(Token token, String msg, String suggestion) {
+        super(token, msg, suggestion);
+    }
 
     /**
      * Constructs a new JHelpWarning with a message
