@@ -13,7 +13,8 @@ public class MemberLevelValidator implements Validator {
     @Override
     public void validate(Program program) {
         if (!program.isDAG()) {
-            program.addError(new SemanticError("cyclic inheritance hierarchy"));
+            program.addError(new SemanticError("The program has a cyclic inheritance hierarchy",
+                                 "Alter the inheritance hierarchy so that no class depends on itself"));
         } else {
             visitor = new BodyLevelVisitor(program);
             visitor.visitInOrder();

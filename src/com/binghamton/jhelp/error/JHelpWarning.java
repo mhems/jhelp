@@ -2,6 +2,8 @@ package com.binghamton.jhelp.error;
 
 import org.antlr.v4.runtime.Token;
 
+import com.binghamton.jhelp.ast.ASTNode;
+
 /**
  * A base class representing non-fatal JHelpErrors
  */
@@ -32,6 +34,10 @@ public abstract class JHelpWarning extends JHelpError {
      */
     protected JHelpWarning(String fmt, Object... args) {
         super(fmt, args);
+    }
+
+    protected JHelpWarning(ASTNode ast, String msg, String suggestion) {
+        super(ast, msg, suggestion);
     }
 
     /**

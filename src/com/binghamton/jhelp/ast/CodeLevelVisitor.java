@@ -26,6 +26,7 @@ import com.binghamton.jhelp.Type;
 import com.binghamton.jhelp.TypeVariable;
 import com.binghamton.jhelp.VariableSymbol;
 import com.binghamton.jhelp.WildcardType;
+import com.binghamton.jhelp.antlr.MyToken;
 import com.binghamton.jhelp.error.StyleWarning;
 import com.binghamton.jhelp.error.UnimplementedFeatureWarning;
 
@@ -79,7 +80,11 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                 if (type != null) {
                     ast.setType(type);
                 } else {
-                    addError("unknown inner class");
+                    addError(rhs,
+                             lType.getClassSymbol().getName() + " has no type named " + rName,
+                             String.format("Did you make a typo or forget to add %s to %s?",
+                                           rName,
+                                           lType.getClassSymbol().getName()));
                 }
             } else if (rKind == Kind.EXPRESSION) {
                 VariableSymbol var = lType.getClassSymbol().getField(rName);
@@ -87,7 +92,11 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                     ast.setSymbol(var);
                     ast.setType(var.getType());
                 } else {
-                    addError("unknown variable");
+                    addError(rhs,
+                             lType.getClassSymbol().getName() + " has no field named " + rName,
+                             String.format("Did you make a typo or forget to add %s to %s?",
+                                           rName,
+                                           lType.getClassSymbol().getName()));
                 }
             } else if (rKind == Kind.METHOD) {
                 // set type to type of lhs
@@ -112,7 +121,9 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         ast.getTypeExpression().accept(this);
         ann = ast.getTypeExpression().getType().getClassSymbol();
         if (!ann.isAnnotation()) {
-            addError("can only annotate with an annotation");
+            addError(ast,
+                     "Can only annotate with an annotation type",
+                     "Declare " + ann.getName() + " to be an annotation");
         }
         ast.setType(ann);
 
@@ -125,10 +136,12 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             arg = ast.getSingleValue();
             arg.accept(this);
             if (needed.size() != 1) {
-                addError("single element annotation requires annotation with only one method");
+                addError(ast,
+                         ann.getName() + " requires more than argument",
+                         "Supply the missing necessary arguments");
             } else {
                 method = ann.getMethod(needed.toArray(new String[1])[0]);
-                annotationTypeCheck(method.getReturnType(), arg.getType());
+                annotationTypeCheck(method.getReturnType(), arg);
             }
         } else {
             for (Token id : ast.getArguments().keySet()) {
@@ -137,13 +150,17 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                     needed.remove(id);
                     arg = ast.getValue(id);
                     arg.accept(this);
-                    annotationTypeCheck(method.getReturnType(), arg.getType());
+                    annotationTypeCheck(method.getReturnType(), arg);
                 } else {
-                    addError("unknown annotation element");
+                    addError((MyToken)id,
+                             id.getText() + " is not a known element of " + ann.getName(),
+                             "Add the element to the annotation or omit the argument");
                 }
             }
             if (!needed.isEmpty()) {
-                addError("non-default annotation element values omitted from annotation");
+                addError(ast,
+                         "Insufficient arguments, necessary annotation elements are missing",
+                         "Supply the missing necessary arguments");
             }
         }
     }
@@ -156,11 +173,15 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         ast.getArrayExpression().accept(this);
         Type arrayType = ast.getArrayExpression().getType();
         if (arrayType.rank() == 0) {
-            addError("an array access must be on an array type");
+            addError(ast.getArrayExpression(),
+                     "An array access must be on an array type",
+                     "Change the type to be an array type");
         }
         ast.getIndexExpression().accept(this);
         if (!unaryPromotion(ast.getIndexExpression()).equals(PrimitiveType.INT)) {
-            addError("an array access must be with an int index");
+            addError(ast.getIndexExpression(),
+                     "An array access must be with an expression that evaluates to an int",
+                     "Change the index expression to evaluate to an int");
         }
         if (arrayType.rank() != 0) {
             ast.setType(((ArrayType)arrayType).getBaseType());
@@ -176,13 +197,17 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         int dims = 0;
         Type baseType = ast.getElementTypeExpression().getType();
         if (!baseType.isReifiable()) {
-            addError("array element type must be reifiable");
+            addError(ast.getElementTypeExpression(),
+                     "The base type of an array must be reifiable",
+                     "Use a reifiable type or a different data structure");
         }
         if (ast.hasDimensionExpressions()) {
             for (DimensionExpression de : ast.getDimensionExpressions()) {
                 de.accept(this);
                 if (!unaryPromotion(de).equals(PrimitiveType.INT)) {
-                    addError("an array must be constructed with integral dimension");
+                    addError(de,
+                             "An array must be constructed with an integer dimension",
+                             "Provide an integer dimension");
                 }
                 ++dims;
             }
@@ -199,7 +224,9 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             ast.getInitializer().setInferredType(baseType);
             ast.getInitializer().accept(this);
             if (!baseType.equals(ast.getInitializer().getType())) {
-                addError("array must be initialized with array of same type as declared");
+                addError(ast,
+                         "An array must be initialized with elements of the same type as the declared element type of the array",
+                         "Correct the type of each specified element of the array");
             }
         }
         ast.setType(baseType);
@@ -212,12 +239,16 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
     public void visit(ArrayInitializer ast) {
         Type baseType = ((ArrayType)ast.getInferredType()).getBaseType();
         if (!baseType.isReifiable()) {
-            addError("base type of array initializer must be reifiable");
+            addError(ast,
+                     "The element type of array initializer must be reifiable",
+                     "Ensure each element is of a reifiable type");
         }
         for (Expression e : ast.getInitializers()) {
             e.accept(this);
             if (!isAssignable(baseType, e.getType())) {
-                addError("elements of array initializer must be assignable to base type");
+                addError(e,
+                         "Elements of array initializer must correspond to the declared base type of the array",
+                         "Correct the type of each specified element in the array initializer");
             }
         }
     }
@@ -230,12 +261,16 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         ast.getCondition().accept(this);
         Type condType = ast.getCondition().getType();
         if (!isBooleanLike(condType)) {
-            addError("assert condition must yield boolean");
+            addError(ast.getCondition(),
+                     "An assert condition must evaluate to a boolean",
+                     "Ensure the expression results in a boolean");
         }
         if (ast.hasMessage()) {
             ast.getMessage().accept(this);
             if (ast.getMessage().getType().equals(PrimitiveType.VOID)) {
-                addError("assert message cannot yield void");
+                addError(ast.getMessage(),
+                         "An assert message cannot result in a void type",
+                         "Change the message expression to result in a non-void type");
             }
         }
     }
@@ -253,11 +288,15 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
 
         // lval will be null if lhs is array access since array elements can never be final
         if (lval != null && lval.isFinal()) {
-            addError("cannot assign to a final variable");
+            addError(ast.getLHS(),
+                     "A final variable cannot be assigned to",
+                     "Make the variable non-final or do not assign to it");
         }
         if (ast.isSimple()) {
             if (!isAssignable(lType, ast.getRHS().getType())) {
-                addError("cannot assign rhs type to lhs type");
+                addError(ast,
+                         "The type of the right hand side is not compatible with the type of the left hand side",
+                         "Change either the left or right hand side such that the types are compatible");
             }
         } else {
             BinaryExpression synthBin = new BinaryExpression(ast.getLHS(),
@@ -265,7 +304,9 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                                                              ast.getRHS());
             synthBin.accept(this);
             if (!canCast(synthBin.getType(), lType)) {
-                addError("result of applying op is not castable to l-value");
+                addError(ast,
+                         "The type of the right hand side is not compatible with the type of the left hand side",
+                         "Change either the left or right hand side such that the types are compatible");
             }
         }
         ast.setType(lType.captureConvert());
@@ -288,8 +329,14 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                  rType.equals(STRING_TYPE))) {
                 ast.setType(STRING_TYPE);
             } else {
-                if (!isNumericLike(lType) || !isNumericLike(rType)) {
-                    addError("binary arithmetic expressions must evaluate numeric types ");
+                if (!isNumericLike(lType)) {
+                    addError(ast.getLHS(),
+                             "The " + op + " operator expects a left hand side with numeric type",
+                             "Change the left hand side to result in a numeric type");
+                } else if (!isNumericLike(rType)) {
+                    addError(ast.getRHS(),
+                             "The " + op + " operator expects a right hand side with numeric type",
+                             "Change the right hand side to result in a numeric type");
                 } else {
                     Type ret = binaryPromotion(ast.getLHS(), ast.getRHS());
                     if (op.isRelational()) {
@@ -302,18 +349,29 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         } else if (op.isShift()) {
             lType = unaryPromotion(ast.getLHS());
             rType = unaryPromotion(ast.getRHS());
-            if (!lType.equals(PrimitiveType.INT) ||
-                !rType.equals(PrimitiveType.INT)) {
-                addError("shift operands must be ints");
+            if (!lType.equals(PrimitiveType.INT)) {
+                addError(ast.getLHS(),
+                         "The " + op + " shift operand expects a left hand with int type",
+                         "Change the left hand side to result in a numeric type");
+            } else if (!rType.equals(PrimitiveType.INT)) {
+                addError(ast.getRHS(),
+                         "The " + op + " shift operand expects a right hand with int type",
+                         "Change the right hand side to result in a numeric type");
             }
             ast.setType(lType);
         } else if (op == BinaryOperator.INSTANCE_OF) {
             if (!lType.isReference() && lType != NilType.TYPE) {
-                addError("lhs of instanceof must be reference type or null");
+                addError(ast.getLHS(),
+                         "The left hand side of the instanceof operator must be of a reference type or null",
+                         "Change the left hand side to be a reference type or null");
             } else if (!rType.isReference() || !rType.isReifiable()) {
-                addError("rhs of instanceof must be reifiable reference type");
+                addError(ast.getRHS(),
+                         "The right hand side of the instanceof operator must be a reifiable reference type",
+                         "Change the right hand side to be a reifiable reference type");
             } else if (!canCast(lType, rType)) {
-                addError("lhs could never be instanceof rhs");
+                addError(ast,
+                         "The left hand side could never be an instance of the right hand side",
+                         "Change either side such that the left hand side could be an instance of the right hand side");
             }
             ast.setType(PrimitiveType.BOOLEAN);
         } else if (op.isEquality()) {
@@ -325,18 +383,23 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                 if (lType != NilType.TYPE &&
                     rType != NilType.TYPE &&
                     !canCast(lType, rType)) {
-                    addError("lhs could never be equal to rhs");
+                    addError(ast,
+                             "The left hand side could never be equal to the right hand side",
+                             "Change either side such that they could be equal or use the 'equals' method");
                 }
                 ast.setType(PrimitiveType.BOOLEAN);
             } else {
-                addError("cannot equate given types");
+                addError(ast,
+                         "The " + op + " operator expects reference types or numeric types",
+                         "Provide reference types or numeric types");
             }
         } else if (op.isBitwise()) {
             if ((isNumericLike(lType) && isNumericLike(rType)) ||
                 (isBooleanLike(lType) && isBooleanLike(rType))) {
                 ast.setType(binaryPromotion(ast.getLHS(), ast.getRHS()));
             } else {
-                addError("bitwise must be two numbers or two booleans");
+                addError("The bitwise operator, " + op + ", requires two numbers or two booleans",
+                         "Provide two numbers or two boolean values");
             }
         } else if (op.isLogical()) {
             if (isBooleanLike(lType) && isBooleanLike(rType)) {
@@ -387,13 +450,18 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
      */
     public void visit(CallExpression ast) {
         MethodSymbol m = resolveMethod(ast, ast.getName() == null);
+        if (ast.hasTypeArguments()) {
+            addError(new UnimplementedFeatureWarning(ast.getArgument(0),
+                                                     "Calls to generic methods"));
+        }
         // TODO check method appropriate (15.12.3)
         ast.setSymbol(m);
         if (m != null) {
-            System.out.println("successfully resolved " + ast.getName());
             ast.setType(m.getReturnType());
         } else {
-            addError("could not resolve method: " + ast.getName());
+            addError(ast.getName(),
+                     "The call to method " + ast.getName() + " could not be resolved",
+                     "Supply the proper arguments or change the method's parameters");
         }
     }
 
@@ -418,7 +486,9 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         Type targetType = ast.getTargetExpression().getType();
         if (ast.hasBounds()) {
             if (!(targetType instanceof ClassSymbol)) {
-                addError("cast with bounds must cast to class/interface type");
+                addError(ast.getTargetExpression(),
+                         "A cast with bounds must cast to a class or interface type",
+                         "Change the bounds to name class or interface types");
             }
             // TODO pairwise-different erasures, no subtypes of different parameterizations of same interface
             for (Expression bound : ast.getBoundExpressions()) {
@@ -426,7 +496,9 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             }
         }
         if (!canCast(sourceType, targetType)) {
-            addError("source type could never be cast to target type");
+            addError(ast,
+                     "The source type could never be cast to the target type",
+                     "Alter either the source or target types or alter their inheritance hierarchies");
         }
         ast.setType(targetType.captureConvert());
     }
@@ -439,10 +511,14 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         for (Expression expr : ast.getExceptionTypes()) {
             expr.accept(this);
             if (!expr.getType().getClassSymbol().extendsClass(fetch("Throwable"))) {
-                addError("catch block exception must extend Throwable class");
+                addError(expr,
+                         "Cannot catch an Object that is not an exception",
+                         "Change " + expr.getType().getClassSymbol().getName() + " to extend Throwable or remove the catch block");
             }
             if (expr.getType() instanceof TypeVariable) {
-                addError("cannot catch on a type variable type");
+                addError(expr,
+                         "Cannot catch a type variable",
+                         "Change the type to name a class or interface that extends Throwable");
             }
         }
         currentScope.enterScope();
@@ -502,7 +578,9 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             type = tmp;
         }
         if (!type.isValidClassLiteralType()) {
-            addError("type in class literal must be valid");
+            addError(ast.getTypeExpression(),
+                     "A class literal must be of valid type",
+                     "Provide a valid type, such as a class or array");
         }
         ast.setType(new ParameterizedType(fetch("Class"), type));
         ast.getType().setProgram(program);
@@ -534,7 +612,9 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                                                          ctorParamTypes,
                                                          new ArrayList<Type>());
         if (ctor == null) {
-            addError("cannot find constructor for enum constant");
+            addError(ast,
+                     "Cannot find a constructor for the given arguments to the enum constant",
+                     "Supply the proper argument types or add an appropriate constructor to the enum");
         }
 
         if (!ast.isEmpty()) {
@@ -547,7 +627,9 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             bodyAST.setSymbol(constant);
             bodyAST.accept(superVisitor);
             if (constant.hasAbstractMethod()) {
-                addError("an enum constant body cannot declare abstract methods");
+                addError(ast.getName(),
+                         "An enum constant body cannot declare abstract methods",
+                         "Remove the abstract methods or make them non-abstract");
             }
 
             bodyAST.accept(this);
@@ -585,10 +667,14 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                 source = ((ParameterizedType)type).getParameter(0);
             }
             if (!isAssignable(var.getType(), source)) {
-                addError("type of elements being iterated over does not match type of variable declared in this loop");
+                addError(ast.getIterable(),
+                         "The type of elements being iterated over does not match the type of the variable declared in this loop",
+                         "Alter the type of the iteration variable or the type of the Iterable");
             }
         } else {
-            addError("for each statement must iterate over arrays or an implementor of Iterable");
+            addError(ast.getIterable(),
+                     "For each loops must iterate over arrays or an implementor of the Iterable interface",
+                     "Specify an array or Iterable to iterate over");
         }
         visit((Block)ast);
         currentScope.exitScope();
@@ -607,7 +693,9 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         if (!ast.getCondition().isNil()) {
             ast.getCondition().accept(this);
             if (!isBooleanLike(ast.getCondition().getType())) {
-                addError("a for loop condition must yield a boolean");
+                addError(ast.getCondition(),
+                         "The condition in a for loop must evaluate to a boolean",
+                         "Change the condition to result in a boolean");
             }
         } else {
             ast.getCondition().setType(PrimitiveType.BOOLEAN);
@@ -627,7 +715,9 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
     public void visit(IfElseStatement ast) {
         ast.getCondition().accept(this);
         if (!isBooleanLike(ast.getCondition().getType())) {
-            addError("an if condition must yield a boolean, is: " + ast.getCondition().getType());
+            addError(ast.getCondition(),
+                     "The condition in an if statement must evaluate to a boolean",
+                     "Change the condition to result in a boolean");
         }
         ast.getThenBlock().accept(this);
         ast.getElseBlock().accept(this);
@@ -638,7 +728,6 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(InstantiationExpression ast) {
-        System.out.println("instantiating " + ast.getSymbol());
         Type consType = ast.getSymbol().getReturnType();
         ClassSymbol consCls = consType.getClassSymbol();
         ast.setType(consType);
@@ -646,34 +735,52 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             Type[] tArgs = ((ParameterizedType)consType).getParameters();
             if (tArgs.length == 0) {
                 if (ast.hasAnonymousClass()) {
-                    addError("cannot use diamond operator to instantiate an anonymous class");
+                    addError(ast.getMethod(),
+                             "Cannot use diamond operator to instantiate an anonymous class",
+                             "Specify type arguments");
                 }
                 if (ast.getTypeArguments().size() > 0) {
-                    addError("cannot supply type arguments to constructor, but use diamond operator on class");
+                    addError(ast.getMethod(),
+                             "Cannot supply type arguments to the constructor but use the diamond operator when specifying the class",
+                             "Do not supply type arguments to the constructor or specify type arguments to the class");
                 }
             }
             if (!consCls.isGeneric() && !ast.hasAnonymousClass()) {
-                addError("cannot construct a non-generic class with type arguments");
+                addError(ast.getMethod(),
+                         "Cannot specify type arguments when constructing a non-generic class",
+                         "Remove the type arguments or make the class generic");
             }
+            int index = 0;
             for (Type tArg : tArgs) {
                 if (tArg instanceof WildcardType) {
-                    addError("constructor cannot take wildcard type arguments");
+                    addError(ast.getArgument(index),
+                             "Constructor cannot take a wildcard type argument",
+                             "Specify a type argument that is not a wildcard");
                 }
+                ++index;
             }
         } else if (consCls.isGeneric() && !ast.hasAnonymousClass()) {
-            addError(new StyleWarning("constructing generic class without type arguments"));
+            addError(new StyleWarning(ast.getMethod(),
+                                      "Constructing a generic class without type arguments is not recommended",
+                                      "Use the diamond operator '<>'"));
         }
 
         if (consCls.isEnum()) {
-            addError("cannot construct an enum");
+            addError(ast.getMethod(),
+                     "Cannot construct an enum",
+                     "Refer directly to an enum constant");
         }
         if (!ast.hasAnonymousClass()) {
             if (consCls.isAbstract()) {
-                addError("cannot construct an abstract class or interface");
+                addError(ast.getMethod(),
+                         "Cannot construct an abstract class or interface without specifying an anonymous subclass",
+                         "Specify an anonymous subclass body");
             }
         } else {
             if (consCls.isFinal()) {
-                addError("cannot subclass a final class with an anonymous class");
+                addError(ast.getMethod(),
+                         "Cannot subclass a final class, even with an anonymous class",
+                         "Remove the anonymous class body or make the class non-final");
             }
             MyClassSymbol anonCls = new MyClassSymbol(currentClass);
             anonCls.setProgram(program);
@@ -692,7 +799,9 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             MyClassSymbol tmp = currentClass;
             bodyAST.accept(superVisitor);
             if (bodyAST.numConstructors() > 0) {
-                addError("anonymous classes cannot declare constructors");
+                addError(ast.getMethod(),
+                         "Anonymous classes cannot declare any constructors",
+                         "Remove all constructors");
             }
 
             bodyAST.accept(this);
@@ -716,11 +825,15 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
      */
     public void visit(JumpStatement ast) {
         if (!inJumpContext) {
-            addError("cannot jump outside of switch/(do)while/for");
+            addError(ast,
+                     "Cannot jump outside of a switch, (do)while, or for statement",
+                     "Remove the jump statement or move it inside a loop statement");
         }
         if (ast.isLabelled() &&
             !labels.contains(ast.getLabel())) {
-            addError("unknown label " + ast.getLabel());
+            addError(ast.getLabel(),
+                     "Unknown label " + ast.getLabel(),
+                     "Introduce a label named " + ast.getLabel());
         }
     }
 
@@ -730,7 +843,9 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
      */
     public void visit(LabelStatement ast) {
         if (!labels.add(ast.getLabel().getText())) {
-            addError("label already exists in current scope");
+            addError(ast.getLabel(),
+                     "Label with that name already exists in current scope",
+                     "Rename or remove the duplicate label");
         }
     }
 
@@ -768,10 +883,14 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         cls.accept(this); // TODO
         cls.getSymbol().setLocal();
         if (cls.getSymbol().hasModifier(Modifier.STATIC)) {
-            addError("local class cannot be static");
+            addError(ast.getDeclaration().getName(),
+                     "Local class cannot have the 'static' modifier",
+                     "Remove the 'static' modifier or move the class to be non-local");
         }
         if (cls.getSymbol().getAccessLevel() != Symbol.AccessLevel.PACKAGE_PRIVATE) {
-            addError("local class cannot have access modifier");
+            addError(ast.getDeclaration().getName(),
+                     "Local class cannot have an access modifier",
+                     "Remove the access modifier");
         }
         currentClass = decl;
     }
@@ -830,7 +949,6 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         NameExpression qual = ast.getQualifyingName();
         VariableSymbol var;
         Type type;
-        System.out.println("code name: " + ast.getText() + " (" + ast.getKind() + ")");
         if (ast.getKind() == Kind.AMBIGUOUS) {
             if (!ast.isQualified()) {
                 var = currentScope.get(rName);
@@ -849,12 +967,13 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                 } else {
                     type = qual.getType();
                     if (type.getClassSymbol().hasMember(rName)) {
-                        System.out.println("reclassifying amb. as expr. since has member " + rName);
                         ast.setKind(Kind.EXPRESSION);
                     } else if (type.getClassSymbol().hasMemberType(rName)) {
                         ast.setKind(Kind.TYPE);
                     } else {
-                        addError("could not find such a qualified field, method, or type");
+                        addError(ast.getToken(),
+                                 "Could not find such a qualified field, method, or type belonging to the class " + type.getClassSymbol().getName(),
+                                 "Did you forget to add such a member to the class or make a typo?");
                     }
                 }
             }
@@ -867,12 +986,16 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                     ast.setSymbol(var);
                     ast.setType(var.getType());
                 } else {
-                    addError("unknown variable");
+                    addError(ast,
+                             "A variable named " + rName + " is not in scope",
+                             "Introduce a variable named " + rName);
                 }
             } else {
                 switch(qual.getKind()) {
                 case PACKAGE:
-                    addError("cannot access a variable from package name");
+                    addError(ast.getToken(),
+                             "Cannot access a variable from a package",
+                             "Qualify the variable with the name of a class, not a package");
                     break;
                 case TYPE:
                     var = qual.getType().getClassSymbol().getField(rName);
@@ -881,25 +1004,32 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                             ast.setSymbol(var);
                             ast.setType(var.getType().captureConvert());
                         } else {
-                            addError("cannot access instance field statically");
+                            addError(ast.getToken(),
+                                     "Cannot access an instance field statically",
+                                     "Access the field with an instance of the class, not the class name");
                         }
                     } else {
-                        addError("class/interface does not have that field");
+                        addError(ast.getToken(),
+                                 "The class " + qual.getType().getClassSymbol().getName() + " does not have a field with that name",
+                                 "Fix the typo or add a field with that name to that class");
                     }
                     break;
                 case EXPRESSION:
                     type = qual.getType();
-                    System.out.println("qual type of expr. name expr: " + type);
                     if (type.isReference()) {
                         var = type.getClassSymbol().getField(rName);
                         if (var != null) {
                             ast.setSymbol(var);
                             ast.setType(var.getType().captureConvert());
                         } else {
-                            addError("indicated class does not have that field");
+                            addError(ast.getToken(),
+                                 "The class " + qual.getType().getClassSymbol().getName() + " does not have a field with that name",
+                                 "Fix the typo or add a field with that name to that class");
                         }
                     } else {
-                        addError("cannot access a field from a non-reference type");
+                        addError(ast.getToken(),
+                                 "Cannot access a field from a non-reference type",
+                                 "Change the type to be a reference type");
                     }
                     break;
                 }
@@ -940,19 +1070,25 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
      */
     public void visit(ReturnStatement ast) {
         if (currentMethod == null) {
-            addError("return statements can only go in methods or constructors");
+            addError(ast,
+                     "Return statements can only go in methods or constructors",
+                     "Remove the return statement or move it into a method or constructor");
         } else {
             Type expRetType = currentMethod.getReturnType();
             if (ast.getExpression().isNil()) {
                 if (!currentMethod.isConstructor() &&
                     !expRetType.equals(PrimitiveType.VOID)) {
-                    addError("empty return can only go in constructor or methods that return void");
+                    addError(ast,
+                             "Empty return can only go in constructor or methods that return void",
+                             "Remove the return, specify a return value, or change the method return type to 'void'");
                 }
             } else {
                 ast.getExpression().accept(this);
                 Type retType = ast.getExpression().getType();
                 if (!isAssignable(expRetType, retType)) {
-                    addError("return type does not match method's");
+                    addError(ast.getExpression(),
+                             "Return type does not match the method's return type",
+                             "Change the return statement's type to match the method's or change the method return type");
                 }
             }
         }
@@ -975,7 +1111,9 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             enumClass = condType.getClassSymbol();
         }
         if (!isValidSwitchType(condType)) {
-            addError("switch condition type must promote to int or be String or enum");
+            addError(ast.getSwitchExpression(),
+                     "Switch condition type must be an int, String or enum",
+                     "Change condition type to be int, String, or enum");
         }
         currentScope.enterScope();
         for (CaseBlock cB: ast.getCases()) {
@@ -983,25 +1121,35 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             for (Expression labelExpr : cB.getLabels()) {
                 caseType = labelExpr.getType();
                 if (!isAssignable(condType, caseType)) {
-                    addError("switch label type must be assignable to switch condition typee");
+                    addError(labelExpr,
+                             "Switch label type must be compatible with type in switch condition",
+                             "Change label type to match that of switch condition");
                 }
                 if (enumClass != null) {
                     caseClass = caseType.getClassSymbol();
                     if (!caseClass.isEnum() || !caseClass.equals(enumClass)) {
-                        addError("enum switches can only have constants of that enum");
+                        addError(labelExpr,
+                                 "Switch statements over enums can only have constants of that enum",
+                                 "Remove this label or add it as an enum constant of that enum");
                     }
                 }
                 if (labelExpr.getText().equals("null")) {
-                    addError("switch cannot have null label");
+                    addError(labelExpr,
+                             "Switch labels cannot be 'null'",
+                             "Change the label to be non-null");
                 }
                 if (labelExpr.getText().equals("default")) {
                     if (seenDefault) {
-                        addError("cannot have multiple default cases");
+                        addError(labelExpr,
+                                 "A switch statement can only have one default case",
+                                 "Merge the code into the first default case and remove the repetitive label");
                     }
                     seenDefault = true;
                 }
                 if (!caseConstants.add(labelExpr.getText())) {
-                    addError("switch labels must be unique");
+                    addError(labelExpr,
+                             "Switch labels cannot be repeated",
+                             "Merge the code into the first unique label and remove the repetitive label");
                 }
             }
         }
@@ -1015,7 +1163,9 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
     public void visit(SynchronizedBlock ast) {
         ast.getLock().accept(this);
         if (!ast.getLock().getType().isReference()) {
-            addError("lock to synchronize on must be of reference type");
+            addError(ast.getLock(),
+                     "Can only synchronize on a reference type",
+                     "Specify a reference type to synchronize on");
         }
     }
 
@@ -1026,15 +1176,22 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
     public void visit(TernaryExpression ast) {
         ast.getCondition().accept(this);
         if (!isBooleanLike(ast.getCondition().getType())) {
-            addError("a ternary expression condition must be boolean type");
+            addError(ast.getCondition(),
+                     "A ternary expression condition must be boolean type",
+                     "Specify a boolean type for the condition");
         }
         ast.getThenExpression().accept(this);
         Type lType = ast.getThenExpression().getType();
         Type rType = ast.getElseExpression().getType();
         ast.getElseExpression().accept(this);
-        if (lType.equals(PrimitiveType.VOID) ||
-            rType.equals(PrimitiveType.VOID)) {
-            addError("ternary expression operands cannot be void");
+        if (lType.equals(PrimitiveType.VOID)) {
+            addError(ast.getThenExpression(),
+                     "The then expression of a ternary expression cannot be void",
+                     "Specify a non-void then expression");
+        } else if (rType.equals(PrimitiveType.VOID)) {
+            addError(ast.getElseExpression(),
+                     "The else expression of a ternary expression cannot be void",
+                     "Specify a non-void else expression");
         }
         if (lType.equals(rType)) {
             ast.setType(lType);
@@ -1083,7 +1240,9 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         expr.accept(this);
         Type type = expr.getType();
         if (type != NilType.TYPE && !isAssignable(type, fetch("Throwable"))) {
-            addError("must either throw null or instance of Throwable");
+            addError(expr,
+                     "Can only throw null or an instance of the Throwable class",
+                     "Throw null or an instance of the Throwable class");
         }
         if (type != NilType.TYPE &&
             !type.getClassSymbol().implementsInterface(fetch("RuntimeException"))) {
@@ -1097,7 +1256,9 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                 }
             }
             if (!good) {
-                addError("throw statement must throw null, an unchecked exception, or be in a method that throws that exception type");
+                addError(expr,
+                         "Throw statement must throw null, an unchecked exception, or be in a method that throws that exception type",
+                         "Change the statement to throw null or an unchecked exception or add the exception to the list of the exceptions this methods throws");
             }
         }
     }
@@ -1112,7 +1273,9 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             var.accept(this);
             var.getSymbol().addModifier(Modifier.FINAL);
             if (!var.getSymbol().getType().getClassSymbol().implementsInterface(fetch("AutoCloseable"))) {
-                addError("resource in try-with-resources must implement AutoCloseable");
+                addError(var,
+                         "The resource in a try-with-resources block must implement the AutoCloseable interface",
+                         "Change the type of the resource or have it implement the AutoCloseable interface");
             }
         }
         ast.getTryBody().accept(this);
@@ -1150,22 +1313,30 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         UnaryOperator op = ast.getOperator();
         if (op.isAdditive()) {
             if (!isNumericLike(type)) {
-                addError("unary expression must be numeric");
+                addError(ast.getExpression(),
+                         "The " + op + " operator expects a numeric argument",
+                         "Provide a numeric type");
             }
             ast.setType(type);
         } else if (op.isLogical()) {
             if (!isBooleanLike(type)) {
-                addError("negation demands boolean-like type");
+                addError(ast.getExpression(),
+                         "The ! operator expectes a boolean argument",
+                         "Provide a boolean type");
             }
             ast.setType(PrimitiveType.BOOLEAN);
         } else {
             if (!isNumericLike(type)) {
-                addError("unary expression must be numeric");
+                addError(ast.getExpression(),
+                         "The " + op + " expects a numeric argument",
+                         "Provide a numeric argument");
             } else {
                 if (op == UnaryOperator.BITWISE_NEGATION &&
                     (type.equals(PrimitiveType.FLOAT) ||
                      type.equals(PrimitiveType.DOUBLE))) {
-                    addError("bitwise negation must be on integral type");
+                    addError(ast.getExpression(),
+                             "The ~ operator expects an integer type",
+                             "Provide an integer argument");
                 }
                 ast.setType(unaryPromotion(ast.getExpression()));
             }
@@ -1178,23 +1349,14 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(VariableDeclaration ast) {
-        System.out.println("*****> var decl" + ast);
         MyVariableSymbol var = ast.getSymbol();
         if (var == null) {
-            System.out.println("encountered new variable");
             var = new MyVariableSymbol(ast.getName(), ast.getModifiers());
             var.setProgram(program);
             ast.setSymbol(var);
             var.setDeclaringClass(currentClass);
             ast.getExpression().accept(this);
             var.setType(ast.getExpression().getType());
-            if (var.getType() == null) {
-                System.err.println("****> variable has no type");
-                return;
-            }
-            System.out.println("added to scope");
-        } else {
-            System.out.println(var.getName() + " " + var.getType());
         }
         if (!var.isField()) {
             currentScope.put(var);
@@ -1204,7 +1366,9 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         init.setInferredType(var.getType());
         init.accept(this);
         if (!init.isNil() && !isAssignable(var.getType(), init.getType())) {
-            addError("cannot initialize a variable of one type with an expression of another type");
+            addError(init,
+                     "This variable's declared type does not match the type of its initial value",
+                     "Provide an initial value of appropriate type or change the variable's type");
         }
     }
 
@@ -1216,7 +1380,9 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         inJumpContext = true;
         ast.getCondition().accept(this);
         if (!isBooleanLike(ast.getCondition().getType())) {
-            addError("a while loop condition must yield boolean");
+            addError(ast.getCondition(),
+                     "A while loop condition expects a boolean",
+                     "Provide a boolean condition");
         }
     }
 
@@ -1358,13 +1524,18 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         }
     }
 
-    private void annotationTypeCheck(Type expected, Type actual) {
+    private void annotationTypeCheck(Type expected, Expression arg) {
+        Type actual = arg.getType();
         if (!(expected instanceof ArrayType)) {
             if (!isAssignable(expected, actual)) {
-                addError("invalid annotation element value, must be assignable to element type");
+                addError(arg,
+                         "Invalid annotation element value, must be compatible with element type",
+                         "Provide argument with compatible type to element value");
             }
             if (actual == NilType.TYPE) {
-                addError("annotation element value cannot be null");
+                addError(arg,
+                         "An annotation element value cannot be null",
+                         "Specify a non-null element value");
             }
         }
     }
@@ -1387,12 +1558,10 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
 
     private MethodSymbol resolveMethod(CallExpression ast, boolean isCtor) {
 
-        System.out.println("attempting to resolve method: " + ast);
         ast.getMethod().setInferredType(ast.getInferredType());
         MethodSymbol ret = null;
         ast.getMethod().accept(this);
         Type owningType = ast.getMethod().getType();
-        System.out.println("owning type is " + owningType.getName());
         if (owningType == null) {
             // unqualified method
             assert(!isCtor);
@@ -1419,7 +1588,9 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         for (TypeArgument tArg : ast.getTypeArguments()) {
             tArg.accept(this);
             if (tArg.getType() instanceof WildcardType) {
-                addError("method cannot take wildcard type arguments");
+                addError(tArg,
+                         "A method cannot take wildcard type arguments",
+                         "Provide a type argument that is not a wildcard");
             }
             typeArgTypes.add(tArg.getType());
         }
@@ -1440,8 +1611,6 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         if (isCtor) {
             choices = owningCls.getConstructors();
         } else {
-            System.out.println("looking for methods in " + owningCls.getName() + " named " + ast.getName().getText());
-            System.out.println(owningCls.repr());
             choices = owningCls.getMethodsByName(ast.getName().getText());
         }
 
@@ -1452,9 +1621,6 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                                                   Type[] argTypes,
                                                   List<Type> typeArgTypes) {
         MethodSymbol ret = null;
-
-        System.out.println("There are " + choices.length + " choices");
-
         List<MethodSymbol> potCands = new ArrayList<>();
         for (MethodSymbol m : choices) {
             if (((argTypes.length >= m.arity() - 1) &&
@@ -1465,7 +1631,6 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             }
         }
         if (potCands.isEmpty()) {
-            addError("no applicable methods exist");
             return null;
         }
 

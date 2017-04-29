@@ -61,6 +61,15 @@ public class Modifiers {
         }
     }
 
+    public Modifier getModifier(Modifier modifier) {
+        for (Modifier mod : modifiers) {
+            if (mod.equals(modifier)) {
+                return mod;
+            }
+        }
+        return null;
+    }
+
     /**
      * Gets the Set of underlying Modifiers in this instance
      * @return the Set of underlying Modifiers in this instance

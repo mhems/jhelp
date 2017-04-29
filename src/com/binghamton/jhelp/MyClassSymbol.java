@@ -99,7 +99,9 @@ public class MyClassSymbol extends ClassSymbol {
      */
     public boolean addInterface(Type sym) {
         if (!interfaces.put(sym)) {
-            addError(new SemanticError("class cannot implement same interface twice"));
+            addError(token,
+                     "This class cannot implement the same interface twice",
+                     "Remove second duplicate interface");
             return false;
         }
         return true;
@@ -126,28 +128,42 @@ public class MyClassSymbol extends ClassSymbol {
         if (parentMethod != null &&
             parentMethod.getAccessLevel() != AccessLevel.PRIVATE) {
             if (parentMethod.isFinal()) {
-                addError(new SemanticError("cannot override a final method"));
+                addError(((MyMethodSymbol)sym).getToken(),
+                         "Cannot override a final method",
+                         "Change the method signature to not override");
                 good = false;
             } else if (parentMethod.isStatic() && !sym.isStatic()) {
-                addError(new SemanticError("an instance method cannot override a static method"));
+                addError(((MyMethodSymbol)sym).getToken(),
+                         "An instance method cannot override a static method",
+                         "Change the method signature to not override");
                 good = false;
             } else if (sym.isStatic() && !parentMethod.isStatic()) {
-                addError(new SemanticError("a static method cannot hide an instance method"));
+                addError(((MyMethodSymbol)sym).getToken(),
+                         "A static method cannot hide an instance method",
+                         "Change the method to not be 'static' or change the signature to not hide (override)");
                 good = false;
             }
             if (sym.hasCheckedExceptions() && !parentMethod.hasExceptions()) {
-                addError(new SemanticError("cannot override a method without any exceptions with a method that throws a checked exception"));
+                addError(((MyMethodSymbol)sym).getToken(),
+                         "Cannot override a method with no exceptions with a method that throws a checked exception",
+                         "Alter the method so it does not throw the checked exceptions");
                 good = false;
             }
             if (sym.getAccessLevel().compareTo(parentMethod.getAccessLevel()) > 0) {
-                addError(new SemanticError("cannot override a method with a method that has more restrictive access than the method it is overriding"));
+                addError(((MyMethodSymbol)sym).getToken(),
+                         "Cannot override a method with a method that has more restrictive access than the method it is overriding",
+                         "Alter this methods access to be at least as accessible as the parent method");
             }
         } else if (sym.hasOverrideAnnotation()){
-            addError(new SemanticError("method is not being overridden!"));
+            addError(((MyMethodSymbol)sym).getToken(),
+                     "This method is not being overridden even if you think it is",
+                     "Change the method signature to match the signature of the parent method you wish to override");
         }
         if (good) {
             if (!methods.put(sym)) {
-                addError(new SemanticError("class cannot declare same method twice"));
+                addError(token,
+                         "A class cannot declare the same method twice",
+                         "Change the method signature to name a unique method");
                 return false;
             }
             return true;
@@ -162,7 +178,9 @@ public class MyClassSymbol extends ClassSymbol {
      */
     public boolean addConstructor(MethodSymbol sym) {
         if (!ctors.put(sym)) {
-            addError(new SemanticError("class cannot declare same constructor twice"));
+            addError(((MyMethodSymbol)sym).getToken(),
+                     "A class cannot declare the same constructor twice",
+                     "Change the constructor signature to name a unique constructor");
             return false;
         }
         return true;
@@ -175,7 +193,9 @@ public class MyClassSymbol extends ClassSymbol {
      */
     public boolean addField(VariableSymbol sym) {
         if (!fields.put(sym)) {
-            addError(new SemanticError("class cannot declare same field twice"));
+            addError(((MyVariableSymbol)sym).getToken(),
+                     "A class cannot declare the same field twice",
+                     "Change the name of the field to be unique");
             return false;
         }
         return true;
@@ -188,7 +208,6 @@ public class MyClassSymbol extends ClassSymbol {
      */
     public boolean addTypeParameter(TypeVariable sym) {
         if (!params.put(sym)) {
-            addError(new SemanticError("class cannot declare same type variable twice"));
             return false;
         }
         paramArr = params.toArray(new TypeVariable[params.size()]);
@@ -203,7 +222,9 @@ public class MyClassSymbol extends ClassSymbol {
     public boolean addInnerClass(MyClassSymbol sym) {
         sym.level = Level.INNER;
         if (!innerClasses.put(sym)) {
-            addError(new SemanticError("class cannot declare same inner class twice"));
+            addError(sym.token,
+                     "A class cannot declare the same inner class twice",
+                     "Change the name of the inner class to be unique");
             return false;
         }
         sym.declarer = this;
@@ -218,7 +239,9 @@ public class MyClassSymbol extends ClassSymbol {
     public boolean addMemberType(MyClassSymbol sym) {
         sym.level = Level.MEMBER;
         if (!memberTypes.put(sym)) {
-            addError(new SemanticError("class cannot declare same member class twice"));
+            addError(sym.token,
+                     "A class cannot declare the same member class twice",
+                     "Change the name of the member type to be unique");
             return false;
         }
         sym.declarer = this;
@@ -328,5 +351,9 @@ public class MyClassSymbol extends ClassSymbol {
         MyClassSymbol ret = new MyClassSymbol(this, false);
         adapt(ret, map, first);
         return ret;
+    }
+
+    private void addError(Token token, String msg, String suggestion) {
+        super.addError(new SemanticError(token, msg, suggestion));
     }
 }

@@ -137,20 +137,10 @@ public class ImportingSymbolTable extends NamedSymbolTable<ClassSymbol> {
      * Imports a class type into this table
      * @param classname the name of the class to try to import
      * @return true iff the import was successful
+     * @throws ClassNotFoundException if classname does not name a pre-compiled class
      */
-    public boolean importType(String classname) {
-        ReflectedClassSymbol cls = null;
-        try {
-            cls = ImportManager.getOrImport(classname);
-        } catch(ClassNotFoundException e) {
-            System.err.println("could not import " + classname);
-        }
-        if (cls != null &&
-            !put(cls) &&
-            !get(classname).equals(cls)) {
-            System.err.println("cannot import two different classes with same name");
-        }
-        return cls != null;
+    public boolean importType(String classname) throws ClassNotFoundException {
+        return put(ImportManager.getOrImport(classname));
     }
 
     /**

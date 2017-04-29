@@ -57,7 +57,7 @@ public class BalancedValidator implements Validator {
                 lexer.setTokenFactory(factory);
                 program.addErrors(check(stream));
             } catch (IOException e) {
-                program.addError(new JHelpError("An IO error occured while processing '%s'",
+                program.addError(new JHelpError("An IO error occured while processing the file '%s'",
                                                 file.getName()));
             }
         }

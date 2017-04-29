@@ -29,6 +29,10 @@ public class MyVariableSymbol extends VariableSymbol {
         this.token = var.token;
     }
 
+    public Token getToken() {
+        return token;
+    }
+
     /**
      * Sets this variable's type
      * @param type this variable's type

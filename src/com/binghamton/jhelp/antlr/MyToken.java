@@ -10,6 +10,7 @@ import org.antlr.v4.runtime.TokenSource;
 import org.antlr.v4.runtime.misc.Pair;
 import org.antlr.v4.runtime.misc.Interval;
 
+import com.binghamton.jhelp.ast.ASTNode;
 import com.binghamton.jhelp.util.FileBuffer;
 import com.binghamton.jhelp.util.ColorStringBuilder;
 
@@ -157,6 +158,12 @@ public class MyToken extends CommonToken implements Comparable<MyToken> {
         }
         sb.append(text.substring(stop));
         return sb.toString();
+    }
+
+    public static String getHighlightedLine(ASTNode ast) {
+        return highlight(ast.getFirstToken().getLineText(),
+                         ast.getFirstToken().getColStart(),
+                         ast.getLastToken().getColStop());
     }
 
     private static String highlight(String line, int start, int stop) {

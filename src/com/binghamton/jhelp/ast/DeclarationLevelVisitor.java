@@ -50,7 +50,11 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         if (lType != null) {
             Type type = lType.getClassSymbol().getType(rName);
             if (type == null) {
-                addError("unknown type " + ast.getText());
+                addError(rhs,
+                         lType.getClassSymbol().getName() + " has no type named " + rName,
+                         String.format("Did you make a typo or forget to add %s to %s?",
+                                       rName,
+                                       lType.getClassSymbol().getName()));
             } else {
                 ast.setType(type);
             }
@@ -103,7 +107,9 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         ClassSymbol enclosingSym = currentClass.getDeclaringClass();
         while (enclosingSym != null) {
             if (enclosingSym.getName().equals(currentClass.getName())) {
-                addError("inner body cannot have same name as one of its enclosing classes");
+                addError(currentClass.getToken(),
+                         "An inner body cannot have same name as one of its enclosing classes",
+                         "Rename the inner body to have a different name");
                 break;
             }
             enclosingSym = enclosingSym.getDeclaringClass();
@@ -116,9 +122,15 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
             currentClass.addModifier(Modifier.STATIC);
             currentClass.setAccessLevel(ClassSymbol.AccessLevel.PUBLIC);
 
-            if (currentClass.hasModifier(Modifier.PROTECTED) ||
-                currentClass.hasModifier(Modifier.PRIVATE)) {
-                addError("a member type in an interface cannot be protected or private");
+            if (currentClass.hasModifier(Modifier.PROTECTED)) {
+                addError(currentClass.getModifier(Modifier.PROTECTED),
+                         "A member type in an interface cannot be protected",
+                         "Remove the protected modifier");
+            }
+            if (currentClass.hasModifier(Modifier.PRIVATE)) {
+                addError(currentClass.getModifier(Modifier.PRIVATE),
+                         "A member type in an interface cannot be private",
+                         "Remove the private modifier");
             }
         }
 
@@ -138,11 +150,17 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
             ast.getSuperClass().accept(this);
             ClassSymbol superCls = ast.getSuperClass().getType().getClassSymbol();
             if (superCls.equals(fetch("Enum"))) {
-                addError("cannot directly subclass java.lang.Enum");
+                addError(ast.getName(),
+                         "A class cannot directly subclass java.lang.Enum",
+                         "Use 'enum' instead of 'class'");
             } else if (superCls.isInterfaceLike()) {
-                addError("cannot subclass interface or annotation");
+                addError(ast.getSuperClass(),
+                         "A class can only subclass other classes",
+                         "Do you mean 'implements' instead of 'extends'?");
             } else if (superCls.hasModifier(Modifier.FINAL)) {
-                addError("cannot subclass a final class or simple enum");
+                addError(ast.getName(),
+                         "A class cannot extend a final class or enum",
+                         "If you have access to the source code of " + superCls.getName() + ", remove the 'final' modifier, otherwise you need to rethink your design");
             } else {
                 currentClass.setSuperClass(ast.getSuperClass().getType());
             }
@@ -191,9 +209,15 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
     public void visit(EnumDeclaration ast) {
         currentClass.addModifier(Modifier.STATIC);
 
-        if (currentClass.hasModifier(Modifier.FINAL) ||
-            currentClass.hasModifier(Modifier.ABSTRACT)) {
-            addError("an enum cannot be final nor abstract");
+        if (currentClass.hasModifier(Modifier.FINAL)) {
+            addError(currentClass.getModifier(Modifier.FINAL),
+                     "An enum cannot be final",
+                     "Remove the 'final' modifier");
+        }
+        if (currentClass.hasModifier(Modifier.ABSTRACT)) {
+            addError(currentClass.getModifier(Modifier.ABSTRACT),
+                     "An enum cannot be abstract",
+                     "Remove the 'abstract' modifier");
         }
 
         if (currentClass.isInner() &&
@@ -260,7 +284,9 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
                 ast.setType(type);
             } else {
                 if (kind == Kind.TYPE || !ast.isQualified()) {
-                    addError("unknown type " + name);
+                    addError(ast,
+                             "Unknown identifier",
+                             "Did you forget an import or make a typo");
                 } else {
                     ast.setKind(Kind.PACKAGE);
                 }
@@ -308,10 +334,14 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
                     }
                 }
             } else {
-                addError("cannot parameterize a non-generic class");
+                addError(ast,
+                         "Cannot parameterize a non-generic class",
+                         "Remove the type arguments or make " + sym.getName() + " generic");
             }
         } else {
-            addError("only classes or interfaces may be parameterized");
+            addError(ast,
+                     "Only classes and interfaces may be parameterized",
+                     "Remove the type arguments");
         }
     }
 
@@ -364,7 +394,9 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
             expr.accept(this);
             cur = expr.getType();
             if (cur.getClassSymbol().isClassLike()) {
-                addError("cannot implement a class or enum");
+                addError(expr,
+                         "Cano only implement a interfaces",
+                         "Do you mean 'extends' instead of 'implements'?");
             } else {
                 currentClass.addInterface(cur);
             }

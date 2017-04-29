@@ -30,7 +30,6 @@ public class ParameterizedType extends ReferenceType {
 
     @Override
     public String getName() {
-        // System.out.println("wrapped: " + wrapped);
         StringBuilder sb = new StringBuilder(wrapped.getName());
         sb.append("<");
         if (params.length > 0) {
@@ -53,7 +52,6 @@ public class ParameterizedType extends ReferenceType {
 
     @Override
     public ClassSymbol getClassSymbol() {
-        // System.out.println("getting class symbol for " + getName());
         return wrapped.substitute(params);
     }
 
@@ -145,19 +143,19 @@ public class ParameterizedType extends ReferenceType {
                     for (int i = 0; i < clsVars.length; i++) {
                         for (Type bound : clsVars[i].getBounds()) {
                             if (!myArgs[i].isSubTypeOf(bound)) {
-                                addError(new SemanticError("invalid arg, not a subtype"));
+                                // addError(new SemanticError("invalid arg, not a subtype"));
                                 ret = false;
                             }
                         }
                     }
                 } else {
-                    addError(new SemanticError("class number of parameters does not match with number of arguments given"));
+                    // addError(new SemanticError("class number of parameters does not match with number of arguments given"));
                 }
             } else {
-                addError(new SemanticError("can only parameterize a generic class"));
+                // addError(new SemanticError("can only parameterize a generic class"));
             }
         } else {
-            addError(new SemanticError("can only parameterize a class"));
+            // addError(new SemanticError("can only parameterize a class"));
         }
         return ret;
     }

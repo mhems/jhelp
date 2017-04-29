@@ -5,18 +5,27 @@ import java.util.List;
 import org.antlr.v4.runtime.Token;
 
 import com.binghamton.jhelp.antlr.MyToken;
+import com.binghamton.jhelp.ast.ASTNode;
 
 /**
  * The base class for all JHelp errors
  */
 public class JHelpError {
 
+    private ASTNode ast;
     private MyToken token;
     private String msg;
     private String suggestion;
 
     protected JHelpError() {
         super();
+    }
+
+    public JHelpError(ASTNode ast, String msg, String suggestion) {
+        this.ast = ast;
+        this.token = ast.getFirstToken();
+        this.msg = msg;
+        this.suggestion = suggestion;
     }
 
     public JHelpError(Token token, String msg, String suggestion) {
@@ -94,7 +103,11 @@ public class JHelpError {
         sb.append(msg);
         sb.append("\n");
         sb.append("\n");
-        sb.append(token.getHighlightedLine());
+        if (ast != null) {
+            sb.append(MyToken.getHighlightedLine(ast));
+        } else {
+            sb.append(token.getHighlightedLine());
+        }
         if (suggestion != null) {
             sb.append("\n");
             sb.append("\n");

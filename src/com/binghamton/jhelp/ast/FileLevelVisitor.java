@@ -74,14 +74,16 @@ public class FileLevelVisitor extends EmptyVisitor {
      */
     public void visit(BodyDeclaration ast) {
         if (!Character.isUpperCase(ast.getName().getText().charAt(0))) {
-            addError("Body names should be capitalized, '%s' is not\n",
-                     ast.getName().getText());
+            addError(new StyleWarning(ast.getName(),
+                                      "Body names should be capitalized",
+                                      "Capitalize the name"));
         }
         if (ast.getName().getText().equals(filename) &&
             !ast.getModifiers().contains(Modifier.PUBLIC)) {
-            addError("Body '%s' in file '%s.java' should be declared public\n",
-                     ast.getName().getText(),
-                     filename);
+            addError(new StyleWarning(ast.getName(),
+                                      "Bodies with same name as its file should be declared public\n",
+                                      "Declare " + ast.getName().getText() + " to be public"));
+
         }
 
         MyClassSymbol sym = new MyClassSymbol(ast.getName(), ast.getModifiers());
@@ -89,7 +91,9 @@ public class FileLevelVisitor extends EmptyVisitor {
 
         if (ast.isTop()) {
             if (!pkg.addClass(sym)) {
-                addError("duplicate declaration of body");
+                addError(sym.getToken(),
+                         "A body named " + sym.getName() + " already exists",
+                         "Rename the class or remove one of the classes");
             }
         } else {
             sym.setDeclaringClass(currentClass);
@@ -121,8 +125,14 @@ public class FileLevelVisitor extends EmptyVisitor {
         ast.getSymbol().setSuperClassForClass();
 
         if (ast.hasTypeParameters()) {
+            int index = 0;
             for (TypeVariable var : makeTypeParameters(ast.getTypeParameters())) {
-                currentClass.addTypeParameter(var);
+                if (!currentClass.addTypeParameter(var)) {
+                    addError(ast.getTypeParameters().get(index),
+                             "A class cannot declare the same type parameter",
+                             "Change the name of the type parameter to be unique");
+                }
+                ++index;
             }
         }
     }
@@ -140,7 +150,8 @@ public class FileLevelVisitor extends EmptyVisitor {
         if (ast.hasPackage()) {
             ast.getPackageStatement().accept(this);
         } else {
-            addError(new StyleWarning("class without package"));
+            addError(new StyleWarning("The file '%s.java' declares no package",
+                                      filename));
         }
 
         for (BodyDeclaration decl : ast.getBodyDeclarations()) {
@@ -156,7 +167,8 @@ public class FileLevelVisitor extends EmptyVisitor {
         }
 
         if (pkg.getClassTable().get(filename) == null) {
-            addError("file '%s.java' must declare a body with name of this file\n",
+            addError("The file '%s.java' must declare a body with name of this file (%s)\n",
+                     filename,
                      filename);
         }
     }
@@ -177,14 +189,15 @@ public class FileLevelVisitor extends EmptyVisitor {
     public void visit(ImportStatement ast) {
         String name = ast.getImportName();
         if (ast.isStatic()) {
-            int indexLastSep = name.indexOf('.');
-            String memberName = name.substring(indexLastSep + 1);
-            name = name.substring(0, indexLastSep);
+            String memberName = ast.getNameExpression().getName();
+            name = ast.getNameExpression().getQualifyingName().getText();
             ReflectedClassSymbol cls = null;
             try {
                 cls = ImportManager.getOrImport(name);
             } catch(ClassNotFoundException e) {
-                addError("static import must name existing class");
+                addError(ast.getNameExpression(),
+                         "Cannot import a non-existent class",
+                         "Correct the import to name an existing class or remove it");
             }
             if (cls != null) {
                 ClassSymbol[] inners = cls.getInnerClasses();
@@ -199,7 +212,9 @@ public class FileLevelVisitor extends EmptyVisitor {
                     if (importedClasses.importStaticMember(memberName, inners)) {
                         added = true;
                         if (pkg.getClassTable().has(memberName)) {
-                            addError("cannot import something with same name as class you've made");
+                            addError(ast.getNameExpression(),
+                                     "Cannot import a class with same name as a class you have created",
+                                     "Rename your class or remove the import");
                         }
                     }
                     added |= importedMethods.importStaticMember(memberName,
@@ -207,7 +222,9 @@ public class FileLevelVisitor extends EmptyVisitor {
                     added |= importedFields.importStaticMember(memberName,
                                                                fields);
                     if (!added) {
-                        addError(ast.getText() + " must import at least one member");
+                        addError(ast.getNameExpression(),
+                                 "Static imports must import at least one member",
+                                 "Modify the import to import at least one member");
                     }
                 }
             }
@@ -216,9 +233,22 @@ public class FileLevelVisitor extends EmptyVisitor {
                 importedClasses.importTypesOnDemand(name);
             } else { // single type import
                 if (pkg.getClassTable().has(name)) {
-                    addError("cannot import something with same name as class you've made");
+                    addError(ast.getNameExpression(),
+                             "Cannot import a class with same name as a class you have created",
+                             "Rename your class or remove the import");
                 } else {
-                    importedClasses.importType(name);
+                    try {
+                        if (!importedClasses.importType(name) &&
+                            importedClasses.get(name) instanceof MyClassSymbol) {
+                            addError(ast.getNameExpression(),
+                                     "Cannot import a class with same name as a class you have created",
+                                     "Rename your class or remove the import");
+                        }
+                    } catch (ClassNotFoundException e) {
+                        addError(ast.getNameExpression(),
+                                 "Cannot import a non-existent class",
+                                 "Correct the import to name an existing class or remove it");
+                    }
                 }
             }
         }
@@ -232,8 +262,14 @@ public class FileLevelVisitor extends EmptyVisitor {
         ast.getSymbol().setClassKind(ClassSymbol.ClassKind.INTERFACE);
         ast.getSymbol().addModifier(Modifier.ABSTRACT);
         if (ast.hasTypeParameters()) {
+            int index = 0;
             for (TypeVariable var : makeTypeParameters(ast.getTypeParameters())) {
-                currentClass.addTypeParameter(var);
+                if (!currentClass.addTypeParameter(var)) {
+                    addError(ast.getTypeParameters().get(index),
+                             "An interface cannot declare the same type parameter",
+                             "Change the name of the type parameter to be unique");
+                }
+                ++index;
             }
         }
     }
@@ -294,6 +330,18 @@ public class FileLevelVisitor extends EmptyVisitor {
                                           filename.length() - ".java".length());
             unit.accept(this);
         }
+    }
+
+    public void addError(Token token, String msg) {
+        program.addError(new SemanticError(token, msg));
+    }
+
+    public void addError(ASTNode ast, String msg, String suggestion) {
+        program.addError(new SemanticError(ast, msg, suggestion));
+    }
+
+    public void addError(Token token, String msg, String suggestion) {
+        program.addError(new SemanticError(token, msg, suggestion));
     }
 
     public void addError(String msg) {

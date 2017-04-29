@@ -84,7 +84,7 @@ public abstract class ASTNode implements Visitable, Comparable<ASTNode> {
      * Gets the first token of this ASTNode
      * @return the first token of this ASTNode
      */
-    public final Token getFirstToken() {
+    public final MyToken getFirstToken() {
         return first;
     }
 
@@ -104,7 +104,7 @@ public abstract class ASTNode implements Visitable, Comparable<ASTNode> {
      * Gets the last token of this ASTNode
      * @return the last token of this ASTNode
      */
-    public final Token getLastToken() {
+    public final MyToken getLastToken() {
         return last;
     }
 

@@ -115,6 +115,10 @@ public abstract class Symbol {
         return access;
     }
 
+    public Modifier getModifier(Modifier modifier) {
+        return modifiers.getModifier(modifier);
+    }
+
     /**
      * Gets the modifiers of this symbol
      * @return the modifiers of this symbol

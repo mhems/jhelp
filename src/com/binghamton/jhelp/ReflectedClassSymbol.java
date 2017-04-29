@@ -74,21 +74,6 @@ public final class ReflectedClassSymbol extends ClassSymbol {
     }
 
     /**
-     * Gets the ClassSymbol reflecting a pre-compiled class
-     * @param name the qualified name of the pre-compiled class
-     * @return the ClassSymbol reflecting the pre-compiled class
-     */
-    public static ReflectedClassSymbol get(String name) {
-        ReflectedClassSymbol ret = null;
-        try {
-            ret = ImportManager.getOrImport(name);
-        } catch(ClassNotFoundException e) {
-            System.err.println("could not retrieve class " + name);
-        }
-        return ret;
-    }
-
-    /**
      * Initializes the attributes of this ClassSymbol. Must be called once per
      * instance before any other operations.
      */
