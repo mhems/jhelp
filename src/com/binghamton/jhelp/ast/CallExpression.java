@@ -63,6 +63,7 @@ public class CallExpression extends QualifiableExpression {
         super(methodExpr.getFirstToken(), last);
         this.methodExpr = methodExpr;
         this.name = name;
+        this.nameExpr = NameExpression.createMethodName(name);
         this.args = args;
         this.typeArgs = typeArgs;
     }
@@ -72,16 +73,19 @@ public class CallExpression extends QualifiableExpression {
      * @param first the first token of this ASTNode
      * @param last the last token of this ASTNode
      * @param methodExpr the expression yielding the method being called
+     * @param name the Token holding the name of the class being instantiated
      * @param args the list of arguments to the method call
      * @param typeArgs the list of type arguments to the method call
      */
     protected CallExpression(Token first,
                              Token last,
                              Expression methodExpr,
+                             Token name,
                              List<Expression> args,
                              List<TypeArgument> typeArgs) {
         super(ASTNode.getFirstToken(first, typeArgs), last);
         this.methodExpr = methodExpr;
+        this.nameExpr = NameExpression.createMethodName(name);
         this.args = args;
         this.typeArgs = typeArgs;
     }
