@@ -48,28 +48,16 @@ public class ArrayType extends ReferenceType {
         return base;
     }
 
-    /**
-     * Gets the type name of this ArrayType
-     * @return the type name of this ArrayType
-     */
     @Override
     public String getTypeName() {
         return base.getTypeName() + "[]";
     }
 
-    /**
-     * Gets the simple name of this ArrayType
-     * @return the simple name of this ArrayType
-     */
     @Override
     public String getName() {
         return base.getName() + "[]";
     }
 
-    /**
-     * Gets the number of dimensions of this ArrayType
-     * @return the number of dimensions of this ArrayType
-     */
     @Override
     public int rank() {
         return 1 + base.rank();
@@ -90,30 +78,16 @@ public class ArrayType extends ReferenceType {
         return base.hashCode() ^ annotations.length;
     }
 
-    /**
-     * Computes the type erasure of this ArrayType
-     * @return a new Type which is this type's erasure
-     */
     @Override
     public Type erase() {
         return base.erase();
     }
 
-    /**
-     * Adapts this type with the substitutions specified
-     * @param map the substition map that associates type variables
-     * with the types to substitute in their place
-     * @return the adaptation of this type
-     */
     @Override
     public ArrayType adapt(Map<TypeVariable, Type> map) {
         return new ArrayType(base.adapt(map), annotations);
     }
 
-    /**
-     * Gets the ClassSymbol reflecting this type
-     * @return the ClassSymbol reflecting this type
-     */
     @Override
     public ClassSymbol getClassSymbol() {
         return cache.get(base);
@@ -128,38 +102,21 @@ public class ArrayType extends ReferenceType {
         return base.getDeclaringClass();
     }
 
-    /**
-     * Determines if this type is reifiable
-     * @return true iff this type is reifiable
-     */
     @Override
     public boolean isReifiable() {
         return base.isReifiable();
     }
 
-    /**
-     * Determines if this type is raw
-     * @return true iff this type is raw
-     */
     @Override
     public boolean isRaw() {
         return base.isRaw();
     }
 
-    /**
-     * Determines if this type can be used as a class literal type
-     * @return true iff this type can be used as a class literal type
-     */
     @Override
     public boolean isValidClassLiteralType() {
         return base.isValidClassLiteralType();
     }
 
-    /**
-     * Determines if this type can be cast to another Type
-     * @param target the Type attempting to be cast to
-     * @return true iff this Type can be cast to `target`
-     */
     @Override
     public boolean canCastTo(Type target) {
         if (target instanceof ClassSymbol) {

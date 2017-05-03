@@ -7,6 +7,8 @@ import com.binghamton.jhelp.util.StringMatcher;
 
 /**
  * A SymbolTable where the lookup names need not exactly match the table keys.
+ * @param <K> the type of the keys of this SymbolTable
+ * @param <V> the type of the Symbols this SymbolTable holds
  */
 public class FuzzySymbolTable<K, V extends Symbol> extends SymbolTable<K, V> {
     private final StringMatcher matcher;

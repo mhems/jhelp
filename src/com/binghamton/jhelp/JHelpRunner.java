@@ -18,6 +18,10 @@ public class JHelpRunner {
     private final List<Validator> validators = new ArrayList<>();
     private final Program program;
 
+    /**
+     * Constructs a new JHelpRunner with a command-line invocation
+     * @param args the command-line arguments given to JHelp
+     */
     public JHelpRunner(String[] args) {
         program = new Program(args);
     }

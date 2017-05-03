@@ -27,6 +27,10 @@ public class Program {
         packages.add(MyPackage.DEFAULT_PACKAGE);
     }
 
+    /**
+     * Constructs a new Program to be analyzed
+     * @param args the command-line arguments given to JHelp
+     */
     public Program(String[] args) {
         this.args = args;
         // TODO
@@ -104,32 +108,60 @@ public class Program {
         return packages;
     }
 
+    /**
+     * Determines if this Program has any errors
+     * @return true iff this Program has any errors
+     */
     public boolean hasErrors() {
         return !errors.isEmpty();
     }
 
+    /**
+     * Gets the number of errors in this Program
+     * @return the number of errors in this Program
+     */
     public int numErrors() {
         return errors.size();
     }
 
+    /**
+     * Gets the errors in this Program
+     * @return a List containing all the errors in this Program
+     */
     public List<JHelpError> getErrors() {
         return errors;
     }
 
+    /**
+     * Adds an error to the List of this Program's errors
+     * @param error the error to add
+     */
     public void addError(JHelpError error) {
         errors.add(error);
     }
 
+    /**
+     * Adds errors to the List of this Program's errors
+     * @param errors the errors to add
+     */
     public void addErrors(JHelpError... errors) {
         for (JHelpError error: errors) {
             this.errors.add(error);
         }
     }
 
+    /**
+     * Adds errors to the List of this Program's errors
+     * @param errors the errors to add
+     */
     public void addErrors(Collection<JHelpError> errors) {
         this.errors.addAll(errors);
     }
 
+    /**
+     * Determines if any of this Program's are fatal
+     * @return true iff any of this Program's are fatal
+     */
     public boolean hasFatalErrors() {
         for (JHelpError error : errors) {
             if (error.isFatal()) {
@@ -139,18 +171,34 @@ public class Program {
         return false;
     }
 
+    /**
+     * Gets the Java Files this Program analyzes
+     * @return the Java Files this Program analyzes
+     */
     public File[] getFiles() {
         return files;
     }
 
+    /**
+     * Sets the Java Files this Program analyzes
+     * @param files the Java Files this Program should analyze
+     */
     public void setFiles(File[] files) {
         this.files = files;
     }
 
+    /**
+     * Gets the number of Java Files this Program analyzes
+     * @return the number of Java Files this Program analyzes
+     */
     public int numFiles() {
         return files.length;
     }
 
+    /**
+     * Gets the command-line arguments this Program was invoked with
+     * @return the command-line arguments this Program was invoked with
+     */
     public String[] getArguments() {
         return args;
     }

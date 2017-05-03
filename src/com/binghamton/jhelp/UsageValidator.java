@@ -47,6 +47,7 @@ public class UsageValidator implements Validator {
 
     /**
      * Validates and builds a list of Files to compile
+     * @param program the Program being validated
      * @param files the starting Files and directories to validate and expand from
      */
     private void validate(Program program, File[] files) {

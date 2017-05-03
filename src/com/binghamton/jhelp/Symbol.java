@@ -115,6 +115,12 @@ public abstract class Symbol {
         return access;
     }
 
+    /**
+     * Gets a particular Modifier of this Symbol, if it exists
+     * @param modifier the Modifier to get
+     * @return the corresponding Modifier of this Symbol if it exists,
+     * otherwise null
+     */
     public Modifier getModifier(Modifier modifier) {
         return modifiers.getModifier(modifier);
     }
@@ -255,14 +261,26 @@ public abstract class Symbol {
      */
     public abstract ClassSymbol getDeclaringClass();
 
+    /**
+     * Gets the Program this Symbol originated from
+     * @return the Program this Symbol originated from
+     */
     public Program getProgram() {
         return program;
     }
 
+    /**
+     * Sets the Program this Symbol originates from
+     * @param program the Program this Symbol originates from
+     */
     public void setProgram(Program program) {
         this.program = program;
     }
 
+    /**
+     * Adds an error to this Symbol's Program
+     * @param error the error to add
+     */
     public void addError(JHelpError error) {
         program.addError(error);
     }

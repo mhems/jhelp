@@ -54,6 +54,11 @@ public final class ReflectedClassSymbol extends ClassSymbol {
         }
     }
 
+    /**
+     * Makes a new ReflectedClassSymbol to reflect a pre-compiled class
+     * @param cls the pre-compiled class to reflect
+     * @return a new ReflectedClassSymbol reflecting the pre-compiled class
+     */
     public static ReflectedClassSymbol make(Class<?> cls) {
         return new ReflectedClassSymbol(cls);
     }

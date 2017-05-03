@@ -61,6 +61,11 @@ public class Modifiers {
         }
     }
 
+    /**
+     * Gets the given Modifier among these Modifiers, if present
+     * @param modifier the Modifier to get
+     * @return the Modifier among these Modifiers, if it exists, otherwise null
+     */
     public Modifier getModifier(Modifier modifier) {
         for (Modifier mod : modifiers) {
             if (mod.equals(modifier)) {

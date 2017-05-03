@@ -353,6 +353,12 @@ public class MyClassSymbol extends ClassSymbol {
         return ret;
     }
 
+    /**
+     * Adds a SemanticError to this Program
+     * @param token the offending Token
+     * @param msg the message explaining the error
+     * @param suggestion a suggestion proposing a possible solution to the error
+     */
     private void addError(Token token, String msg, String suggestion) {
         super.addError(new SemanticError(token, msg, suggestion));
     }

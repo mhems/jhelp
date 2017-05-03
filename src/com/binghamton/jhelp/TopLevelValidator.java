@@ -3,6 +3,9 @@ package com.binghamton.jhelp;
 import com.binghamton.jhelp.ast.FileLevelVisitor;
 import com.binghamton.jhelp.ast.DeclarationLevelVisitor;
 
+/**
+ * Validates the top-level declarations among Java Files' contents
+ */
 public class TopLevelValidator implements Validator {
 
     @Override

@@ -10,6 +10,8 @@ import com.binghamton.jhelp.error.SemanticError;
 
 /**
  * A class encapsulating a symbol table over a Java compilation unit
+ * @param <K> the type of the key this SymbolTable uses
+ * @param <V> the type of the Symbol this SymbolTable holds
  */
 public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
 
@@ -19,6 +21,7 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
 
     /**
      * A singleton dummy class to represent an empty SymbolTable
+     * @param <S> the type of the Symbol this SymbolTable holds
      */
     private final class EmptyTable<S extends Symbol> extends SymbolTable<K, S> {
         /**

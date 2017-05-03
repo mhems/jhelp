@@ -29,6 +29,10 @@ public class MyVariableSymbol extends VariableSymbol {
         this.token = var.token;
     }
 
+    /**
+     * Gets the Token holding this variable's name
+     * @return the Token holding this variable's name
+     */
     public Token getToken() {
         return token;
     }

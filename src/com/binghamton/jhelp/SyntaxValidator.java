@@ -18,6 +18,9 @@ import com.binghamton.jhelp.error.JHelpError;
 import com.binghamton.jhelp.error.SyntacticError;
 import com.binghamton.jhelp.util.FileBuffer;
 
+/**
+ * Validates the syntax of Java files' contents
+ */
 public class SyntaxValidator implements Validator {
 
     @Override

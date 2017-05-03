@@ -10,6 +10,9 @@ import java.util.Map;
 public class ImportManager {
     private static final Map<String, ReflectedClassSymbol> cache = new HashMap<>();
 
+    /**
+     * Constructs an ImportManager
+     */
     private ImportManager() {
         // prevent public instantiation
     }

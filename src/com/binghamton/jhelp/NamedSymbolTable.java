@@ -5,6 +5,7 @@ import java.util.function.Function;
 
 /**
  * A specialization of a SymbolTable that keys Symbols by their name
+ * @param <T> the type of Symbol this SymbolTable holds
  */
 public class NamedSymbolTable<T extends Symbol> extends SymbolTable<String, T> {
 

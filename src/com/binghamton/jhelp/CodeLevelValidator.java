@@ -3,9 +3,16 @@ package com.binghamton.jhelp;
 import com.binghamton.jhelp.ast.BodyLevelVisitor;
 import com.binghamton.jhelp.ast.CodeLevelVisitor;
 
+/**
+ * Validates Java files' contents at a line-by-line level
+ */
 public class CodeLevelValidator implements Validator {
     private BodyLevelVisitor visitor;
 
+    /**
+     * Constructs a new CodeLevelValidator
+     * @param visitor the Visitor that visits body declarations
+     */
     public CodeLevelValidator(BodyLevelVisitor visitor) {
         this.visitor = visitor;
     }
