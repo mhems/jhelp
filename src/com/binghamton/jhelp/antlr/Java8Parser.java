@@ -1940,7 +1940,7 @@ public class Java8Parser extends Parser {
 				match(DOT);
 				setState(760);
 				((ExpressionNameContext)_localctx).id = match(Identifier);
-				((ExpressionNameContext)_localctx).ret =  new NameExpression(((ExpressionNameContext)_localctx).a.ret, createExpressionName(((ExpressionNameContext)_localctx).id));
+				((ExpressionNameContext)_localctx).ret =  new NameExpression(((ExpressionNameContext)_localctx).a.ret, createAmbiguousName(((ExpressionNameContext)_localctx).id));
 				}
 				break;
 			}

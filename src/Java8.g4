@@ -308,7 +308,7 @@ packageOrTypeName returns [NameExpression ret]
 expressionName returns [NameExpression ret]
     :   id = Identifier { $ret = createExpressionName($id); }
     |   a = ambiguousName '.' id = Identifier
-        {$ret = new NameExpression($a.ret, createExpressionName($id));}
+        {$ret = new NameExpression($a.ret, createAmbiguousName($id));}
     ;
 
 ambiguousName returns [NameExpression ret]

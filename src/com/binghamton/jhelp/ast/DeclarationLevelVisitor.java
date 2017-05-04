@@ -395,7 +395,7 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
             cur = expr.getType();
             if (cur.getClassSymbol().isClassLike()) {
                 addError(expr,
-                         "Cano only implement a interfaces",
+                         "Can only implement a interfaces",
                          "Do you mean 'extends' instead of 'implements'?");
             } else {
                 currentClass.addInterface(cur);

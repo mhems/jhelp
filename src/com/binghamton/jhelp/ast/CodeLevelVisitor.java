@@ -403,7 +403,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             }
         } else if (op.isLogical()) {
             if (isBooleanLike(lType) && isBooleanLike(rType)) {
-                ast.setType(binaryPromotion(ast.getLHS(), ast.getRHS()));
+                ast.setType(PrimitiveType.BOOLEAN);
             }
         }
     }
@@ -414,12 +414,12 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
      */
     public void visit(Block ast) {
         currentScope.enterScope();
-        try {
-            for (Statement stmt : ast.getStatements()) {
+        for (Statement stmt : ast.getStatements()) {
+            try {
                 stmt.accept(this);
+            } catch (Exception e) {
+                // squelched
             }
-        } catch (Exception e) {
-            // squelched
         }
         currentScope.exitScope();
     }
@@ -431,8 +431,13 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
     public void visit(BodyDeclaration ast) {
         currentClass = ast.getSymbol();
         currentScope = currentClass.getFieldTable();
+
         for (VariableDeclaration v : ast.getFields()) {
-            v.accept(this);
+            try {
+                v.accept(this);
+            } catch (Exception e) {
+                // squelched
+            }
         }
         for (MethodDeclaration m : ast.getMethods()) {
             m.accept(this);
@@ -1035,21 +1040,24 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                 }
             }
         } else if (ast.getKind() == Kind.TYPE) {
-            boolean done = false;
+            ClassSymbol cls = null;
             if ("super".equals(rName) || "this".equals(rName)) {
-                type = qual.getType();
-                if (type != null) {
-                    type.setAnnotations(anns);
-                    if ("super".equals(rName)) {
-                        ast.setType(type.getClassSymbol().getSuperClass());
-                    } else {
-                        ast.setType(type);
+                if (ast.isQualified()) {
+                    type = qual.getType();
+                    if (type != null) {
+                        type.setAnnotations(anns);
+                        cls = type.getClassSymbol();
                     }
-                    done = true;
+                } else {
+                    cls = currentClass;
                 }
             }
-            if (!done) {
+            if (cls == null) {
                 super.visit(ast);
+            } else if ("super".equals(rName)) {
+                ast.setType(cls.getSuperClass());
+            } else {
+                ast.setType(cls);
             }
         } else if (ast.getKind() != Kind.METHOD) {
             super.visit(ast);
@@ -1181,9 +1189,9 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                      "Specify a boolean type for the condition");
         }
         ast.getThenExpression().accept(this);
+        ast.getElseExpression().accept(this);
         Type lType = ast.getThenExpression().getType();
         Type rType = ast.getElseExpression().getType();
-        ast.getElseExpression().accept(this);
         if (lType.equals(PrimitiveType.VOID)) {
             addError(ast.getThenExpression(),
                      "The then expression of a ternary expression cannot be void",
@@ -1557,7 +1565,6 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
     }
 
     private MethodSymbol resolveMethod(CallExpression ast, boolean isCtor) {
-
         ast.getMethod().setInferredType(ast.getInferredType());
         MethodSymbol ret = null;
         ast.getMethod().accept(this);
@@ -1633,6 +1640,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         if (potCands.isEmpty()) {
             return null;
         }
+        choices = potCands.toArray(new MethodSymbol[potCands.size()]);
 
         ret = selectCandidates(choices,
                                argTypes,
