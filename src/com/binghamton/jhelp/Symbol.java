@@ -363,8 +363,9 @@ public abstract class Symbol {
         } else if (type instanceof Class<?>) {
             Class<?> cls = (Class<?>)type;
             if (cls.isPrimitive()) {
-                ret = PrimitiveType.UNBOX_MAP.get(cls.getName());
-            } else if (cls.isArray()) {
+                ret = PrimitiveType.fromPrimitiveName(cls.getSimpleName());
+            }
+            else if (cls.isArray()) {
                 ret = new ArrayType(fromType(cls.getComponentType()));
             } else {
                 ret = ReflectedClassSymbol.get(cls);
@@ -384,7 +385,7 @@ public abstract class Symbol {
         TypeVariable fromTypeVariable(java.lang.reflect.TypeVariable<?> type) {
         // TODO fix cyclic recursion
         // creation of type variable must not create bounds ???
-        return new TypeVariable(type.getName());
+        return new TypeVariable(type);
         // fromTypes(type.getAnnotatedBounds()));
     }
 

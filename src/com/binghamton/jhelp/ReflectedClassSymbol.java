@@ -112,18 +112,11 @@ public final class ReflectedClassSymbol extends ClassSymbol {
 
     @Override
     public PrimitiveType unbox() {
-        if (isBoxed()) {
-            return PrimitiveType.UNBOX_MAP.get(cls.getSimpleName());
-        }
-        return null;
+        return PrimitiveType.fromBoxedName(cls.getSimpleName());
     }
 
     @Override
-    protected ReflectedClassSymbol adapt(Map<TypeVariable, Type> map,
-                                         boolean first) {
-        ReflectedClassSymbol ret = new ReflectedClassSymbol(this);
-        ret.init();
-        adapt(ret, map, first);
-        return ret;
+    protected ReflectedClassSymbol makeNew() {
+        return ReflectedClassSymbol.get(this.cls);
     }
 }

@@ -1,6 +1,5 @@
 package com.binghamton.jhelp;
 
-import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -522,6 +521,9 @@ public abstract class ClassSymbol extends ReferenceType {
      * @return true iff this ClassSymbol extends `cls`
      */
     public boolean extendsClass(ClassSymbol cls) {
+        if (isInterfaceLike() || superClass == null) {
+            return false;
+        }
         return superClass.getClassSymbol().equals(cls) ||
             superClass.getClassSymbol().extendsClass(cls);
     }
@@ -533,12 +535,18 @@ public abstract class ClassSymbol extends ReferenceType {
      * @return true iff this ClassSymbol implements `intf`
      */
     public boolean implementsInterface(ClassSymbol intf) {
+        ClassSymbol sym;
         for (Type type : interfaces) {
-            if (type.getClassSymbol().equals(intf)) {
+            sym = type.getClassSymbol();
+            if (sym.equals(intf) ||
+                (sym.isInterfaceLike() && sym.implementsInterface(intf))) {
                 return true;
             }
         }
-        return superClass.getClassSymbol().implementsInterface(intf);
+        if (superClass != null) {
+            return superClass.getClassSymbol().implementsInterface(intf);
+        }
+        return false;
     }
 
     /**
@@ -653,15 +661,22 @@ public abstract class ClassSymbol extends ReferenceType {
      *         substituted with the given Type arguments
      */
     public ClassSymbol substitute(Type[] args) {
-        List<Type> argList = Collections.unmodifiableList(Arrays.asList(args));
+        Map<TypeVariable, Type> subMap = new HashMap<>();
+        for (int i = 0; i < paramArr.length; i++) {
+            subMap.put(paramArr[i], args[i]);
+        }
+        return lookupOrAdapt(subMap, true);
+    }
+
+    private ClassSymbol lookupOrAdapt(Map<TypeVariable, Type> map,
+                                      boolean first) {
+        List<Type> argList = Collections.unmodifiableList(new ArrayList<>(map.values()));
         ClassSymbol adapted = adaptationCache.get(argList);
+
         if (adapted == null) {
-            Map<TypeVariable, Type> subMap = new HashMap<>();
-            for (int i = 0; i < paramArr.length; i++) {
-                subMap.put(paramArr[i], args[i]);
-            }
-            adapted = this.adapt(subMap, true);
+            adapted = makeNew();
             adaptationCache.put(argList, adapted);
+            adapt(adapted, map, first);
         }
         return adapted;
     }
@@ -679,33 +694,51 @@ public abstract class ClassSymbol extends ReferenceType {
             // allow type parameters to shadow outer scopes'
             for (TypeVariable param : cls.paramArr) {
                 if (map.containsKey(param)) {
+                    System.out.println("--------> removing " + param);
                     map.remove(param);
                 }
             }
         }
+        // System.out.println(cls.getName() + " " + "adapting superclass");
         if (cls.superClass != null){
             cls.superClass = cls.superClass.adapt(map);
         }
+        // System.out.println(cls.getName() + " " + "adapting interfaces");
         cls.interfaces = NamedSymbolTable.adaptTypes(cls.interfaces, map);
+        // System.out.println(cls.getName() + " " + "adapting inner cls");
         cls.innerClasses = NamedSymbolTable.adaptClasses(cls.innerClasses, map);
+        // System.out.println(cls.getName() + " " + "adapting inner mem");
         cls.memberTypes = NamedSymbolTable.adaptClasses(cls.memberTypes, map);
+        // System.out.println(cls.getName() + " " + "adapting field");
         cls.fields = NamedSymbolTable.adaptVariables(cls.fields, map);
+        // System.out.println(cls.getName() + " " + "adapting method");
         cls.methods = cls.methods.adapt(map);
+        // System.out.println(cls.getName() + " " + "adapting ctor");
         cls.ctors = cls.ctors.adapt(map);
     }
 
     /**
      * Helper hook function to adapt
-     * @param map the substitution map
-     * @param first true iff this substitution is top-level
-     * @return the adapted ClassSymbol
+     * @return a new ClassSymbol
      */
-    protected abstract ClassSymbol adapt(Map<TypeVariable, Type> map,
-                                         boolean first);
+    protected abstract ClassSymbol makeNew();
+
+    /**
+     * Determines if this ClassSymbol is subject to adaptation
+     * @return true iff this class or any of its enclosing classes are generic
+     */
+    private boolean subjectToAdaptation() {
+        return isGeneric() ||
+            (getDeclaringClass() != null &&
+             getDeclaringClass().subjectToAdaptation());
+    }
 
     @Override
     public ClassSymbol adapt(Map<TypeVariable, Type> map) {
-        return adapt(map, false);
+        if (subjectToAdaptation()) {
+            return lookupOrAdapt(map, false);
+        }
+        return this;
     }
 
     @Override

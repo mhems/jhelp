@@ -70,9 +70,7 @@ public class MethodSymbol extends Symbol {
     public MethodSymbol(Method method) {
         super(method.getName(), method.getModifiers());
         constructor = false;
-        returnType = fromType(method.getAnnotatedReturnType());
         commonInit(method);
-        constructType();
     }
 
     /**
@@ -82,9 +80,7 @@ public class MethodSymbol extends Symbol {
     public MethodSymbol(Constructor<?> ctor) {
         super(ctor.getName(), ctor.getModifiers());
         constructor = true;
-        returnType = ReflectedClassSymbol.get(ctor.getDeclaringClass());
         commonInit(ctor);
-        constructType();
     }
 
     /**
@@ -404,5 +400,16 @@ public class MethodSymbol extends Symbol {
         typeVars = fromTypeParameters(exe.getTypeParameters());
         paramTypes = fromTypes(exe.getAnnotatedParameterTypes());
         exceptions = fromTypes(exe.getAnnotatedExceptionTypes());
+        if (constructor) {
+            if (declarer.isGeneric()) {
+                returnType = new ParameterizedType(declarer,
+                                                   declarer.getTypeParameters());
+            } else {
+                returnType = declarer;
+            }
+        } else {
+            returnType = fromType(exe.getAnnotatedReturnType());
+        }
+        constructType();
     }
 }

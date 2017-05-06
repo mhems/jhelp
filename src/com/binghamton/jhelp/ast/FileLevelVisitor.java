@@ -122,7 +122,6 @@ public class FileLevelVisitor extends EmptyVisitor {
      */
     public void visit(ClassDeclaration ast) {
         ast.getSymbol().setClassKind(ClassSymbol.ClassKind.CLASS);
-        ast.getSymbol().setSuperClassForClass();
 
         if (ast.hasTypeParameters()) {
             int index = 0;

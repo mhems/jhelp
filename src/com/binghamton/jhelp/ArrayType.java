@@ -68,7 +68,7 @@ public class ArrayType extends ReferenceType {
         if (other instanceof ArrayType) {
             ArrayType type = (ArrayType)other;
             return Arrays.equals(annotations, type.annotations) &&
-                base.equals(type);
+                base.equals(type.base);
         }
         return false;
     }
@@ -230,9 +230,8 @@ public class ArrayType extends ReferenceType {
         }
 
         @Override
-        protected ArrayClassSymbol adapt(Map<TypeVariable, Type> map,
-                                         boolean b) {
-            return adapt(map);
+        protected ArrayClassSymbol makeNew() {
+            return new ArrayClassSymbol(baseType);
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.binghamton.jhelp;
 
-import java.util.Arrays;
+import java.lang.reflect.GenericDeclaration;
+import java.lang.reflect.Executable;
 import java.util.Map;
 
 import com.binghamton.jhelp.util.StringUtils;
@@ -13,6 +14,22 @@ import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
 public class TypeVariable extends ReferenceType {
     private Type[] bounds = {};
     private Symbol declarer;
+
+    /**
+     * Constructs a new named TypeVariable
+     * @param var the pre-compiled TypeVariable to reflect
+     */
+    public TypeVariable(java.lang.reflect.TypeVariable<?> var) {
+        this(var.getName());
+        GenericDeclaration decl = var.getGenericDeclaration();
+        Class<?> declCls = null;
+        if (decl instanceof Class) {
+            declCls = (Class)decl;
+        } else if (decl instanceof Executable) {
+            declCls = ((Executable)decl).getDeclaringClass();
+        }
+        declarer = ReflectedClassSymbol.get(declCls);
+    }
 
     /**
      * Constructs a new named TypeVariable
@@ -119,8 +136,7 @@ public class TypeVariable extends ReferenceType {
     public boolean equals(Object other) {
         if (other instanceof TypeVariable) {
             TypeVariable type = (TypeVariable)other;
-            return name.equals(type.name) &&
-                Arrays.equals(bounds, type.bounds);
+            return nameEquivalent(type) && declarer.equals(type.declarer);
         }
         return false;
     }

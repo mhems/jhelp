@@ -256,7 +256,7 @@ public class MyClassSymbol extends ClassSymbol {
     }
 
     /**
-     * Sets the superclass of this class
+     * Sets the superclass of this class.
      * @param cls the superclass this class extends
      */
     public void setSuperClass(Type cls) {
@@ -275,7 +275,7 @@ public class MyClassSymbol extends ClassSymbol {
      * Sets the superclass for a class declared as an enum
      */
     public void setSuperClassForEnum() {
-        superClass = new ParameterizedType(fetch("Enum"), this);
+        setSuperClass(new ParameterizedType(fetch("Enum"), this));
         MyMethodSymbol values = new MyMethodSymbol(new MyToken(0, "values"),
                                                    new Modifiers(Modifier.PUBLIC,
                                                                  Modifier.STATIC));
@@ -296,21 +296,21 @@ public class MyClassSymbol extends ClassSymbol {
      * Sets the superclass for a class declared as an annotation
      */
     public void setSuperClassForAnnotation() {
-        superClass = fetch("java.lang.annotation.Annotation");
+        setSuperClass(fetch("java.lang.annotation.Annotation"));
     }
 
     /**
      * Sets the superclass for a class declared as an class
      */
     public void setSuperClassForClass() {
-        superClass = fetch("Object");
+        setSuperClass(fetch("Object"));
     }
 
     /**
      * Sets the superclass for an enum constant's body
      */
     public void setSuperClassForEnumConstant() {
-        superClass = declarer;
+        setSuperClass(declarer);
     }
 
     /**
@@ -347,10 +347,8 @@ public class MyClassSymbol extends ClassSymbol {
     }
 
     @Override
-    protected MyClassSymbol adapt(Map<TypeVariable, Type> map, boolean first) {
-        MyClassSymbol ret = new MyClassSymbol(this, false);
-        adapt(ret, map, first);
-        return ret;
+    protected MyClassSymbol makeNew() {
+        return new MyClassSymbol(this, false);
     }
 
     /**

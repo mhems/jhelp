@@ -118,14 +118,10 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         Set<String> needed = new HashSet<>();
         ClassSymbol ann;
 
-        ast.getTypeExpression().accept(this);
-        ann = ast.getTypeExpression().getType().getClassSymbol();
-        if (!ann.isAnnotation()) {
-            addError(ast,
-                     "Can only annotate with an annotation type",
-                     "Declare " + ann.getName() + " to be an annotation");
+        if (ast.getType() == null) {
+            superVisitor.visit(ast);
         }
-        ast.setType(ann);
+        ann = ast.getType();
 
         for (MethodSymbol m : ann.getMethods()) {
             if (!m.hasModifier(Modifier.DEFAULT)) {
@@ -490,12 +486,15 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         ast.getTargetExpression().accept(this);
         Type targetType = ast.getTargetExpression().getType();
         if (ast.hasBounds()) {
+            if (ast.getBoundExpressions().size() > 1) {
+                addError(new UnimplementedFeatureWarning(ast.getBoundExpressions().get(1),
+                                                         "casts with additional bounds"));
+            }
             if (!(targetType instanceof ClassSymbol)) {
                 addError(ast.getTargetExpression(),
                          "A cast with bounds must cast to a class or interface type",
                          "Change the bounds to name class or interface types");
             }
-            // TODO pairwise-different erasures, no subtypes of different parameterizations of same interface
             for (Expression bound : ast.getBoundExpressions()) {
                 bound.accept(this);
             }
@@ -513,34 +512,45 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(CatchBlock ast) {
+        Type[] exTypes = new Type[ast.getExceptionTypes().size()];
+        int pos = 0;
+        boolean error = false;
         for (Expression expr : ast.getExceptionTypes()) {
             expr.accept(this);
             if (!expr.getType().getClassSymbol().extendsClass(fetch("Throwable"))) {
                 addError(expr,
                          "Cannot catch an Object that is not an exception",
                          "Change " + expr.getType().getClassSymbol().getName() + " to extend Throwable or remove the catch block");
+                error = true;
             }
-            if (expr.getType() instanceof TypeVariable) {
+            else if (expr.getType() instanceof TypeVariable) {
                 addError(expr,
                          "Cannot catch a type variable",
                          "Change the type to name a class or interface that extends Throwable");
+                error = true;
+            } else {
+                exTypes[pos] = expr.getType();
+                ++pos;
             }
         }
-        currentScope.enterScope();
-        MyVariableSymbol var = new MyVariableSymbol(ast.getVariable().getName(),
-                                                    ast.getVariable().getModifiers());
-        var.setProgram(program);
-        var.setAnnotations(makeAnnotations(ast.getVariable().getAnnotations()));
-        Type[] exTypes = currentMethod.getExceptionTypes();
-        if (exTypes.length == 1) {
-            var.setType(exTypes[0]);
-        } else {
-            var.setType(Type.lub(exTypes));
+
+        if (!error) {
+            currentScope.enterScope();
+            MyVariableSymbol var = new MyVariableSymbol(ast.getVariable().getName(),
+                                                        ast.getVariable().getModifiers());
+            var.setProgram(program);
+            var.setAnnotations(makeAnnotations(ast.getVariable().getAnnotations()));
+            if (exTypes.length == 1) {
+                var.setType(exTypes[0]);
+            } else {
+                addError(new UnimplementedFeatureWarning(ast.getVariable(),
+                                                         "Multi-catch clauses"));
+            }
+            ast.getVariable().setSymbol(var);
+            currentScope.put(var);
+            visit((Block)ast);
+            currentScope.exitScope();
         }
-        ast.getVariable().setSymbol(var);
-        currentScope.put(var);
-        visit((Block)ast);
-        currentScope.exitScope();
     }
 
     /**
@@ -664,7 +674,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         Type type = ast.getIterable().getType();
         VariableSymbol var = ast.getVariable().getSymbol();
         if (type.rank() > 1 ||
-            type.getClassSymbol().extendsClass(fetch("Iterable"))) {
+            type.getClassSymbol().implementsInterface(fetch("Iterable"))) {
             Type source;
             if (type.rank() > 1) {
                 source = ((ArrayType)type).getBaseType();
@@ -764,10 +774,12 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                 }
                 ++index;
             }
-        } else if (consCls.isGeneric() && !ast.hasAnonymousClass()) {
+        }
+        if (ast.getMethod() instanceof ParamExpression) {
+            if (((ParamExpression)ast.getMethod()).isDiamond())
             addError(new StyleWarning(ast.getMethod(),
                                       "Constructing a generic class without type arguments is not recommended",
-                                      "Use the diamond operator '<>'"));
+                                      "Specify type arguments or use the diamond operator '<>'"));
         }
 
         if (consCls.isEnum()) {
@@ -1433,7 +1445,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         } else if (PrimitiveType.DOUBLE.box().equals(type)) {
             return PrimitiveType.DOUBLE;
         }
-        throw new IllegalArgumentException(type + " cannot undergo unary promotion");
+        return type;
     }
 
     private static Type unaryPromotion(Expression expr) {
@@ -1502,7 +1514,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             return true;
         }
         Type unboxedRType = rType.unbox();
-        if (unboxedRType != null && unboxedRType.canWidenTo(lType)) {
+        if (unboxedRType != null && isAssignable(lType, unboxedRType)) {
             return true;
         }
         if (canUncheckConvert(rType, lType)) {

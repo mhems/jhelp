@@ -164,6 +164,8 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
             } else {
                 currentClass.setSuperClass(ast.getSuperClass().getType());
             }
+        } else {
+            currentClass.setSuperClassForClass();
         }
     }
 
@@ -262,7 +264,6 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
             Package pkg = program.getPackage(name);
             if (pkg != null) {
                 ast.setPackage(pkg);
-            } else if (!ast.isQualified()) {
             }
             // cannot throw error yet, must wait and hoist from Access
         } else {
@@ -283,7 +284,7 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
                 type.setAnnotations(anns);
                 ast.setType(type);
             } else {
-                if (kind == Kind.TYPE || !ast.isQualified()) {
+                if (kind == Kind.TYPE) {
                     addError(ast,
                              "Unknown identifier",
                              "Did you forget an import or make a typo");
@@ -407,7 +408,7 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         AnnotationSymbol[] ret = new AnnotationSymbol[annotations.length];
         for (int i = 0; i < ret.length; i++) {
             annotations[i].accept(this);
-            ret[i] = new AnnotationSymbol((ClassSymbol)annotations[i].getType());
+            ret[i] = new AnnotationSymbol(annotations[i].getType());
         }
         return ret;
     }

@@ -51,6 +51,24 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
     }
 
     /**
+     * Visit a Annotation node
+     * @param ast the AST node being visited
+     */
+    public void visit(Annotation ast) {
+        Expression arg;
+        ClassSymbol ann;
+
+        ast.getTypeExpression().accept(this);
+        ann = ast.getTypeExpression().getType().getClassSymbol();
+        if (!ann.isAnnotation()) {
+            addError(ast,
+                     "Can only annotate with an annotation type",
+                     "Declare " + ann.getName() + " to be an annotation");
+        }
+        ast.setType(ann);
+    }
+
+    /**
      * Visit a AnnotationDeclaration node
      * @param ast the AST node being visited
      */
@@ -445,18 +463,11 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(NameExpression ast) {
-        String name = ast.getName();
-        String rName = ast.getToken().getText();
-        AnnotationSymbol[] anns = makeAnnotations(ast.getAnnotations());
-        Kind kind = ast.getKind();
-        NameExpression qual = ast.getQualifyingName();
-        Type type = null;
-
-        if (kind == Kind.TYPE) {
-            type = PrimitiveType.UNBOX_MAP.get(name);
-        }
-        if (type != null) {
-            type.setAnnotations(anns);
+        if (ast.getKind() == Kind.TYPE &&
+            !ast.isQualified() &&
+            PrimitiveType.isPrimitiveName(ast.getToken().getText())) {
+            Type type = new PrimitiveType(ast.getToken());
+            type.setAnnotations(makeAnnotations(ast.getAnnotations()));
             ast.setType(type);
         } else {
             super.visit(ast);
