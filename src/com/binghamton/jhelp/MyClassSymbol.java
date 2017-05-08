@@ -116,7 +116,8 @@ public class MyClassSymbol extends ClassSymbol {
         MethodSymbol parentMethod = null;
         if (superClass != null) {
             parentMethod = superClass.getClassSymbol().getMethod(sym);
-        } else {
+        }
+        if (parentMethod == null) {
             for (Type type : interfaces) {
                 parentMethod = type.getClassSymbol().getMethod(sym);
                 if (parentMethod != null) {
@@ -124,6 +125,7 @@ public class MyClassSymbol extends ClassSymbol {
                 }
             }
         }
+
         boolean good = true;
         if (parentMethod != null &&
             parentMethod.getAccessLevel() != AccessLevel.PRIVATE) {
@@ -154,7 +156,7 @@ public class MyClassSymbol extends ClassSymbol {
                          "Cannot override a method with a method that has more restrictive access than the method it is overriding",
                          "Alter this methods access to be at least as accessible as the parent method");
             }
-        } else if (sym.hasOverrideAnnotation()){
+        } else if (parentMethod == null && sym.hasOverrideAnnotation()){
             addError(((MyMethodSymbol)sym).getToken(),
                      "This method is not being overridden even if you think it is",
                      "Change the method signature to match the signature of the parent method you wish to override");
@@ -210,7 +212,7 @@ public class MyClassSymbol extends ClassSymbol {
         if (!params.put(sym)) {
             return false;
         }
-        paramArr = params.toArray(new TypeVariable[params.size()]);
+        paramArr = params.getSymbols(new TypeVariable[params.size()]);
         return true;
     }
 

@@ -44,12 +44,9 @@ public class FileLevelVisitor extends EmptyVisitor {
     protected MyPackage pkg;
     protected Program program;
     protected MyClassSymbol currentClass;
+    protected CompilationUnit currentUnit;
 
     private String filename;
-    private ImportingSymbolTable importedClasses;
-    private MethodSymbolTable importedMethods;
-    private NamedSymbolTable<VariableSymbol> importedFields;
-    private CompilationUnit currentUnit;
 
     /**
      * Constructs a FileLevelVisitor for a given Program
@@ -88,6 +85,7 @@ public class FileLevelVisitor extends EmptyVisitor {
 
         MyClassSymbol sym = new MyClassSymbol(ast.getName(), ast.getModifiers());
         sym.setProgram(program);
+        sym.setCompilationUnit(currentUnit);
 
         if (ast.isTop()) {
             if (!pkg.addClass(sym)) {
@@ -142,9 +140,6 @@ public class FileLevelVisitor extends EmptyVisitor {
      */
     public void visit(CompilationUnit ast) {
         pkg = MyPackage.DEFAULT_PACKAGE;
-        importedClasses = new ImportingSymbolTable();
-        importedMethods = new MethodSymbolTable();
-        importedFields = new NamedSymbolTable<>();
 
         if (ast.hasPackage()) {
             ast.getPackageStatement().accept(this);
@@ -155,7 +150,6 @@ public class FileLevelVisitor extends EmptyVisitor {
 
         for (BodyDeclaration decl : ast.getBodyDeclarations()) {
             decl.accept(this);
-            decl.getSymbol().setImportedTypes(importedClasses);
         }
 
         // visit import stmts after classes to check naming conflicts
@@ -203,12 +197,12 @@ public class FileLevelVisitor extends EmptyVisitor {
                 MethodSymbol[] methods = cls.getMethods();
                 VariableSymbol[] fields = cls.getFields();
                 if (ast.isDemand()) { // static import on demand
-                    importedClasses.importStaticMemberOnDemand(inners);
-                    importedMethods.importStaticMemberOnDemand(methods);
-                    importedFields.importStaticMemberOnDemand(fields);
+                    currentUnit.importStaticClassMemberOnDemand(inners);
+                    currentUnit.importStaticMethodOnDemand(methods);
+                    currentUnit.importStaticFieldOnDemand(fields);
                 } else { // single static import
                     boolean added = false;
-                    if (importedClasses.importStaticMember(memberName, inners)) {
+                    if (currentUnit.importStaticClassMember(memberName, inners)) {
                         added = true;
                         if (pkg.getClassTable().has(memberName)) {
                             addError(ast.getNameExpression(),
@@ -216,10 +210,8 @@ public class FileLevelVisitor extends EmptyVisitor {
                                      "Rename your class or remove the import");
                         }
                     }
-                    added |= importedMethods.importStaticMember(memberName,
-                                                                methods);
-                    added |= importedFields.importStaticMember(memberName,
-                                                               fields);
+                    added |= currentUnit.importStaticMethod(memberName, methods);
+                    added |= currentUnit.importStaticField(memberName, fields);
                     if (!added) {
                         addError(ast.getNameExpression(),
                                  "Static imports must import at least one member",
@@ -229,7 +221,7 @@ public class FileLevelVisitor extends EmptyVisitor {
             }
         } else {
             if (ast.isDemand()) { // type import on demand
-                importedClasses.importTypesOnDemand(name);
+                currentUnit.importTypesOnDemand(name);
             } else { // single type import
                 if (pkg.getClassTable().has(name)) {
                     addError(ast.getNameExpression(),
@@ -237,8 +229,8 @@ public class FileLevelVisitor extends EmptyVisitor {
                              "Rename your class or remove the import");
                 } else {
                     try {
-                        if (!importedClasses.importType(name) &&
-                            importedClasses.get(name) instanceof MyClassSymbol) {
+                        if (!currentUnit.importType(name) &&
+                            currentUnit.getImportedClass(name) instanceof MyClassSymbol) {
                             addError(ast.getNameExpression(),
                                      "Cannot import a class with same name as a class you have created",
                                      "Rename your class or remove the import");

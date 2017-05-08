@@ -64,7 +64,6 @@ public class MethodSymbolTable extends SymbolTable<MethodType, MethodSymbol> {
      */
     public MethodSymbolTable adapt(Map<TypeVariable, Type> map) {
         MethodSymbolTable ret = new MethodSymbolTable();
-        ret.parent = this.parent;
         for (MethodSymbol sym : this.table.peekFirst().values()) {
             ret.put(sym.adapt(map));
         }

@@ -59,9 +59,7 @@ public class UsageValidator implements Validator {
             if (!file.exists()) {
                 program.addError(new InvalidUsageError("The filename '%s' must name an existing file or directory",
                                                        filename));
-            }
-
-            if (!file.isFile()) {
+            } else if (!file.isFile()) {
                 validate(program, file.listFiles());
             }
 

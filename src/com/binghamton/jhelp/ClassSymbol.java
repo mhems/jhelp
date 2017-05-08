@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.binghamton.jhelp.ast.ASTVisitor;
+import com.binghamton.jhelp.ast.CompilationUnit;
 import com.binghamton.jhelp.util.StringUtils;
 
 import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
@@ -37,6 +38,7 @@ public abstract class ClassSymbol extends ReferenceType {
     protected ClassSymbol declarer;
     protected boolean boxed;
     protected Package pkg;
+    private CompilationUnit unit;
 
     protected ImportingSymbolTable importedTypes = new ImportingSymbolTable();
     protected NamedSymbolTable<Type> interfaces = new NamedSymbolTable<>();
@@ -47,6 +49,7 @@ public abstract class ClassSymbol extends ReferenceType {
     protected MethodSymbolTable ctors = new MethodSymbolTable();
     protected NamedSymbolTable<TypeVariable> params = new NamedSymbolTable<>();
     protected TypeVariable[] paramArr = {};
+
     protected Map<List<Type>, ClassSymbol> adaptationCache = new HashMap<>();
 
     /**
@@ -76,7 +79,7 @@ public abstract class ClassSymbol extends ReferenceType {
      * Construct a new ClassSymbol
      * @param name the name of this class symbol
      */
-    public ClassSymbol(String name) {
+    protected ClassSymbol(String name) {
         super(name);
     }
 
@@ -85,7 +88,7 @@ public abstract class ClassSymbol extends ReferenceType {
      * @param name the name of this ClassSymbol
      * @param modifiers a bit mask of the reflected modifiers
      */
-    public ClassSymbol(String name, int modifiers) {
+    protected ClassSymbol(String name, int modifiers) {
         super(name, modifiers);
     }
 
@@ -94,7 +97,7 @@ public abstract class ClassSymbol extends ReferenceType {
      * @param name the name of this ClassSymbol
      * @param modifiers the Modifiers of this ClassSymbol
      */
-    public ClassSymbol(String name, Modifiers modifiers) {
+    protected ClassSymbol(String name, Modifiers modifiers) {
         super(name, modifiers);
     }
 
@@ -116,31 +119,55 @@ public abstract class ClassSymbol extends ReferenceType {
      * @return the interfaces this ClassSymbol implements
      */
     public Type[] getInterfaces() {
-        return interfaces.toArray(new Type[interfaces.size()]);
+        return interfaces.getAllSymbols(new Type[interfaces.totalSize()]);
+    }
+
+    /**
+     * Gets the interfaces this ClassSymbol directly implements
+     * @return the interfaces this ClassSymbol directly implements
+     */
+    public Type[] getDeclaredInterfaces() {
+        return interfaces.getSymbols(new Type[interfaces.size()]);
+    }
+
+    /**
+     * Gets the methods this ClassSymbol declares
+     * @return the methods this ClassSymbol declares
+     */
+    public MethodSymbol[] getMethods() {
+        return methods.getAllSymbols(new MethodSymbol[methods.totalSize()]);
     }
 
     /**
      * Gets the methods this ClassSymbol directly declares
      * @return the methods this ClassSymbol directly declares
      */
-    public MethodSymbol[] getMethods() {
-        return methods.toArray(new MethodSymbol[methods.size()]);
+    public MethodSymbol[] getDeclaredMethods() {
+        return methods.getSymbols(new MethodSymbol[methods.size()]);
     }
 
     /**
-     * Gets the constructors of this ClassSymbol
-     * @return the constructors of this ClassSymbol
+     * Gets the constructors this ClassSymbol declares
+     * @return the constructors this ClassSymbol declares
      */
     public MethodSymbol[] getConstructors() {
-        return ctors.toArray(new MethodSymbol[ctors.size()]);
+        return ctors.getSymbols(new MethodSymbol[ctors.size()]);
+    }
+
+    /**
+     * Gets the fields this ClassSymbol declares
+     * @return the fields this ClassSymbol declares
+     */
+    public VariableSymbol[] getFields() {
+        return fields.getAllSymbols(new VariableSymbol[fields.totalSize()]);
     }
 
     /**
      * Gets the fields this ClassSymbol directly declares
      * @return the fields this ClassSymbol directly declares
      */
-    public VariableSymbol[] getFields() {
-        return fields.toArray(new VariableSymbol[fields.size()]);
+    public VariableSymbol[] getDeclaredFields() {
+        return fields.getOutermostSymbols(new VariableSymbol[fields.outermostSize()]);
     }
 
     /**
@@ -164,7 +191,15 @@ public abstract class ClassSymbol extends ReferenceType {
      * @return the inner classes this ClassSymbol declares
      */
     public ClassSymbol[] getInnerClasses() {
-        return innerClasses.toArray(new ClassSymbol[innerClasses.size()]);
+        return innerClasses.getAllSymbols(new ClassSymbol[innerClasses.totalSize()]);
+    }
+
+    /**
+     * Gets the inner classes this ClassSymbol directly declares
+     * @return the inner classes this ClassSymbol directly declares
+     */
+    public ClassSymbol[] getDeclaredInnerClasses() {
+        return innerClasses.getSymbols(new ClassSymbol[innerClasses.size()]);
     }
 
     /**
@@ -172,7 +207,15 @@ public abstract class ClassSymbol extends ReferenceType {
      * @return the member types this ClassSymbol declares
      */
     public ClassSymbol[] getMemberTypes() {
-        return memberTypes.toArray(new ClassSymbol[memberTypes.size()]);
+        return memberTypes.getAllSymbols(new ClassSymbol[memberTypes.totalSize()]);
+    }
+
+    /**
+     * Gets the member types this ClassSymbol directly declares
+     * @return the member types this ClassSymbol directly declares
+     */
+    public ClassSymbol[] getDeclaredMemberTypes() {
+        return memberTypes.getSymbols(new ClassSymbol[memberTypes.size()]);
     }
 
     /**
@@ -479,6 +522,22 @@ public abstract class ClassSymbol extends ReferenceType {
         return pkg;
     }
 
+    /**
+     * Sets the CompilationUnit of this ClassSymbol
+     * @param unit the CompilationUnit of this ClassSymbol
+     */
+    public void setCompilationUnit(CompilationUnit unit) {
+        this.unit = unit;
+    }
+
+    /**
+     * Gets the CompilationUnit of this ClassSymbol
+     * @return the CompilationUnit of this ClassSymbol
+     */
+    public CompilationUnit getCompilationUnit() {
+        return unit;
+    }
+
     @Override
     public boolean equals(Object other) {
         if (other instanceof ClassSymbol) {
@@ -585,26 +644,9 @@ public abstract class ClassSymbol extends ReferenceType {
      *         implemented
      */
     public List<MethodSymbol> getUnimplementedMethods() {
-        // TODO still have to hook up tables,
-        // this wont work if superclass's superclass has abstract methods that
-        // superclass left unimplemented
-        List<MethodSymbol> abstractMethods = new ArrayList<>();
         List<MethodSymbol> ret = new ArrayList<>();
-        for (MethodSymbol method : superClass.getClassSymbol().getMethods()) {
+        for (MethodSymbol method : methods) {
             if (method.hasModifier(Modifier.ABSTRACT)) {
-                abstractMethods.add(method);
-            }
-        }
-        for (Type intf : interfaces) {
-            for (MethodSymbol method: intf.getClassSymbol().getMethods()) {
-                if (method.hasModifier(Modifier.ABSTRACT)) {
-                    abstractMethods.add(method);
-                }
-            }
-        }
-
-        for (MethodSymbol method : abstractMethods) {
-            if (getMethod(method) == null) {
                 ret.add(method);
             }
         }
@@ -638,10 +680,9 @@ public abstract class ClassSymbol extends ReferenceType {
                 names.add(cur.getName());
                 cur = cur.getDeclaringClass();
             }
-            for (int i = names.size() - 1; i >= 0; i--) {
-                sb.append(names.get(i));
-                sb.append(".");
-            }
+            Collections.reverse(names);
+            sb.append(String.join(".", names));
+            sb.append(".");
         }
 
         sb.append(getName());
@@ -651,6 +692,11 @@ public abstract class ClassSymbol extends ReferenceType {
     @Override
     public String getName() {
         return name;
+    }
+
+    public boolean isUncheckedException() {
+        ClassSymbol sym = fetch("RuntimeException");
+        return equals(sym) || extendsClass(sym);
     }
 
     /**
@@ -872,18 +918,18 @@ public abstract class ClassSymbol extends ReferenceType {
             sb.append(declarer.getName());
             sb.append("\n");
         }
-        for (ClassSymbol inner : getInnerClasses()) {
+        for (ClassSymbol inner : getDeclaredInnerClasses()) {
             sb.append("inner class: ");
             sb.append(inner.getName());
             sb.append("\n");
         }
-        for (ClassSymbol mem : getMemberTypes()) {
+        for (ClassSymbol mem : getDeclaredMemberTypes()) {
             sb.append("member type: ");
             sb.append(mem.getName());
             sb.append("\n");
         }
 
-        for (VariableSymbol field : getFields()) {
+        for (VariableSymbol field : getDeclaredFields()) {
             sb.append(field.repr());
             sb.append("\n");
         }
@@ -905,5 +951,52 @@ public abstract class ClassSymbol extends ReferenceType {
      */
     public void visit(ASTVisitor visitor) {
         // reflected classes are not visited
+    }
+
+    /**
+     * Establishes the inheritance hierarchy of this class.  This hooks up the
+     * relevant symbol tables to point to those in parent classes. This method
+     * should be called once per instance.
+     */
+    public void establishInheritanceHierarchy() {
+        System.out.println("** ESTABLISHING HIERARCHY OF " + getName());
+        for (Type intf : interfaces) {
+            linkupType(intf);
+        }
+        if (superClass != null) {
+            linkupType(superClass);
+        }
+    }
+
+    /**
+     * Links up the Type's class symbol's tables to be the ancestors of this
+     * class's corresponding tables.
+     * @param parent the Type whose class symbol's table are to be made ancestors
+     */
+    private void linkupType(Type parent) {
+        ClassSymbol sym = parent.getClassSymbol();
+        System.out.println(">> LINKING UP " + sym.getName() + " TO BE ANCESTOR OF " + getName());
+        int[] arr = new int[5];
+
+        arr[0] = interfaces.totalSize();
+        arr[1] = innerClasses.totalSize();
+        arr[2] = memberTypes.totalSize();
+        arr[3] = fields.totalSize();
+        arr[4] = methods.totalSize();
+        System.out.println("~~ BEFORE: " + java.util.Arrays.toString(arr));
+
+        interfaces.addAncestor(sym.interfaces);
+        innerClasses.addAncestor(sym.innerClasses);
+        memberTypes.addAncestor(sym.memberTypes);
+        fields.addAncestor(sym.fields);
+        methods.addAncestor(sym.methods);
+
+        arr[0] = interfaces.totalSize();
+        arr[1] = innerClasses.totalSize();
+        arr[2] = memberTypes.totalSize();
+        arr[3] = fields.totalSize();
+        arr[4] = methods.totalSize();
+        System.out.println("~~ AFTER: " + java.util.Arrays.toString(arr));
+
     }
 }

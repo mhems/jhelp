@@ -3,6 +3,14 @@ package com.binghamton.jhelp.ast;
 import java.util.List;
 
 import com.binghamton.jhelp.MyPackage;
+import com.binghamton.jhelp.ClassSymbol;
+import com.binghamton.jhelp.MethodSymbol;
+import com.binghamton.jhelp.MethodType;
+import com.binghamton.jhelp.VariableSymbol;
+import com.binghamton.jhelp.ImportingSymbolTable;
+import com.binghamton.jhelp.NamedSymbolTable;
+import com.binghamton.jhelp.MethodSymbolTable;
+import com.binghamton.jhelp.Type;
 
 /**
  * A class representing a Java compilation unit (file)
@@ -12,7 +20,55 @@ public class CompilationUnit extends ASTNode {
     private final PackageStatement pkg;
     private final List<ImportStatement> imports;
     private final List<BodyDeclaration> bodies;
+    private final ImportingSymbolTable importedClasses = new ImportingSymbolTable();
+    private final MethodSymbolTable importedMethods = new MethodSymbolTable();
+    private final NamedSymbolTable<VariableSymbol> importedFields = new NamedSymbolTable<>();
     private MyPackage declaringPackage;
+
+    public ClassSymbol getImportedClass(String name) {
+        return importedClasses.get(name);
+    }
+
+    public MethodSymbol getImportedMethod(String name, Type... paramTypes) {
+        return importedMethods.get(MethodType.fromParameters(name, paramTypes));
+    }
+
+    public VariableSymbol getImportedField(String name) {
+        return importedFields.get(name);
+    }
+
+    public boolean importStaticClassMember(String name,
+                                           ClassSymbol[] inners) {
+        return importedClasses.importStaticMember(name, inners);
+    }
+
+    public boolean importStaticField(String name, VariableSymbol[] fields) {
+        return importedFields.importStaticMember(name, fields);
+    }
+
+    public boolean importStaticMethod(String name, MethodSymbol[] methods) {
+        return importedMethods.importStaticMember(name, methods);
+    }
+
+    public boolean importStaticClassMemberOnDemand(ClassSymbol[] inners) {
+        return importedClasses.importStaticMemberOnDemand(inners);
+    }
+
+    public boolean importStaticFieldOnDemand(VariableSymbol[] fields) {
+        return importedFields.importStaticMemberOnDemand(fields);
+    }
+
+    public boolean importStaticMethodOnDemand(MethodSymbol[] methods) {
+        return importedMethods.importStaticMemberOnDemand(methods);
+    }
+
+    public boolean importTypesOnDemand(String classname) {
+        return importedClasses.importTypesOnDemand(classname);
+    }
+
+    public boolean importType(String classname) throws ClassNotFoundException {
+        return importedClasses.importType(classname);
+    }
 
     /**
      * Construct a new compilation unit

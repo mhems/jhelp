@@ -257,7 +257,7 @@ public class Program {
             if (cls.hasSuperClass()) {
                 graph.addEdge(cls, cls.getSuperClass().getClassSymbol());
             }
-            for (Type type : cls.getInterfaces()) {
+            for (Type type : cls.getDeclaredInterfaces()) {
                 graph.addEdge(cls, type.getClassSymbol());
             }
         }

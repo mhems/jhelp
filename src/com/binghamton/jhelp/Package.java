@@ -10,7 +10,7 @@ public abstract class Package {
      * Constructs a new Package with name `name`
      * @param name the name of the package
      */
-    public Package(String name) {
+    protected Package(String name) {
         this.name = name;
     }
 

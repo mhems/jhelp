@@ -76,7 +76,7 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
         ClassSymbol objCls = fetch("Object");
         ClassSymbol annoCls = fetch("java.lang.annotation.Annotation");
         MethodSymbol refMethod;
-        for (MethodSymbol method : currentClass.getMethods()) {
+        for (MethodSymbol method : currentClass.getDeclaredMethods()) {
             refMethod = objCls.getMethod(method);
             if (refMethod == null) {
                 refMethod = annoCls.getMethod(method);
@@ -213,6 +213,7 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
             currentClass.addField(c.getSymbol());
             allEmpty &= c.isEmpty();
         }
+
         for (MethodSymbol ctor : currentClass.getConstructors()) {
             if (ctor.hasModifier(Modifier.PUBLIC) ||
                 ctor.hasModifier(Modifier.PROTECTED)) {
@@ -222,7 +223,7 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
             }
         }
         boolean hasAbstract = false;
-        for (MethodSymbol method : currentClass.getMethods()) {
+        for (MethodSymbol method : currentClass.getDeclaredMethods()) {
             if (method.isAbstract()) {
                 hasAbstract = true;
                 break;
@@ -247,7 +248,7 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
     public void visit(InterfaceDeclaration ast) {
         ClassSymbol objCls = fetch("Object");
         MethodSymbol objMethod;
-        for (MethodSymbol method : currentClass.getMethods()) {
+        for (MethodSymbol method : currentClass.getDeclaredMethods()) {
             objMethod = objCls.getMethod(method);
             if (method.hasModifier(Modifier.DEFAULT) &&
                 objMethod != null &&
@@ -538,6 +539,7 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
     public void visitInOrder() {
         for (ClassSymbol cls : program.getAllClasses()) {
             if (cls.isTop()) {
+                currentUnit = cls.getCompilationUnit();
                 cls.visit(this);
             }
         }

@@ -2282,7 +2282,7 @@ unaryExpression returns [Expression ret]
     |   first = '+' ex = unaryExpression
         {$ret = new UnaryExpression($first, $ex.ret, UnaryOperator.PLUS);}
     |   first = '-' ex = unaryExpression
-        {$ret = new UnaryExpression($first, $ex.ret, UnaryOperator.NEGATION);}
+        {$ret = new UnaryExpression($first, $ex.ret, UnaryOperator.MINUS);}
     |   npm = unaryExpressionNotPlusMinus {$ret = $npm.ret;}
     ;
 

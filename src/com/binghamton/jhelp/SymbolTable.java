@@ -19,59 +19,9 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
     protected ArrayDeque<Map<K, V>> table = new ArrayDeque<>();
     protected Function<V, K> valueToKey;
 
-    /**
-     * A singleton dummy class to represent an empty SymbolTable
-     * @param <S> the type of the Symbol this SymbolTable holds
-     */
-    private final class EmptyTable<S extends Symbol> extends SymbolTable<K, S> {
-        /**
-         * Constructs a new EmptyTable
-         */
-        private EmptyTable() {
-            super(true);
-        }
-
-        /**
-         * Gets the Symbol mapped by a key
-         * @param key the key to index the Symbol
-         * @return the Symbol associated with the given key
-         */
-        @Override
-        public S get(K key) {
-            return null;
-        }
-
-        /**
-         * Gets the number of Symbols in this SymbolTable
-         * @return the number of Symbols in this SymbolTable
-         */
-        @Override
-        public int totalSize() {
-            return 0;
-        }
-
-        /**
-         * Adapts the contents of this SymbolTable
-         * @param map the Map mapping TypeVariables to their substituted Types
-         * @return the adapted SymbolTable
-         * @throws UnsupportedOperationException always
-         */
-        public SymbolTable<K, S> adapt(Map<TypeVariable, Type> map) {
-            throw new UnsupportedOperationException("cannot adapt the empty table");
-        }
-    }
-
     {
         // ensure table is non-empty
         enterScope();
-    }
-
-    /**
-     * Constructs an empty SymbolTable without a parent
-     * @param noParent unused used to distinguish from default constructor
-     */
-    private SymbolTable(boolean noParent) {
-        parent = null;
     }
 
     /**
@@ -80,16 +30,15 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
      */
     protected SymbolTable(Function<V, K> valueToKey) {
         this.valueToKey = valueToKey;
-        parent = new EmptyTable<V>();
     }
 
     /**
      * Constructs a SymbolTable with a parent SymbolTable
      * @param parent the parent SymbolTable
      */
-    public SymbolTable(SymbolTable<K, V> parent) {
-        this.valueToKey = parent.valueToKey;
+    protected SymbolTable(SymbolTable<K, V> parent) {
         this.parent = parent;
+        this.valueToKey = parent.valueToKey;
     }
 
     /**
@@ -203,7 +152,15 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
      * @return true iff the Symbol shadows a Symbol in this table
      */
     public boolean shadows(K key) {
-        return !hasInCurrentScope(key) && parent.has(key);
+        return !hasInCurrentScope(key) && (parent != null && parent.has(key));
+    }
+
+    /**
+     * Gets the number of Symbols in this SymbolTable's outermost scope
+     * @return the number of Symbols in this SymbolTable's outermost scope
+     */
+    public int outermostSize() {
+        return table.getFirst().size();
     }
 
     /**
@@ -223,25 +180,48 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
      * @return the number of Symbols in this SymbolTable and its parent
      */
     public int totalSize() {
-        return size() + parent.size();
+        return size() + (parent == null ? 0 : parent.size());
     }
 
     /**
-     * Gathers the Symbols in this table into an array
+     * Gathers the unique Symbols in this table and any parent table into an
+     * array.
      * @param dest the array to place the Symbols in
-     * @return an array with all the Symbols in this table
+     * @return an array with all the unique Symbols in this table and any parent
+     * table.
      */
-    public V[] toArray(V[] dest) {
-        if (dest.length != size()) {
-            throw new IllegalArgumentException("provided array must have length equal to the size of this table");
+    public V[] getAllSymbols(V[] dest) {
+        Map<K, V> map = new HashMap<>();
+        populate(this, map);
+
+        if (parent != null) {
+            populate(parent, map);
         }
 
-        int pos = 0;
-        for (V sym : this) {
-            dest[pos] = sym;
-            ++pos;
-        }
-        return dest;
+        return map.values().toArray(dest);
+    }
+
+    /**
+     * Gathers the unique Symbols in this table into an array.
+     * @param dest the array to place the Symbols in
+     * @return an array with all the unique Symbols in this table.
+     */
+    public V[] getSymbols(V[] dest) {
+        Map<K, V> map = new HashMap<>();
+        populate(this, map);
+        return map.values().toArray(dest);
+    }
+
+    /**
+     * Gathers the unique Symbols in this table's outermost scope into an array.
+     * @param dest the array to place the Symbols in
+     * @return an array with all the unique Symbols in this table's outermost
+     * scope.
+     */
+    public V[] getOutermostSymbols(V[] dest) {
+        Map<K, V> map = new HashMap<>();
+        populate(table.getFirst().values(), map);
+        return map.values().toArray(dest);
     }
 
     /**
@@ -250,6 +230,20 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
      */
     public void setParent(SymbolTable<K, V> parent) {
         this.parent = parent;
+    }
+
+    /**
+     * Adds a SymbolTable at the root of this table's hierarchy.  If this table
+     * has no parent, ancestor becomes its parent, otherwise this process
+     * continues recursively until a table without a parent is found.
+     * @param ancestor the SymbolTable to be at the root of this table's hierarchy
+     */
+    public void addAncestor(SymbolTable<K, V> ancestor) {
+        if (parent == null) {
+            parent = ancestor;
+        } else {
+            parent.addAncestor(ancestor);
+        }
     }
 
     /**
@@ -274,6 +268,7 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
      */
     public String repr() {
         StringBuilder sb = new StringBuilder();
+        sb.append("begin table ----------------------------------------\n");
         for (Map<K, V> scope : table) {
             for (V symbol : scope.values()) {
                 sb.append(symbol.repr());
@@ -281,7 +276,12 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
             }
             sb.append("end scope ----------------------------------------\n");
         }
-        sb.append("end table ----------------------------------------\n");
+        if (parent != null) {
+            sb.append(parent.repr());
+        } else {
+            sb.append("****************************************\n");
+        }
+        sb.append("end table ========================================\n");
         return sb.toString();
     }
 
@@ -375,5 +375,20 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
             }
         }
         return true;
+    }
+
+    /**
+     * Populates a Map with unique elements among an Iterable of Symbols.
+     * Uniqueness is determined by the Symbol's key, not its equals method.
+     * @param tableItr the Iterable yielding Symbols to populate with
+     * @param map the Map to place the unique Symbols into
+     */
+    private void populate(Iterable<V> tableItr, Map<K, V> map) {
+        for (V sym : tableItr) {
+            K key = valueToKey.apply(sym);
+            if (!map.containsKey(key)) {
+                map.put(key, sym);
+            }
+        }
     }
 }

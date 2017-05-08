@@ -35,7 +35,7 @@ public class ImportingSymbolTable extends NamedSymbolTable<ClassSymbol> {
      * Constructs a new ImportingSymbolTable
      */
     public ImportingSymbolTable() {
-
+        // parent = ROOT;
     }
 
 

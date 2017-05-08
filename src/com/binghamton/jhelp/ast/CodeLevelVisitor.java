@@ -119,6 +119,8 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         ClassSymbol ann;
 
         if (ast.getType() == null) {
+            updateSuperVisitor();
+            System.out.println("ANNOTATION VISITING SUPER");
             superVisitor.visit(ast);
         }
         ann = ast.getType();
@@ -283,7 +285,10 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         Symbol lval = ast.getLHS().getSymbol();
 
         // lval will be null if lhs is array access since array elements can never be final
-        if (lval != null && lval.isFinal()) {
+        if (lval != null &&
+            lval.isFinal() &&
+            (currentMethod != null &&
+             !currentMethod.isConstructor())) {
             addError(ast.getLHS(),
                      "A final variable cannot be assigned to",
                      "Make the variable non-final or do not assign to it");
@@ -640,6 +645,8 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             constant.setProgram(program);
             constant.setSuperClassForEnumConstant();
             bodyAST.setSymbol(constant);
+            updateSuperVisitor();
+            System.out.println("ENUM CONSTANT VISITING SUPER");
             bodyAST.accept(superVisitor);
             if (constant.hasAbstractMethod()) {
                 addError(ast.getName(),
@@ -673,10 +680,10 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         ast.getIterable().accept(this);
         Type type = ast.getIterable().getType();
         VariableSymbol var = ast.getVariable().getSymbol();
-        if (type.rank() > 1 ||
+        if (type.rank() > 0 ||
             type.getClassSymbol().implementsInterface(fetch("Iterable"))) {
             Type source;
-            if (type.rank() > 1) {
+            if (type.rank() > 0) {
                 source = ((ArrayType)type).getBaseType();
             } else {
                 source = ((ParameterizedType)type).getParameter(0);
@@ -691,6 +698,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                      "For each loops must iterate over arrays or an implementor of the Iterable interface",
                      "Specify an array or Iterable to iterate over");
         }
+        // TODO this is wrong!
         visit((Block)ast);
         currentScope.exitScope();
     }
@@ -775,12 +783,13 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                 ++index;
             }
         }
-        if (ast.getMethod() instanceof ParamExpression) {
-            if (((ParamExpression)ast.getMethod()).isDiamond())
-            addError(new StyleWarning(ast.getMethod(),
-                                      "Constructing a generic class without type arguments is not recommended",
-                                      "Specify type arguments or use the diamond operator '<>'"));
-        }
+        // TODO incorrect
+        // if (ast.getMethod() instanceof ParamExpression) {
+        //     if (!((ParamExpression)ast.getMethod()).isDiamond())
+        //         addError(new StyleWarning(ast.getMethod(),
+        //                                   "Constructing a generic class without type arguments is not recommended",
+        //                                   "Specify type arguments or use the diamond operator '<>'"));
+        // }
 
         if (consCls.isEnum()) {
             addError(ast.getMethod(),
@@ -814,6 +823,8 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             bodyAST.setAnonymousParameterTypes(ctor.getParameterTypes());
 
             MyClassSymbol tmp = currentClass;
+            updateSuperVisitor();
+            System.out.println("INSTANTIATION VISITING SUPER");
             bodyAST.accept(superVisitor);
             if (bodyAST.numConstructors() > 0) {
                 addError(ast.getMethod(),
@@ -897,7 +908,12 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         MyClassSymbol decl = currentClass;
         ConcreteBodyDeclaration cls = ast.getDeclaration();
         cls.setKind(BodyDeclaration.Kind.LOCAL);
-        cls.accept(this); // TODO
+
+        // TODO
+        // TODO also sidenote, check other uses of super, do those states need to synced
+        //        should i be making protected static versions of those super methods that get called so I can call them from down here?
+        //        or just duplicate the necessary logic if its enough of a subset/specialized?
+
         cls.getSymbol().setLocal();
         if (cls.getSymbol().hasModifier(Modifier.STATIC)) {
             addError(ast.getDeclaration().getName(),
@@ -927,9 +943,6 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(MethodDeclaration ast) {
-        if (ast.getSymbol() == null) {
-            super.visit(ast);
-        }
         currentMethod = ast.getSymbol();
         visitAnnotations(ast.getAnnotations());
         inJumpContext = false;
@@ -941,9 +954,6 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         }
         ast.getBody().accept(this);
         currentScope.exitScope();
-        if (!retType.equals(PrimitiveType.VOID)) {
-            // TODO ensure every control path returns return type
-        }
         currentMethod = null;
     }
 
@@ -969,6 +979,9 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         if (ast.getKind() == Kind.AMBIGUOUS) {
             if (!ast.isQualified()) {
                 var = currentScope.get(rName);
+                if (var == null) {
+                    var = currentUnit.getImportedField(rName);
+                }
                 if (var != null) {
                     ast.setKind(Kind.EXPRESSION);
                     ast.setSymbol(var);
@@ -999,6 +1012,9 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         if (ast.getKind() == Kind.EXPRESSION) {
             if (!ast.isQualified()) {
                 var = currentScope.get(rName);
+                if (var == null) {
+                    var = currentUnit.getImportedField(rName);
+                }
                 if (var != null) {
                     ast.setSymbol(var);
                     ast.setType(var.getType());
@@ -1265,7 +1281,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                      "Throw null or an instance of the Throwable class");
         }
         if (type != NilType.TYPE &&
-            !type.getClassSymbol().implementsInterface(fetch("RuntimeException"))) {
+            !type.getClassSymbol().isUncheckedException()) {
             boolean good = false;
             if (currentMethod != null) {
                 for (Type exType : currentMethod.getExceptionTypes()) {
@@ -1728,5 +1744,14 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             }
         }
         return false;
+    }
+
+    /**
+     * Syncs the state of the BodyLevelVisitor to that of this Visitor's state.
+     */
+    private void updateSuperVisitor() {
+        superVisitor.currentClass = currentClass;
+        superVisitor.currentUnit = currentUnit;
+        superVisitor.pkg = pkg;
     }
 }

@@ -79,7 +79,7 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(AnnotationDeclaration ast) {
-        // override to do nothing
+        currentClass.establishInheritanceHierarchy();
     }
 
     /**
@@ -167,6 +167,7 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         } else {
             currentClass.setSuperClassForClass();
         }
+        currentClass.establishInheritanceHierarchy();
     }
 
     /**
@@ -239,6 +240,7 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         if (isFinal) {
             currentClass.addModifier(Modifier.FINAL);
         }
+        currentClass.establishInheritanceHierarchy();
     }
 
     /**
@@ -246,7 +248,10 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(InterfaceDeclaration ast) {
-        // override to do nothing
+        if (ast.hasSuperInterfaces()) {
+            addInterfaces(ast.getSuperInterfaces());
+        }
+        currentClass.establishInheritanceHierarchy();
     }
 
     /**
@@ -269,6 +274,9 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         } else {
             if (!ast.isQualified()) {
                 type = currentClass.getType(name);
+                if (type == null) {
+                    type = currentUnit.getImportedClass(name);
+                }
             } else {
                 if (qual.getKind() == Kind.PACKAGE_OR_TYPE) {
                     qual.accept(this);

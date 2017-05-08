@@ -16975,7 +16975,7 @@ public class Java8Parser extends Parser {
 				((UnaryExpressionContext)_localctx).first = match(SUB);
 				setState(3749);
 				((UnaryExpressionContext)_localctx).ex = unaryExpression();
-				((UnaryExpressionContext)_localctx).ret =  new UnaryExpression(((UnaryExpressionContext)_localctx).first, ((UnaryExpressionContext)_localctx).ex.ret, UnaryOperator.NEGATION);
+				((UnaryExpressionContext)_localctx).ret =  new UnaryExpression(((UnaryExpressionContext)_localctx).first, ((UnaryExpressionContext)_localctx).ex.ret, UnaryOperator.MINUS);
 				}
 				break;
 			case BOOLEAN:
