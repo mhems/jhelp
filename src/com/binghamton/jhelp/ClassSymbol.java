@@ -73,6 +73,7 @@ public abstract class ClassSymbol extends ReferenceType {
         ctors = cls.ctors;
         params = cls.params;
         paramArr = cls.paramArr;
+        // adaptationCache = cls.adaptationCache;
     }
 
     /**
@@ -343,10 +344,20 @@ public abstract class ClassSymbol extends ReferenceType {
      * Gets a method by the signature of a given method
      * @param sym the MethodSymbol with the signature of the method to get
      * @return the method corresponding to the given symbol if
-     *         this ClassSymbol declares such a method, otherwise null
+     *         this ClassSymbol has such a method, otherwise null
      */
     public MethodSymbol getMethod(MethodSymbol sym) {
         return methods.get(sym.getType());
+    }
+
+    /**
+     * Gets a declared method by the signature of a given method
+     * @param sym the MethodSymbol with the signature of the method to get
+     * @return the method corresponding to the given symbol if
+     *         this ClassSymbol declares such a method, otherwise null
+     */
+    public MethodSymbol getDeclaredMethod(MethodSymbol sym) {
+        return methods.getFromTable(sym.getType());
     }
 
     /**
@@ -595,10 +606,10 @@ public abstract class ClassSymbol extends ReferenceType {
      */
     public boolean implementsInterface(ClassSymbol intf) {
         ClassSymbol sym;
+
         for (Type type : interfaces) {
             sym = type.getClassSymbol();
-            if (sym.equals(intf) ||
-                (sym.isInterfaceLike() && sym.implementsInterface(intf))) {
+            if (sym.equals(intf) || sym.implementsInterface(intf)) {
                 return true;
             }
         }
@@ -736,31 +747,30 @@ public abstract class ClassSymbol extends ReferenceType {
     protected static void adapt(ClassSymbol cls,
                                 Map<TypeVariable, Type> map,
                                 boolean first) {
+        // System.out.println("adapting " + cls.getName() + " with " + map.values().toString());
         if (!first) {
             // allow type parameters to shadow outer scopes'
-            for (TypeVariable param : cls.paramArr) {
-                if (map.containsKey(param)) {
-                    System.out.println("--------> removing " + param);
-                    map.remove(param);
-                }
-            }
+            // for (TypeVariable param : cls.paramArr) {
+            //     if (map.containsKey(param)) {
+            //         // System.out.println("--------> removing " + param + " from " + map.keySet().toString());
+            //         // map.remove(param);
+            //     }
+            // }
         }
-        // System.out.println(cls.getName() + " " + "adapting superclass");
         if (cls.superClass != null){
             cls.superClass = cls.superClass.adapt(map);
         }
-        // System.out.println(cls.getName() + " " + "adapting interfaces");
+
         cls.interfaces = NamedSymbolTable.adaptTypes(cls.interfaces, map);
-        // System.out.println(cls.getName() + " " + "adapting inner cls");
         cls.innerClasses = NamedSymbolTable.adaptClasses(cls.innerClasses, map);
-        // System.out.println(cls.getName() + " " + "adapting inner mem");
         cls.memberTypes = NamedSymbolTable.adaptClasses(cls.memberTypes, map);
-        // System.out.println(cls.getName() + " " + "adapting field");
         cls.fields = NamedSymbolTable.adaptVariables(cls.fields, map);
-        // System.out.println(cls.getName() + " " + "adapting method");
-        cls.methods = cls.methods.adapt(map);
-        // System.out.println(cls.getName() + " " + "adapting ctor");
-        cls.ctors = cls.ctors.adapt(map);
+        cls.methods = MethodSymbolTable.adaptMethods(cls.methods, map);
+        cls.ctors = MethodSymbolTable.adaptMethods(cls.ctors, map);
+        cls.establishInheritanceHierarchy();
+
+        // System.out.println("methods of " + cls.getName());
+        // System.out.println(cls.methods.repr());
     }
 
     /**
@@ -959,12 +969,23 @@ public abstract class ClassSymbol extends ReferenceType {
      * should be called once per instance.
      */
     public void establishInheritanceHierarchy() {
-        System.out.println("** ESTABLISHING HIERARCHY OF " + getName());
+
         for (Type intf : interfaces) {
             linkupType(intf);
         }
         if (superClass != null) {
             linkupType(superClass);
+        }
+        for (ClassSymbol innerCls : innerClasses) {
+            innerCls.linkupType(this);
+        }
+        for (ClassSymbol memberType : memberTypes) {
+            memberType.linkupType(this);
+        }
+        if (unit != null) {
+            importedTypes.addAncestor(unit.getImportedClasses());
+            methods.addAncestor(unit.getImportedMethods());
+            fields.addAncestor(unit.getImportedFields());
         }
     }
 
@@ -974,29 +995,12 @@ public abstract class ClassSymbol extends ReferenceType {
      * @param parent the Type whose class symbol's table are to be made ancestors
      */
     private void linkupType(Type parent) {
+        // System.out.println("setting " + parent + " to be ancestor of " + getName());
         ClassSymbol sym = parent.getClassSymbol();
-        System.out.println(">> LINKING UP " + sym.getName() + " TO BE ANCESTOR OF " + getName());
-        int[] arr = new int[5];
-
-        arr[0] = interfaces.totalSize();
-        arr[1] = innerClasses.totalSize();
-        arr[2] = memberTypes.totalSize();
-        arr[3] = fields.totalSize();
-        arr[4] = methods.totalSize();
-        System.out.println("~~ BEFORE: " + java.util.Arrays.toString(arr));
-
         interfaces.addAncestor(sym.interfaces);
         innerClasses.addAncestor(sym.innerClasses);
         memberTypes.addAncestor(sym.memberTypes);
         fields.addAncestor(sym.fields);
         methods.addAncestor(sym.methods);
-
-        arr[0] = interfaces.totalSize();
-        arr[1] = innerClasses.totalSize();
-        arr[2] = memberTypes.totalSize();
-        arr[3] = fields.totalSize();
-        arr[4] = methods.totalSize();
-        System.out.println("~~ AFTER: " + java.util.Arrays.toString(arr));
-
     }
 }

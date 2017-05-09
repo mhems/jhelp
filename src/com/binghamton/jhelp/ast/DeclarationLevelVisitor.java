@@ -181,7 +181,12 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         }
 
         for (BodyDeclaration decl : ast.getBodyDeclarations()) {
-            decl.accept(this);
+            try {
+                decl.accept(this);
+            } catch (Exception e) {
+                // e.printStackTrace();
+                // squelch
+            }
         }
     }
 

@@ -35,13 +35,16 @@ public class MyClassSymbol extends ClassSymbol {
     /**
      * Construct a new anonymous class
      * @param declarer the class this anonymous class is declared in
+     * @param superClass the class this anonymous class is subclassing
      */
-    public MyClassSymbol(MyClassSymbol declarer) {
+    public MyClassSymbol(MyClassSymbol declarer, ClassSymbol cls) {
         super(declarer.nextAnonName());
         this.declarer = declarer;
+        this.superClass = cls;
         this.level = Level.ANONYMOUS;
         this.pkg = declarer.pkg;
         addModifier(Modifier.FINAL);
+        establishInheritanceHierarchy();
     }
 
     /**
@@ -278,13 +281,13 @@ public class MyClassSymbol extends ClassSymbol {
      */
     public void setSuperClassForEnum() {
         setSuperClass(new ParameterizedType(fetch("Enum"), this));
-        MyMethodSymbol values = new MyMethodSymbol(new MyToken(0, "values"),
+        MyMethodSymbol values = new MyMethodSymbol("values",
                                                    new Modifiers(Modifier.PUBLIC,
                                                                  Modifier.STATIC));
         values.setReturnType(new ArrayType(this));
         values.constructType();
         addMethod(values);
-        MyMethodSymbol valueOf = new MyMethodSymbol(new MyToken(0, "valueOf"),
+        MyMethodSymbol valueOf = new MyMethodSymbol("valueOf",
                                                     new Modifiers(Modifier.PUBLIC,
                                                                   Modifier.STATIC));
         Type[] strings = {fetch("String")};

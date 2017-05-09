@@ -136,7 +136,7 @@ public class TypeVariable extends ReferenceType {
     public boolean equals(Object other) {
         if (other instanceof TypeVariable) {
             TypeVariable type = (TypeVariable)other;
-            return nameEquivalent(type) && declarer.equals(type.declarer);
+            return nameEquivalent(type);// && declarer.equals(type.declarer); // TODO
         }
         return false;
     }

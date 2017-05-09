@@ -32,41 +32,57 @@ public class MethodSymbolTable extends SymbolTable<MethodType, MethodSymbol> {
                 ret.add(sym);
             }
         }
+        for (SymbolTable<MethodType, MethodSymbol> ancestor : ancestors) {
+            for (MethodSymbol sym : ancestor) {
+                if (sym.getName().equals(name) && types.add(sym.getType())) {
+                    ret.add(sym);
+                }
+            }
+        }
         return ret;
     }
 
     /**
-     * Determines if this symbol is overriding an existing one
+     * Determines if a symbol overrides an existing one
      * @param sym the MethodSymbol this method may be overriding
-     * @return true iff this method is overriding an existing one
+     * @return true iff the method overrides an existing one
      */
     public boolean overrides(MethodSymbol sym) {
         return overrides(sym.getType());
     }
 
     /**
-     * Determines if this symbol is overriding an existing one
+     * Determines if a symbol overrides an existing one
      * @param key the MethodType of the method possibly being
      * overridden.
-     * @return true iff this method is overriding an existing one
+     * @return true iff the method overrides an existing one
      */
     public boolean overrides(MethodType key) {
-        return !hasInTable(key) && parent.has(key);
+        for (SymbolTable<MethodType, MethodSymbol> ancestor : ancestors) {
+            if (ancestor.has(key)) {
+                return !hasInTable(key);
+            }
+        }
+        return false;
     }
 
     /**
-     * Adapts the contents of this SymbolTable by substituting any
-     * Type parameters with Type arguments.
-     * @param map the Map mapping type variable to the type argument
-     *        substitutions
-     * @return a new SymbolTable with the adapted contents of this
-     *         table.
+     * Adapts a SymbolTable of MethodSymbols
+     * @param symTab the SymbolTable whose contents are to be adapted
+     * @param map the Map mapping type variables to the types they are to
+     *        substituted with
+     * @return a new SymbolTable with adapted contents
      */
-    public MethodSymbolTable adapt(Map<TypeVariable, Type> map) {
+    public static MethodSymbolTable
+        adaptMethods(SymbolTable<MethodType, MethodSymbol> symTab,
+                     Map<TypeVariable, Type> map) {
         MethodSymbolTable ret = new MethodSymbolTable();
-        for (MethodSymbol sym : this.table.peekFirst().values()) {
+        for (MethodSymbol sym : symTab) {
             ret.put(sym.adapt(map));
         }
+        // for (SymbolTable<MethodType, MethodSymbol> ancestor : symTab.ancestors) {
+        //     ret.addAncestor(adaptMethods(ancestor, map));
+        // }
         return ret;
     }
 }

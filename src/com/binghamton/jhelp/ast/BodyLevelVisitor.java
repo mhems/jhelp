@@ -102,11 +102,8 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
         currentClass = ast.getSymbol();
         pkg = currentClass.getPackage();
 
-        // delay visiting anonymous classes as the instantiation type cannot be
-        // determined until code-level visitor
-        if (!currentClass.isAnonymous()) {
-            visitMembers(ast, this);
-        }
+        visitMembers(ast, this);
+
         MyClassSymbol tmp = currentClass;
         for (BodyDeclaration body : ast.getInnerBodies()) {
             body.accept(this);
@@ -131,8 +128,7 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
 
         if (currentClass.getConstructors().length == 0 &&
             !currentClass.isAnonymous()) {
-            MyMethodSymbol emptyCtor = new MyMethodSymbol(new MyToken(0,
-                                                                      currentClass.getName()));
+            MyMethodSymbol emptyCtor = new MyMethodSymbol(currentClass.getName());
             emptyCtor.setProgram(program);
             if (currentClass.getAccessLevel() != Symbol.AccessLevel.PRIVATE &&
                 currentClass.isMember()) {
@@ -161,8 +157,7 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
      */
     public void visit(ClassDeclaration ast) {
         if (currentClass.isAnonymous()) {
-            MyMethodSymbol emptyCtor = new MyMethodSymbol(new MyToken(0,
-                                                                      currentClass.getName()));
+            MyMethodSymbol emptyCtor = new MyMethodSymbol(currentClass.getName());
             emptyCtor.setProgram(program);
             Type[] paramTypes = ast.getAnonymousParameterTypes();
             ClassSymbol superCls = currentClass.getDeclaringClass();
@@ -256,12 +251,25 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
                 addError(((MyMethodSymbol)method).getToken(),
                          "The default method of an interface cannot be override-equivalent to non-private method of Object",
                          "Change the method signature or provide no implementation");
-                if (!method.getReturnType().equals(objMethod.getReturnType())) {
-                    addError(((MyMethodSymbol)method).getToken(),
-                             "An interface cannot override a public method of Object but change the return type",
-                        "Change the method signature to either have the same return type or no longer override");
-                }
+            }
+        }
 
+
+        MethodSymbol currentMethod;
+        for (MethodSymbol method : objCls.getDeclaredMethods()) {
+            currentMethod = currentClass.getDeclaredMethod(method);
+            if (currentMethod != null) {
+                if (method.getAccessLevel() == Symbol.AccessLevel.PUBLIC &&
+                    !currentMethod.isAbstract()) {
+                    addError(((MyMethodSymbol)currentMethod).getToken(),
+                             "An interface cannot declare a method when that method is a final method of Object",
+                             "Change the method signature to no longer override the method of Object");
+                }
+            } else if (method.getAccessLevel() == Symbol.AccessLevel.PUBLIC &&
+                       !currentClass.hasInterfaces()) {
+                currentMethod = new MethodSymbol(method);
+                currentMethod.addModifier(Modifier.ABSTRACT);
+                currentClass.addMethod(currentMethod);
             }
         }
     }

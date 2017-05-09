@@ -120,12 +120,11 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
 
         if (ast.getType() == null) {
             updateSuperVisitor();
-            System.out.println("ANNOTATION VISITING SUPER");
             superVisitor.visit(ast);
         }
         ann = ast.getType();
 
-        for (MethodSymbol m : ann.getMethods()) {
+        for (MethodSymbol m : ann.getDeclaredMethods()) {
             if (!m.hasModifier(Modifier.DEFAULT)) {
                 needed.add(m.getName());
             }
@@ -135,7 +134,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             arg.accept(this);
             if (needed.size() != 1) {
                 addError(ast,
-                         ann.getName() + " requires more than argument",
+                         ann.getName() + " requires more than one argument",
                          "Supply the missing necessary arguments");
             } else {
                 method = ann.getMethod(needed.toArray(new String[1])[0]);
@@ -221,6 +220,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         if (ast.hasInitializer()) {
             ast.getInitializer().setInferredType(baseType);
             ast.getInitializer().accept(this);
+            // TODO will this always be true?
             if (!baseType.equals(ast.getInitializer().getType())) {
                 addError(ast,
                          "An array must be initialized with elements of the same type as the declared element type of the array",
@@ -249,6 +249,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                          "Correct the type of each specified element in the array initializer");
             }
         }
+        ast.setType(ast.getInferredType());
     }
 
     /**
@@ -448,6 +449,10 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             body.accept(this);
             currentClass = tmp;
         }
+
+        if (!currentClass.isTop()) {
+            currentScope = currentClass.getDeclaringClass().getFieldTable();
+        }
     }
 
     /**
@@ -466,7 +471,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             ast.setType(m.getReturnType());
         } else {
             addError(ast.getName(),
-                     "The call to method " + ast.getName() + " could not be resolved",
+                     "The call to method " + ast.getName().getText() + " could not be resolved",
                      "Supply the proper arguments or change the method's parameters");
         }
     }
@@ -587,6 +592,14 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
     }
 
     /**
+     * Visit a ClassDeclaration node
+     * @param ast the AST node being visited
+     */
+    public void visit(ClassDeclaration ast) {
+        // override to do nothing
+    }
+
+    /**
      * Visit a ClassLiteralExpression node
      * @param ast the AST node being visited
      */
@@ -641,12 +654,11 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             MyClassSymbol tmp = currentClass;
             ClassDeclaration bodyAST = ast.getBody();
             bodyAST.setAnonymousParameterTypes(ctor.getParameterTypes());
-            MyClassSymbol constant = new MyClassSymbol(currentClass);
+            MyClassSymbol constant = new MyClassSymbol(currentClass, currentClass);
             constant.setProgram(program);
             constant.setSuperClassForEnumConstant();
             bodyAST.setSymbol(constant);
             updateSuperVisitor();
-            System.out.println("ENUM CONSTANT VISITING SUPER");
             bodyAST.accept(superVisitor);
             if (constant.hasAbstractMethod()) {
                 addError(ast.getName(),
@@ -808,7 +820,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                          "Cannot subclass a final class, even with an anonymous class",
                          "Remove the anonymous class body or make the class non-final");
             }
-            MyClassSymbol anonCls = new MyClassSymbol(currentClass);
+            MyClassSymbol anonCls = new MyClassSymbol(currentClass, consCls);
             anonCls.setProgram(program);
             if (consCls.isInterfaceLike()) {
                 anonCls.setSuperClassForClass();
@@ -824,7 +836,6 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
 
             MyClassSymbol tmp = currentClass;
             updateSuperVisitor();
-            System.out.println("INSTANTIATION VISITING SUPER");
             bodyAST.accept(superVisitor);
             if (bodyAST.numConstructors() > 0) {
                 addError(ast.getMethod(),
@@ -834,8 +845,6 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
 
             bodyAST.accept(this);
             currentClass = tmp;
-
-
         }
     }
 
@@ -1156,6 +1165,15 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             cB.accept(this);
             for (Expression labelExpr : cB.getLabels()) {
                 caseType = labelExpr.getType();
+                if (labelExpr.getText().equals("default")) {
+                    if (seenDefault) {
+                        addError(labelExpr,
+                                 "A switch statement can only have one default case",
+                                 "Merge the code into the first default case and remove the repetitive label");
+                    }
+                    seenDefault = true;
+                    continue;
+                }
                 if (!isAssignable(condType, caseType)) {
                     addError(labelExpr,
                              "Switch label type must be compatible with type in switch condition",
@@ -1163,7 +1181,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                 }
                 if (enumClass != null) {
                     caseClass = caseType.getClassSymbol();
-                    if (!caseClass.isEnum() || !caseClass.equals(enumClass)) {
+                    if (enumClass.getField(labelExpr.getText()) == null) {
                         addError(labelExpr,
                                  "Switch statements over enums can only have constants of that enum",
                                  "Remove this label or add it as an enum constant of that enum");
@@ -1174,14 +1192,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                              "Switch labels cannot be 'null'",
                              "Change the label to be non-null");
                 }
-                if (labelExpr.getText().equals("default")) {
-                    if (seenDefault) {
-                        addError(labelExpr,
-                                 "A switch statement can only have one default case",
-                                 "Merge the code into the first default case and remove the repetitive label");
-                    }
-                    seenDefault = true;
-                }
+
                 if (!caseConstants.add(labelExpr.getText())) {
                     addError(labelExpr,
                              "Switch labels cannot be repeated",

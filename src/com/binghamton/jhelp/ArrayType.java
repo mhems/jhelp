@@ -148,7 +148,7 @@ public class ArrayType extends ReferenceType {
         private Type baseType;
 
         static {
-            lengthField = new MyVariableSymbol(new MyToken(0, "length"),
+            lengthField = new MyVariableSymbol("length",
                                                new Modifiers(Modifier.PUBLIC,
                                                              Modifier.FINAL));
             lengthField.setType(PrimitiveType.INT);
@@ -173,7 +173,7 @@ public class ArrayType extends ReferenceType {
             interfaces.put(fetch("java.io.Serializable"));
             interfaces.put(fetch("Cloneable"));
             fields.put(lengthField);
-            MyMethodSymbol cloneMethod = new MyMethodSymbol(new MyToken(0, "clone"),
+            MyMethodSymbol cloneMethod = new MyMethodSymbol("clone",
                                                             new Modifiers(Modifier.PUBLIC));
             cloneMethod.setReturnType(new ArrayType(baseType));
             methods.put(cloneMethod);

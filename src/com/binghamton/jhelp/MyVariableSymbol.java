@@ -21,6 +21,16 @@ public class MyVariableSymbol extends VariableSymbol {
     }
 
     /**
+     * Construct a new synthesized variable
+     * @param name the name of the variable
+     * @param modifiers the Modifiers the variable is declared with
+     */
+    public MyVariableSymbol(String name, Modifiers modifiers) {
+        super(name, modifiers);
+        this.token = null;
+    }
+
+    /**
      * Copy constructs a variable
      * @param var the variable to copy from
      */

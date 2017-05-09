@@ -108,6 +108,10 @@ public final class ReflectedClassSymbol extends ClassSymbol {
         for (Field cur : cls.getDeclaredFields()) {
             fields.put(new VariableSymbol(cur));
         }
+        establishInheritanceHierarchy();
+        // if (getQualifiedName().equals("java.util.Collection")) {
+        //     // System.out.println("implements? " + implementsInterface(fetch("Iterable")));
+        // }
     }
 
     @Override

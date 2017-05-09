@@ -1,9 +1,12 @@
 package com.binghamton.jhelp;
 
 import java.util.ArrayDeque;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.List;
 import java.util.function.Function;
 
 import com.binghamton.jhelp.error.SemanticError;
@@ -15,7 +18,7 @@ import com.binghamton.jhelp.error.SemanticError;
  */
 public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
 
-    protected SymbolTable<K, V> parent;
+    protected List<SymbolTable<K, V>> ancestors = new ArrayList<>();
     protected ArrayDeque<Map<K, V>> table = new ArrayDeque<>();
     protected Function<V, K> valueToKey;
 
@@ -34,23 +37,28 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
 
     /**
      * Constructs a SymbolTable with a parent SymbolTable
-     * @param parent the parent SymbolTable
+     * @param ancestor the ancestor SymbolTable
      */
-    protected SymbolTable(SymbolTable<K, V> parent) {
-        this.parent = parent;
-        this.valueToKey = parent.valueToKey;
+    protected SymbolTable(SymbolTable<K, V> ancestor) {
+        ancestors.add(ancestor);
+        this.valueToKey = ancestor.valueToKey;
     }
 
     /**
-     * Looks for a Symbol by key in this SymbolTable, or its parent.
+     * Looks for a Symbol by key in this SymbolTable, or its ancestors.
      * @param key the key to use to retrieve the Symbol
      * @return the Symbol represented by the key, if one exists,
      *         otherwise null
      */
     public V get(K key) {
         V sym = getFromTable(key);
-        if (sym == null && parent != null) {
-            sym = parent.get(key);
+        if (sym == null) {
+            for (SymbolTable<K, V> ancestor : ancestors) {
+                sym = ancestor.get(key);
+                if (sym != null) {
+                    break;
+                }
+            }
         }
         return sym;
     }
@@ -91,7 +99,7 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
     public boolean put(V symbol) {
         K key = valueToKey.apply(symbol);
         if (hasInCurrentScope(key)) {
-            System.err.println("put failed, error should follow...");
+            System.out.println("**** PUT FAILED, ERROR SHOULD FOLLOW...");
             return false;
         }
         table.peekFirst().put(key, symbol);
@@ -147,12 +155,12 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
     }
 
     /**
-     * Determines if this key shadows a Symbol in an enclosing scope
+     * Determines if a key would shadow a Symbol in an enclosing scope
      * @param key the key of the Symbol to search for
-     * @return true iff the Symbol shadows a Symbol in this table
+     * @return true iff the Symbol would shadow a Symbol in this table
      */
     public boolean shadows(K key) {
-        return !hasInCurrentScope(key) && (parent != null && parent.has(key));
+        return !hasInCurrentScope(key) && has(key);
     }
 
     /**
@@ -176,29 +184,33 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
     }
 
     /**
-     * Gets the number of Symbols in this SymbolTable and its parent
-     * @return the number of Symbols in this SymbolTable and its parent
+     * Gets the number of Symbols in this SymbolTable and its ancestors.
+     * @return the number of Symbols in this SymbolTable and its ancestors
      */
     public int totalSize() {
-        return size() + (parent == null ? 0 : parent.size());
+        int sum = size();
+        for (SymbolTable<K, V> ancestor : ancestors) {
+            sum += ancestor.size();
+        }
+        return sum;
     }
 
     /**
-     * Gathers the unique Symbols in this table and any parent table into an
+     * Gathers the unique Symbols in this table and any ancestor tables into an
      * array.
      * @param dest the array to place the Symbols in
-     * @return an array with all the unique Symbols in this table and any parent
-     * table.
+     * @return an array with all the unique Symbols in this table and any
+     * ancestor tables.
      */
     public V[] getAllSymbols(V[] dest) {
         Map<K, V> map = new HashMap<>();
         populate(this, map);
 
-        if (parent != null) {
-            populate(parent, map);
+        for (SymbolTable<K, V> ancestor : ancestors) {
+            populate(ancestor, map);
         }
 
-        return map.values().toArray(dest);
+        return trim(map.values().toArray(dest));
     }
 
     /**
@@ -209,7 +221,7 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
     public V[] getSymbols(V[] dest) {
         Map<K, V> map = new HashMap<>();
         populate(this, map);
-        return map.values().toArray(dest);
+        return trim(map.values().toArray(dest));
     }
 
     /**
@@ -221,29 +233,15 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
     public V[] getOutermostSymbols(V[] dest) {
         Map<K, V> map = new HashMap<>();
         populate(table.getFirst().values(), map);
-        return map.values().toArray(dest);
+        return trim(map.values().toArray(dest));
     }
 
     /**
-     * Sets the parent table of this table
-     * @param parent the parent table
-     */
-    public void setParent(SymbolTable<K, V> parent) {
-        this.parent = parent;
-    }
-
-    /**
-     * Adds a SymbolTable at the root of this table's hierarchy.  If this table
-     * has no parent, ancestor becomes its parent, otherwise this process
-     * continues recursively until a table without a parent is found.
+     * Adds a SymbolTable to be an ancestor of this SymbolTable
      * @param ancestor the SymbolTable to be at the root of this table's hierarchy
      */
     public void addAncestor(SymbolTable<K, V> ancestor) {
-        if (parent == null) {
-            parent = ancestor;
-        } else {
-            parent.addAncestor(ancestor);
-        }
+        ancestors.add(ancestor);
     }
 
     /**
@@ -276,10 +274,9 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
             }
             sb.append("end scope ----------------------------------------\n");
         }
-        if (parent != null) {
-            sb.append(parent.repr());
-        } else {
-            sb.append("****************************************\n");
+        for (SymbolTable<K, V> ancestor : ancestors) {
+            sb.append("ancestor table ----------------------------------------\n");
+            sb.append(ancestor.repr());
         }
         sb.append("end table ========================================\n");
         return sb.toString();
@@ -390,5 +387,13 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
                 map.put(key, sym);
             }
         }
+    }
+
+    private V[] trim(V[] src) {
+        int i = 0;
+        while (i < src.length && src[i] != null) {
+            ++i;
+        }
+        return Arrays.copyOf(src, i);
     }
 }

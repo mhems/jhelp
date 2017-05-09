@@ -34,7 +34,7 @@ public class MethodSymbol extends Symbol {
      * Copy construct a MethodSymbol from an existing one
      * @param method the existing method to copy from
      */
-    protected MethodSymbol(MethodSymbol method) {
+    public MethodSymbol(MethodSymbol method) {
         super(method.name, method.modifiers);
         this.type = method.type;
         this.declarer = method.declarer;
@@ -50,7 +50,7 @@ public class MethodSymbol extends Symbol {
      * Constructs a new named method symbol
      * @param name the name of the method
      */
-    public MethodSymbol(String name) {
+    protected MethodSymbol(String name) {
         super(name);
     }
 
@@ -59,7 +59,7 @@ public class MethodSymbol extends Symbol {
      * @param name the name of this MethodSymbol
      * @param modifiers the modifiers of this MethodSymbol
      */
-    public MethodSymbol(String name, Modifiers modifiers) {
+    protected MethodSymbol(String name, Modifiers modifiers) {
         super(name, modifiers);
     }
 
@@ -70,6 +70,9 @@ public class MethodSymbol extends Symbol {
     public MethodSymbol(Method method) {
         super(method.getName(), method.getModifiers());
         constructor = false;
+        if (method.getDefaultValue() != null) {
+            addModifier(Modifier.DEFAULT);
+        }
         commonInit(method);
     }
 
@@ -276,11 +279,12 @@ public class MethodSymbol extends Symbol {
     protected static void adapt(MethodSymbol method,
                                 Map<TypeVariable, Type> map){
         // allow method type parameters to shadow outer scopes'
-        for (TypeVariable mParam : method.typeVars) {
-            if (map.containsKey(mParam)) {
-                map.remove(mParam);
-            }
-        }
+        // for (TypeVariable mParam : method.typeVars) {
+        //     if (map.containsKey(mParam)) {
+        //         // map.remove(mParam);
+        //         // System.out.println("----> removing " + mParam);
+        //     }
+        // }
         for (int i = 0; i < method.paramTypes.length; i++) {
             method.paramTypes[i] = method.paramTypes[i].adapt(map);
         }

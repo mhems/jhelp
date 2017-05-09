@@ -39,6 +39,25 @@ public class MyMethodSymbol extends MethodSymbol {
     }
 
     /**
+     * Construct a new synthesized method
+     * @param name the name of this method
+     */
+    public MyMethodSymbol(String name) {
+        super(name);
+        this.token = null;
+    }
+
+    /**
+     * Construct a new synthesized, modified method
+     * @param name the name of this method
+     * @param modifiers the Modifiers of this method
+     */
+    public MyMethodSymbol(String name, Modifiers modifiers) {
+        super(name, modifiers);
+        this.token = null;
+    }
+
+    /**
      * Gets the Token holding the name of this method
      * @return the Token holding the name of this method
      */

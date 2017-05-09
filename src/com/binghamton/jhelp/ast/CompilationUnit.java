@@ -25,6 +25,18 @@ public class CompilationUnit extends ASTNode {
     private final NamedSymbolTable<VariableSymbol> importedFields = new NamedSymbolTable<>();
     private MyPackage declaringPackage;
 
+    public ImportingSymbolTable getImportedClasses() {
+        return importedClasses;
+    }
+
+    public MethodSymbolTable getImportedMethods() {
+        return importedMethods;
+    }
+
+    public NamedSymbolTable<VariableSymbol> getImportedFields() {
+        return importedFields;
+    }
+
     public ClassSymbol getImportedClass(String name) {
         return importedClasses.get(name);
     }

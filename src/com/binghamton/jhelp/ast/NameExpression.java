@@ -253,6 +253,7 @@ public class NameExpression extends Expression {
         String ret = "";
         if (isQualified()) {
             ret += qualifier.getName();
+            ret += ".";
         }
         ret += name.getText();
         return ret;

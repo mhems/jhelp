@@ -183,7 +183,11 @@ public class FileLevelVisitor extends EmptyVisitor {
         String name = ast.getImportName();
         if (ast.isStatic()) {
             String memberName = ast.getNameExpression().getName();
-            name = ast.getNameExpression().getQualifyingName().getText();
+            if (ast.isDemand()) {
+                name = memberName;
+            } else {
+                name = ast.getNameExpression().getQualifyingName().getName();
+            }
             ReflectedClassSymbol cls = null;
             try {
                 cls = ImportManager.getOrImport(name);

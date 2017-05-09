@@ -28,6 +28,7 @@ public class MyTokenFactory implements TokenFactory<MyToken> {
     @Override
     public MyToken create(int type, String text) {
         MyToken token = new MyToken(type, text);
+        token.setFileBuffer(buffer);
         token.setTokenStream(stream);
         return token;
     }
