@@ -47,6 +47,10 @@ public class MyClassSymbol extends ClassSymbol {
         establishInheritanceHierarchy();
     }
 
+    // public MyClassSymbol copy() {
+    //     return new MyClassSymbol(this, false);
+    // }
+
     /**
      * Construct a new named class
      * @param token the Token holding this class's name
@@ -215,6 +219,7 @@ public class MyClassSymbol extends ClassSymbol {
         if (!params.put(sym)) {
             return false;
         }
+        sym.setIndex(paramArr.length);
         paramArr = params.getSymbols(new TypeVariable[params.size()]);
         return true;
     }

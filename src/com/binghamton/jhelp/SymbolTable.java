@@ -22,6 +22,22 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
     protected ArrayDeque<Map<K, V>> table = new ArrayDeque<>();
     protected Function<V, K> valueToKey;
 
+    // protected static <K, V extends Symbol> void copy(SymbolTable<K, V> dest,
+    //                                                  SymbolTable<K, V> src) {
+    //     for (Map<K, V> scope : src.table) {
+    //         Map<K, V> newScope = new HashMap<>();
+    //         for (K key : scope.keySet()) {
+    //             newScope.put(key, (V)scope.get(key).copy());
+    //         }
+    //         dest.table.add(newScope);
+    //     }
+    //     for (SymbolTable<K, V> ancestor : src.ancestors) {
+    //         dest.addAncestor(ancestor.copy());
+    //     }
+    // }
+
+    // public abstract SymbolTable<K, V> copy();
+
     {
         // ensure table is non-empty
         enterScope();

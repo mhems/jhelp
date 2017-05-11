@@ -82,6 +82,10 @@ public class CompilationUnit extends ASTNode {
         return importedClasses.importType(classname);
     }
 
+    public boolean importType(ClassSymbol cls) {
+        return importedClasses.put(cls);
+    }
+
     /**
      * Construct a new compilation unit
      * @param pkg the package statement

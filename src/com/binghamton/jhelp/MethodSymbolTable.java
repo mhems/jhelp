@@ -11,7 +11,7 @@ import java.util.function.Function;
  */
 public class MethodSymbolTable extends SymbolTable<MethodType, MethodSymbol> {
     private static final Function<MethodSymbol, MethodType> TO_TYPE = s -> s.getType();
-
+    private static final boolean RECURSE = true;
     /**
      * Construct a new MethodSymbolTable
      */
@@ -80,9 +80,18 @@ public class MethodSymbolTable extends SymbolTable<MethodType, MethodSymbol> {
         for (MethodSymbol sym : symTab) {
             ret.put(sym.adapt(map));
         }
-        // for (SymbolTable<MethodType, MethodSymbol> ancestor : symTab.ancestors) {
-        //     ret.addAncestor(adaptMethods(ancestor, map));
-        // }
+        if (RECURSE) {
+        for (SymbolTable<MethodType, MethodSymbol> ancestor : symTab.ancestors) {
+            ret.addAncestor(adaptMethods(ancestor, map));
+        }
+        }
         return ret;
     }
+
+    // @Override
+    // public MethodSymbolTable copy() {
+    //     MethodSymbolTable ret = new MethodSymbolTable();
+    //     copy(ret, this);
+    //     return ret;
+    // }
 }

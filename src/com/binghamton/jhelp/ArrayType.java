@@ -93,6 +93,13 @@ public class ArrayType extends ReferenceType {
         return cache.get(base);
     }
 
+    @Override
+    public boolean isSuperTypeOf(Type other) {
+        return (other instanceof ArrayType &&
+                base.isSuperTypeOf(((ArrayType)other).getBaseType())) ||
+            other == NilType.TYPE;
+    }
+
     /**
      * Gets the ClassSymbol where this type is declared
      * @return the ClassSymbol where this type is declared
@@ -162,6 +169,10 @@ public class ArrayType extends ReferenceType {
             super("[" + baseType.getName());
             this.baseType = baseType;
             superClass = fetch("Object");
+        }
+
+        public ArrayClassSymbol copy() {
+            return new ArrayClassSymbol(baseType);
         }
 
         /**

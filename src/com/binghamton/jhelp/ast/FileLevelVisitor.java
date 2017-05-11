@@ -14,14 +14,18 @@ import com.binghamton.jhelp.Modifier;
 import com.binghamton.jhelp.MethodSymbol;
 import com.binghamton.jhelp.MyClassSymbol;
 import com.binghamton.jhelp.MyPackage;
+import com.binghamton.jhelp.Package;
 import com.binghamton.jhelp.Program;
 import com.binghamton.jhelp.ReflectedClassSymbol;
 import com.binghamton.jhelp.Symbol;
+import com.binghamton.jhelp.Type;
 import com.binghamton.jhelp.TypeVariable;
 import com.binghamton.jhelp.VariableSymbol;
 import com.binghamton.jhelp.error.JHelpError;
 import com.binghamton.jhelp.error.SemanticError;
 import com.binghamton.jhelp.error.StyleWarning;
+
+import static com.binghamton.jhelp.ast.NameExpression.Kind;
 
 /**
  * The file (highest) level Visitor for visiting packages, imports, and
@@ -54,6 +58,48 @@ public class FileLevelVisitor extends EmptyVisitor {
      */
     public FileLevelVisitor(Program program) {
         this.program = program;
+    }
+
+    /**
+     * Visit a AccessExpression node
+     * @param ast the AST node being visited
+     */
+    public void visit(AccessExpression ast) {
+        Expression lhs = ast.getLHS();
+        NameExpression rhs = ast.getRHS();
+
+        lhs.accept(this);
+        // rhs is guaranteed to be unqualified NameExpression
+        // instead of visiting, we just hoist its data
+
+        Type lType = lhs.getType();
+        String rName = rhs.getName();
+
+        if (lType != null) {
+            Type type = lType.getClassSymbol().getType(rName);
+            if (type == null) {
+                addError(rhs,
+                         lType.getClassSymbol().getName() + " has no type named " + rName,
+                         String.format("Did you make a typo or forget to add %s to %s?",
+                                       rName,
+                                       lType.getClassSymbol().getName()));
+            } else {
+                ast.setType(type);
+            }
+        } else {
+            // if not typed yet, must name Package or part of a Package
+            Package curPkg = program.getPackage(lhs.getText());
+            if (curPkg != null) {
+                ClassSymbol cls = curPkg.getClass(rName);
+                if (cls != null) {
+                    ast.setType(cls);
+                } else {
+                    rhs.setKind(Kind.PACKAGE);
+                }
+            } else {
+                rhs.setKind(Kind.PACKAGE);
+            }
+        }
     }
 
     /**
@@ -181,20 +227,36 @@ public class FileLevelVisitor extends EmptyVisitor {
      */
     public void visit(ImportStatement ast) {
         String name = ast.getImportName();
+        if (!ast.getNameExpression().isQualified() &&
+            !ast.isStatic() &&
+            ast.isDemand()) {
+            addError(ast.getNameExpression(),
+                     "Imports must be qualified with the package they occur in",
+                     "Did you forget to specify the package?");
+            return;
+        }
+
         if (ast.isStatic()) {
             String memberName = ast.getNameExpression().getName();
+            NameExpression nameExpr;
             if (ast.isDemand()) {
-                name = memberName;
+                nameExpr = ast.getNameExpression();
             } else {
-                name = ast.getNameExpression().getQualifyingName().getName();
+                nameExpr = ast.getNameExpression().getQualifyingName();
             }
-            ReflectedClassSymbol cls = null;
+            name = nameExpr.getName();
+            ClassSymbol cls = null;
             try {
                 cls = ImportManager.getOrImport(name);
             } catch(ClassNotFoundException e) {
-                addError(ast.getNameExpression(),
-                         "Cannot import a non-existent class",
-                         "Correct the import to name an existing class or remove it");
+                nameExpr.accept(this);
+                if (nameExpr.getType() != null) {
+                    cls = nameExpr.getType().getClassSymbol();
+                } else {
+                    addError(nameExpr,
+                             "Cannot import a member from a non-existent class",
+                             "Correct the import to name an existing class or remove it");
+                }
             }
             if (cls != null) {
                 ClassSymbol[] inners = cls.getInnerClasses();
@@ -227,22 +289,26 @@ public class FileLevelVisitor extends EmptyVisitor {
             if (ast.isDemand()) { // type import on demand
                 currentUnit.importTypesOnDemand(name);
             } else { // single type import
-                if (pkg.getClassTable().has(name)) {
-                    addError(ast.getNameExpression(),
+                String simpleName = ast.getNameExpression().getSimpleName();
+                if (pkg.getClassTable().has(simpleName)) {
+                    addError(ast.getNameExpression().getToken(),
                              "Cannot import a class with same name as a class you have created",
                              "Rename your class or remove the import");
                 } else {
                     try {
-                        if (!currentUnit.importType(name) &&
-                            currentUnit.getImportedClass(name) instanceof MyClassSymbol) {
-                            addError(ast.getNameExpression(),
-                                     "Cannot import a class with same name as a class you have created",
-                                     "Rename your class or remove the import");
-                        }
+                        boolean b = currentUnit.importType(name);
+                        System.out.println("importing " + name + " gave " + b);
                     } catch (ClassNotFoundException e) {
-                        addError(ast.getNameExpression(),
-                                 "Cannot import a non-existent class",
-                                 "Correct the import to name an existing class or remove it");
+                        System.out.println(name + " must be a user-defined class");
+                        ast.getNameExpression().accept(this);
+                        if (ast.getNameExpression().getType() != null) {
+                            System.out.println(" -> it was, importing it");
+                            currentUnit.importType(ast.getNameExpression().getType().getClassSymbol());
+                        } else {
+                            addError(ast.getNameExpression(),
+                                     "Cannot import a non-existent class",
+                                     "Correct the import to name an existing class or remove it");
+                        }
                     }
                 }
             }
@@ -265,6 +331,53 @@ public class FileLevelVisitor extends EmptyVisitor {
                              "Change the name of the type parameter to be unique");
                 }
                 ++index;
+            }
+        }
+    }
+
+    /**
+     * Visit a NameExpression node
+     * @param ast the AST node being visited
+     */
+    public void visit(NameExpression ast) {
+        String name = ast.getName();
+        String rName = ast.getToken().getText();
+        Kind kind = ast.getKind();
+        Type type;
+        NameExpression qual = ast.getQualifyingName();
+        if (kind == Kind.PACKAGE) {
+            Package pkg = program.getPackage(name);
+            if (pkg != null) {
+                ast.setPackage(pkg);
+            }
+            // cannot throw error yet, must wait and hoist from Access
+        } else {
+            if (!ast.isQualified()) {
+                type = currentClass.getType(name);
+                if (type == null) {
+                    type = currentUnit.getImportedClass(name);
+                }
+            } else {
+                if (qual.getKind() == Kind.PACKAGE_OR_TYPE) {
+                    qual.accept(this);
+                }
+                if (qual.getKind() == Kind.PACKAGE) {
+                    type = qual.getPackage().getClass(rName);
+                } else {
+                    type = qual.getType().getClassSymbol().getType(rName);
+                }
+            }
+            if (type != null) {
+                ast.setKind(Kind.TYPE);
+                ast.setType(type);
+            } else {
+                if (kind == Kind.TYPE) {
+                    addError(ast,
+                             "Unknown identifier",
+                             "Did you forget an import or make a typo");
+                } else {
+                    ast.setKind(Kind.PACKAGE);
+                }
             }
         }
     }
@@ -323,6 +436,7 @@ public class FileLevelVisitor extends EmptyVisitor {
             filename = new File(unit.getFilename()).getName();
             filename = filename.substring(0,
                                           filename.length() - ".java".length());
+            System.out.println("\nvisiting file " + filename + "\n");
             unit.accept(this);
         }
     }

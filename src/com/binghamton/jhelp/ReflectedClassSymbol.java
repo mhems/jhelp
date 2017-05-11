@@ -3,6 +3,8 @@ package com.binghamton.jhelp;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Member;
 import java.util.Map;
 
 import com.binghamton.jhelp.ast.ASTVisitor;
@@ -28,6 +30,7 @@ public final class ReflectedClassSymbol extends ClassSymbol {
      */
     private ReflectedClassSymbol(Class<? extends Object> cls) {
         super(cls.getSimpleName(), cls.getModifiers());
+        // System.out.println("reflecting class "+ cls.getSimpleName());
         this.cls = cls;
         boxed = cls.isPrimitive();
         pkg = new ReflectedPackage(cls.getPackage());
@@ -60,7 +63,9 @@ public final class ReflectedClassSymbol extends ClassSymbol {
      * @return a new ReflectedClassSymbol reflecting the pre-compiled class
      */
     public static ReflectedClassSymbol make(Class<?> cls) {
-        return new ReflectedClassSymbol(cls);
+         ReflectedClassSymbol ret = new ReflectedClassSymbol(cls);
+         // ret.init();
+         return ret;
     }
 
     /**
@@ -83,6 +88,32 @@ public final class ReflectedClassSymbol extends ClassSymbol {
      * instance before any other operations.
      */
     public void init() {
+        paramArr = fromTypeParameters(cls.getTypeParameters());
+        params.putAll(paramArr);
+        // System.out.println("initializing " + getName());
+        for (Class<?> cur : cls.getDeclaredClasses()) {
+            if (visible(cur)) {
+                // System.out.println("giving class " + getName() + " the inner class " + cur.getSimpleName());
+                innerClasses.put(ReflectedClassSymbol.get(cur));
+            }
+        }
+        for (Method cur : cls.getDeclaredMethods()) {
+            if (visible(cur) && !cur.isSynthetic() && !cur.isBridge()) {
+                methods.put(new MethodSymbol(cur));
+            }
+        }
+        // System.out.println("initializing " + getName() + " to have " + methods.size() + " methods");
+        for (Constructor<?> cur : cls.getDeclaredConstructors()) {
+            if (visible(cur) && !cur.isSynthetic()) {
+                ctors.put(new MethodSymbol(cur));
+            }
+        }
+        for (Field cur : cls.getDeclaredFields()) {
+            if (visible(cur) && !cur.isSynthetic()) {
+                fields.put(new VariableSymbol(cur));
+            }
+        }
+
         if (cls.getDeclaringClass() != null) {
             declarer = get(cls.getDeclaringClass());
         }
@@ -90,29 +121,27 @@ public final class ReflectedClassSymbol extends ClassSymbol {
             superClass = fromType(cls.getAnnotatedSuperclass());
         }
         interfaces.putAll(fromTypes(cls.getAnnotatedInterfaces()));
-        paramArr = fromTypeParameters(cls.getTypeParameters());
-        params.putAll(paramArr);
-        for (Class<?> cur : cls.getDeclaredClasses()) {
-            innerClasses.put(ReflectedClassSymbol.get(cur));
-        }
-        for (Method cur : cls.getDeclaredMethods()) {
-            if (!cur.isSynthetic() && !cur.isBridge()) {
-                methods.put(new MethodSymbol(cur));
-            }
-        }
-        for (Constructor<?> cur : cls.getDeclaredConstructors()) {
-            if (!cur.isSynthetic()) {
-                ctors.put(new MethodSymbol(cur));
-            }
-        }
-        for (Field cur : cls.getDeclaredFields()) {
-            fields.put(new VariableSymbol(cur));
-        }
+        // System.out.println("initializing " + getName() + " to have " + interfaces.size() + " interfaces");
         establishInheritanceHierarchy();
-        // if (getQualifiedName().equals("java.util.Collection")) {
-        //     // System.out.println("implements? " + implementsInterface(fetch("Iterable")));
-        // }
     }
+
+    private static boolean visible(Class<?> cls) {
+        return visible(cls.getModifiers());
+    }
+
+    private static boolean visible(Member member) {
+        return visible(member.getModifiers());
+    }
+
+    private static boolean visible(int modifiers) {
+        return Modifier.isPublic(modifiers) ||
+            (!Modifier.isPrivate(modifiers) &&
+             !Modifier.isProtected(modifiers));
+    }
+
+    // public ReflectedClassSymbol copy() {
+    //     return new ReflectedClassSymbol(this);
+    // }
 
     @Override
     public PrimitiveType unbox() {

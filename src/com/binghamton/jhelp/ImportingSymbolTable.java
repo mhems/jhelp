@@ -35,9 +35,13 @@ public class ImportingSymbolTable extends NamedSymbolTable<ClassSymbol> {
      * Constructs a new ImportingSymbolTable
      */
     public ImportingSymbolTable() {
-        // parent = ROOT;
+        ancestors.add(ROOT);
     }
 
+    @Override
+    public void addAncestor(SymbolTable<String, ClassSymbol> ancestor) {
+        ancestors.add(ancestors.size() - 1, ancestor);
+    }
 
     /**
      * Constructs a new ImportingSymbolTable
@@ -152,4 +156,11 @@ public class ImportingSymbolTable extends NamedSymbolTable<ClassSymbol> {
         onDemandPackages.add(classname);
         return true;
     }
+
+    // @Override
+    // public ImportingSymbolTable copy() {
+    //     ImportingSymbolTable ret = new ImportingSymbolTable();
+    //     copy(ret, this);
+    //     return ret;
+    // }
 }

@@ -67,5 +67,6 @@ public class ArrayAccessExpression extends QualifiableExpression {
     public void qualifyWith(Expression expr) {
         qualExpr.qualifyWith(expr);
         arrayExpr = qualExpr;
+        setFirstToken(arrayExpr.getFirstToken());
     }
 }

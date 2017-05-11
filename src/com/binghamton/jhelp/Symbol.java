@@ -57,6 +57,8 @@ public abstract class Symbol {
         modifiers = new Modifiers();
     }
 
+    // public abstract Symbol copy();
+
     /**
      * Constructs a annotated Symbol
      * @param annotations the annotations of the symbol
@@ -399,7 +401,16 @@ public abstract class Symbol {
         TypeVariable[] syms = new TypeVariable[params.length];
         for (int i = 0; i < syms.length; i++) {
             syms[i] = fromTypeVariable(params[i]);
+            syms[i].setIndex(i);
         }
         return syms;
+    }
+
+    protected static String subRepr(Map<TypeVariable, Type> map) {
+        java.util.List<String> list = new java.util.ArrayList<>();
+        for (TypeVariable var : map.keySet()) {
+            list.add(String.format("%s -> %s", var.getName(), map.get(var).toString()));
+        }
+        return String.join(", ", list);
     }
 }

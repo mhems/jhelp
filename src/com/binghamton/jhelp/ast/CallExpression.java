@@ -176,5 +176,6 @@ public class CallExpression extends QualifiableExpression {
     @Override
     public void qualifyWith(Expression expr) {
         methodExpr = new AccessExpression(expr, nameExpr);
+        setFirstToken(methodExpr.getFirstToken());
     }
 }

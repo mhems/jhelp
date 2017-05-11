@@ -14,9 +14,9 @@ import com.binghamton.jhelp.ReferenceType;
 import com.binghamton.jhelp.Type;
 import com.binghamton.jhelp.TypeVariable;
 import com.binghamton.jhelp.WildcardType;
+import com.binghamton.jhelp.error.UnimplementedFeatureWarning;
 
 import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
-import static com.binghamton.jhelp.ast.NameExpression.Kind;
 
 /**
  * The top level Visitor for visiting top-level declarations and adding them to
@@ -30,48 +30,6 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
      */
     public DeclarationLevelVisitor(Program program) {
         super(program);
-    }
-
-    /**
-     * Visit a AccessExpression node
-     * @param ast the AST node being visited
-     */
-    public void visit(AccessExpression ast) {
-        Expression lhs = ast.getLHS();
-        NameExpression rhs = ast.getRHS();
-
-        lhs.accept(this);
-        // rhs is guaranteed to be unqualified NameExpression
-        // instead of visiting, we just hoist its data
-
-        Type lType = lhs.getType();
-        String rName = rhs.getName();
-
-        if (lType != null) {
-            Type type = lType.getClassSymbol().getType(rName);
-            if (type == null) {
-                addError(rhs,
-                         lType.getClassSymbol().getName() + " has no type named " + rName,
-                         String.format("Did you make a typo or forget to add %s to %s?",
-                                       rName,
-                                       lType.getClassSymbol().getName()));
-            } else {
-                ast.setType(type);
-            }
-        } else {
-            // if not typed yet, must name Package or part of a Package
-            Package curPkg = program.getPackage(lhs.getText());
-            if (curPkg != null) {
-                ClassSymbol cls = curPkg.getClass(rName);
-                if (cls != null) {
-                    ast.setType(cls);
-                } else {
-                    rhs.setKind(Kind.PACKAGE);
-                }
-            } else {
-                rhs.setKind(Kind.PACKAGE);
-            }
-        }
     }
 
     /**
@@ -264,47 +222,9 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(NameExpression ast) {
-        String name = ast.getName();
-        String rName = ast.getToken().getText();
-        AnnotationSymbol[] anns = makeAnnotations(ast.getAnnotations());
-        Kind kind = ast.getKind();
-        Type type;
-        NameExpression qual = ast.getQualifyingName();
-        if (kind == Kind.PACKAGE) {
-            Package pkg = program.getPackage(name);
-            if (pkg != null) {
-                ast.setPackage(pkg);
-            }
-            // cannot throw error yet, must wait and hoist from Access
-        } else {
-            if (!ast.isQualified()) {
-                type = currentClass.getType(name);
-                if (type == null) {
-                    type = currentUnit.getImportedClass(name);
-                }
-            } else {
-                if (qual.getKind() == Kind.PACKAGE_OR_TYPE) {
-                    qual.accept(this);
-                }
-                if (qual.getKind() == Kind.PACKAGE) {
-                    type = qual.getPackage().getClass(rName);
-                } else {
-                    type = qual.getType().getClassSymbol().getType(rName);
-                }
-            }
-            if (type != null) {
-                ast.setKind(Kind.TYPE);
-                type.setAnnotations(anns);
-                ast.setType(type);
-            } else {
-                if (kind == Kind.TYPE) {
-                    addError(ast,
-                             "Unknown identifier",
-                             "Did you forget an import or make a typo");
-                } else {
-                    ast.setKind(Kind.PACKAGE);
-                }
-            }
+        super.visit(ast);
+        if (ast.getType() != null) {
+            ast.getType().setAnnotations(makeAnnotations(ast.getAnnotations()));
         }
     }
 
@@ -376,6 +296,8 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
             type.setProgram(program);
             type.setAnnotations(makeAnnotations(ast.getAnnotations()));
             ast.setType(type);
+            addError(new UnimplementedFeatureWarning(ast.getWildCard(),
+                         "Wildcards may not fully typecheck"));
         }
         else {
             ast.getTypeExpression().accept(this);
@@ -402,6 +324,15 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         type.setAnnotations(makeAnnotations(ast.getAnnotations()));
     }
 
+    protected AnnotationSymbol[] makeAnnotations(Annotation[] annotations) {
+        AnnotationSymbol[] ret = new AnnotationSymbol[annotations.length];
+        for (int i = 0; i < ret.length; i++) {
+            annotations[i].accept(this);
+            ret[i] = new AnnotationSymbol(annotations[i].getType());
+        }
+        return ret;
+    }
+
     private void addInterfaces(List<Expression> interfaces) {
         Type cur;
         for (Expression expr : interfaces) {
@@ -415,14 +346,5 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
                 currentClass.addInterface(cur);
             }
         }
-    }
-
-    protected AnnotationSymbol[] makeAnnotations(Annotation[] annotations) {
-        AnnotationSymbol[] ret = new AnnotationSymbol[annotations.length];
-        for (int i = 0; i < ret.length; i++) {
-            annotations[i].accept(this);
-            ret[i] = new AnnotationSymbol(annotations[i].getType());
-        }
-        return ret;
     }
 }

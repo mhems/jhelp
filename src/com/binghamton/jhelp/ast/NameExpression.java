@@ -246,6 +246,14 @@ public class NameExpression extends Expression {
     }
 
     /**
+     * Gets the simple (unqualified) name of this NameExpression
+     * @return the simple (unqualified) name of this NameExpression
+     */
+    public String getSimpleName() {
+        return name.getText();
+    }
+
+    /**
      * Gets the fully qualified name of this NameExpression
      * @return the fully qualified name of this NameExpression
      */

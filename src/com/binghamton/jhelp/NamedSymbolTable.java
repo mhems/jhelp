@@ -9,13 +9,20 @@ import java.util.function.Function;
  * @param <T> the type of Symbol this SymbolTable holds
  */
 public class NamedSymbolTable<T extends Symbol> extends SymbolTable<String, T> {
-
+    private static final boolean RECURSE = true;
     /**
      * Default construct a NamedSymbolTable
      */
     public NamedSymbolTable() {
         this(s -> s.getName());
     }
+
+    // @Override
+    // public NamedSymbolTable<T> copy() {
+    //     NamedSymbolTable<T> ret = new NamedSymbolTable<>();
+    //     copy(ret, this);
+    //     return ret;
+    // }
 
     /**
      * Constructs a new NamedSymbolTable
@@ -39,9 +46,11 @@ public class NamedSymbolTable<T extends Symbol> extends SymbolTable<String, T> {
         for (ClassSymbol sym : symTab) {
             ret.put(sym.adapt(map));
         }
-        // for (SymbolTable<String, ClassSymbol> ancestor : symTab.ancestors) {
-        //     ret.addAncestor(adaptClasses(ancestor, map));
-        // }
+        if (RECURSE) {
+        for (SymbolTable<String, ClassSymbol> ancestor : symTab.ancestors) {
+            ret.addAncestor(adaptClasses(ancestor, map));
+        }
+        }
         return ret;
     }
 
@@ -59,9 +68,11 @@ public class NamedSymbolTable<T extends Symbol> extends SymbolTable<String, T> {
         for (Type sym : symTab) {
             ret.put(sym.adapt(map));
         }
-        // for (SymbolTable<String, Type> ancestor : symTab.ancestors) {
-        //     ret.addAncestor(adaptTypes(ancestor, map));
-        // }
+        if (RECURSE) {
+        for (SymbolTable<String, Type> ancestor : symTab.ancestors) {
+            ret.addAncestor(adaptTypes(ancestor, map));
+        }
+        }
         return ret;
     }
 
@@ -79,9 +90,11 @@ public class NamedSymbolTable<T extends Symbol> extends SymbolTable<String, T> {
         for (VariableSymbol sym : symTab) {
             ret.put(sym.adapt(map));
         }
-        // for (SymbolTable<String, VariableSymbol> ancestor : symTab.ancestors) {
-        //     ret.addAncestor(adaptVariables(ancestor, map));
-        // }
+        if (RECURSE) {
+        for (SymbolTable<String, VariableSymbol> ancestor : symTab.ancestors) {
+            ret.addAncestor(adaptVariables(ancestor, map));
+        }
+            }
         return ret;
     }
 }

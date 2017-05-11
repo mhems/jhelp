@@ -30,6 +30,10 @@ public class MyVariableSymbol extends VariableSymbol {
         this.token = null;
     }
 
+    // public MyVariableSymbol copy() {
+    //     return new MyVariableSymbol(this);
+    // }
+
     /**
      * Copy constructs a variable
      * @param var the variable to copy from

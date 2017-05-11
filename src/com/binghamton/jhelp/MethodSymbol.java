@@ -5,6 +5,7 @@ import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.binghamton.jhelp.util.StringUtils;
@@ -278,20 +279,46 @@ public class MethodSymbol extends Symbol {
      */
     protected static void adapt(MethodSymbol method,
                                 Map<TypeVariable, Type> map){
-        // allow method type parameters to shadow outer scopes'
-        // for (TypeVariable mParam : method.typeVars) {
-        //     if (map.containsKey(mParam)) {
-        //         // map.remove(mParam);
-        //         // System.out.println("----> removing " + mParam);
-        //     }
-        // }
+        System.out.println("adapting method: " + method + " with " + subRepr(map));
+
+        Map<TypeVariable, Type> toUse = map;
+        if (method.isGeneric()) {
+            // System.out.println("method map was: " + subRepr(map));
+            toUse = new HashMap<>(map);
+            // allow method type parameters to shadow outer scopes'
+            for (TypeVariable mParam : method.typeVars) {
+                for (TypeVariable subParam : map.keySet()) {
+                    if (subParam.getName().equals(mParam.getName()) &&
+                        mParam.getDeclaringClass().equals(subParam.getDeclaringClass())) {
+                        // System.out.println("----> method removing " + mParam);
+                        toUse.remove(mParam);
+                        break;
+                    }
+                }
+            }
+            // System.out.println("method map is now: " + subRepr(toUse));
+        }
+        if (toUse.isEmpty()) {
+            System.out.println("method map is now empty");
+            return;
+        }
+
         for (int i = 0; i < method.paramTypes.length; i++) {
-            method.paramTypes[i] = method.paramTypes[i].adapt(map);
+            method.paramTypes[i] = method.paramTypes[i].adapt(toUse);
         }
         for (int i = 0; i < method.exceptions.length; i++) {
-            method.exceptions[i] = method.exceptions[i].adapt(map);
+            method.exceptions[i] = method.exceptions[i].adapt(toUse);
         }
-        method.returnType = method.returnType.adapt(map);
+        method.returnType = method.returnType.adapt(toUse);
+
+        System.out.println("adapted method: " + method);
+
+        if (method.getName().equals("get") &&
+            method.getDeclaringClass().getName().equals("HashMap") &&
+            method.getParameterTypes()[0].getName().equals("Object")) {
+            throw new NullPointerException();
+        }
+
     }
 
     @Override
@@ -394,6 +421,10 @@ public class MethodSymbol extends Symbol {
         return false;
     }
 
+    // public MethodSymbol copy() {
+    //     return new MethodSymbol(this);
+    // }
+
     /**
      * Common initialization of a pre-compiled method or constructor
      * @param exe the pre-compiled Executable to reflect
@@ -415,5 +446,13 @@ public class MethodSymbol extends Symbol {
             returnType = fromType(exe.getAnnotatedReturnType());
         }
         constructType();
+        if (declarer.getName().equals("HashMap") &&
+            getName().equals("get")) {
+            if (returnType.getName().equals("Object")) {
+                throw new NullPointerException();
+            } else {
+                System.out.println("method: " + this);
+            }
+        }
     }
 }

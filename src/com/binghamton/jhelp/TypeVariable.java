@@ -2,6 +2,7 @@ package com.binghamton.jhelp;
 
 import java.lang.reflect.GenericDeclaration;
 import java.lang.reflect.Executable;
+import java.util.Arrays;
 import java.util.Map;
 
 import com.binghamton.jhelp.util.StringUtils;
@@ -14,6 +15,7 @@ import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
 public class TypeVariable extends ReferenceType {
     private Type[] bounds = {};
     private Symbol declarer;
+    private int index = -1;
 
     /**
      * Constructs a new named TypeVariable
@@ -47,6 +49,14 @@ public class TypeVariable extends ReferenceType {
     public TypeVariable(String name, Type... bounds) {
         super(name);
         this.bounds = bounds;
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public void setIndex(int i) {
+        index = i;
     }
 
     @Override
@@ -129,6 +139,7 @@ public class TypeVariable extends ReferenceType {
      * @return true iff this TypeVariable has the same name as `other`
      */
     public boolean nameEquivalent(TypeVariable other) {
+        // System.out.println("tv: " + name + " vs " + other.name);
         return name.equals(other.name);
     }
 
@@ -136,7 +147,11 @@ public class TypeVariable extends ReferenceType {
     public boolean equals(Object other) {
         if (other instanceof TypeVariable) {
             TypeVariable type = (TypeVariable)other;
-            return nameEquivalent(type);// && declarer.equals(type.declarer); // TODO
+            // System.out.println("tv decl: " + declarer.getName() + " vs " + type.declarer.getName());
+            return nameEquivalent(type)
+                // && declarer.equals(type.declarer)
+                && Arrays.equals(bounds, type.bounds)
+                ;
         }
         return false;
     }

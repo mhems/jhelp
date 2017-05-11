@@ -32,6 +32,10 @@ public class VariableSymbol extends Symbol {
         super(name, modifiers);
     }
 
+    // public VariableSymbol copy() {
+    //     return new VariableSymbol(this);
+    // }
+
     /**
      * Constructs a new reflected VariableSymbol
      * @param field the pre-compiled Field to reflect
@@ -107,7 +111,9 @@ public class VariableSymbol extends Symbol {
      */
     protected static void adapt(VariableSymbol var,
                                 Map<TypeVariable, Type> map) {
+        // System.out.println("adapting variable: " + var);
         var.type = var.type.adapt(map);
+        // System.out.println("adapted variable: " + var);
     }
 
     @Override
