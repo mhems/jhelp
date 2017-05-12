@@ -47,9 +47,10 @@ public class MyClassSymbol extends ClassSymbol {
         establishInheritanceHierarchy();
     }
 
-    // public MyClassSymbol copy() {
-    //     return new MyClassSymbol(this, false);
-    // }
+    @Override
+    public MyClassSymbol copy() {
+        return new MyClassSymbol(this, false);
+    }
 
     /**
      * Construct a new named class

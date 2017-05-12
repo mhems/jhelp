@@ -57,8 +57,6 @@ public abstract class Symbol {
         modifiers = new Modifiers();
     }
 
-    // public abstract Symbol copy();
-
     /**
      * Constructs a annotated Symbol
      * @param annotations the annotations of the symbol

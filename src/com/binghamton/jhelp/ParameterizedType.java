@@ -6,6 +6,8 @@ import java.util.Map;
 import com.binghamton.jhelp.error.SemanticError;
 import com.binghamton.jhelp.util.StringUtils;
 
+import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
+
 /**
  * A class representing the parameterization of a generic type with type
  * arguments.
@@ -26,6 +28,15 @@ public class ParameterizedType extends ReferenceType {
         this.wrapped = wrapped;
         this.params = parameters;
         // isWellFormed(); // TODO infinite recursion?
+    }
+
+    public ParameterizedType(ParameterizedType type) {
+        this(type.wrapped.copy(), copyTypes(type.params));
+    }
+
+    @Override
+    public ParameterizedType copy() {
+        return new ParameterizedType(this);
     }
 
     @Override
@@ -164,6 +175,28 @@ public class ParameterizedType extends ReferenceType {
             // addError(new SemanticError("can only parameterize a class"));
         }
         return ret;
+    }
+
+    public boolean isSuperTypeOf(Type other) {
+        if (wrapped.equals(other)) {
+            return true;
+        }
+        ClassSymbol cls = null;
+        if (other instanceof ClassSymbol) {
+            cls = (ClassSymbol)other;
+        } else if (other instanceof ParameterizedType) {
+            cls = ((ParameterizedType)other).wrapped;
+            if (cls.isInterfaceLike() &&
+                !cls.hasInterfaces() &&
+                wrapped.equals(fetch("Object"))) {
+                return true;
+            }
+        }
+        if (cls != null) {
+            return cls.implementsInterface(wrapped) ||
+                cls.extendsClass(wrapped);
+        }
+        return false;
     }
 
     @Override

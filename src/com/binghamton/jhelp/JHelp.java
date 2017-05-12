@@ -27,7 +27,7 @@ public class JHelp {
         runner.addValidator(new TopLevelValidator());
         MemberLevelValidator mV = new MemberLevelValidator();
         runner.addValidator(mV);
-        runner.addValidator(new CodeLevelValidator(mV.getVisitor()));
+        runner.addValidator(new CodeLevelValidator(mV));
         System.exit(runner.run());
     }
 }

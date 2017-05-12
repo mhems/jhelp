@@ -90,6 +90,15 @@ public class CallExpression extends QualifiableExpression {
         this.typeArgs = typeArgs;
     }
 
+    public boolean isDiamond() {
+        return methodExpr instanceof ParamExpression &&
+            ((ParamExpression)methodExpr).isDiamond();
+    }
+
+    public boolean argsSupplied() {
+        return methodExpr instanceof ParamExpression;
+    }
+
     /**
      * Gets the expression that yields the method being called
      * @return the expression that yields the method being called

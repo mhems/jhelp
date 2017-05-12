@@ -157,10 +157,9 @@ public class ImportingSymbolTable extends NamedSymbolTable<ClassSymbol> {
         return true;
     }
 
-    // @Override
-    // public ImportingSymbolTable copy() {
-    //     ImportingSymbolTable ret = new ImportingSymbolTable();
-    //     copy(ret, this);
-    //     return ret;
-    // }
+    public ImportingSymbolTable copy() {
+        ImportingSymbolTable ret = new ImportingSymbolTable();
+        copy(ret, this, i -> i.copy(), () -> new ImportingSymbolTable());
+        return ret;
+    }
 }

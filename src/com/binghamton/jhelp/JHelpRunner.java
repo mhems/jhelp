@@ -47,12 +47,20 @@ public class JHelpRunner {
             v.validate(program);
             stop = System.nanoTime();
             if (PROFILING) {
-                System.out.printf("validator %d took '%f' ms\n", i, (stop - start)/1e6);
+                System.out.printf("validator %s took '%f' ms\n",
+                                  v.getClass().getSimpleName(),
+                                  (stop - start)/1e6);
             }
             if (program.hasFatalErrors()) {
                 int num = report();
                 System.out.println("----------------------------------------");
-                System.out.println(v.getExitExplanation() + ", exiting now");
+                ColorStringBuilder sb = new ColorStringBuilder();
+                sb.append(v.getExitExplanation());
+                sb.append(", ");
+                sb.append("exiting now",
+                      ColorStringBuilder.Color.RED,
+                      null);
+                System.out.println(sb.toString());
                 return num;
             }
             ++i;

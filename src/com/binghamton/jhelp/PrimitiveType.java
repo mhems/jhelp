@@ -230,6 +230,13 @@ public class PrimitiveType extends Type {
         }
     }
 
+    public PrimitiveType copy() {
+        if (token != null) {
+            return new PrimitiveType(token);
+        }
+        return this;
+    }
+
     /**
      * Constructs a PrimitiveType from an underlying Primitive
      * @param primitive the underlying Primitive

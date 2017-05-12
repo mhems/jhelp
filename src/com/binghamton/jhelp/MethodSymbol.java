@@ -3,6 +3,7 @@ package com.binghamton.jhelp;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.HashMap;
@@ -37,14 +38,14 @@ public class MethodSymbol extends Symbol {
      */
     public MethodSymbol(MethodSymbol method) {
         super(method.name, method.modifiers);
-        this.type = method.type;
         this.declarer = method.declarer;
-        this.paramTypes = method.paramTypes;
-        this.typeVars = method.typeVars;
-        this.exceptions = method.exceptions;
+        this.paramTypes = Arrays.copyOf(method.paramTypes, method.paramTypes.length);
+        this.typeVars = Arrays.copyOf(method.typeVars, method.typeVars.length);
+        this.exceptions = Arrays.copyOf(method.exceptions, method.exceptions.length);
         this.variadic = method.variadic;
         this.constructor = method.constructor;
         this.returnType = method.returnType;
+        constructType();
     }
 
     /**
@@ -310,7 +311,7 @@ public class MethodSymbol extends Symbol {
             method.exceptions[i] = method.exceptions[i].adapt(toUse);
         }
         method.returnType = method.returnType.adapt(toUse);
-
+        method.constructType();
         System.out.println("adapted method: " + method);
 
         if (method.getName().equals("get") &&
@@ -421,9 +422,9 @@ public class MethodSymbol extends Symbol {
         return false;
     }
 
-    // public MethodSymbol copy() {
-    //     return new MethodSymbol(this);
-    // }
+    public MethodSymbol copy() {
+        return new MethodSymbol(this);
+    }
 
     /**
      * Common initialization of a pre-compiled method or constructor

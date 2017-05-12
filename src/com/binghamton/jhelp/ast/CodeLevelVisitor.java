@@ -799,14 +799,12 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                 ++index;
             }
         }
-        // TODO incorrect
-        // if (ast.getMethod() instanceof ParamExpression) {
-        //     if (!((ParamExpression)ast.getMethod()).isDiamond())
-        //         addError(new StyleWarning(ast.getMethod(),
-        //                                   "Constructing a generic class without type arguments is not recommended",
-        //                                   "Specify type arguments or use the diamond operator '<>'"));
-        // }
-
+        if (consCls.isGeneric() && !ast.argsSupplied()) {
+            ast.setType(((ParameterizedType)ast.getType()).getWrappedType());
+            addError(new StyleWarning(ast.getMethod(),
+                                      "Constructing a generic class without type arguments is not recommended",
+                                      "Specify type arguments or use the diamond operator '<>'"));
+        }
         if (consCls.isEnum()) {
             addError(ast.getMethod(),
                      "Cannot construct an enum",
@@ -1411,6 +1409,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             var.setDeclaringClass(currentClass);
             ast.getExpression().accept(this);
             var.setType(ast.getExpression().getType());
+            checkForRawType(var.getType(), ast.getExpression());
         }
         if (!var.isField()) {
             currentScope.put(var);

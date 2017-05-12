@@ -28,9 +28,15 @@ public final class MethodType extends Type {
     private MethodType(MethodSymbol method) {
         super(method.getName());
         declarer = method.getDeclaringClass();
-        typeParams = method.getTypeParameters();
-        paramTypes = method.getParameterTypes();
+        typeParams = Arrays.copyOf(method.getTypeParameters(), method.getTypeParameters().length);
+        paramTypes = Arrays.copyOf(method.getParameterTypes(), method.getParameterTypes().length);
     }
+
+    @Override
+    public MethodType copy() {
+        return fromParameters(getName(), paramTypes);
+    }
+
 
     /**
      * Build a MethodType from its name and parameter types
@@ -41,7 +47,7 @@ public final class MethodType extends Type {
      */
     public static MethodType fromParameters(String name, Type... paramTypes) {
         MethodType type = new MethodType(name);
-        type.paramTypes = paramTypes;
+        type.paramTypes = Arrays.copyOf(paramTypes, paramTypes.length);
         return type;
     }
 

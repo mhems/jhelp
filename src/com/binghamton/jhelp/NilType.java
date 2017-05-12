@@ -16,6 +16,11 @@ public final class NilType extends Type {
     }
 
     @Override
+    public NilType copy() {
+        return TYPE;
+    }
+
+    @Override
     public String getTypeName() {
         return "null";
     }

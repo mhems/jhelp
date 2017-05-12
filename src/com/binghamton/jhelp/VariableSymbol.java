@@ -32,9 +32,9 @@ public class VariableSymbol extends Symbol {
         super(name, modifiers);
     }
 
-    // public VariableSymbol copy() {
-    //     return new VariableSymbol(this);
-    // }
+    public VariableSymbol copy() {
+        return new VariableSymbol(this);
+    }
 
     /**
      * Constructs a new reflected VariableSymbol

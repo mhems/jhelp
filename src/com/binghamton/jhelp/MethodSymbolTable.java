@@ -74,24 +74,23 @@ public class MethodSymbolTable extends SymbolTable<MethodType, MethodSymbol> {
      * @return a new SymbolTable with adapted contents
      */
     public static MethodSymbolTable
-        adaptMethods(SymbolTable<MethodType, MethodSymbol> symTab,
-                     Map<TypeVariable, Type> map) {
+    adaptMethods(SymbolTable<MethodType, MethodSymbol> src,
+                 Map<TypeVariable, Type> map) {
         MethodSymbolTable ret = new MethodSymbolTable();
-        for (MethodSymbol sym : symTab) {
+        for (MethodSymbol sym : src) {
             ret.put(sym.adapt(map));
         }
         if (RECURSE) {
-        for (SymbolTable<MethodType, MethodSymbol> ancestor : symTab.ancestors) {
-            ret.addAncestor(adaptMethods(ancestor, map));
-        }
+            for (SymbolTable<MethodType, MethodSymbol> ancestor : src.ancestors) {
+                ret.addAncestor(adaptMethods(ancestor, map));
+            }
         }
         return ret;
     }
 
-    // @Override
-    // public MethodSymbolTable copy() {
-    //     MethodSymbolTable ret = new MethodSymbolTable();
-    //     copy(ret, this);
-    //     return ret;
-    // }
+    public MethodSymbolTable copy() {
+        MethodSymbolTable ret = new MethodSymbolTable();
+        copy(ret, this, m -> m.copy(), () -> new MethodSymbolTable());
+        return ret;
+    }
 }

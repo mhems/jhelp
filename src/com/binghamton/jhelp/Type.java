@@ -39,6 +39,16 @@ public abstract class Type extends Symbol {
 
     }
 
+    public abstract Type copy();
+
+    protected static Type[] copyTypes(Type[] types) {
+        Type[] ret = new Type[types.length];
+        for (int i = 0; i < ret.length; i++) {
+            ret[i] = types[i].copy();
+        }
+        return ret;
+    }
+
     /**
      * Constructs a named Type
      * @param name the name of this Type
@@ -184,8 +194,7 @@ public abstract class Type extends Symbol {
      * @param other the potential subtype of this Type
      * @return true iff this Type is a supertype of another Type
      */
-    // TODO implement
-    public /*abstract*/ boolean isSuperTypeOf(Type other) {return true;}
+    public /*abstract*/ boolean isSuperTypeOf(Type other) { return true; }
 
     /**
      * Determines if this type is reifiable

@@ -33,6 +33,15 @@ public class TypeVariable extends ReferenceType {
         declarer = ReflectedClassSymbol.get(declCls);
     }
 
+    public TypeVariable(TypeVariable var) {
+        this(var.name, copyTypes(var.bounds));
+    }
+
+    @Override
+    public TypeVariable copy() {
+        return new TypeVariable(this);
+    }
+
     /**
      * Constructs a new named TypeVariable
      * @param name the name of the TypeVariable

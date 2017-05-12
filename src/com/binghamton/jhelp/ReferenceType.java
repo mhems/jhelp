@@ -53,6 +53,9 @@ public abstract class ReferenceType extends Type {
     public abstract ReferenceType adapt(Map<TypeVariable, Type> map);
 
     @Override
+    public abstract ReferenceType copy();
+
+    @Override
     public boolean canWidenTo(Type type) {
         return this.isSubTypeOf(type);
     }

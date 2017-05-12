@@ -40,6 +40,15 @@ public class ArrayType extends ReferenceType {
         }
     }
 
+    public ArrayType(ArrayType type) {
+        this(type.copy(), type.annotations);
+    }
+
+    @Override
+    public ArrayType copy() {
+        return new ArrayType(this);
+    }
+
     /**
      * Gets the base type of this ArrayType
      * @return the base type of this ArrayType

@@ -139,9 +139,10 @@ public final class ReflectedClassSymbol extends ClassSymbol {
              !Modifier.isProtected(modifiers));
     }
 
-    // public ReflectedClassSymbol copy() {
-    //     return new ReflectedClassSymbol(this);
-    // }
+    @Override
+    public ReflectedClassSymbol copy() {
+        return new ReflectedClassSymbol(this);
+    }
 
     @Override
     public PrimitiveType unbox() {

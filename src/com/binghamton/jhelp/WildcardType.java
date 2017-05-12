@@ -20,6 +20,10 @@ public class WildcardType extends Type {
         this(true, fetch("Object"));
     }
 
+    public WildcardType(WildcardType type) {
+        this(type.upper, type.bound.copy()) ;
+    }
+
     /**
      * Constructs a new bounded WildcardType
      * @param upper true iff bound is an upper bound
@@ -29,6 +33,11 @@ public class WildcardType extends Type {
         this.upper = upper;
         this.bound = bound;
         bounded = !bound.equals(fetch("Object"));
+    }
+
+    @Override
+    public WildcardType copy() {
+        return new WildcardType(this);
     }
 
     @Override

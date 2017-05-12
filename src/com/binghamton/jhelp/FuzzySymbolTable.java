@@ -49,4 +49,12 @@ public class FuzzySymbolTable<K, V extends Symbol> extends SymbolTable<K, V> {
         }
         return sym;
     }
+
+    public FuzzySymbolTable<K, V> copy() {
+        FuzzySymbolTable<K, V> ret = new FuzzySymbolTable<>(valueToKey,
+                                                            matcher,
+                                                            threshold);
+        // TODO
+        return ret;
+    }
 }

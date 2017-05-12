@@ -38,9 +38,9 @@ public class MyMethodSymbol extends MethodSymbol {
         this.token = token;
     }
 
-    // public MyMethodSymbol copy() {
-    //     return new MyMethodSymbol(this);
-    // }
+    public MyMethodSymbol copy() {
+        return new MyMethodSymbol(this);
+    }
 
     /**
      * Construct a new synthesized method

@@ -9,6 +9,7 @@ import com.binghamton.jhelp.MyClassSymbol;
 import com.binghamton.jhelp.Modifier;
 import com.binghamton.jhelp.Package;
 import com.binghamton.jhelp.ParameterizedType;
+import com.binghamton.jhelp.PrimitiveType;
 import com.binghamton.jhelp.Program;
 import com.binghamton.jhelp.ReferenceType;
 import com.binghamton.jhelp.Type;
@@ -255,6 +256,11 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
                     for (TypeArgument arg : args) {
                         arg.accept(this);
                         tArgs[pos] = arg.getType();
+                        if (arg.getType() instanceof PrimitiveType) {
+                            addError(arg,
+                                     "Cannot specify a primitive type as a type argument",
+                                     "Specify the class version of the primitive type, such as Integer instead of int");
+                        }
                         ++pos;
                     }
                     ast.setType(new ParameterizedType(sym, tArgs));

@@ -1,5 +1,6 @@
 package com.binghamton.jhelp;
 
+import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -65,17 +66,19 @@ public abstract class ClassSymbol extends ReferenceType {
         declarer = cls.declarer;
         boxed = cls.boxed;
         pkg = cls.pkg;
-        importedTypes = cls.importedTypes;
-        interfaces = cls.interfaces;
-        innerClasses = cls.innerClasses;
-        memberTypes = cls.memberTypes;
-        fields = cls.fields;
-        methods = cls.methods;
-        ctors = cls.ctors;
-        params = cls.params;
-        paramArr = cls.paramArr;
-        // adaptationCache = cls.adaptationCache;
+        importedTypes = cls.importedTypes.copy();
+        interfaces = NamedSymbolTable.copyTypes(cls.interfaces);
+        innerClasses = NamedSymbolTable.copyClasses(cls.innerClasses);
+        memberTypes = NamedSymbolTable.copyClasses(cls.memberTypes);
+        fields = NamedSymbolTable.copyVariables(cls.fields);
+        methods = cls.methods.copy();
+        ctors = cls.ctors.copy();
+        params = NamedSymbolTable.copyTypeVariables(cls.params);
+        paramArr = Arrays.copyOf(cls.paramArr, cls.paramArr.length);
+        adaptationCache = cls.adaptationCache;
     }
+
+    public abstract ClassSymbol copy();
 
     /**
      * Construct a new ClassSymbol
@@ -727,14 +730,12 @@ public abstract class ClassSymbol extends ReferenceType {
             return makeNew();
         }
 
-
-
         Map<TypeVariable, Type> subMap = new HashMap<>();
         for (int i = 0; i < paramArr.length; i++) {
             subMap.put(paramArr[i], args[i]);
             paramArr[i].setIndex(i);
         }
-        return lookupOrAdapt(subMap, true);
+        return makeNew().lookupOrAdapt(subMap, true);
     }
 
     private ClassSymbol lookupOrAdapt(Map<TypeVariable, Type> map,
@@ -1131,10 +1132,14 @@ public abstract class ClassSymbol extends ReferenceType {
             linkupType(superClass);
         }
         for (ClassSymbol innerCls : innerClasses) {
-            innerCls.linkupType(this);
+            if (!equals(innerCls)) {
+                innerCls.linkupType(this);
+            }
         }
         for (ClassSymbol memberType : memberTypes) {
-            memberType.linkupType(this);
+            if (!equals(memberType)) {
+                memberType.linkupType(this);
+            }
         }
         if (unit != null) {
             importedTypes.addAncestor(unit.getImportedClasses());

@@ -20,6 +20,7 @@ import com.binghamton.jhelp.Symbol;
 import com.binghamton.jhelp.Type;
 import com.binghamton.jhelp.TypeVariable;
 import com.binghamton.jhelp.VariableSymbol;
+import com.binghamton.jhelp.error.StyleWarning;
 
 import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
 import static com.binghamton.jhelp.ast.NameExpression.Kind;
@@ -394,6 +395,7 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
                              "Rename or remove one of the parameters");
                 }
                 v.getExpression().accept(this);
+                checkForRawType(v.getExpression().getType(), v);
                 paramTypes[pos] = v.getExpression().getType();
                 ++pos;
             }
@@ -430,6 +432,7 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
             ret.accept(this);
             Type type = ret.getType();
             method.setReturnType(type);
+            checkForRawType(type, ret);
             if (currentClass.isAnnotation() &&
                 !validAnnotationReturnType(type) &&
                 (type instanceof ArrayType &&
@@ -528,6 +531,7 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
         var.setDeclaringClass(currentClass);
         ast.getExpression().accept(this);
         var.setType(ast.getExpression().getType());
+        checkForRawType(var.getType(), ast.getExpression());
 
         if (var.isFinal() &&
             var.hasModifier(Modifier.VOLATILE)) {
@@ -588,5 +592,14 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
             return sym.isEnum() || sym.isAnnotation();
         }
         return false;
+    }
+
+    protected void checkForRawType(Type type, ASTNode ast) {
+        System.out.println("checking for raw: " + type + " on " + ast);
+        if (type.isRaw()) {
+            addError(new StyleWarning(ast,
+                                      "Using a raw type (not specifying type arguments for a generic class) is not recommended",
+                                      "Specify type arguments in between '<' and '>', such as ArrayList<Integer>"));
+        }
     }
 }
