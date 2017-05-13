@@ -54,18 +54,24 @@ public abstract class ClassSymbol extends ReferenceType {
 
     protected Map<List<Type>, ClassSymbol> adaptationCache = new HashMap<>();
 
+    private boolean adapted = false;
+
+
     /**
      * Construct a new Classsymbol from an existing instance
      * @param cls the existing ClassSymbol to copy construct from
      */
     protected ClassSymbol(ClassSymbol cls) {
         super(cls.name, cls.modifiers);
+        System.out.println("copy constructing class " + cls.getName());
         classKind = cls.classKind;
         level = cls.level;
-        superClass = cls.superClass;
         declarer = cls.declarer;
         boxed = cls.boxed;
         pkg = cls.pkg;
+        if (cls.superClass != null) {
+            superClass = cls.superClass.copy();
+        }
         importedTypes = cls.importedTypes.copy();
         interfaces = NamedSymbolTable.copyTypes(cls.interfaces);
         innerClasses = NamedSymbolTable.copyClasses(cls.innerClasses);
@@ -75,6 +81,7 @@ public abstract class ClassSymbol extends ReferenceType {
         ctors = cls.ctors.copy();
         params = NamedSymbolTable.copyTypeVariables(cls.params);
         paramArr = Arrays.copyOf(cls.paramArr, cls.paramArr.length);
+        // TODO this should not be a problem, dont think it is
         adaptationCache = cls.adaptationCache;
     }
 
@@ -557,6 +564,7 @@ public abstract class ClassSymbol extends ReferenceType {
     public boolean equals(Object other) {
         if (other instanceof ClassSymbol) {
             ClassSymbol sym = (ClassSymbol)other;
+            // System.out.println("cls: " + getQualifiedName() + " vs " + sym.getQualifiedName());
             return getQualifiedName().equals(sym.getQualifiedName());
         }
         return false;
@@ -610,7 +618,8 @@ public abstract class ClassSymbol extends ReferenceType {
      */
     public boolean implementsInterface(ClassSymbol intf) {
         ClassSymbol sym;
-
+        // System.out.println("does " + getName() + "implement " + intf.getName());
+        // System.out.println(getName() + " has " + interfaces.size() + " declared interfaces, " + interfaces.totalSize() + " in total");
         for (Type type : interfaces) {
             sym = type.getClassSymbol();
             if (sym.equals(intf) || sym.implementsInterface(intf)) {
@@ -725,9 +734,13 @@ public abstract class ClassSymbol extends ReferenceType {
      */
     public ClassSymbol substitute(Type[] args) {
         System.out.println("### SUBSTITUTING " + java.util.Arrays.toString(args) + " into " + getQualifiedName());
+        // assert !this.adapted : "cannot substitute " + getName() + ", its already has been, " + subjectToAdaptation();
+
         if (java.util.Arrays.equals(paramArr, args)) {
-            System.out.println("substitution pointless for " + getName() + ", returning");
-            return makeNew();
+            // System.out.println("substitution pointless for " + getName() + ", returning");
+            // TODO also think this is pointless
+           // return makeNew();
+            return this;
         }
 
         Map<TypeVariable, Type> subMap = new HashMap<>();
@@ -735,19 +748,12 @@ public abstract class ClassSymbol extends ReferenceType {
             subMap.put(paramArr[i], args[i]);
             paramArr[i].setIndex(i);
         }
-        return makeNew().lookupOrAdapt(subMap, true);
+        // TODO why is it necessary to makeNew, or is it even necessary?
+        return /*makeNew().*/lookupOrAdapt(subMap, true);
     }
 
     private ClassSymbol lookupOrAdapt(Map<TypeVariable, Type> map,
                                       boolean first) {
-        if (getName().equals("HashMap")) {
-            System.out.println("CACHE IS EMPTY &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
-            for (List<Type> key : adaptationCache.keySet()) {
-                System.out.println(key + " maps to methods:--------------------********************");
-                System.out.println(join("\n", adaptationCache.get(key).methods));
-            }
-        }
-
         List<TypeVariable> ordered = new ArrayList<>(map.keySet());
         Collections.sort(ordered, (a, b) -> a.getIndex() - b.getIndex());
         List<Type> args = new ArrayList<>();
@@ -758,27 +764,42 @@ public abstract class ClassSymbol extends ReferenceType {
         List<Type> argList = Collections.unmodifiableList(args);
         ClassSymbol adapted = adaptationCache.get(argList);
 
+        System.out.println("!!!!!!! Cache state for " + getName());
+        System.out.println(" -> " + join("\n -> ",
+                                adaptationCache.keySet(),
+                                list -> String.format("%s |-> %s (%s)",
+                                                      list.toString(),
+                                                      adaptationCache.get(list),
+                                                      adaptationCache.containsKey(list) ?
+                                                      Arrays.toString(adaptationCache.get(list).getMethodsByName("tryAdvance")) :
+                                                      ""
+                                    )));
+
         if (adapted == null) {
             adapted = makeNew();
             adaptationCache.put(argList, adapted);
             System.out.println(">>> PUTTING " + getName() + " with " + argList + " in cache " + adapted.getTypeName());
             adapt(adapted, map, first);
-            System.out.println(">>> " + getName() + ", " + adapted.getName() + ", " + java.util.Arrays.toString(adapted.getMethodsByName("get")));
         } else {
+            assert adapted.adapted;
             assert adapted.getName().equals(getName());
             System.out.println("*** " + getName() + " with " + argList + " is already in cache");
-            System.out.println(java.util.Arrays.toString(adapted.getMethodsByName("get")));
         }
 
+        // TODO should this be here?
+        // assert !this.adapted;
+
         System.out.println(getName() + ", " + adapted.getName() + " has been adapted!");
-        if (getName().equals("HashMap")) {
-            System.out.println("HashMap has been adapted!!!!!");
-            System.out.println(methods.getAll("get"));
-            for (List<Type> key : adaptationCache.keySet()) {
-                System.out.println(key + " maps to methods:--------------------********************");
-                System.out.println(join("\n", adaptationCache.get(key).methods));
-            }
-        }
+        System.out.println("!!!!!!! Cache state for " + getName());
+        System.out.println(" -> " + join("\n -> ",
+                                adaptationCache.keySet(),
+                                list -> String.format("%s |-> %s (%s)",
+                                                      list.toString(),
+                                                      adaptationCache.get(list),
+                                                      adaptationCache.containsKey(list) ?
+                                                      Arrays.toString(adaptationCache.get(list).getMethodsByName("tryAdvance")) :
+                                                      ""
+                                    )));
         return adapted;
     }
 
@@ -810,56 +831,36 @@ public abstract class ClassSymbol extends ReferenceType {
                         }
                     }
                 }
-                System.out.println("class map is: " + subRepr(toUse));
+                // System.out.println("class map is: " + subRepr(toUse));
                 if (toUse.isEmpty()) {
-                    System.out.println("early exit " + cls.getName() + "class map is now empty");
+                    // System.out.println("early exit " + cls.getName() + "class map is now empty");
                     return;
                 }
             }
         }
 
+        cls.adapted = true;
+
         int[] old = mk(cls);
 
-        // System.out.println(cls.getName() + " methods BEFORE adapting: " + cls.methods.repr());
-        // System.out.println(cls.getName() + " interfaces BEFORE adapting: " + cls.interfaces.repr());
-
-        // System.out.println("adapting " + cls.getName() + " superclass");
         if (cls.superClass != null){
             cls.superClass = cls.superClass.adapt(toUse);
         }
-        // System.out.println("adapting " + cls.getName() + " interfaces");
         cls.interfaces = NamedSymbolTable.adaptTypes(cls.interfaces, toUse);
-        // System.out.println("adapting " + cls.getName() + " inner classes");
-        // System.out.println(" |-> they are " + join(", ", cls.innerClasses, c -> c.getName()));
         cls.innerClasses = NamedSymbolTable.adaptClasses(cls.innerClasses, toUse);
-        // System.out.println("adapting " + cls.getName() + " member types");
         cls.memberTypes = NamedSymbolTable.adaptClasses(cls.memberTypes, toUse);
-        // System.out.println("adapting " + cls.getName() + " fields");
         cls.fields = NamedSymbolTable.adaptVariables(cls.fields, toUse);
-        // System.out.println("adapting " + cls.getName() + " methods");
         cls.methods = MethodSymbolTable.adaptMethods(cls.methods, toUse);
-        // System.out.println("adapting " + cls.getName() + " ctors");
         cls.ctors = MethodSymbolTable.adaptMethods(cls.ctors, toUse);
-
 
         // assert java.util.Arrays.equals(old, mk(cls)) : "after adapt: wanted: " + java.util.Arrays.toString(old) + "\ngot " + java.util.Arrays.toString(mk(cls));
 
-        // try {
-        //     assert (Class.forName(cls.getQualifiedName()).getAnnotatedInterfaces().length == cls.interfaces.size()) :
-        //     ("expected " + Class.forName(cls.getQualifiedName()).getAnnotatedInterfaces().length + ", was " + cls.interfaces.size() + " " + cls.interfaces.totalSize() + " for " + cls.getName() + " with " + map.values().toString());
-        // } catch(ClassNotFoundException e) {
-        // }
-
         // cls.establishInheritanceHierarchy();
+
+        System.out.println(java.util.Arrays.toString(cls.getMethodsByName("tryAdvance")));
 
         // System.out.println(cls.getName() + " interfaces AFTER adapting: " + cls.interfaces.repr());
         // System.out.println(cls.getName() + " methods AFTER adapting: " + cls.methods.repr());
-
-        // try {
-        //     assert (Class.forName(cls.getQualifiedName()).getAnnotatedInterfaces().length == cls.interfaces.size()) :
-        //     ("expected " + Class.forName(cls.getQualifiedName()).getAnnotatedInterfaces().length + ", was " + cls.interfaces.size() + " " + cls.interfaces.totalSize() + " for " + cls.getName() + " with " + map.values().toString());
-        // } catch(ClassNotFoundException e) {
-        // }
 
         // System.out.println(cls.innerClasses.repr());
         // System.out.println(cls.methods.repr());
@@ -925,8 +926,10 @@ public abstract class ClassSymbol extends ReferenceType {
                 return lookupOrAdapt(map, true);
             }
         }
-        System.out.println(getName() + " is not subject to adaptation");
-        return makeNew();
+        // System.out.println(getName() + " is not subject to adaptation");
+        // TODO dont think this is necessary
+        // return makeNew();
+        return this;
     }
 
     @Override

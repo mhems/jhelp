@@ -595,7 +595,6 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
     }
 
     protected void checkForRawType(Type type, ASTNode ast) {
-        System.out.println("checking for raw: " + type + " on " + ast);
         if (type.isRaw()) {
             addError(new StyleWarning(ast,
                                       "Using a raw type (not specifying type arguments for a generic class) is not recommended",

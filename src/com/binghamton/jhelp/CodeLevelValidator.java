@@ -10,7 +10,7 @@ public class CodeLevelValidator implements Validator {
 
     /**
      * Constructs a new CodeLevelValidator
-     * @param visitor the Visitor that visits body declarations
+     * @param validator the Validator that validates body declarations
      */
     public CodeLevelValidator(MemberLevelValidator validator) {
         this.mV = validator;

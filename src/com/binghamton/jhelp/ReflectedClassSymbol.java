@@ -19,10 +19,10 @@ public final class ReflectedClassSymbol extends ClassSymbol {
      * Copy construct a new ReflectedClassSymbol
      * @param sym the class to copy
      */
-    private ReflectedClassSymbol(ReflectedClassSymbol sym) {
-        super(sym);
-        this.cls = sym.cls;
-    }
+    // private ReflectedClassSymbol(ReflectedClassSymbol sym) {
+    //     super(sym);
+    //     this.cls = sym.cls;
+    // }
 
     /**
      * Construct a new ReflectedClassSymbol
@@ -141,7 +141,10 @@ public final class ReflectedClassSymbol extends ClassSymbol {
 
     @Override
     public ReflectedClassSymbol copy() {
-        return new ReflectedClassSymbol(this);
+        System.out.println("rcls copying " + this.getName());
+        ReflectedClassSymbol ret = new ReflectedClassSymbol(this.cls);
+        ret.init();
+        return ret;
     }
 
     @Override
@@ -151,6 +154,7 @@ public final class ReflectedClassSymbol extends ClassSymbol {
 
     @Override
     protected ReflectedClassSymbol makeNew() {
-        return ReflectedClassSymbol.get(this.cls);
+        // return get(this.cls);
+        return copy();
     }
 }

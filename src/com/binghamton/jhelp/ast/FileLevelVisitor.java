@@ -235,6 +235,11 @@ public class FileLevelVisitor extends EmptyVisitor {
                      "Did you forget to specify the package?");
             return;
         }
+        if (ast.isDemand()) {
+            addError(new StyleWarning(ast,
+                                      "On-demand imports are discouraged",
+                                      "Explicitly import only those items you are using"));
+        }
 
         if (ast.isStatic()) {
             String memberName = ast.getNameExpression().getName();

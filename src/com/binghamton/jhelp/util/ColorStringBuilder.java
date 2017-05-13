@@ -50,7 +50,7 @@ public class ColorStringBuilder {
      * Construct a new ColorStringBuilder object
      */
     public ColorStringBuilder() {
-        this(true);
+        this(System.console() != null);
     }
 
     /**

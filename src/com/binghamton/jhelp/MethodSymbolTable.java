@@ -68,7 +68,7 @@ public class MethodSymbolTable extends SymbolTable<MethodType, MethodSymbol> {
 
     /**
      * Adapts a SymbolTable of MethodSymbols
-     * @param symTab the SymbolTable whose contents are to be adapted
+     * @param src the SymbolTable whose contents are to be adapted
      * @param map the Map mapping type variables to the types they are to
      *        substituted with
      * @return a new SymbolTable with adapted contents

@@ -35,7 +35,7 @@ public class MyClassSymbol extends ClassSymbol {
     /**
      * Construct a new anonymous class
      * @param declarer the class this anonymous class is declared in
-     * @param superClass the class this anonymous class is subclassing
+     * @param cls the class this anonymous class is subclassing
      */
     public MyClassSymbol(MyClassSymbol declarer, ClassSymbol cls) {
         super(declarer.nextAnonName());
