@@ -63,7 +63,6 @@ public class ParameterizedType extends ReferenceType {
 
     @Override
     public ClassSymbol getClassSymbol() {
-        System.out.println("param type "  + this.toString() + " requesting adapted class symbol");
         return wrapped.substitute(params);
     }
 
@@ -99,22 +98,17 @@ public class ParameterizedType extends ReferenceType {
 
     @Override
     public ParameterizedType adapt(Map<TypeVariable, Type> map) {
-        // System.out.println("adapting param type " + this.toString() + " with " + subRepr(map));
         Type[] newParams = new Type[params.length];
         for (int i = 0; i < newParams.length; i++) {
             newParams[i] = params[i].adapt(map);
         }
-        // System.out.println("new params are " + java.util.Arrays.toString(newParams));
-        ParameterizedType ret =  new ParameterizedType(wrapped, newParams);
-        // System.out.println("adapted param type is " + ret.toString());
-        return ret;
+        return new ParameterizedType(wrapped, newParams);
     }
 
     @Override
     public boolean equals(Object other) {
         if (other instanceof ParameterizedType) {
             ParameterizedType type = (ParameterizedType)other;
-            // System.out.println("param: " + this + " vs " + type);
             return wrapped.equals(type.wrapped) &&
                 Arrays.equals(params, type.params);
         }

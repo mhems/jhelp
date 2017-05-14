@@ -470,10 +470,8 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         // TODO check method appropriate (15.12.3)
         ast.setSymbol(m);
         if (m != null) {
-            System.out.println("method resolved to return: " + m.getReturnType());
             ast.setType(m.getReturnType());
         } else {
-            // System.out.println("UNABLE to resolve: " + ast);
             addError(ast.getName(),
                      "The call to method " + ast.getName().getText() + " could not be resolved",
                      "Supply the proper arguments or change the method's parameters");
@@ -572,13 +570,6 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(ConcreteBodyDeclaration ast) {
-        // first see if exists, if does, visit members,
-        // otherwise must be local or anon, or inner of the one of the former
-        // add to appropriate tables and visit and establish member decl.s
-
-        // TODO local/anonymous but not enum constant anonymous
-
-
         for (MethodDeclaration ctor : ast.getConstructors()) {
             ctor.accept(this);
         }
@@ -1136,9 +1127,6 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                     addError(ast.getExpression(),
                              "Return type does not match the method's return type",
                              "Change the return statement's type to match the method's or change the method return type");
-                } else {
-                    System.out.println("looks like " + retType + " is assignable to " + expRetType);
-                    System.out.println(isAssignable(retType, expRetType));
                 }
             }
         }
@@ -1540,22 +1528,17 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         if (lType.equals(rType) ||
             rType.canWidenTo(lType) ||
             rType == NilType.TYPE && lType.isReference()) {
-            System.out.println(lType + " == " + rType);
-            System.out.println(lType.equals(rType) + ", " + rType.canWidenTo(lType));
             return true;
         }
         Type boxedRType = rType.box();
         if (boxedRType != null && boxedRType.canWidenTo(lType)) {
-            System.out.println("boxed");
             return true;
         }
         Type unboxedRType = rType.unbox();
         if (unboxedRType != null && isAssignable(lType, unboxedRType)) {
-            System.out.println("unboxed");
             return true;
         }
         if (canUncheckConvert(rType, lType)) {
-            System.out.println("unchecked");
             return true;
         }
         if (rType.equals(PrimitiveType.BYTE) ||
@@ -1570,7 +1553,6 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                 toUse.equals(PrimitiveType.SHORT) ||
                 toUse.equals(PrimitiveType.CHAR)) {
                 // erroneously assume toUse can represent r-value const. expr.
-                System.out.println("primitive narrow");
                 return rType.canNarrowTo(toUse);
             }
         }
@@ -1616,7 +1598,6 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
     }
 
     private MethodSymbol resolveMethod(CallExpression ast, boolean isCtor) {
-        // System.out.println("resolving: " + ast);
         ast.getMethod().setInferredType(ast.getInferredType());
         MethodSymbol ret = null;
         ast.getMethod().accept(this);
@@ -1626,8 +1607,6 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             owningType = currentClass;
         }
         ClassSymbol owningCls = owningType.getClassSymbol();
-        // System.out.println("checking class: " + owningCls.getName());
-        // System.out.println("class type: " + owningType.getTypeName());
 
         // early exit if anonymous subclass of interface,
         // there is no constructor to be found

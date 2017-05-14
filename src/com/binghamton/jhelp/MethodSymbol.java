@@ -280,27 +280,21 @@ public class MethodSymbol extends Symbol {
      */
     protected static void adapt(MethodSymbol method,
                                 Map<TypeVariable, Type> map){
-        System.out.println("adapting method: " + method + " with " + subRepr(map));
-
         Map<TypeVariable, Type> toUse = map;
         if (method.isGeneric()) {
-            // System.out.println("method map was: " + subRepr(map));
             toUse = new HashMap<>(map);
             // allow method type parameters to shadow outer scopes'
             for (TypeVariable mParam : method.typeVars) {
                 for (TypeVariable subParam : map.keySet()) {
                     if (subParam.getName().equals(mParam.getName()) &&
                         mParam.getDeclaringClass().equals(subParam.getDeclaringClass())) {
-                        // System.out.println("----> method removing " + mParam);
                         toUse.remove(mParam);
                         break;
                     }
                 }
             }
-            // System.out.println("method map is now: " + subRepr(toUse));
         }
         if (toUse.isEmpty()) {
-            System.out.println("method map is now empty");
             return;
         }
 
@@ -312,14 +306,6 @@ public class MethodSymbol extends Symbol {
         }
         method.returnType = method.returnType.adapt(toUse);
         method.constructType();
-        System.out.println("adapted method: " + method);
-
-        if (method.getName().equals("get") &&
-            method.getDeclaringClass().getName().equals("HashMap") &&
-            method.getParameterTypes()[0].getName().equals("Object")) {
-            throw new NullPointerException();
-        }
-
     }
 
     @Override
@@ -447,13 +433,5 @@ public class MethodSymbol extends Symbol {
             returnType = fromType(exe.getAnnotatedReturnType());
         }
         constructType();
-        if (declarer.getName().equals("HashMap") &&
-            getName().equals("get")) {
-            if (returnType.getName().equals("Object")) {
-                throw new NullPointerException();
-            } else {
-                System.out.println("method: " + this);
-            }
-        }
     }
 }

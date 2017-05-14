@@ -159,6 +159,7 @@ public class ImportingSymbolTable extends NamedSymbolTable<ClassSymbol> {
 
     public ImportingSymbolTable copy() {
         ImportingSymbolTable ret = new ImportingSymbolTable();
+        ret.onDemandPackages.addAll(this.onDemandPackages);
         copy(ret, this, i -> i.copy(), () -> new ImportingSymbolTable());
         return ret;
     }

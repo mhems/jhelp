@@ -16,21 +16,11 @@ public final class ReflectedClassSymbol extends ClassSymbol {
     private final Class<? extends Object> cls;
 
     /**
-     * Copy construct a new ReflectedClassSymbol
-     * @param sym the class to copy
-     */
-    // private ReflectedClassSymbol(ReflectedClassSymbol sym) {
-    //     super(sym);
-    //     this.cls = sym.cls;
-    // }
-
-    /**
      * Construct a new ReflectedClassSymbol
      * @param cls the pre-compiled class to construct with
      */
     private ReflectedClassSymbol(Class<? extends Object> cls) {
         super(cls.getSimpleName(), cls.getModifiers());
-        // System.out.println("reflecting class "+ cls.getSimpleName());
         this.cls = cls;
         boxed = cls.isPrimitive();
         pkg = new ReflectedPackage(cls.getPackage());
@@ -63,9 +53,7 @@ public final class ReflectedClassSymbol extends ClassSymbol {
      * @return a new ReflectedClassSymbol reflecting the pre-compiled class
      */
     public static ReflectedClassSymbol make(Class<?> cls) {
-         ReflectedClassSymbol ret = new ReflectedClassSymbol(cls);
-         // ret.init();
-         return ret;
+         return new ReflectedClassSymbol(cls);
     }
 
     /**
@@ -90,10 +78,8 @@ public final class ReflectedClassSymbol extends ClassSymbol {
     public void init() {
         paramArr = fromTypeParameters(cls.getTypeParameters());
         params.putAll(paramArr);
-        // System.out.println("initializing " + getName());
         for (Class<?> cur : cls.getDeclaredClasses()) {
             if (visible(cur)) {
-                // System.out.println("giving class " + getName() + " the inner class " + cur.getSimpleName());
                 innerClasses.put(ReflectedClassSymbol.get(cur));
             }
         }
@@ -102,7 +88,6 @@ public final class ReflectedClassSymbol extends ClassSymbol {
                 methods.put(new MethodSymbol(cur));
             }
         }
-        // System.out.println("initializing " + getName() + " to have " + methods.size() + " methods");
         for (Constructor<?> cur : cls.getDeclaredConstructors()) {
             if (visible(cur) && !cur.isSynthetic()) {
                 ctors.put(new MethodSymbol(cur));
@@ -121,7 +106,6 @@ public final class ReflectedClassSymbol extends ClassSymbol {
             superClass = fromType(cls.getAnnotatedSuperclass());
         }
         interfaces.putAll(fromTypes(cls.getAnnotatedInterfaces()));
-        // System.out.println("initializing " + getName() + " to have " + interfaces.size() + " interfaces");
         establishInheritanceHierarchy();
     }
 
@@ -141,7 +125,6 @@ public final class ReflectedClassSymbol extends ClassSymbol {
 
     @Override
     public ReflectedClassSymbol copy() {
-        System.out.println("rcls copying " + this.getName());
         ReflectedClassSymbol ret = new ReflectedClassSymbol(this.cls);
         ret.init();
         return ret;
@@ -154,7 +137,6 @@ public final class ReflectedClassSymbol extends ClassSymbol {
 
     @Override
     protected ReflectedClassSymbol makeNew() {
-        // return get(this.cls);
         return copy();
     }
 }

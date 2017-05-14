@@ -54,16 +54,12 @@ public abstract class ClassSymbol extends ReferenceType {
 
     protected Map<List<Type>, ClassSymbol> adaptationCache = new HashMap<>();
 
-    private boolean adapted = false;
-
-
     /**
      * Construct a new Classsymbol from an existing instance
      * @param cls the existing ClassSymbol to copy construct from
      */
     protected ClassSymbol(ClassSymbol cls) {
         super(cls.name, cls.modifiers);
-        System.out.println("copy constructing class " + cls.getName());
         classKind = cls.classKind;
         level = cls.level;
         declarer = cls.declarer;
@@ -81,7 +77,6 @@ public abstract class ClassSymbol extends ReferenceType {
         ctors = cls.ctors.copy();
         params = NamedSymbolTable.copyTypeVariables(cls.params);
         paramArr = Arrays.copyOf(cls.paramArr, cls.paramArr.length);
-        // TODO this should not be a problem, dont think it is
         adaptationCache = cls.adaptationCache;
     }
 
@@ -564,7 +559,6 @@ public abstract class ClassSymbol extends ReferenceType {
     public boolean equals(Object other) {
         if (other instanceof ClassSymbol) {
             ClassSymbol sym = (ClassSymbol)other;
-            // System.out.println("cls: " + getQualifiedName() + " vs " + sym.getQualifiedName());
             return getQualifiedName().equals(sym.getQualifiedName());
         }
         return false;
@@ -618,8 +612,6 @@ public abstract class ClassSymbol extends ReferenceType {
      */
     public boolean implementsInterface(ClassSymbol intf) {
         ClassSymbol sym;
-        // System.out.println("does " + getName() + "implement " + intf.getName());
-        // System.out.println(getName() + " has " + interfaces.size() + " declared interfaces, " + interfaces.totalSize() + " in total");
         for (Type type : interfaces) {
             sym = type.getClassSymbol();
             if (sym.equals(intf) || sym.implementsInterface(intf)) {
@@ -733,14 +725,8 @@ public abstract class ClassSymbol extends ReferenceType {
      *         substituted with the given Type arguments
      */
     public ClassSymbol substitute(Type[] args) {
-        System.out.println("### SUBSTITUTING " + java.util.Arrays.toString(args) + " into " + getQualifiedName());
-        // assert !this.adapted : "cannot substitute " + getName() + ", its already has been, " + subjectToAdaptation();
-
         if (java.util.Arrays.equals(paramArr, args)) {
-            // System.out.println("substitution pointless for " + getName() + ", returning");
-            // TODO also think this is pointless
-           // return makeNew();
-            return this;
+           return makeNew();
         }
 
         Map<TypeVariable, Type> subMap = new HashMap<>();
@@ -748,8 +734,7 @@ public abstract class ClassSymbol extends ReferenceType {
             subMap.put(paramArr[i], args[i]);
             paramArr[i].setIndex(i);
         }
-        // TODO why is it necessary to makeNew, or is it even necessary?
-        return /*makeNew().*/lookupOrAdapt(subMap, true);
+        return lookupOrAdapt(subMap, true);
     }
 
     private ClassSymbol lookupOrAdapt(Map<TypeVariable, Type> map,
@@ -763,43 +748,12 @@ public abstract class ClassSymbol extends ReferenceType {
 
         List<Type> argList = Collections.unmodifiableList(args);
         ClassSymbol adapted = adaptationCache.get(argList);
-
-        System.out.println("!!!!!!! Cache state for " + getName());
-        System.out.println(" -> " + join("\n -> ",
-                                adaptationCache.keySet(),
-                                list -> String.format("%s |-> %s (%s)",
-                                                      list.toString(),
-                                                      adaptationCache.get(list),
-                                                      adaptationCache.containsKey(list) ?
-                                                      Arrays.toString(adaptationCache.get(list).getMethodsByName("tryAdvance")) :
-                                                      ""
-                                    )));
-
         if (adapted == null) {
             adapted = makeNew();
             adaptationCache.put(argList, adapted);
-            System.out.println(">>> PUTTING " + getName() + " with " + argList + " in cache " + adapted.getTypeName());
             adapt(adapted, map, first);
-        } else {
-            assert adapted.adapted;
-            assert adapted.getName().equals(getName());
-            System.out.println("*** " + getName() + " with " + argList + " is already in cache");
         }
 
-        // TODO should this be here?
-        // assert !this.adapted;
-
-        System.out.println(getName() + ", " + adapted.getName() + " has been adapted!");
-        System.out.println("!!!!!!! Cache state for " + getName());
-        System.out.println(" -> " + join("\n -> ",
-                                adaptationCache.keySet(),
-                                list -> String.format("%s |-> %s (%s)",
-                                                      list.toString(),
-                                                      adaptationCache.get(list),
-                                                      adaptationCache.containsKey(list) ?
-                                                      Arrays.toString(adaptationCache.get(list).getMethodsByName("tryAdvance")) :
-                                                      ""
-                                    )));
         return adapted;
     }
 
@@ -812,36 +766,25 @@ public abstract class ClassSymbol extends ReferenceType {
     protected static void adapt(ClassSymbol cls,
                                 Map<TypeVariable, Type> map,
                                 boolean first) {
-        System.out.println("adapting " + cls.getQualifiedName() + " with " + subRepr(map));
         Map<TypeVariable, Type> toUse = map;
         if (!first) {
             if (cls.isGeneric()) {
-                // System.out.println("class map was: " + subRepr(map));
                 toUse = new HashMap<>(map);
                 // allow type parameters to shadow outer scopes'
                 for (TypeVariable mParam : cls.paramArr) {
                     for (TypeVariable subParam : map.keySet()) {
                         if (subParam.getName().equals(mParam.getName()) &&
                             mParam.getDeclaringClass().equals(subParam.getDeclaringClass())) {
-                            // System.out.println("----> class removing " + mParam);
                             toUse.remove(mParam);
                             break;
-                        } else if (subParam.getName().equals(mParam.getName())) {
-                            // System.out.println(mParam.getDeclaringClass().getName() + " vs " + subParam.getDeclaringClass().getName());
                         }
                     }
                 }
-                // System.out.println("class map is: " + subRepr(toUse));
                 if (toUse.isEmpty()) {
-                    // System.out.println("early exit " + cls.getName() + "class map is now empty");
                     return;
                 }
             }
         }
-
-        cls.adapted = true;
-
-        int[] old = mk(cls);
 
         if (cls.superClass != null){
             cls.superClass = cls.superClass.adapt(toUse);
@@ -852,37 +795,6 @@ public abstract class ClassSymbol extends ReferenceType {
         cls.fields = NamedSymbolTable.adaptVariables(cls.fields, toUse);
         cls.methods = MethodSymbolTable.adaptMethods(cls.methods, toUse);
         cls.ctors = MethodSymbolTable.adaptMethods(cls.ctors, toUse);
-
-        // assert java.util.Arrays.equals(old, mk(cls)) : "after adapt: wanted: " + java.util.Arrays.toString(old) + "\ngot " + java.util.Arrays.toString(mk(cls));
-
-        // cls.establishInheritanceHierarchy();
-
-        System.out.println(java.util.Arrays.toString(cls.getMethodsByName("tryAdvance")));
-
-        // System.out.println(cls.getName() + " interfaces AFTER adapting: " + cls.interfaces.repr());
-        // System.out.println(cls.getName() + " methods AFTER adapting: " + cls.methods.repr());
-
-        // System.out.println(cls.innerClasses.repr());
-        // System.out.println(cls.methods.repr());
-
-        assert java.util.Arrays.equals(old, mk(cls)) : cls.getName() + " after establish: wanted: " + java.util.Arrays.toString(old) + "\ngot " + java.util.Arrays.toString(mk(cls));
-
-        // System.out.println("methods of " + cls.getName());
-        // System.out.println(cls.methods.repr());
-
-        System.out.println("done adapting " + cls.getName());
-
-    }
-
-    private static int[] mk(ClassSymbol cls) {
-        int[] a = new int[6];
-        a[0] = cls.interfaces.totalSize();
-        a[1] = cls.innerClasses.totalSize();
-        a[2] = cls.memberTypes.totalSize();
-        a[3] = cls.fields.totalSize();
-        a[4] = cls.methods.totalSize();
-        a[5] = cls.ctors.totalSize();
-        return a;
     }
 
     /**
@@ -903,33 +815,21 @@ public abstract class ClassSymbol extends ReferenceType {
 
     @Override
     public ClassSymbol adapt(Map<TypeVariable, Type> map) {
-        System.out.println("top level adapting " + getName() + " with " + subRepr(map));
         if (subjectToAdaptation()) {
             if (isGeneric()) {
                 Map<TypeVariable, Type> newMap = new HashMap<>();
                 List<TypeVariable> ordered = new ArrayList<>(map.keySet());
                 Collections.sort(ordered, (a, b) -> a.getIndex() - b.getIndex());
-                // System.out.println("ordered map keys: " + ordered);
-                // System.out.println("param arr: " + java.util.Arrays.toString(paramArr));
                 TypeVariable[] toUse = params.getAllSymbols(new TypeVariable[params.totalSize()]);
-                // System.out.println("all params arr: " + java.util.Arrays.toString(toUse));
-                // for (int i = 0; i < paramArr.length; i++) {
-                // for (int i = 0; i < toUse.length; i++) {
                 for (int i = 0; i < ordered.size(); i++) {
-                    // System.out.println(paramArr[i] + " -> " + map.get(ordered.get(i)));
                     newMap.put(paramArr[i], map.get(ordered.get(i)));
-                    assert paramArr[i].getIndex() == i : paramArr[i].getIndex() + " vs " + i ;
                 }
-                // System.out.println("new map for " + getName() + " is " + subRepr(newMap));
                 return lookupOrAdapt(newMap, true);
             } else {
                 return lookupOrAdapt(map, true);
             }
         }
-        // System.out.println(getName() + " is not subject to adaptation");
-        // TODO dont think this is necessary
-        // return makeNew();
-        return this;
+        return makeNew();
     }
 
     @Override
@@ -1149,12 +1049,6 @@ public abstract class ClassSymbol extends ReferenceType {
             methods.addAncestor(unit.getImportedMethods());
             fields.addAncestor(unit.getImportedFields());
         }
-
-        // try {
-        //     assert (Class.forName(getQualifiedName()).getAnnotatedInterfaces().length == interfaces.size()) :
-        //     ("expected " + Class.forName(getQualifiedName()).getAnnotatedInterfaces().length + ", was " + interfaces.size() + " " + interfaces.totalSize() + " for " + getName() + " when establishing hierarchy");
-        // } catch(ClassNotFoundException e) {
-        // }
     }
 
     /**
@@ -1164,7 +1058,6 @@ public abstract class ClassSymbol extends ReferenceType {
      */
     private void linkupType(Type parent) {
         ClassSymbol sym = parent.getClassSymbol();
-        // System.out.println("setting " + parent + " to be ancestor of " + getName());
         interfaces.addAncestor(sym.interfaces);
         innerClasses.addAncestor(sym.innerClasses);
         memberTypes.addAncestor(sym.memberTypes);

@@ -302,12 +302,9 @@ public class FileLevelVisitor extends EmptyVisitor {
                 } else {
                     try {
                         boolean b = currentUnit.importType(name);
-                        System.out.println("importing " + name + " gave " + b);
                     } catch (ClassNotFoundException e) {
-                        System.out.println(name + " must be a user-defined class");
                         ast.getNameExpression().accept(this);
                         if (ast.getNameExpression().getType() != null) {
-                            System.out.println(" -> it was, importing it");
                             currentUnit.importType(ast.getNameExpression().getType().getClassSymbol());
                         } else {
                             addError(ast.getNameExpression(),
