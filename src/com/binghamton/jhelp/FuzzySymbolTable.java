@@ -50,6 +50,10 @@ public class FuzzySymbolTable<K, V extends Symbol> extends SymbolTable<K, V> {
         return sym;
     }
 
+    /**
+     * Performs a deep-copy of this FuzzySymbolTable
+     * @return a new FuzzySymbolTable with copied contents
+     */
     public FuzzySymbolTable<K, V> copy() {
         FuzzySymbolTable<K, V> ret = new FuzzySymbolTable<>(valueToKey,
                                                             matcher,

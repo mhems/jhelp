@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -157,6 +156,10 @@ public class ImportingSymbolTable extends NamedSymbolTable<ClassSymbol> {
         return true;
     }
 
+    /**
+     * Performs a deep-copy of this table into a new table
+     * @return a new SymbolTable holding a deep-copy of this table's contents
+     */
     public ImportingSymbolTable copy() {
         ImportingSymbolTable ret = new ImportingSymbolTable();
         ret.onDemandPackages.addAll(this.onDemandPackages);

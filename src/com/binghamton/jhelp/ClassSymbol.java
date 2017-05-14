@@ -13,7 +13,6 @@ import com.binghamton.jhelp.ast.CompilationUnit;
 import com.binghamton.jhelp.util.StringUtils;
 
 import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
-import static com.binghamton.jhelp.util.StringUtils.join;
 
 /**
  * A base class representing a Java class and its members
@@ -80,6 +79,10 @@ public abstract class ClassSymbol extends ReferenceType {
         adaptationCache = cls.adaptationCache;
     }
 
+    /**
+     * Copies this ClassSymbol into a new ClassSymbol
+     * @return a new ClassSymbol with this ClassSymbol's data
+     */
     public abstract ClassSymbol copy();
 
     /**
@@ -712,6 +715,10 @@ public abstract class ClassSymbol extends ReferenceType {
         return name;
     }
 
+    /**
+     * Determines if this class is an unchecked exception
+     * @return true iff this class is an unchecked exception
+     */
     public boolean isUncheckedException() {
         ClassSymbol sym = fetch("RuntimeException");
         return equals(sym) || extendsClass(sym);
@@ -737,6 +744,14 @@ public abstract class ClassSymbol extends ReferenceType {
         return lookupOrAdapt(subMap, true);
     }
 
+    /**
+     * Determines the adapted version of this ClassSymbol. If this ClassSymbol
+     * has already been adapted with the given arguments, the cached Symbol is
+     * returned, otherwise the ClassSymbol is adapted and cached for future use.
+     * @param map the Map mapping type variables to the types that replace them
+     * @param first true iff this substitution is top-level
+     * @return the adapted ClassSymbol
+     */
     private ClassSymbol lookupOrAdapt(Map<TypeVariable, Type> map,
                                       boolean first) {
         List<TypeVariable> ordered = new ArrayList<>(map.keySet());

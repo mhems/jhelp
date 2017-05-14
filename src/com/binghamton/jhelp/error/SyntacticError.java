@@ -17,10 +17,21 @@ public class SyntacticError extends JHelpError {
         map.put(MSG_0, "Put top-level statements inside a method or initializer block");
     }
 
+    /**
+     * Constructs a SyntacticError on a Token
+     * @param token the offending Token
+     * @param msg the message explaining the error
+     */
     public SyntacticError(Token token, String msg) {
         super(token, msg, map.get(msg));
     }
 
+    /**
+     * Constructs a SyntacticError on a Token
+     * @param token the offending Token
+     * @param msg the message explaining the error
+     * @param suggestion the suggestion suggesting a fix to the error
+     */
     public SyntacticError(Token token, String msg, String suggestion) {
         super(token, msg, suggestion);
     }

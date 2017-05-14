@@ -3,8 +3,6 @@ package com.binghamton.jhelp.ast;
 import java.util.HashSet;
 import java.util.Set;
 
-import com.binghamton.jhelp.antlr.MyToken;
-import com.binghamton.jhelp.AnnotationSymbol;
 import com.binghamton.jhelp.ArrayType;
 import com.binghamton.jhelp.Modifier;
 import com.binghamton.jhelp.Modifiers;
@@ -548,6 +546,9 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
         }
     }
 
+    /**
+     * Visits each class in hierarchical order.
+     */
     public void visitInOrder() {
         for (ClassSymbol cls : program.getAllClasses()) {
             if (cls.isTop()) {
@@ -557,6 +558,11 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
         }
     }
 
+    /**
+     * Visits the members of a body declaration with a visitor
+     * @param ast the body declaration whose members are to be visited
+     * @param visitor the visitor to visit the members with
+     */
     protected void visitMembers(BodyDeclaration ast, ASTVisitor visitor) {
         for (VariableDeclaration v : ast.getFields()) {
             v.accept(visitor);
@@ -580,7 +586,12 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
         }
     }
 
-    private boolean validAnnotationReturnType(Type type) {
+    /**
+     * Determines if a Type is a valid type for an annotation element
+     * @param type the Type to examine
+     * @return true if the Type is a valid type for an annotation element
+     */
+    private static boolean validAnnotationReturnType(Type type) {
         if (type instanceof PrimitiveType ||
             type.equals(fetch("String")) ||
             type.equals(fetch("Class"))) {
@@ -594,6 +605,11 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
         return false;
     }
 
+    /**
+     * Checks a Type for the lack of type arguments
+     * @param type the Type to examine
+     * @param ast the AST the Type originated from
+     */
     protected void checkForRawType(Type type, ASTNode ast) {
         if (type.isRaw()) {
             addError(new StyleWarning(ast,

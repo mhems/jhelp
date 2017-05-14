@@ -230,6 +230,10 @@ public class PrimitiveType extends Type {
         }
     }
 
+    /**
+     * Copies this Type into a new PrimitiveType
+     * @return a new PrimitiveType with a copy of this type's contents
+     */
     public PrimitiveType copy() {
         if (token != null) {
             return new PrimitiveType(token);

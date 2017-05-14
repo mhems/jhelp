@@ -88,6 +88,10 @@ public class MethodSymbolTable extends SymbolTable<MethodType, MethodSymbol> {
         return ret;
     }
 
+    /**
+     * Performs a deep-copy of this table into a new table
+     * @return a new SymbolTable holding a deep-copy of this table's contents
+     */
     public MethodSymbolTable copy() {
         MethodSymbolTable ret = new MethodSymbolTable();
         copy(ret, this, m -> m.copy(), () -> new MethodSymbolTable());

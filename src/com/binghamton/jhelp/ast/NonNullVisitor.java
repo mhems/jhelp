@@ -17,8 +17,12 @@ public class NonNullVisitor extends EmptyVisitor {
         return count;
     }
 
+    /**
+     * Asserts that an Object is not null
+     * @param o the Object to examine
+     */
     private void assertNonNull(Object o) {
-        assert(o != null);
+        assert o != null;
         ++count;
     }
 

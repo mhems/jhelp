@@ -3,7 +3,6 @@ package com.binghamton.jhelp;
 import java.util.Arrays;
 import java.util.Map;
 
-import com.binghamton.jhelp.error.SemanticError;
 import com.binghamton.jhelp.util.StringUtils;
 
 import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
@@ -30,6 +29,10 @@ public class ParameterizedType extends ReferenceType {
         // isWellFormed(); // TODO infinite recursion?
     }
 
+    /**
+     * Copy constructs a ParameterizedType
+     * @param type the ParameterizedType whose contents are to be copied
+     */
     public ParameterizedType(ParameterizedType type) {
         this(type.wrapped.copy(), copyTypes(type.params));
     }
@@ -171,6 +174,7 @@ public class ParameterizedType extends ReferenceType {
         return ret;
     }
 
+    @Override
     public boolean isSuperTypeOf(Type other) {
         if (wrapped.equals(other)) {
             return true;

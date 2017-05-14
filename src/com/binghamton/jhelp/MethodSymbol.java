@@ -408,6 +408,10 @@ public class MethodSymbol extends Symbol {
         return false;
     }
 
+    /**
+     * Performs a deep-copy of this MethodSymbol
+     * @return a new MethodSymbol with this MethodSymbol's contents
+     */
     public MethodSymbol copy() {
         return new MethodSymbol(this);
     }

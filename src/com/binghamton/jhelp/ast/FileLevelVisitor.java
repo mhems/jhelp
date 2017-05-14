@@ -7,17 +7,12 @@ import org.antlr.v4.runtime.Token;
 
 import com.binghamton.jhelp.ClassSymbol;
 import com.binghamton.jhelp.ImportManager;
-import com.binghamton.jhelp.ImportingSymbolTable;
-import com.binghamton.jhelp.NamedSymbolTable;
-import com.binghamton.jhelp.MethodSymbolTable;
 import com.binghamton.jhelp.Modifier;
 import com.binghamton.jhelp.MethodSymbol;
 import com.binghamton.jhelp.MyClassSymbol;
 import com.binghamton.jhelp.MyPackage;
 import com.binghamton.jhelp.Package;
 import com.binghamton.jhelp.Program;
-import com.binghamton.jhelp.ReflectedClassSymbol;
-import com.binghamton.jhelp.Symbol;
 import com.binghamton.jhelp.Type;
 import com.binghamton.jhelp.TypeVariable;
 import com.binghamton.jhelp.VariableSymbol;
@@ -423,6 +418,11 @@ public class FileLevelVisitor extends EmptyVisitor {
         ast.setType(type);
     }
 
+    /**
+     * Makes TypeVariables from a List of TypeParameters
+     * @param params the TypeParameters to visit and resolve
+     * @return the TypeVariables constructed from the TypeParameters
+     */
     protected TypeVariable[] makeTypeParameters(List<TypeParameter> params) {
         TypeVariable[] ret = new TypeVariable[params.size()];
         for (int i = 0; i < ret.length; i++) {
@@ -432,6 +432,9 @@ public class FileLevelVisitor extends EmptyVisitor {
         return ret;
     }
 
+    /**
+     * Visits all the CompilationUnits of the Program this Visitor is visiting.
+     */
     public void visitAll() {
         for (CompilationUnit unit : program.getCompilationUnits()) {
             currentUnit = unit;
@@ -443,26 +446,56 @@ public class FileLevelVisitor extends EmptyVisitor {
         }
     }
 
+    /**
+     * Constructs and adds a SemanticError to this Visitor's Program
+     * @param msg a message explaining the error
+     * @param token the Token the error originates from
+     */
     public void addError(Token token, String msg) {
         program.addError(new SemanticError(token, msg));
     }
 
+    /**
+     * Constructs and adds a SemanticError to this Visitor's Program
+     * @param ast the AST the error originates from
+     * @param msg a message explaining the error
+     * @param suggestion a message recommending a fix to the error
+     */
     public void addError(ASTNode ast, String msg, String suggestion) {
         program.addError(new SemanticError(ast, msg, suggestion));
     }
 
+    /**
+     * Constructs and adds a SemanticError to this Visitor's Program
+     * @param token the Token the error originates from
+     * @param msg a message explaining the error
+     * @param suggestion a message recommending a fix to the error
+     */
     public void addError(Token token, String msg, String suggestion) {
         program.addError(new SemanticError(token, msg, suggestion));
     }
 
+    /**
+     * Constructs and adds a SemanticError to this Visitor's Program
+     * @param msg a message explaining the error
+     */
     public void addError(String msg) {
         program.addError(new SemanticError(msg));
     }
 
+    /**
+     * Constructs and adds a SemanticError to this Visitor's Program
+     * @param msg a format String explaining the error
+     * @param args any arguments to the format String message
+     */
     public void addError(String msg, Object... args) {
         program.addError(new SemanticError(msg, args));
     }
 
+    /**
+     * Adds a error to this Visitor's Program
+     * @param error the error to add
+     */
     public void addError(JHelpError error) {
         program.addError(error);
     }

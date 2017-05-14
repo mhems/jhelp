@@ -7,7 +7,6 @@ import com.binghamton.jhelp.ArrayType;
 import com.binghamton.jhelp.ClassSymbol;
 import com.binghamton.jhelp.MyClassSymbol;
 import com.binghamton.jhelp.Modifier;
-import com.binghamton.jhelp.Package;
 import com.binghamton.jhelp.ParameterizedType;
 import com.binghamton.jhelp.PrimitiveType;
 import com.binghamton.jhelp.Program;
@@ -330,6 +329,11 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         type.setAnnotations(makeAnnotations(ast.getAnnotations()));
     }
 
+    /**
+     * Makes AnnotationSymbols from Annotation ASTs
+     * @param annotations the annotation ASTs to visit
+     * @return the AnnotationSymbols constructed from the visited ASTs
+     */
     protected AnnotationSymbol[] makeAnnotations(Annotation[] annotations) {
         AnnotationSymbol[] ret = new AnnotationSymbol[annotations.length];
         for (int i = 0; i < ret.length; i++) {
@@ -339,6 +343,10 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         return ret;
     }
 
+    /**
+     * Resolves interface types and adds them to the current class
+     * @param interfaces the Expressions housing the interface types
+     */
     private void addInterfaces(List<Expression> interfaces) {
         Type cur;
         for (Expression expr : interfaces) {

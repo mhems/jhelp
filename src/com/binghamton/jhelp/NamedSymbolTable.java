@@ -1,6 +1,5 @@
 package com.binghamton.jhelp;
 
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -25,7 +24,11 @@ public class NamedSymbolTable<T extends Symbol> extends SymbolTable<String, T> {
         super(valueToKey);
     }
 
-
+    /**
+     * Copies the classes of the given table into a new table
+     * @param symTab the SymbolTable holding the classes to copy
+     * @return a new SymbolTable with a deep-copy of the given table's contents
+     */
     public static NamedSymbolTable<ClassSymbol>
     copyClasses (NamedSymbolTable<ClassSymbol> symTab) {
         NamedSymbolTable<ClassSymbol> ret = new NamedSymbolTable<ClassSymbol>();
@@ -33,6 +36,11 @@ public class NamedSymbolTable<T extends Symbol> extends SymbolTable<String, T> {
         return ret;
     }
 
+    /**
+     * Copies the variables of the given table into a new table
+     * @param symTab the SymbolTable holding the variables to copy
+     * @return a new SymbolTable with a deep-copy of the given table's contents
+     */
     public static NamedSymbolTable<VariableSymbol>
     copyVariables (NamedSymbolTable<VariableSymbol> symTab) {
         NamedSymbolTable<VariableSymbol> ret = new NamedSymbolTable<VariableSymbol>();
@@ -40,6 +48,11 @@ public class NamedSymbolTable<T extends Symbol> extends SymbolTable<String, T> {
         return ret;
     }
 
+    /**
+     * Copies the type variables of the given table into a new table
+     * @param symTab the SymbolTable holding the type variables to copy
+     * @return a new SymbolTable with a deep-copy of the given table's contents
+     */
     public static NamedSymbolTable<TypeVariable>
     copyTypeVariables (NamedSymbolTable<TypeVariable> symTab) {
         NamedSymbolTable<TypeVariable> ret = new NamedSymbolTable<TypeVariable>();
@@ -47,6 +60,11 @@ public class NamedSymbolTable<T extends Symbol> extends SymbolTable<String, T> {
         return ret;
     }
 
+    /**
+     * Copies the types of the given table into a new table
+     * @param symTab the SymbolTable holding the types to copy
+     * @return a new SymbolTable with a deep-copy of the given table's contents
+     */
     public static NamedSymbolTable<Type>
     copyTypes (NamedSymbolTable<Type> symTab) {
         NamedSymbolTable<Type> ret = new NamedSymbolTable<Type>();

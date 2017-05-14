@@ -4,9 +4,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.binghamton.jhelp.antlr.MyToken;
-import com.binghamton.jhelp.ast.ASTVisitor;
-
 import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
 
 /**
@@ -40,6 +37,10 @@ public class ArrayType extends ReferenceType {
         }
     }
 
+    /**
+     * Copy construct an ArrayType
+     * @param type the ArrayType to initialize this type with
+     */
     public ArrayType(ArrayType type) {
         this(type.copy(), type.annotations);
     }
@@ -180,6 +181,7 @@ public class ArrayType extends ReferenceType {
             superClass = fetch("Object");
         }
 
+        @Override
         public ArrayClassSymbol copy() {
             return new ArrayClassSymbol(baseType);
         }

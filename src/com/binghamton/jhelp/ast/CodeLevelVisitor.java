@@ -1427,11 +1427,21 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         }
     }
 
+    /**
+     * Determines if a Type is boolean-like
+     * @param type the Type to examine
+     * @return true if the given Type is boolean-like
+     */
     private static boolean isBooleanLike(Type type) {
         return type.equals(PrimitiveType.BOOLEAN) ||
             PrimitiveType.BOOLEAN.box().equals(type);
     }
 
+    /**
+     * Determines if a Type is numeric-like
+     * @param type the Type to examine
+     * @return true if the given Type is numeric-like
+     */
     private static boolean isNumericLike(Type type) {
         if (type instanceof PrimitiveType &&
             ((PrimitiveType)type).isNumeric()) {
@@ -1444,12 +1454,22 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         return false;
     }
 
+    /**
+     * Determines if a Type is a valid switch type
+     * @param type the Type to examine
+     * @return true iff the given Type is a valid switch type
+     */
     private static boolean isValidSwitchType(Type type) {
         return unaryPromotion(type).equals(PrimitiveType.INT) ||
             type.equals(fetch("String")) ||
             type.getClassSymbol().isEnum();
     }
 
+    /**
+     * Performs unary promotion on a given Type
+     * @param type the Type to promote
+     * @return the promoted Type
+     */
     private static Type unaryPromotion(Type type) {
         if (PrimitiveType.BYTE.box().equals(type) ||
             PrimitiveType.SHORT.box().equals(type) ||
@@ -1469,12 +1489,23 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         return type;
     }
 
+    /**
+     * Performs unary promotion on a given Expression
+     * @param expr the Expression whose Type is to be promoted
+     * @return the promoted Type
+     */
     private static Type unaryPromotion(Expression expr) {
         Type type = unaryPromotion(expr.getType());
         expr.setType(type);
         return type;
     }
 
+    /**
+     * Performs binary promotion on given Expressions
+     * @param lhs the left-hand Expression whose Type is to be promoted
+     * @param rhs the right-hand Expression whose Type is to be promoted
+     * @return the promoted Type
+     */
     private static Type binaryPromotion(Expression lhs, Expression rhs) {
         Type lType = lhs.getType();
         Type rType = rhs.getType();
@@ -1503,6 +1534,12 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         return lType;
     }
 
+    /**
+     * Determines if one Type can be cast to another Type
+     * @param source the Type being cast
+     * @param target the Type attempting to be cast to
+     * @return true if the source Type can be cast to the target Type
+     */
     private static boolean canCast(Type source, Type target) {
         if (source.canCastTo(target) || isAssignable(target, source)) {
             return true;
@@ -1511,6 +1548,12 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         return true;
     }
 
+    /**
+     * Determines if a Type can undergo an unchecked conversion to another Type
+     * @param source the Type being converted
+     * @param target the Type attempting to be converted to
+     * @return true if the source Type can be converted to the target Type
+     */
     private static boolean canUncheckConvert(Type source, Type target) {
         return source.isRaw() &&
             source.getClassSymbol().equals(target.getClassSymbol()) &&
@@ -1559,12 +1602,21 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         return false;
     }
 
+    /**
+     * Visits the given array of Annotations
+     * @param asts the array of Annotations to visit
+     */
     private void visitAnnotations(Annotation[] asts) {
         for (Annotation ast : asts) {
             ast.accept(this);
         }
     }
 
+    /**
+     * Type checks a given annotation
+     * @param expected the expected type of an Annotation
+     * @param arg the Annotation Expression to type check
+     */
     private void annotationTypeCheck(Type expected, Expression arg) {
         Type actual = arg.getType();
         if (!(expected instanceof ArrayType)) {
@@ -1581,6 +1633,14 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         }
     }
 
+    /**
+     * Resolves a constructor with an anonymous class
+     * @param superCls the class being constructed
+     * @param argTypes the Types supplied to the constructor
+     * @param typeArgTypes the Type arguments to the constructor
+     * @return the MethodSymbol representing the constructor being called, if
+     * one could be resolved, otherwise null
+     */
     private MethodSymbol resolveCtorForAnonymousClass(ClassSymbol superCls,
                                                       Type[] argTypes,
                                                       List<Type> typeArgTypes) {
@@ -1597,6 +1657,13 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
 
     }
 
+    /**
+     * Resolves a method call
+     * @param ast the CallExpression holding the method call to resolve
+     * @param isCtor true if the given method call is a constructor call
+     * @return the MethodSymbol representing the method being called, if one
+     * could be resolved, otherwise null
+     */
     private MethodSymbol resolveMethod(CallExpression ast, boolean isCtor) {
         ast.getMethod().setInferredType(ast.getInferredType());
         MethodSymbol ret = null;
@@ -1656,6 +1723,14 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         return resolveMethodFromChoices(choices, argTypes, typeArgTypes);
     }
 
+    /**
+     * Selects the appropriate method from an array of possible methods
+     * @param choices the MethodSymbols to choose from
+     * @param argTypes the Types of the method call arguments
+     * @param typeArgTypes the Type arguments to the method call
+     * @return the MethodSymbol being called, if one could be resolved,
+     * otherwise null
+     */
     private MethodSymbol resolveMethodFromChoices(MethodSymbol[] choices,
                                                   Type[] argTypes,
                                                   List<Type> typeArgTypes) {
@@ -1698,10 +1773,19 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         return ret;
     }
 
-    private MethodSymbol selectCandidates(MethodSymbol[] choices,
-                                          Type[] argTypes,
-                                          BiFunction<MethodSymbol, Integer, Type[]> getTypes,
-                                          BiFunction<Type, Type, Boolean> isValid) {
+    /**
+     * Selects the most applicable method given the argument types
+     * @param choices the MethodSymbols to select from
+     * @param argTypes the Types of the method call arguments
+     * @param getTypes the Function that gets the parameter types of a method
+     * @param isValid the Function that determines if an argument type is valid
+     * for a parameter type
+     * @return the most applicable method, if one can be found, otherwise null
+     */
+    private static MethodSymbol selectCandidates(MethodSymbol[] choices,
+                                                 Type[] argTypes,
+                                                 BiFunction<MethodSymbol, Integer, Type[]> getTypes,
+                                                 BiFunction<Type, Type, Boolean> isValid) {
         List<MethodSymbol> cands = new ArrayList<>();
         Type[] methodParamTypes;
     OUTER:
@@ -1721,10 +1805,22 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         return null;
     }
 
+    /**
+     * Determines if two Types are strictly compatible
+     * @param a a Type
+     * @param b a Type
+     * @return if the two Types are strictly compatible
+     */
     private static boolean strictCompatible(Type a, Type b) {
         return a.equals(b) || b.canWidenTo(a) || (b == NilType.TYPE && a.isReference());
     }
 
+    /**
+     * Determines if two Types are loosely compatible
+     * @param a a Type
+     * @param b a Type
+     * @return if the two Types are loosely compatible
+     */
     private static boolean looseCompatible(Type a, Type b) {
         if (strictCompatible(a, b)) {
             return true;

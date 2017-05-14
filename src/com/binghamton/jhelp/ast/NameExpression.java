@@ -17,8 +17,8 @@ public class NameExpression extends Expression {
     /**
      * An enum enumerating the kinds of NameExpressions
      */
-    public static enum Kind { TYPE, PACKAGE, EXPRESSION,
-                              METHOD, AMBIGUOUS, PACKAGE_OR_TYPE };
+    public enum Kind { TYPE, PACKAGE, EXPRESSION,
+                       METHOD, AMBIGUOUS, PACKAGE_OR_TYPE };
 
     private NameExpression qualifier = null;
     private Annotation[] annotations = {};
@@ -26,7 +26,7 @@ public class NameExpression extends Expression {
     private Token name;
     private Package pkg;
 
-    /*
+    /**
      * Constructs a qualified NameExpression from a NameExpression and
      * unqualified NameExpression.
      * @param qualifier the qualified NameExpression of this NameExpression

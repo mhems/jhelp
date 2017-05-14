@@ -32,6 +32,10 @@ public class VariableSymbol extends Symbol {
         super(name, modifiers);
     }
 
+    /**
+     * Copy constructs a VariableSymbol
+     * @return a new VariableSymbol whose contents are copied
+     */
     public VariableSymbol copy() {
         return new VariableSymbol(this);
     }

@@ -1,10 +1,7 @@
 package com.binghamton.jhelp;
 
-import java.util.Map;
-
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.antlr.MyToken;
 import com.binghamton.jhelp.ast.ASTVisitor;
 import com.binghamton.jhelp.ast.BodyDeclaration;
 import com.binghamton.jhelp.error.SemanticError;

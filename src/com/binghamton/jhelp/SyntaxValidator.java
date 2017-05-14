@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.DiagnosticErrorListener;
 import org.antlr.v4.runtime.Lexer;
 
 import com.binghamton.jhelp.antlr.Java8Lexer;
@@ -15,7 +14,6 @@ import com.binghamton.jhelp.antlr.MyTokenFactory;
 import com.binghamton.jhelp.antlr.SyntaxErrorListener;
 import com.binghamton.jhelp.ast.CompilationUnit;
 import com.binghamton.jhelp.error.JHelpError;
-import com.binghamton.jhelp.error.SyntacticError;
 import com.binghamton.jhelp.util.FileBuffer;
 
 /**
@@ -47,7 +45,16 @@ public class SyntaxValidator implements Validator {
                 parser.addErrorListener(new SyntaxErrorListener(program));
                 parser.setBuildParseTree(false);
                 int old = program.numErrors();
-                cu = parser.compilationUnit().ret;
+                try {
+                    cu = parser.compilationUnit().ret;
+                } catch (Exception e) {
+                    // e.printStackTrace();
+                    List<String> stack = parser.getRuleInvocationStack();
+                    java.util.Collections.reverse(stack);
+                    System.out.println(stack);
+                    throw e;
+                    // continue;
+                }
                 if (parser.getNumberOfSyntaxErrors() == 0 &&
                     program.numErrors() == old) {
                     cu.setFilename(file.getAbsolutePath());

@@ -36,6 +36,12 @@ public abstract class JHelpWarning extends JHelpError {
         super(fmt, args);
     }
 
+    /**
+     * Constructs a JHelpWarning on an AST
+     * @param ast the offending AST
+     * @param msg the message explaining the warning
+     * @param suggestion the suggestion suggesting a fix to the warning
+     */
     protected JHelpWarning(ASTNode ast, String msg, String suggestion) {
         super(ast, msg, suggestion);
     }

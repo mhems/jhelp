@@ -1,6 +1,5 @@
 package com.binghamton.jhelp;
 
-import java.io.File;
 import java.io.FileFilter;
 
 import java.util.ArrayList;

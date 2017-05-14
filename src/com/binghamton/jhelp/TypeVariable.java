@@ -33,6 +33,10 @@ public class TypeVariable extends ReferenceType {
         declarer = ReflectedClassSymbol.get(declCls);
     }
 
+    /**
+     * Copy constructs a new TypeVariable
+     * @param var the TypeVariable to copy from
+     */
     public TypeVariable(TypeVariable var) {
         this(var.name, copyTypes(var.bounds));
     }
@@ -60,10 +64,18 @@ public class TypeVariable extends ReferenceType {
         this.bounds = bounds;
     }
 
+    /**
+     * Gets this TypeVariable's index in the class that declared it
+     * @return the index in the class that declared this TypeVariable
+     */
     public int getIndex() {
         return index;
     }
 
+    /**
+     * Sets the index of this TypeVariable in the class that declared it
+     * @param i the index in the class that declared this TypeVariable
+     */
     public void setIndex(int i) {
         index = i;
     }

@@ -38,6 +38,7 @@ public class MyMethodSymbol extends MethodSymbol {
         this.token = token;
     }
 
+    @Override
     public MyMethodSymbol copy() {
         return new MyMethodSymbol(this);
     }

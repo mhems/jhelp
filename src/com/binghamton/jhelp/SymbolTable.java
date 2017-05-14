@@ -23,6 +23,15 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
     protected ArrayDeque<Map<K, V>> table = new ArrayDeque<>();
     protected Function<V, K> valueToKey;
 
+    /**
+     * Performs a deep-copy of a SymbolTable's contents
+     * @param <K> the type of the keys of the SymbolTable being copied
+     * @param <V> the type of the Symbols of the SymbolTable being copied
+     * @param dest the fresh SymbolTable who will hold the copied contents
+     * @param src the SymbolTable whose contents are to be copied
+     * @param symCopier the Function that copies a given Symbol
+     * @param creator the Supplier that creates new SymbolTables
+     */
     protected static <K, V extends Symbol> void copy(SymbolTable<K, V> dest,
                                                      SymbolTable<K, V> src,
                                                      Function<V, V> symCopier,
@@ -312,7 +321,7 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
          * Constructs a new Iterator from a table's contents
          * @param table the table's contents
          */
-        public SymbolTableIterator(ArrayDeque<Map<K, V>> table) {
+        SymbolTableIterator(ArrayDeque<Map<K, V>> table) {
             tableItr = table.iterator();
         }
 
@@ -408,7 +417,13 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
         }
     }
 
-    private V[] trim(V[] src) {
+    /**
+     * Trims any trailing null elements in a given array
+     * @param <V> the type of array elements
+     * @param src the array to be trimmed
+     * @return the trimmed array
+     */
+    private static <V> V[] trim(V[] src) {
         int i = 0;
         while (i < src.length && src[i] != null) {
             ++i;

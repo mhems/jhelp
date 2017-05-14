@@ -22,12 +22,17 @@ public class JHelp {
         JHelpRunner runner = new JHelpRunner(args);
         runner.addValidator(new EnvironmentValidator());
         runner.addValidator(new UsageValidator());
-        runner.addValidator(new BalancedValidator());
+        // runner.addValidator(new BalancedValidator());
         runner.addValidator(new SyntaxValidator());
         runner.addValidator(new TopLevelValidator());
         MemberLevelValidator mV = new MemberLevelValidator();
         runner.addValidator(mV);
         runner.addValidator(new CodeLevelValidator(mV));
-        System.exit(runner.run());
+        try {
+            System.exit(runner.run());
+        } catch (Exception e) {
+            System.out.flush();
+            e.printStackTrace(System.err);
+        }
     }
 }

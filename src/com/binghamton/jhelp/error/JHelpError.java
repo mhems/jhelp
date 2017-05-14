@@ -1,7 +1,5 @@
 package com.binghamton.jhelp.error;
 
-import java.util.List;
-
 import org.antlr.v4.runtime.Token;
 
 import com.binghamton.jhelp.antlr.MyToken;
@@ -17,10 +15,19 @@ public class JHelpError {
     private String msg;
     private String suggestion;
 
+    /**
+     * Constructs an empty JHelpError
+     */
     protected JHelpError() {
         super();
     }
 
+    /**
+     * Constructs a JHelpError on an AST
+     * @param ast the offending AST
+     * @param msg the message explaining the error
+     * @param suggestion the suggestion suggesting a fix to the error
+     */
     public JHelpError(ASTNode ast, String msg, String suggestion) {
         this.ast = ast;
         this.token = ast.getFirstToken();
@@ -28,6 +35,12 @@ public class JHelpError {
         this.suggestion = suggestion;
     }
 
+    /**
+     * Constructs a JHelpError on a Token
+     * @param token the offending Token
+     * @param msg the message explaining the error
+     * @param suggestion the suggestion suggesting a fix to the error
+     */
     public JHelpError(Token token, String msg, String suggestion) {
         if (token instanceof MyToken) {
             this.token = (MyToken)token;
@@ -38,12 +51,17 @@ public class JHelpError {
         this.suggestion = suggestion;
     }
 
+    /**
+     * Constructs a JHelpError on a Token
+     * @param token the offending Token
+     * @param msg the message explaining the error
+     */
     public JHelpError(Token token, String msg) {
         this(token, msg, null);
     }
 
     /**
-     * Constructs a new JHelpError exception with a message
+     * Constructs a new JHelpError with a message
      * @param msg the message explaining the error
      */
     public JHelpError(String msg) {
@@ -51,7 +69,7 @@ public class JHelpError {
     }
 
     /**
-     * Constructs a new JHelpError exception with a formatted message
+     * Constructs a new JHelpError with a formatted message
      * @param fmt the formatted message string
      * @param args any arguments to the formatted message string
      */
@@ -59,6 +77,14 @@ public class JHelpError {
         this(String.format(fmt, args));
     }
 
+    /**
+     * A utility method to make a message over multiple Tokens
+     * @param first the first Token of this error
+     * @param second the second Token of this error
+     * @param message the message explaining the error
+     * @param suggestion the suggestion suggesting a fix to the error
+     * @return a formatted error message over multiple Tokens
+     */
     public static String makeMultiTokenMessage(MyToken first,
                                                MyToken second,
                                                String message,

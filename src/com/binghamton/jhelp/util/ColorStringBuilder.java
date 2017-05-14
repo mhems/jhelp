@@ -9,14 +9,18 @@ public class ColorStringBuilder {
     /**
      * An enum enumerating available formats
      */
-    public static enum Format {
+    public enum Format {
         NORMAL(0), BOLD(1), DIM(2), UNDERSCORE(4), INVERSE(7);
 
-        private final static int DELTA = 20;
+        private final int DELTA = 20;
         private final int code;
         private final int resetCode;
 
-        private Format(int code) {
+        /**
+         * Constructs a Format with a given code
+         * @param code the corresponding int code of this Format
+         */
+        Format(int code) {
             this.code = code;
             this.resetCode = code + DELTA;
         }
@@ -25,23 +29,27 @@ public class ColorStringBuilder {
     /**
      * An enum enumerating available colors
      */
-    public static enum Color {
+    public enum Color {
         DEFAULT(39), BLACK(30), RED(31), GREEN(32), YELLOW(33), BLUE(34),
         MAGENTA(35), CYAN(36), LIGHT_GRAY(37), DARK_GRAY(90), LIGHT_RED(91),
         LIGHT_GREEN(92), LIGHT_YELLOW(93), LIGHT_BLUE(94), LIGHT_MAGENTA(95),
         LIGHT_CYAN(96), WHITE(97);
 
-        private final static int DELTA = 10;
+        private static final int DELTA = 10;
         private final int fgCode;
         private final int bgCode;
 
-        private Color(int fgCode) {
+        /**
+         * Constructs a Color with a given code
+         * @param fgCode the corresponding int code of this Color
+         */
+        Color(int fgCode) {
             this.fgCode = fgCode;
             this.bgCode = fgCode + DELTA;
         }
     };
 
-    private final static char ESCAPE_CHAR = 27;
+    private static final char ESCAPE_CHAR = 27;
 
     private StringBuilder builder;
     private boolean allow;

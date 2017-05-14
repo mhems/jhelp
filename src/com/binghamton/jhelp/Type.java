@@ -39,8 +39,17 @@ public abstract class Type extends Symbol {
 
     }
 
+    /**
+     * Copies this Type into a new Type with equivalent contents
+     * @return a new Type with equivalent contents of this Type
+     */
     public abstract Type copy();
 
+    /**
+     * Performs copies of each Type in an array of Types
+     * @param types the array of Types to copy
+     * @return a new array holding the copied contents of the given array
+     */
     protected static Type[] copyTypes(Type[] types) {
         Type[] ret = new Type[types.length];
         for (int i = 0; i < ret.length; i++) {

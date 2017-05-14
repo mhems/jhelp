@@ -90,11 +90,19 @@ public class CallExpression extends QualifiableExpression {
         this.typeArgs = typeArgs;
     }
 
+    /**
+     * Determines if the diamond operator is present in this Expression
+     * @return true if the diamond operator is present in this Expression
+     */
     public boolean isDiamond() {
         return methodExpr instanceof ParamExpression &&
             ((ParamExpression)methodExpr).isDiamond();
     }
 
+    /**
+     * Determines if type arguments were suppplied in this CallExpression
+     * @return true if type arguments were suppplied in this CallExpression
+     */
     public boolean argsSupplied() {
         return methodExpr instanceof ParamExpression;
     }

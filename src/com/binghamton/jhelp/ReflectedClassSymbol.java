@@ -5,9 +5,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Member;
-import java.util.Map;
-
-import com.binghamton.jhelp.ast.ASTVisitor;
 
 /**
  * A class to represent a pre-compiled class
@@ -109,14 +106,29 @@ public final class ReflectedClassSymbol extends ClassSymbol {
         establishInheritanceHierarchy();
     }
 
+    /**
+     * Determines if a given class is visible to outside classes
+     * @param cls the Class whose visiblity is to be determined
+     * @return true iff the given class is visible to outside classes
+     */
     private static boolean visible(Class<?> cls) {
         return visible(cls.getModifiers());
     }
 
+    /**
+     * Determines if a given class member is visible to outside classes
+     * @param member the Member whose visibility is to be determined
+     * @return true iff the given member is visible to outside classes
+     */
     private static boolean visible(Member member) {
         return visible(member.getModifiers());
     }
 
+    /**
+     * Determines if a set of modifiers dictates a visible declaration
+     * @param modifiers the bit-mask contains the declaration's modifiers
+     * @return true if the given modifiers dictate a visible declaration
+     */
     private static boolean visible(int modifiers) {
         return Modifier.isPublic(modifiers) ||
             (!Modifier.isPrivate(modifiers) &&

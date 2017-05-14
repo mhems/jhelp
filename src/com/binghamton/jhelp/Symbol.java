@@ -17,12 +17,12 @@ public abstract class Symbol {
     /**
      * An enum enumerating the kinds of Symbols
      */
-    public static enum SymbolKind {CLASS, CONSTRUCTOR, METHOD, TYPE, VARIABLE};
+    public enum SymbolKind {CLASS, CONSTRUCTOR, METHOD, TYPE, VARIABLE};
 
     /**
      * An enum enumerating the access levels of a Symbol
      */
-    public static enum AccessLevel {PUBLIC, PROTECTED, PACKAGE_PRIVATE, PRIVATE};
+    public enum AccessLevel {PUBLIC, PROTECTED, PACKAGE_PRIVATE, PRIVATE};
 
     protected Program program;
     protected SymbolKind kind;
@@ -402,13 +402,5 @@ public abstract class Symbol {
             syms[i].setIndex(i);
         }
         return syms;
-    }
-
-    protected static String subRepr(Map<TypeVariable, Type> map) {
-        java.util.List<String> list = new java.util.ArrayList<>();
-        for (TypeVariable var : map.keySet()) {
-            list.add(String.format("%s -> %s", var.getName(), map.get(var).toString()));
-        }
-        return String.join(", ", list);
     }
 }

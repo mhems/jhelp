@@ -20,6 +20,10 @@ public class WildcardType extends Type {
         this(true, fetch("Object"));
     }
 
+    /**
+     * Copy constructs a WildcardType
+     * @param type the WildcardType to copy from
+     */
     public WildcardType(WildcardType type) {
         this(type.upper, type.bound.copy()) ;
     }

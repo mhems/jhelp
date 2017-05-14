@@ -165,6 +165,7 @@ public abstract class BodyDeclaration extends Declaration {
         return innerBodies.size();
     }
 
+    @Override
     public MyClassSymbol getSymbol() {
         return (MyClassSymbol)sym;
     }
