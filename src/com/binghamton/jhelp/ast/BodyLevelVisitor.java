@@ -466,6 +466,12 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
                 }
             }
         }
+
+        if (method.getName().equals("main") && !method.isMainMethodSignature()) {
+            addError(new StyleWarning(ast.getName(),
+                                      "Malformed main method detected",
+                                      "If you are trying to declare a main method, it needs to exactly be 'public static void main(String[] args)'"));
+        }
     }
 
     /**
