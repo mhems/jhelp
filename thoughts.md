@@ -51,7 +51,6 @@ Compile Errors
   * comparsion
   * arithmetic
 * array vs. arraylist confusion
-* unbalanced matching pairs
 * not all branches return
 * trying to override private/static
 * missing return statement
@@ -68,8 +67,6 @@ Compile Errors
 * primitives in generics
 * call non-static from static context
 * access modifier in local vars
-* single quote strings
-* miscapitalized true/false/null/...
 * unchecked exceptions
 
 Anticipated Challenges

@@ -81,6 +81,13 @@ grammar Java8;
             }
         }
     }
+
+    private MyRecognitionException createMyException(String suggestion) {
+        return new MyRecognitionException(this,
+                                          getInputStream(),
+                                          getRuleContext(),
+                                          suggestion);
+    }
 }
 
 /*
@@ -115,6 +122,24 @@ literal returns [Expression ret]
         {$ret = new LiteralExpression($s, null);}
     |   n = NullLiteral
         {$ret = new LiteralExpression($n, null);}
+    |   e = BadStringLiteral
+        {
+            notifyErrorListeners($e,
+                                 "Strings must be enclosed in double quotes (\"\"), not single quotes (\'\')",
+                                 createMyException("Use \"\" instead of \'\'"));
+        }
+    |   e = BadBooleanLiteral
+        {
+            notifyErrorListeners($e,
+                                 "Boolean value has wrong capitalization",
+                                 createMyException("boolean values must be all lowercase"));
+        }
+    |   e = BadNullLiteral
+        {
+            notifyErrorListeners($e,
+                                 "The null literal has the wrong capitalization",
+                                 createMyException("the null literal must be all lowercase"));
+        }
     ;
 
 /*
@@ -1106,6 +1131,14 @@ arrayInitializer returns [ArrayInitializer ret]
     :   first = '{' (l = variableInitializerList {$ls = $l.ret;})? ','?
         last = '}'
         {$ret = new ArrayInitializer($first, $last, $ls);}
+    |   first = '[' (l = variableInitializerList {$ls = $l.ret;})? ','?
+        last = ']'
+        {
+            $ret = new ArrayInitializer($first, $last, $ls);
+            notifyErrorListeners($first,
+                                 "Array initialization uses curly braces instead of brackets",
+                                 createMyException("Replace the curly braces with square brackets"));
+        }
     ;
 
 variableInitializerList returns [List<Expression> ret]
@@ -2617,6 +2650,13 @@ BooleanLiteral
     |   'false'
     ;
 
+BadBooleanLiteral
+    :   'TRUE'
+    |   'True'
+    |   'FALSE'
+    |   'False'
+    ;
+
 // §3.10.4 Character Literals
 
 CharacterLiteral
@@ -2633,6 +2673,10 @@ SingleCharacter
 
 StringLiteral
     :   '"' StringCharacters? '"'
+    ;
+
+BadStringLiteral
+    :   '\'' StringCharacters? '\''
     ;
 
 fragment
@@ -2677,6 +2721,11 @@ UnicodeEscape
 
 NullLiteral
     :   'null'
+    ;
+
+BadNullLiteral
+    :   'Null'
+    |   'NULL'
     ;
 
 // §3.11 Separators
