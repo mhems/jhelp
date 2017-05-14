@@ -10,14 +10,17 @@ import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
  */
 public class VariableSymbol extends Symbol {
 
-        {
-            kind = SymbolKind.VARIABLE;
-        }
+    {
+        kind = SymbolKind.VARIABLE;
+    }
 
-    public enum VariableKind {FIELD, LOCAL, PARAMETER};
+    /**
+     * An enum enumerating the kinds of variables that can occur
+     */
+    public enum VariableKind {FIELD, LOCAL};
 
     protected ClassSymbol declarer;
-    protected VariableKind varKind;
+    protected VariableKind varKind = VariableKind.LOCAL;
     protected Type type;
 
     /**
@@ -27,6 +30,14 @@ public class VariableSymbol extends Symbol {
      */
     public VariableSymbol(String name, Modifiers modifiers) {
         super(name, modifiers);
+    }
+
+    /**
+     * Copy constructs a VariableSymbol
+     * @return a new VariableSymbol whose contents are copied
+     */
+    public VariableSymbol copy() {
+        return new VariableSymbol(this);
     }
 
     /**
@@ -67,6 +78,14 @@ public class VariableSymbol extends Symbol {
         return varKind;
     }
 
+    /**
+     * Determines if this VariableSymbol is a field
+     * @return true iff this VariableSymbol is a field
+     */
+    public boolean isField() {
+        return varKind == VariableKind.FIELD;
+    }
+
     @Override
     public ClassSymbol getDeclaringClass() {
         return declarer;
@@ -78,8 +97,8 @@ public class VariableSymbol extends Symbol {
      */
     public boolean isConstant() {
         return isFinal() && (
-            (type instanceof PrimitiveType) ||
-            type.equals(fetch("String")));
+                             (type instanceof PrimitiveType) ||
+                             type.equals(fetch("String")));
     }
 
     @Override
@@ -96,7 +115,9 @@ public class VariableSymbol extends Symbol {
      */
     protected static void adapt(VariableSymbol var,
                                 Map<TypeVariable, Type> map) {
+        // System.out.println("adapting variable: " + var);
         var.type = var.type.adapt(map);
+        // System.out.println("adapted variable: " + var);
     }
 
     @Override

@@ -7,16 +7,16 @@ import com.binghamton.jhelp.ArrayType;
 import com.binghamton.jhelp.ClassSymbol;
 import com.binghamton.jhelp.MyClassSymbol;
 import com.binghamton.jhelp.Modifier;
-import com.binghamton.jhelp.Package;
 import com.binghamton.jhelp.ParameterizedType;
+import com.binghamton.jhelp.PrimitiveType;
 import com.binghamton.jhelp.Program;
 import com.binghamton.jhelp.ReferenceType;
 import com.binghamton.jhelp.Type;
 import com.binghamton.jhelp.TypeVariable;
 import com.binghamton.jhelp.WildcardType;
+import com.binghamton.jhelp.error.UnimplementedFeatureWarning;
 
 import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
-import static com.binghamton.jhelp.ast.NameExpression.Kind;
 
 /**
  * The top level Visitor for visiting top-level declarations and adding them to
@@ -33,49 +33,11 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
     }
 
     /**
-     * Visit a AccessExpression node
-     * @param ast the AST node being visited
-     */
-    public void visit(AccessExpression ast) {
-        Expression lhs = ast.getLHS();
-        NameExpression rhs = ast.getRHS();
-
-        lhs.accept(this);
-        // rhs is guaranteed to be unqualified NameExpression
-        // instead of visiting, we just hoist its data
-
-        Type lType = lhs.getType();
-        String rName = rhs.getName();
-
-        if (lType != null) {
-            Type type = lType.getClassSymbol().getType(rName);
-            if (type == null) {
-                System.err.println("unknown type " + ast.getText());
-            } else {
-                ast.setType(type);
-            }
-        } else {
-            // if not typed yet, must name Package or part of a Package
-            Package curPkg = program.getPackage(lhs.getText());
-            if (curPkg != null) {
-                ClassSymbol cls = curPkg.getClass(rName);
-                if (cls != null) {
-                    ast.setType(cls);
-                } else {
-                    rhs.setKind(Kind.PACKAGE);
-                }
-            } else {
-                rhs.setKind(Kind.PACKAGE);
-            }
-        }
-    }
-
-    /**
      * Visit a AnnotationDeclaration node
      * @param ast the AST node being visited
      */
     public void visit(AnnotationDeclaration ast) {
-        // override to do nothing
+        currentClass.establishInheritanceHierarchy();
     }
 
     /**
@@ -89,6 +51,7 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         for (Dimension dim : ast.getDimensions()) {
             arrayType = new ArrayType(arrayType,
                                       makeAnnotations(dim.getAnnotations()));
+            arrayType.setProgram(program);
         }
         ast.setType(arrayType);
     }
@@ -102,7 +65,9 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         ClassSymbol enclosingSym = currentClass.getDeclaringClass();
         while (enclosingSym != null) {
             if (enclosingSym.getName().equals(currentClass.getName())) {
-                System.err.println("inner body cannot have same name as one of its enclosing classes");
+                addError(currentClass.getToken(),
+                         "An inner body cannot have same name as one of its enclosing classes",
+                         "Rename the inner body to have a different name");
                 break;
             }
             enclosingSym = enclosingSym.getDeclaringClass();
@@ -115,9 +80,15 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
             currentClass.addModifier(Modifier.STATIC);
             currentClass.setAccessLevel(ClassSymbol.AccessLevel.PUBLIC);
 
-            if (currentClass.hasModifier(Modifier.PROTECTED) ||
-                currentClass.hasModifier(Modifier.PRIVATE)) {
-                System.err.println("a member type in an interface cannot be protected or private");
+            if (currentClass.hasModifier(Modifier.PROTECTED)) {
+                addError(currentClass.getModifier(Modifier.PROTECTED),
+                         "A member type in an interface cannot be protected",
+                         "Remove the protected modifier");
+            }
+            if (currentClass.hasModifier(Modifier.PRIVATE)) {
+                addError(currentClass.getModifier(Modifier.PRIVATE),
+                         "A member type in an interface cannot be private",
+                         "Remove the private modifier");
             }
         }
 
@@ -125,7 +96,6 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         for (BodyDeclaration body : ast.getInnerBodies()) {
             body.accept(this);
             currentClass = tmp;
-            // System.out.println(body.getSymbol().repr());
         }
     }
 
@@ -138,15 +108,24 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
             ast.getSuperClass().accept(this);
             ClassSymbol superCls = ast.getSuperClass().getType().getClassSymbol();
             if (superCls.equals(fetch("Enum"))) {
-                System.err.println("cannot directly subclass java.lang.Enum");
+                addError(ast.getName(),
+                         "A class cannot directly subclass java.lang.Enum",
+                         "Use 'enum' instead of 'class'");
             } else if (superCls.isInterfaceLike()) {
-                System.err.println("cannot subclass interface or annotation");
+                addError(ast.getSuperClass(),
+                         "A class can only subclass other classes",
+                         "Do you mean 'implements' instead of 'extends'?");
             } else if (superCls.hasModifier(Modifier.FINAL)) {
-                System.err.println("cannot subclass a final class or simple enum");
+                addError(ast.getName(),
+                         "A class cannot extend a final class or enum",
+                         "If you have access to the source code of " + superCls.getName() + ", remove the 'final' modifier, otherwise you need to rethink your design");
             } else {
                 currentClass.setSuperClass(ast.getSuperClass().getType());
             }
+        } else {
+            currentClass.setSuperClassForClass();
         }
+        currentClass.establishInheritanceHierarchy();
     }
 
     /**
@@ -160,8 +139,12 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         }
 
         for (BodyDeclaration decl : ast.getBodyDeclarations()) {
-            decl.accept(this);
-            // System.out.println(decl.getSymbol().repr());
+            try {
+                decl.accept(this);
+            } catch (Exception e) {
+                // e.printStackTrace();
+                // squelch
+            }
         }
     }
 
@@ -192,9 +175,15 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
     public void visit(EnumDeclaration ast) {
         currentClass.addModifier(Modifier.STATIC);
 
-        if (currentClass.hasModifier(Modifier.FINAL) ||
-            currentClass.hasModifier(Modifier.ABSTRACT)) {
-            System.err.println("an enum cannot be final nor abstract");
+        if (currentClass.hasModifier(Modifier.FINAL)) {
+            addError(currentClass.getModifier(Modifier.FINAL),
+                     "An enum cannot be final",
+                     "Remove the 'final' modifier");
+        }
+        if (currentClass.hasModifier(Modifier.ABSTRACT)) {
+            addError(currentClass.getModifier(Modifier.ABSTRACT),
+                     "An enum cannot be abstract",
+                     "Remove the 'abstract' modifier");
         }
 
         if (currentClass.isInner() &&
@@ -214,6 +203,7 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         if (isFinal) {
             currentClass.addModifier(Modifier.FINAL);
         }
+        currentClass.establishInheritanceHierarchy();
     }
 
     /**
@@ -221,7 +211,10 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(InterfaceDeclaration ast) {
-        // override to do nothing
+        if (ast.hasSuperInterfaces()) {
+            addInterfaces(ast.getSuperInterfaces());
+        }
+        currentClass.establishInheritanceHierarchy();
     }
 
     /**
@@ -229,43 +222,9 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(NameExpression ast) {
-        String name = ast.getName();
-        String rName = ast.getToken().getText();
-        AnnotationSymbol[] anns = makeAnnotations(ast.getAnnotations());
-        Kind kind = ast.getKind();
-        Type type;
-        NameExpression qual = ast.getQualifyingName();
-        // System.out.println("decl name: " + ast.getText() + " (" + ast.getKind() + ")");
-        if (kind == Kind.PACKAGE) {
-            Package pkg = program.getPackage(name);
-            if (pkg != null) {
-                ast.setPackage(pkg);
-            }
-            // cannot throw error yet, must wait and hoist from Access
-        } else {
-            if (!ast.isQualified()) {
-                type = currentClass.getType(name);
-            } else {
-                if (qual.getKind() == Kind.PACKAGE_OR_TYPE) {
-                    qual.accept(this);
-                }
-                if (qual.getKind() == Kind.PACKAGE) {
-                    type = qual.getPackage().getClass(rName);
-                } else {
-                    type = qual.getType().getClassSymbol().getType(rName);
-                }
-            }
-            if (type != null) {
-                ast.setKind(Kind.TYPE);
-                type.setAnnotations(anns);
-                ast.setType(type);
-            } else {
-                if (kind == Kind.TYPE) {
-                    System.err.println("unknown type " + name);
-                } else {
-                    ast.setKind(Kind.PACKAGE);
-                }
-            }
+        super.visit(ast);
+        if (ast.getType() != null) {
+            ast.getType().setAnnotations(makeAnnotations(ast.getAnnotations()));
         }
     }
 
@@ -296,21 +255,32 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
                     for (TypeArgument arg : args) {
                         arg.accept(this);
                         tArgs[pos] = arg.getType();
+                        if (arg.getType() instanceof PrimitiveType) {
+                            addError(arg,
+                                     "Cannot specify a primitive type as a type argument",
+                                     "Specify the class version of the primitive type, such as Integer instead of int");
+                        }
                         ++pos;
                     }
                     ast.setType(new ParameterizedType(sym, tArgs));
+                    ast.getType().setProgram(program);
                 } else {
                     Type iType = ast.getInferredType();
                     if (iType != null) {
                         ast.setType(new ParameterizedType(sym,
                                                           ((ParameterizedType)iType).getParameters()));
+                        ast.getType().setProgram(program);
                     }
                 }
             } else {
-                System.err.println("cannot parameterize a non-generic class");
+                addError(ast,
+                         "Cannot parameterize a non-generic class",
+                         "Remove the type arguments or make " + sym.getName() + " generic");
             }
         } else {
-            System.err.println("only classes or interfaces may be parameterized");
+            addError(ast,
+                     "Only classes and interfaces may be parameterized",
+                     "Remove the type arguments");
         }
     }
 
@@ -320,7 +290,7 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
      */
     public void visit(TypeArgument ast) {
         if (ast.isWildcard()) {
-            WildcardType type = new WildcardType();
+            WildcardType type;
             if (ast.hasExplicitBound()) {
                 ast.getBoundType().accept(this);
                 type = new WildcardType(ast.isUpperBounded(),
@@ -328,8 +298,11 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
             } else {
                 type = new WildcardType();
             }
+            type.setProgram(program);
             type.setAnnotations(makeAnnotations(ast.getAnnotations()));
             ast.setType(type);
+            addError(new UnimplementedFeatureWarning(ast.getWildCard(),
+                         "Wildcards may not fully typecheck"));
         }
         else {
             ast.getTypeExpression().accept(this);
@@ -356,25 +329,36 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         type.setAnnotations(makeAnnotations(ast.getAnnotations()));
     }
 
+    /**
+     * Makes AnnotationSymbols from Annotation ASTs
+     * @param annotations the annotation ASTs to visit
+     * @return the AnnotationSymbols constructed from the visited ASTs
+     */
+    protected AnnotationSymbol[] makeAnnotations(Annotation[] annotations) {
+        AnnotationSymbol[] ret = new AnnotationSymbol[annotations.length];
+        for (int i = 0; i < ret.length; i++) {
+            annotations[i].accept(this);
+            ret[i] = new AnnotationSymbol(annotations[i].getType());
+        }
+        return ret;
+    }
+
+    /**
+     * Resolves interface types and adds them to the current class
+     * @param interfaces the Expressions housing the interface types
+     */
     private void addInterfaces(List<Expression> interfaces) {
         Type cur;
         for (Expression expr : interfaces) {
             expr.accept(this);
             cur = expr.getType();
             if (cur.getClassSymbol().isClassLike()) {
-                System.err.println("cannot implement a class or enum");
+                addError(expr,
+                         "Can only implement a interfaces",
+                         "Do you mean 'extends' instead of 'implements'?");
             } else {
                 currentClass.addInterface(cur);
             }
         }
-    }
-
-    protected AnnotationSymbol[] makeAnnotations(Annotation[] annotations) {
-        AnnotationSymbol[] ret = new AnnotationSymbol[annotations.length];
-        for (int i = 0; i < ret.length; i++) {
-            annotations[i].accept(this);
-            ret[i] = new AnnotationSymbol((ClassSymbol)annotations[i].getType());
-        }
-        return ret;
     }
 }

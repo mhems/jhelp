@@ -16,6 +16,7 @@ public class TypeArgument extends ASTNode {
     private boolean isWildcard = false;
     private boolean isUpperBound;
     private Type type;
+    private Token wildcard;
 
     /**
      * Construct a type argument of a reference type
@@ -34,6 +35,7 @@ public class TypeArgument extends ASTNode {
     public TypeArgument(Token literal, List<Annotation> annotations) {
         super(ASTNode.getFirstToken(literal, annotations), literal);
         this.isWildcard = true;
+        this.wildcard = literal;
         this.annotations = annotations.toArray(this.annotations);
     }
 
@@ -44,6 +46,14 @@ public class TypeArgument extends ASTNode {
      */
     public Expression getTypeExpression() {
         return typeExpr;
+    }
+
+    /**
+     * Gets the Token of this wildcard TypeArgument
+     * @return the Token of this wildcard TypeArgument
+     */
+    public Token getWildCard() {
+        return wildcard;
     }
 
     /**

@@ -3,8 +3,10 @@ package com.binghamton.jhelp;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.binghamton.jhelp.util.StringUtils;
@@ -16,9 +18,9 @@ import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
  */
 public class MethodSymbol extends Symbol {
 
-        {
-            kind = SymbolKind.METHOD;
-        }
+    {
+        kind = SymbolKind.METHOD;
+    }
 
     protected MethodType type;
 
@@ -34,23 +36,23 @@ public class MethodSymbol extends Symbol {
      * Copy construct a MethodSymbol from an existing one
      * @param method the existing method to copy from
      */
-    protected MethodSymbol(MethodSymbol method) {
+    public MethodSymbol(MethodSymbol method) {
         super(method.name, method.modifiers);
-        this.type = method.type;
         this.declarer = method.declarer;
-        this.paramTypes = method.paramTypes;
-        this.typeVars = method.typeVars;
-        this.exceptions = method.exceptions;
+        this.paramTypes = Arrays.copyOf(method.paramTypes, method.paramTypes.length);
+        this.typeVars = Arrays.copyOf(method.typeVars, method.typeVars.length);
+        this.exceptions = Arrays.copyOf(method.exceptions, method.exceptions.length);
         this.variadic = method.variadic;
         this.constructor = method.constructor;
         this.returnType = method.returnType;
+        constructType();
     }
 
     /**
      * Constructs a new named method symbol
      * @param name the name of the method
      */
-    public MethodSymbol(String name) {
+    protected MethodSymbol(String name) {
         super(name);
     }
 
@@ -59,7 +61,7 @@ public class MethodSymbol extends Symbol {
      * @param name the name of this MethodSymbol
      * @param modifiers the modifiers of this MethodSymbol
      */
-    public MethodSymbol(String name, Modifiers modifiers) {
+    protected MethodSymbol(String name, Modifiers modifiers) {
         super(name, modifiers);
     }
 
@@ -70,9 +72,10 @@ public class MethodSymbol extends Symbol {
     public MethodSymbol(Method method) {
         super(method.getName(), method.getModifiers());
         constructor = false;
-        returnType = fromType(method.getAnnotatedReturnType());
+        if (method.getDefaultValue() != null) {
+            addModifier(Modifier.DEFAULT);
+        }
         commonInit(method);
-        constructType();
     }
 
     /**
@@ -82,9 +85,7 @@ public class MethodSymbol extends Symbol {
     public MethodSymbol(Constructor<?> ctor) {
         super(ctor.getName(), ctor.getModifiers());
         constructor = true;
-        returnType = ReflectedClassSymbol.get(ctor.getDeclaringClass());
         commonInit(ctor);
-        constructType();
     }
 
     /**
@@ -279,19 +280,32 @@ public class MethodSymbol extends Symbol {
      */
     protected static void adapt(MethodSymbol method,
                                 Map<TypeVariable, Type> map){
-        // allow method type parameters to shadow outer scopes'
-        for (TypeVariable mParam : method.typeVars) {
-            if (map.containsKey(mParam)) {
-                map.remove(mParam);
+        Map<TypeVariable, Type> toUse = map;
+        if (method.isGeneric()) {
+            toUse = new HashMap<>(map);
+            // allow method type parameters to shadow outer scopes'
+            for (TypeVariable mParam : method.typeVars) {
+                for (TypeVariable subParam : map.keySet()) {
+                    if (subParam.getName().equals(mParam.getName()) &&
+                        mParam.getDeclaringClass().equals(subParam.getDeclaringClass())) {
+                        toUse.remove(mParam);
+                        break;
+                    }
+                }
             }
         }
+        if (toUse.isEmpty()) {
+            return;
+        }
+
         for (int i = 0; i < method.paramTypes.length; i++) {
-            method.paramTypes[i] = method.paramTypes[i].adapt(map);
+            method.paramTypes[i] = method.paramTypes[i].adapt(toUse);
         }
         for (int i = 0; i < method.exceptions.length; i++) {
-            method.exceptions[i] = method.exceptions[i].adapt(map);
+            method.exceptions[i] = method.exceptions[i].adapt(toUse);
         }
-        method.returnType = method.returnType.adapt(map);
+        method.returnType = method.returnType.adapt(toUse);
+        method.constructType();
     }
 
     @Override
@@ -395,6 +409,14 @@ public class MethodSymbol extends Symbol {
     }
 
     /**
+     * Performs a deep-copy of this MethodSymbol
+     * @return a new MethodSymbol with this MethodSymbol's contents
+     */
+    public MethodSymbol copy() {
+        return new MethodSymbol(this);
+    }
+
+    /**
      * Common initialization of a pre-compiled method or constructor
      * @param exe the pre-compiled Executable to reflect
      */
@@ -404,5 +426,16 @@ public class MethodSymbol extends Symbol {
         typeVars = fromTypeParameters(exe.getTypeParameters());
         paramTypes = fromTypes(exe.getAnnotatedParameterTypes());
         exceptions = fromTypes(exe.getAnnotatedExceptionTypes());
+        if (constructor) {
+            if (declarer.isGeneric()) {
+                returnType = new ParameterizedType(declarer,
+                                                   declarer.getTypeParameters());
+            } else {
+                returnType = declarer;
+            }
+        } else {
+            returnType = fromType(exe.getAnnotatedReturnType());
+        }
+        constructType();
     }
 }

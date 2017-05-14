@@ -19,6 +19,7 @@ public class NilBlock extends Block {
      * A NilBlock is always nil
      * @return true
      */
+    @Override
     public boolean isNil() {
         return true;
     }

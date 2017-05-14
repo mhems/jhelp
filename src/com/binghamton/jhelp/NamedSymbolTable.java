@@ -5,6 +5,7 @@ import java.util.function.Function;
 
 /**
  * A specialization of a SymbolTable that keys Symbols by their name
+ * @param <T> the type of Symbol this SymbolTable holds
  */
 public class NamedSymbolTable<T extends Symbol> extends SymbolTable<String, T> {
 
@@ -24,12 +25,51 @@ public class NamedSymbolTable<T extends Symbol> extends SymbolTable<String, T> {
     }
 
     /**
-     * Constructs a new NamedSymbolTable with a parent table
-     * @param table the parent table
+     * Copies the classes of the given table into a new table
+     * @param symTab the SymbolTable holding the classes to copy
+     * @return a new SymbolTable with a deep-copy of the given table's contents
      */
-    private NamedSymbolTable(NamedSymbolTable<T> table) {
-        this();
-        this.parent = table.parent;
+    public static NamedSymbolTable<ClassSymbol>
+    copyClasses (NamedSymbolTable<ClassSymbol> symTab) {
+        NamedSymbolTable<ClassSymbol> ret = new NamedSymbolTable<ClassSymbol>();
+        copy(ret, symTab, c -> c.copy(), () -> new NamedSymbolTable<ClassSymbol>());
+        return ret;
+    }
+
+    /**
+     * Copies the variables of the given table into a new table
+     * @param symTab the SymbolTable holding the variables to copy
+     * @return a new SymbolTable with a deep-copy of the given table's contents
+     */
+    public static NamedSymbolTable<VariableSymbol>
+    copyVariables (NamedSymbolTable<VariableSymbol> symTab) {
+        NamedSymbolTable<VariableSymbol> ret = new NamedSymbolTable<VariableSymbol>();
+        copy(ret, symTab, v -> v.copy(), () -> new NamedSymbolTable<VariableSymbol>());
+        return ret;
+    }
+
+    /**
+     * Copies the type variables of the given table into a new table
+     * @param symTab the SymbolTable holding the type variables to copy
+     * @return a new SymbolTable with a deep-copy of the given table's contents
+     */
+    public static NamedSymbolTable<TypeVariable>
+    copyTypeVariables (NamedSymbolTable<TypeVariable> symTab) {
+        NamedSymbolTable<TypeVariable> ret = new NamedSymbolTable<TypeVariable>();
+        copy(ret, symTab, tv -> tv.copy(), () -> new NamedSymbolTable<TypeVariable>());
+        return ret;
+    }
+
+    /**
+     * Copies the types of the given table into a new table
+     * @param symTab the SymbolTable holding the types to copy
+     * @return a new SymbolTable with a deep-copy of the given table's contents
+     */
+    public static NamedSymbolTable<Type>
+    copyTypes (NamedSymbolTable<Type> symTab) {
+        NamedSymbolTable<Type> ret = new NamedSymbolTable<Type>();
+        copy(ret, symTab, t -> t.copy(), () -> new NamedSymbolTable<Type>());
+        return ret;
     }
 
     /**
@@ -40,11 +80,14 @@ public class NamedSymbolTable<T extends Symbol> extends SymbolTable<String, T> {
      * @return a new SymbolTable with adapted contents
      */
     public static NamedSymbolTable<ClassSymbol>
-    adaptClasses(NamedSymbolTable<ClassSymbol> symTab,
+    adaptClasses(SymbolTable<String, ClassSymbol> symTab,
                  Map<TypeVariable, Type> map) {
-        NamedSymbolTable<ClassSymbol> ret = new NamedSymbolTable<>(symTab);
-        for (ClassSymbol sym : symTab.table.peekFirst().values()) {
+        NamedSymbolTable<ClassSymbol> ret = new NamedSymbolTable<>();
+        for (ClassSymbol sym : symTab) {
             ret.put(sym.adapt(map));
+        }
+        for (SymbolTable<String, ClassSymbol> ancestor : symTab.ancestors) {
+            ret.addAncestor(adaptClasses(ancestor, map));
         }
         return ret;
     }
@@ -57,14 +100,20 @@ public class NamedSymbolTable<T extends Symbol> extends SymbolTable<String, T> {
      * @return a new SymbolTable with adapted contents
      */
     public static NamedSymbolTable<Type>
-    adaptTypes(NamedSymbolTable<Type> symTab,
+    adaptTypes(SymbolTable<String, Type> symTab,
                Map<TypeVariable, Type> map) {
-        NamedSymbolTable<Type> ret = new NamedSymbolTable<>(symTab);
-        for (Type sym : symTab.table.peekFirst().values()) {
+        NamedSymbolTable<Type> ret = new NamedSymbolTable<>();
+        for (Type sym : symTab) {
             ret.put(sym.adapt(map));
+        }
+        for (SymbolTable<String, Type> ancestor : symTab.ancestors) {
+            ret.addAncestor(adaptTypes(ancestor, map));
         }
         return ret;
     }
+
+
+
 
     /**
      * Adapts a SymbolTable of VariableSymbols
@@ -74,11 +123,14 @@ public class NamedSymbolTable<T extends Symbol> extends SymbolTable<String, T> {
      * @return a new SymbolTable with adapted contents
      */
     public static NamedSymbolTable<VariableSymbol>
-    adaptVariables(NamedSymbolTable<VariableSymbol> symTab,
+    adaptVariables(SymbolTable<String, VariableSymbol> symTab,
                    Map<TypeVariable, Type> map) {
-        NamedSymbolTable<VariableSymbol> ret = new NamedSymbolTable<>(symTab);
-        for (VariableSymbol sym : symTab.table.peekFirst().values()) {
+        NamedSymbolTable<VariableSymbol> ret = new NamedSymbolTable<>();
+        for (VariableSymbol sym : symTab) {
             ret.put(sym.adapt(map));
+        }
+        for (SymbolTable<String, VariableSymbol> ancestor : symTab.ancestors) {
+            ret.addAncestor(adaptVariables(ancestor, map));
         }
         return ret;
     }

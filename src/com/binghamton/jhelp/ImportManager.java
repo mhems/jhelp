@@ -10,8 +10,11 @@ import java.util.Map;
 public class ImportManager {
     private static final Map<String, ReflectedClassSymbol> cache = new HashMap<>();
 
+    /**
+     * Constructs an ImportManager
+     */
     private ImportManager() {
-	// prevent public instantiation
+        // prevent public instantiation
     }
 
     /**
@@ -46,7 +49,7 @@ public class ImportManager {
      */
     public static ReflectedClassSymbol getOrImport(String name) throws ClassNotFoundException {
         if (!isImported(name)) {
-            cache.put(name, ReflectedClassSymbol.get(Class.forName(name)));
+            cache.put(name, ReflectedClassSymbol.make(Class.forName(name)));
             cache.get(name).init();
         }
         return cache.get(name);

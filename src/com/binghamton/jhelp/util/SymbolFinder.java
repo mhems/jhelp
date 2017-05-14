@@ -38,8 +38,7 @@ public class SymbolFinder {
             Path tmpPath;
             String[] parts;
             for (Enumeration<JarEntry> e = rt_jar.entries();
-                 e.hasMoreElements();)
-            {
+                 e.hasMoreElements();) {
                 tmpPath = Paths.get(e.nextElement().getName());
                 nDirs = tmpPath.getNameCount();
                 parts = tmpPath.getName(nDirs - 1).toString().split("\\.");

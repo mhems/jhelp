@@ -6,6 +6,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.GenericArrayType;
 
+import com.binghamton.jhelp.error.JHelpError;
+
 /**
  * A class representing the abstract notion of a Java symbol
  * Java symbols include classes, enums, interfaces, methods, and variables
@@ -15,13 +17,14 @@ public abstract class Symbol {
     /**
      * An enum enumerating the kinds of Symbols
      */
-    public static enum SymbolKind {CLASS, CONSTRUCTOR, METHOD, TYPE, VARIABLE};
+    public enum SymbolKind {CLASS, CONSTRUCTOR, METHOD, TYPE, VARIABLE};
 
     /**
      * An enum enumerating the access levels of a Symbol
      */
-    public static enum AccessLevel {PUBLIC, PROTECTED, PACKAGE_PRIVATE, PRIVATE};
+    public enum AccessLevel {PUBLIC, PROTECTED, PACKAGE_PRIVATE, PRIVATE};
 
+    protected Program program;
     protected SymbolKind kind;
     protected String name;
     protected AnnotationSymbol[] annotations = {};
@@ -110,6 +113,16 @@ public abstract class Symbol {
      */
     public AccessLevel getAccessLevel() {
         return access;
+    }
+
+    /**
+     * Gets a particular Modifier of this Symbol, if it exists
+     * @param modifier the Modifier to get
+     * @return the corresponding Modifier of this Symbol if it exists,
+     * otherwise null
+     */
+    public Modifier getModifier(Modifier modifier) {
+        return modifiers.getModifier(modifier);
     }
 
     /**
@@ -249,6 +262,30 @@ public abstract class Symbol {
     public abstract ClassSymbol getDeclaringClass();
 
     /**
+     * Gets the Program this Symbol originated from
+     * @return the Program this Symbol originated from
+     */
+    public Program getProgram() {
+        return program;
+    }
+
+    /**
+     * Sets the Program this Symbol originates from
+     * @param program the Program this Symbol originates from
+     */
+    public void setProgram(Program program) {
+        this.program = program;
+    }
+
+    /**
+     * Adds an error to this Symbol's Program
+     * @param error the error to add
+     */
+    public void addError(JHelpError error) {
+        program.addError(error);
+    }
+
+    /**
      * Transforms reflected annotations into AnnotationSymbols
      * @param annotations the reflected annotations
      * @return the AnnotationSymbols corresponding to the reflected annotations
@@ -326,11 +363,12 @@ public abstract class Symbol {
         } else if (type instanceof Class<?>) {
             Class<?> cls = (Class<?>)type;
             if (cls.isPrimitive()) {
-                ret = PrimitiveType.UNBOX_MAP.get(cls.getName());
-            } else if (cls.isArray()) {
+                ret = PrimitiveType.fromPrimitiveName(cls.getSimpleName());
+            }
+            else if (cls.isArray()) {
                 ret = new ArrayType(fromType(cls.getComponentType()));
             } else {
-                ret = ReflectedClassSymbol.get((Class<?>)type);
+                ret = ReflectedClassSymbol.get(cls);
             }
         } else {
             throw new IllegalArgumentException();
@@ -344,11 +382,11 @@ public abstract class Symbol {
      * @return the TypeVariable corresponding to the reflected type variable
      */
     protected static
-    TypeVariable fromTypeVariable(java.lang.reflect.TypeVariable<?> type) {
-            // TODO fix cyclic recursion
+        TypeVariable fromTypeVariable(java.lang.reflect.TypeVariable<?> type) {
+        // TODO fix cyclic recursion
         // creation of type variable must not create bounds ???
-        return new TypeVariable(type.getName());
-                                // fromTypes(type.getAnnotatedBounds()));
+        return new TypeVariable(type);
+        // fromTypes(type.getAnnotatedBounds()));
     }
 
     /**
@@ -357,10 +395,11 @@ public abstract class Symbol {
      * @return the TypeVariables corresponding to the reflected type variables
      */
     protected static
-    TypeVariable[] fromTypeParameters(java.lang.reflect.TypeVariable<?>[] params) {
+        TypeVariable[] fromTypeParameters(java.lang.reflect.TypeVariable<?>[] params) {
         TypeVariable[] syms = new TypeVariable[params.length];
         for (int i = 0; i < syms.length; i++) {
             syms[i] = fromTypeVariable(params[i]);
+            syms[i].setIndex(i);
         }
         return syms;
     }

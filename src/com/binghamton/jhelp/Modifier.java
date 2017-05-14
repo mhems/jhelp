@@ -22,7 +22,8 @@ public class Modifier extends ASTNode {
     public static final Modifier TRANSIENT = new Modifier("transient");
     public static final Modifier VOLATILE  = new Modifier("volatile");
 
-    protected String name;
+    private Token token;
+    private String name;
 
     /**
      * Construct a Modifier by name
@@ -39,6 +40,7 @@ public class Modifier extends ASTNode {
      */
     public Modifier(Token name) {
         super(name);
+        this.token = name;
         this.name = name.getText();
     }
 
@@ -48,6 +50,14 @@ public class Modifier extends ASTNode {
      */
     public String getName() {
         return name;
+    }
+
+    /**
+     * Gets this modifier's token
+     * @return this modifier's token
+     */
+    public Token getToken() {
+        return token;
     }
 
     @Override

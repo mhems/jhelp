@@ -5,6 +5,8 @@ import java.util.Map;
 
 import com.binghamton.jhelp.util.StringUtils;
 
+import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
+
 /**
  * A class representing the parameterization of a generic type with type
  * arguments.
@@ -27,9 +29,21 @@ public class ParameterizedType extends ReferenceType {
         // isWellFormed(); // TODO infinite recursion?
     }
 
+    /**
+     * Copy constructs a ParameterizedType
+     * @param type the ParameterizedType whose contents are to be copied
+     */
+    public ParameterizedType(ParameterizedType type) {
+        this(type.wrapped.copy(), copyTypes(type.params));
+    }
+
+    @Override
+    public ParameterizedType copy() {
+        return new ParameterizedType(this);
+    }
+
     @Override
     public String getName() {
-        // System.out.println("wrapped: " + wrapped);
         StringBuilder sb = new StringBuilder(wrapped.getName());
         sb.append("<");
         if (params.length > 0) {
@@ -52,7 +66,6 @@ public class ParameterizedType extends ReferenceType {
 
     @Override
     public ClassSymbol getClassSymbol() {
-        // System.out.println("getting class symbol for " + getName());
         return wrapped.substitute(params);
     }
 
@@ -92,7 +105,7 @@ public class ParameterizedType extends ReferenceType {
         for (int i = 0; i < newParams.length; i++) {
             newParams[i] = params[i].adapt(map);
         }
-        return new ParameterizedType(wrapped.adapt(map), newParams);
+        return new ParameterizedType(wrapped, newParams);
     }
 
     @Override
@@ -144,21 +157,44 @@ public class ParameterizedType extends ReferenceType {
                     for (int i = 0; i < clsVars.length; i++) {
                         for (Type bound : clsVars[i].getBounds()) {
                             if (!myArgs[i].isSubTypeOf(bound)) {
-                                System.err.println("invalid arg, not a subtype");
+                                // addError(new SemanticError("invalid arg, not a subtype"));
                                 ret = false;
                             }
                         }
                     }
                 } else {
-                    System.err.println("class number of parameters does not match with number of arguments given");
+                    // addError(new SemanticError("class number of parameters does not match with number of arguments given"));
                 }
             } else {
-                System.err.println("can only parameterize a generic class");
+                // addError(new SemanticError("can only parameterize a generic class"));
             }
         } else {
-            System.err.println("can only parameterize a class");
+            // addError(new SemanticError("can only parameterize a class"));
         }
         return ret;
+    }
+
+    @Override
+    public boolean isSuperTypeOf(Type other) {
+        if (wrapped.equals(other)) {
+            return true;
+        }
+        ClassSymbol cls = null;
+        if (other instanceof ClassSymbol) {
+            cls = (ClassSymbol)other;
+        } else if (other instanceof ParameterizedType) {
+            cls = ((ParameterizedType)other).wrapped;
+            if (cls.isInterfaceLike() &&
+                !cls.hasInterfaces() &&
+                wrapped.equals(fetch("Object"))) {
+                return true;
+            }
+        }
+        if (cls != null) {
+            return cls.implementsInterface(wrapped) ||
+                cls.extendsClass(wrapped);
+        }
+        return false;
     }
 
     @Override

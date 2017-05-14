@@ -11,9 +11,10 @@ public abstract class StringMatcher {
     private StringMatcher.CharEquater charCmp;
 
     static {
-        CASE_SENSITIVE_COMPARATOR = (c1, c2) -> c1 == c2;
-        CASE_INSENSITIVE_COMPARATOR = (c1, c2) -> Character.toLowerCase(c1) ==
-                                                  Character.toLowerCase(c2);
+        CASE_SENSITIVE_COMPARATOR = (c1, c2) ->
+            c1 == c2;
+        CASE_INSENSITIVE_COMPARATOR = (c1, c2) ->
+            Character.toLowerCase(c1) == Character.toLowerCase(c2);
     }
 
     /**

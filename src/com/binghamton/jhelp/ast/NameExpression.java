@@ -17,8 +17,8 @@ public class NameExpression extends Expression {
     /**
      * An enum enumerating the kinds of NameExpressions
      */
-    public static enum Kind { TYPE, PACKAGE, EXPRESSION,
-                              METHOD, AMBIGUOUS, PACKAGE_OR_TYPE };
+    public enum Kind { TYPE, PACKAGE, EXPRESSION,
+                       METHOD, AMBIGUOUS, PACKAGE_OR_TYPE };
 
     private NameExpression qualifier = null;
     private Annotation[] annotations = {};
@@ -26,7 +26,7 @@ public class NameExpression extends Expression {
     private Token name;
     private Package pkg;
 
-    /*
+    /**
      * Constructs a qualified NameExpression from a NameExpression and
      * unqualified NameExpression.
      * @param qualifier the qualified NameExpression of this NameExpression
@@ -40,7 +40,6 @@ public class NameExpression extends Expression {
         }
         this.qualifier = qualifier;
         this.annotations = expr.annotations;
-        // System.out.println("ctor 1 with " + expr.getKind());
         this.kind = expr.kind;
         this.name = expr.name;
     }
@@ -53,7 +52,6 @@ public class NameExpression extends Expression {
     public NameExpression(Token name, Kind kind) {
         super(name);
         this.kind = kind;
-        // System.out.println("ctor 2 with " + kind);
         this.name = name;
     }
 
@@ -66,7 +64,6 @@ public class NameExpression extends Expression {
     public NameExpression(Token name, Kind kind, List<Annotation> annotations) {
         super(name);
         this.kind = kind;
-        // System.out.println("ctor 3 with " + kind);
         this.name = name;
         this.annotations = annotations.toArray(new Annotation[annotations.size()]);
     }
@@ -237,7 +234,6 @@ public class NameExpression extends Expression {
      * @param kind the Kind of this NameExpression
      */
     public void setKind(Kind kind) {
-        // System.out.println("setting kind to " + kind);
         this.kind = kind;
     }
 
@@ -250,6 +246,14 @@ public class NameExpression extends Expression {
     }
 
     /**
+     * Gets the simple (unqualified) name of this NameExpression
+     * @return the simple (unqualified) name of this NameExpression
+     */
+    public String getSimpleName() {
+        return name.getText();
+    }
+
+    /**
      * Gets the fully qualified name of this NameExpression
      * @return the fully qualified name of this NameExpression
      */
@@ -257,6 +261,7 @@ public class NameExpression extends Expression {
         String ret = "";
         if (isQualified()) {
             ret += qualifier.getName();
+            ret += ".";
         }
         ret += name.getText();
         return ret;

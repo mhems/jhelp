@@ -7,18 +7,20 @@ import org.antlr.v4.runtime.Token;
 
 import com.binghamton.jhelp.ClassSymbol;
 import com.binghamton.jhelp.ImportManager;
-import com.binghamton.jhelp.ImportingSymbolTable;
-import com.binghamton.jhelp.NamedSymbolTable;
-import com.binghamton.jhelp.MethodSymbolTable;
 import com.binghamton.jhelp.Modifier;
 import com.binghamton.jhelp.MethodSymbol;
 import com.binghamton.jhelp.MyClassSymbol;
 import com.binghamton.jhelp.MyPackage;
+import com.binghamton.jhelp.Package;
 import com.binghamton.jhelp.Program;
-import com.binghamton.jhelp.ReflectedClassSymbol;
-import com.binghamton.jhelp.Symbol;
+import com.binghamton.jhelp.Type;
 import com.binghamton.jhelp.TypeVariable;
 import com.binghamton.jhelp.VariableSymbol;
+import com.binghamton.jhelp.error.JHelpError;
+import com.binghamton.jhelp.error.SemanticError;
+import com.binghamton.jhelp.error.StyleWarning;
+
+import static com.binghamton.jhelp.ast.NameExpression.Kind;
 
 /**
  * The file (highest) level Visitor for visiting packages, imports, and
@@ -41,12 +43,9 @@ public class FileLevelVisitor extends EmptyVisitor {
     protected MyPackage pkg;
     protected Program program;
     protected MyClassSymbol currentClass;
+    protected CompilationUnit currentUnit;
 
     private String filename;
-    private ImportingSymbolTable importedClasses;
-    private MethodSymbolTable importedMethods;
-    private NamedSymbolTable<VariableSymbol> importedFields;
-    private CompilationUnit currentUnit;
 
     /**
      * Constructs a FileLevelVisitor for a given Program
@@ -54,6 +53,48 @@ public class FileLevelVisitor extends EmptyVisitor {
      */
     public FileLevelVisitor(Program program) {
         this.program = program;
+    }
+
+    /**
+     * Visit a AccessExpression node
+     * @param ast the AST node being visited
+     */
+    public void visit(AccessExpression ast) {
+        Expression lhs = ast.getLHS();
+        NameExpression rhs = ast.getRHS();
+
+        lhs.accept(this);
+        // rhs is guaranteed to be unqualified NameExpression
+        // instead of visiting, we just hoist its data
+
+        Type lType = lhs.getType();
+        String rName = rhs.getName();
+
+        if (lType != null) {
+            Type type = lType.getClassSymbol().getType(rName);
+            if (type == null) {
+                addError(rhs,
+                         lType.getClassSymbol().getName() + " has no type named " + rName,
+                         String.format("Did you make a typo or forget to add %s to %s?",
+                                       rName,
+                                       lType.getClassSymbol().getName()));
+            } else {
+                ast.setType(type);
+            }
+        } else {
+            // if not typed yet, must name Package or part of a Package
+            Package curPkg = program.getPackage(lhs.getText());
+            if (curPkg != null) {
+                ClassSymbol cls = curPkg.getClass(rName);
+                if (cls != null) {
+                    ast.setType(cls);
+                } else {
+                    rhs.setKind(Kind.PACKAGE);
+                }
+            } else {
+                rhs.setKind(Kind.PACKAGE);
+            }
+        }
     }
 
     /**
@@ -71,21 +112,27 @@ public class FileLevelVisitor extends EmptyVisitor {
      */
     public void visit(BodyDeclaration ast) {
         if (!Character.isUpperCase(ast.getName().getText().charAt(0))) {
-            System.err.printf("Body names should be capitalized, '%s' is not\n",
-                              ast.getName().getText());
+            addError(new StyleWarning(ast.getName(),
+                                      "Body names should be capitalized",
+                                      "Capitalize the name"));
         }
         if (ast.getName().getText().equals(filename) &&
             !ast.getModifiers().contains(Modifier.PUBLIC)) {
-            System.err.printf("Body '%s' in file '%s.java' should be declared public\n",
-                              ast.getName().getText(),
-                              filename);
+            addError(new StyleWarning(ast.getName(),
+                                      "Bodies with same name as its file should be declared public\n",
+                                      "Declare " + ast.getName().getText() + " to be public"));
+
         }
 
         MyClassSymbol sym = new MyClassSymbol(ast.getName(), ast.getModifiers());
+        sym.setProgram(program);
+        sym.setCompilationUnit(currentUnit);
 
         if (ast.isTop()) {
             if (!pkg.addClass(sym)) {
-                System.err.println("duplicate declaration of body");
+                addError(sym.getToken(),
+                         "A body named " + sym.getName() + " already exists",
+                         "Rename the class or remove one of the classes");
             }
         } else {
             sym.setDeclaringClass(currentClass);
@@ -114,11 +161,16 @@ public class FileLevelVisitor extends EmptyVisitor {
      */
     public void visit(ClassDeclaration ast) {
         ast.getSymbol().setClassKind(ClassSymbol.ClassKind.CLASS);
-        ast.getSymbol().setSuperClassForClass();
 
         if (ast.hasTypeParameters()) {
+            int index = 0;
             for (TypeVariable var : makeTypeParameters(ast.getTypeParameters())) {
-                currentClass.addTypeParameter(var);
+                if (!currentClass.addTypeParameter(var)) {
+                    addError(ast.getTypeParameters().get(index),
+                             "A class cannot declare the same type parameter",
+                             "Change the name of the type parameter to be unique");
+                }
+                ++index;
             }
         }
     }
@@ -129,19 +181,16 @@ public class FileLevelVisitor extends EmptyVisitor {
      */
     public void visit(CompilationUnit ast) {
         pkg = MyPackage.DEFAULT_PACKAGE;
-        importedClasses = new ImportingSymbolTable();
-        importedMethods = new MethodSymbolTable();
-        importedFields = new NamedSymbolTable<>();
 
         if (ast.hasPackage()) {
             ast.getPackageStatement().accept(this);
         } else {
-            System.err.println("WARNING - class without package");
+            addError(new StyleWarning("The file '%s.java' declares no package",
+                                      filename));
         }
 
         for (BodyDeclaration decl : ast.getBodyDeclarations()) {
             decl.accept(this);
-            decl.getSymbol().setImportedTypes(importedClasses);
         }
 
         // visit import stmts after classes to check naming conflicts
@@ -152,8 +201,9 @@ public class FileLevelVisitor extends EmptyVisitor {
         }
 
         if (pkg.getClassTable().get(filename) == null) {
-            System.err.printf("file '%s.java' must declare a body with name of this file\n",
-                              filename);
+            addError("The file '%s.java' must declare a body with name of this file (%s)\n",
+                     filename,
+                     filename);
         }
     }
 
@@ -172,49 +222,91 @@ public class FileLevelVisitor extends EmptyVisitor {
      */
     public void visit(ImportStatement ast) {
         String name = ast.getImportName();
+        if (!ast.getNameExpression().isQualified() &&
+            !ast.isStatic() &&
+            ast.isDemand()) {
+            addError(ast.getNameExpression(),
+                     "Imports must be qualified with the package they occur in",
+                     "Did you forget to specify the package?");
+            return;
+        }
+        if (ast.isDemand()) {
+            addError(new StyleWarning(ast,
+                                      "On-demand imports are discouraged",
+                                      "Explicitly import only those items you are using"));
+        }
+
         if (ast.isStatic()) {
-            int indexLastSep = name.indexOf('.');
-            String memberName = name.substring(indexLastSep + 1);
-            name = name.substring(0, indexLastSep);
-            ReflectedClassSymbol cls = null;
+            String memberName = ast.getNameExpression().getName();
+            NameExpression nameExpr;
+            if (ast.isDemand()) {
+                nameExpr = ast.getNameExpression();
+            } else {
+                nameExpr = ast.getNameExpression().getQualifyingName();
+            }
+            name = nameExpr.getName();
+            ClassSymbol cls = null;
             try {
                 cls = ImportManager.getOrImport(name);
             } catch(ClassNotFoundException e) {
-                System.err.println("static import must name existing class");
+                nameExpr.accept(this);
+                if (nameExpr.getType() != null) {
+                    cls = nameExpr.getType().getClassSymbol();
+                } else {
+                    addError(nameExpr,
+                             "Cannot import a member from a non-existent class",
+                             "Correct the import to name an existing class or remove it");
+                }
             }
             if (cls != null) {
                 ClassSymbol[] inners = cls.getInnerClasses();
                 MethodSymbol[] methods = cls.getMethods();
                 VariableSymbol[] fields = cls.getFields();
                 if (ast.isDemand()) { // static import on demand
-                    importedClasses.importStaticMemberOnDemand(inners);
-                    importedMethods.importStaticMemberOnDemand(methods);
-                    importedFields.importStaticMemberOnDemand(fields);
+                    currentUnit.importStaticClassMemberOnDemand(inners);
+                    currentUnit.importStaticMethodOnDemand(methods);
+                    currentUnit.importStaticFieldOnDemand(fields);
                 } else { // single static import
                     boolean added = false;
-                    if (importedClasses.importStaticMember(memberName, inners)) {
+                    if (currentUnit.importStaticClassMember(memberName, inners)) {
                         added = true;
                         if (pkg.getClassTable().has(memberName)) {
-                            System.err.println("cannot import something with same name as class you've made");
+                            addError(ast.getNameExpression(),
+                                     "Cannot import a class with same name as a class you have created",
+                                     "Rename your class or remove the import");
                         }
                     }
-                    added |= importedMethods.importStaticMember(memberName,
-                                                                methods);
-                    added |= importedFields.importStaticMember(memberName,
-                                                               fields);
+                    added |= currentUnit.importStaticMethod(memberName, methods);
+                    added |= currentUnit.importStaticField(memberName, fields);
                     if (!added) {
-                        System.err.println(ast.getText() + " must import at least one member");
+                        addError(ast.getNameExpression(),
+                                 "Static imports must import at least one member",
+                                 "Modify the import to import at least one member");
                     }
                 }
             }
         } else {
             if (ast.isDemand()) { // type import on demand
-                importedClasses.importTypesOnDemand(name);
+                currentUnit.importTypesOnDemand(name);
             } else { // single type import
-                if (pkg.getClassTable().has(name)) {
-                    System.err.println("cannot import something with same name as class you've made");
+                String simpleName = ast.getNameExpression().getSimpleName();
+                if (pkg.getClassTable().has(simpleName)) {
+                    addError(ast.getNameExpression().getToken(),
+                             "Cannot import a class with same name as a class you have created",
+                             "Rename your class or remove the import");
                 } else {
-                    importedClasses.importType(name);
+                    try {
+                        boolean b = currentUnit.importType(name);
+                    } catch (ClassNotFoundException e) {
+                        ast.getNameExpression().accept(this);
+                        if (ast.getNameExpression().getType() != null) {
+                            currentUnit.importType(ast.getNameExpression().getType().getClassSymbol());
+                        } else {
+                            addError(ast.getNameExpression(),
+                                     "Cannot import a non-existent class",
+                                     "Correct the import to name an existing class or remove it");
+                        }
+                    }
                 }
             }
         }
@@ -228,8 +320,61 @@ public class FileLevelVisitor extends EmptyVisitor {
         ast.getSymbol().setClassKind(ClassSymbol.ClassKind.INTERFACE);
         ast.getSymbol().addModifier(Modifier.ABSTRACT);
         if (ast.hasTypeParameters()) {
+            int index = 0;
             for (TypeVariable var : makeTypeParameters(ast.getTypeParameters())) {
-                currentClass.addTypeParameter(var);
+                if (!currentClass.addTypeParameter(var)) {
+                    addError(ast.getTypeParameters().get(index),
+                             "An interface cannot declare the same type parameter",
+                             "Change the name of the type parameter to be unique");
+                }
+                ++index;
+            }
+        }
+    }
+
+    /**
+     * Visit a NameExpression node
+     * @param ast the AST node being visited
+     */
+    public void visit(NameExpression ast) {
+        String name = ast.getName();
+        String rName = ast.getToken().getText();
+        Kind kind = ast.getKind();
+        Type type;
+        NameExpression qual = ast.getQualifyingName();
+        if (kind == Kind.PACKAGE) {
+            Package pkg = program.getPackage(name);
+            if (pkg != null) {
+                ast.setPackage(pkg);
+            }
+            // cannot throw error yet, must wait and hoist from Access
+        } else {
+            if (!ast.isQualified()) {
+                type = currentClass.getType(name);
+                if (type == null) {
+                    type = currentUnit.getImportedClass(name);
+                }
+            } else {
+                if (qual.getKind() == Kind.PACKAGE_OR_TYPE) {
+                    qual.accept(this);
+                }
+                if (qual.getKind() == Kind.PACKAGE) {
+                    type = qual.getPackage().getClass(rName);
+                } else {
+                    type = qual.getType().getClassSymbol().getType(rName);
+                }
+            }
+            if (type != null) {
+                ast.setKind(Kind.TYPE);
+                ast.setType(type);
+            } else {
+                if (kind == Kind.TYPE) {
+                    addError(ast,
+                             "Unknown identifier",
+                             "Did you forget an import or make a typo");
+                } else {
+                    ast.setKind(Kind.PACKAGE);
+                }
             }
         }
     }
@@ -268,10 +413,16 @@ public class FileLevelVisitor extends EmptyVisitor {
     public void visit(TypeParameter ast) {
         String name = ast.getName();
         TypeVariable type = new TypeVariable(name);
+        type.setProgram(program);
         type.setDeclaringSymbol(currentClass);
         ast.setType(type);
     }
 
+    /**
+     * Makes TypeVariables from a List of TypeParameters
+     * @param params the TypeParameters to visit and resolve
+     * @return the TypeVariables constructed from the TypeParameters
+     */
     protected TypeVariable[] makeTypeParameters(List<TypeParameter> params) {
         TypeVariable[] ret = new TypeVariable[params.size()];
         for (int i = 0; i < ret.length; i++) {
@@ -281,13 +432,71 @@ public class FileLevelVisitor extends EmptyVisitor {
         return ret;
     }
 
+    /**
+     * Visits all the CompilationUnits of the Program this Visitor is visiting.
+     */
     public void visitAll() {
         for (CompilationUnit unit : program.getCompilationUnits()) {
             currentUnit = unit;
             filename = new File(unit.getFilename()).getName();
             filename = filename.substring(0,
                                           filename.length() - ".java".length());
+            System.out.println("\nvisiting file " + filename + "\n");
             unit.accept(this);
         }
+    }
+
+    /**
+     * Constructs and adds a SemanticError to this Visitor's Program
+     * @param msg a message explaining the error
+     * @param token the Token the error originates from
+     */
+    public void addError(Token token, String msg) {
+        program.addError(new SemanticError(token, msg));
+    }
+
+    /**
+     * Constructs and adds a SemanticError to this Visitor's Program
+     * @param ast the AST the error originates from
+     * @param msg a message explaining the error
+     * @param suggestion a message recommending a fix to the error
+     */
+    public void addError(ASTNode ast, String msg, String suggestion) {
+        program.addError(new SemanticError(ast, msg, suggestion));
+    }
+
+    /**
+     * Constructs and adds a SemanticError to this Visitor's Program
+     * @param token the Token the error originates from
+     * @param msg a message explaining the error
+     * @param suggestion a message recommending a fix to the error
+     */
+    public void addError(Token token, String msg, String suggestion) {
+        program.addError(new SemanticError(token, msg, suggestion));
+    }
+
+    /**
+     * Constructs and adds a SemanticError to this Visitor's Program
+     * @param msg a message explaining the error
+     */
+    public void addError(String msg) {
+        program.addError(new SemanticError(msg));
+    }
+
+    /**
+     * Constructs and adds a SemanticError to this Visitor's Program
+     * @param msg a format String explaining the error
+     * @param args any arguments to the format String message
+     */
+    public void addError(String msg, Object... args) {
+        program.addError(new SemanticError(msg, args));
+    }
+
+    /**
+     * Adds a error to this Visitor's Program
+     * @param error the error to add
+     */
+    public void addError(JHelpError error) {
+        program.addError(error);
     }
 }

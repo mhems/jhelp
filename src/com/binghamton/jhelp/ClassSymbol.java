@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.binghamton.jhelp.ast.ASTVisitor;
+import com.binghamton.jhelp.ast.CompilationUnit;
 import com.binghamton.jhelp.util.StringUtils;
 
 import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
@@ -28,9 +29,9 @@ public abstract class ClassSymbol extends ReferenceType {
      */
     public enum Level {TOP, MEMBER, INNER, ANONYMOUS, LOCAL};
 
-        {
-            kind = SymbolKind.CLASS;
-        }
+    {
+        kind = SymbolKind.CLASS;
+    }
 
     protected ClassKind classKind;
     protected Level level = Level.TOP;
@@ -38,6 +39,7 @@ public abstract class ClassSymbol extends ReferenceType {
     protected ClassSymbol declarer;
     protected boolean boxed;
     protected Package pkg;
+    private CompilationUnit unit;
 
     protected ImportingSymbolTable importedTypes = new ImportingSymbolTable();
     protected NamedSymbolTable<Type> interfaces = new NamedSymbolTable<>();
@@ -48,6 +50,7 @@ public abstract class ClassSymbol extends ReferenceType {
     protected MethodSymbolTable ctors = new MethodSymbolTable();
     protected NamedSymbolTable<TypeVariable> params = new NamedSymbolTable<>();
     protected TypeVariable[] paramArr = {};
+
     protected Map<List<Type>, ClassSymbol> adaptationCache = new HashMap<>();
 
     /**
@@ -58,26 +61,35 @@ public abstract class ClassSymbol extends ReferenceType {
         super(cls.name, cls.modifiers);
         classKind = cls.classKind;
         level = cls.level;
-        superClass = cls.superClass;
         declarer = cls.declarer;
         boxed = cls.boxed;
         pkg = cls.pkg;
-        importedTypes = cls.importedTypes;
-        interfaces = cls.interfaces;
-        innerClasses = cls.innerClasses;
-        memberTypes = cls.memberTypes;
-        fields = cls.fields;
-        methods = cls.methods;
-        ctors = cls.ctors;
-        params = cls.params;
-        paramArr = cls.paramArr;
+        if (cls.superClass != null) {
+            superClass = cls.superClass.copy();
+        }
+        importedTypes = cls.importedTypes.copy();
+        interfaces = NamedSymbolTable.copyTypes(cls.interfaces);
+        innerClasses = NamedSymbolTable.copyClasses(cls.innerClasses);
+        memberTypes = NamedSymbolTable.copyClasses(cls.memberTypes);
+        fields = NamedSymbolTable.copyVariables(cls.fields);
+        methods = cls.methods.copy();
+        ctors = cls.ctors.copy();
+        params = NamedSymbolTable.copyTypeVariables(cls.params);
+        paramArr = Arrays.copyOf(cls.paramArr, cls.paramArr.length);
+        adaptationCache = cls.adaptationCache;
     }
+
+    /**
+     * Copies this ClassSymbol into a new ClassSymbol
+     * @return a new ClassSymbol with this ClassSymbol's data
+     */
+    public abstract ClassSymbol copy();
 
     /**
      * Construct a new ClassSymbol
      * @param name the name of this class symbol
      */
-    public ClassSymbol(String name) {
+    protected ClassSymbol(String name) {
         super(name);
     }
 
@@ -86,7 +98,7 @@ public abstract class ClassSymbol extends ReferenceType {
      * @param name the name of this ClassSymbol
      * @param modifiers a bit mask of the reflected modifiers
      */
-    public ClassSymbol(String name, int modifiers) {
+    protected ClassSymbol(String name, int modifiers) {
         super(name, modifiers);
     }
 
@@ -95,7 +107,7 @@ public abstract class ClassSymbol extends ReferenceType {
      * @param name the name of this ClassSymbol
      * @param modifiers the Modifiers of this ClassSymbol
      */
-    public ClassSymbol(String name, Modifiers modifiers) {
+    protected ClassSymbol(String name, Modifiers modifiers) {
         super(name, modifiers);
     }
 
@@ -117,31 +129,55 @@ public abstract class ClassSymbol extends ReferenceType {
      * @return the interfaces this ClassSymbol implements
      */
     public Type[] getInterfaces() {
-        return interfaces.toArray(new Type[interfaces.size()]);
+        return interfaces.getAllSymbols(new Type[interfaces.totalSize()]);
+    }
+
+    /**
+     * Gets the interfaces this ClassSymbol directly implements
+     * @return the interfaces this ClassSymbol directly implements
+     */
+    public Type[] getDeclaredInterfaces() {
+        return interfaces.getSymbols(new Type[interfaces.size()]);
+    }
+
+    /**
+     * Gets the methods this ClassSymbol declares
+     * @return the methods this ClassSymbol declares
+     */
+    public MethodSymbol[] getMethods() {
+        return methods.getAllSymbols(new MethodSymbol[methods.totalSize()]);
     }
 
     /**
      * Gets the methods this ClassSymbol directly declares
      * @return the methods this ClassSymbol directly declares
      */
-    public MethodSymbol[] getMethods() {
-        return methods.toArray(new MethodSymbol[methods.size()]);
+    public MethodSymbol[] getDeclaredMethods() {
+        return methods.getSymbols(new MethodSymbol[methods.size()]);
     }
 
     /**
-     * Gets the constructors of this ClassSymbol
-     * @return the constructors of this ClassSymbol
+     * Gets the constructors this ClassSymbol declares
+     * @return the constructors this ClassSymbol declares
      */
     public MethodSymbol[] getConstructors() {
-        return ctors.toArray(new MethodSymbol[ctors.size()]);
+        return ctors.getSymbols(new MethodSymbol[ctors.size()]);
+    }
+
+    /**
+     * Gets the fields this ClassSymbol declares
+     * @return the fields this ClassSymbol declares
+     */
+    public VariableSymbol[] getFields() {
+        return fields.getAllSymbols(new VariableSymbol[fields.totalSize()]);
     }
 
     /**
      * Gets the fields this ClassSymbol directly declares
      * @return the fields this ClassSymbol directly declares
      */
-    public VariableSymbol[] getFields() {
-        return fields.toArray(new VariableSymbol[fields.size()]);
+    public VariableSymbol[] getDeclaredFields() {
+        return fields.getOutermostSymbols(new VariableSymbol[fields.outermostSize()]);
     }
 
     /**
@@ -165,7 +201,15 @@ public abstract class ClassSymbol extends ReferenceType {
      * @return the inner classes this ClassSymbol declares
      */
     public ClassSymbol[] getInnerClasses() {
-        return innerClasses.toArray(new ClassSymbol[innerClasses.size()]);
+        return innerClasses.getAllSymbols(new ClassSymbol[innerClasses.totalSize()]);
+    }
+
+    /**
+     * Gets the inner classes this ClassSymbol directly declares
+     * @return the inner classes this ClassSymbol directly declares
+     */
+    public ClassSymbol[] getDeclaredInnerClasses() {
+        return innerClasses.getSymbols(new ClassSymbol[innerClasses.size()]);
     }
 
     /**
@@ -173,7 +217,15 @@ public abstract class ClassSymbol extends ReferenceType {
      * @return the member types this ClassSymbol declares
      */
     public ClassSymbol[] getMemberTypes() {
-        return memberTypes.toArray(new ClassSymbol[memberTypes.size()]);
+        return memberTypes.getAllSymbols(new ClassSymbol[memberTypes.totalSize()]);
+    }
+
+    /**
+     * Gets the member types this ClassSymbol directly declares
+     * @return the member types this ClassSymbol directly declares
+     */
+    public ClassSymbol[] getDeclaredMemberTypes() {
+        return memberTypes.getSymbols(new ClassSymbol[memberTypes.size()]);
     }
 
     /**
@@ -301,10 +353,20 @@ public abstract class ClassSymbol extends ReferenceType {
      * Gets a method by the signature of a given method
      * @param sym the MethodSymbol with the signature of the method to get
      * @return the method corresponding to the given symbol if
-     *         this ClassSymbol declares such a method, otherwise null
+     *         this ClassSymbol has such a method, otherwise null
      */
     public MethodSymbol getMethod(MethodSymbol sym) {
         return methods.get(sym.getType());
+    }
+
+    /**
+     * Gets a declared method by the signature of a given method
+     * @param sym the MethodSymbol with the signature of the method to get
+     * @return the method corresponding to the given symbol if
+     *         this ClassSymbol declares such a method, otherwise null
+     */
+    public MethodSymbol getDeclaredMethod(MethodSymbol sym) {
+        return methods.getFromTable(sym.getType());
     }
 
     /**
@@ -325,9 +387,9 @@ public abstract class ClassSymbol extends ReferenceType {
      *         this ClassSymbol declares such a constructor, otherwise null
      */
     public MethodSymbol getConstructor(MethodSymbol sym) {
-	if (!sym.isConstructor()) {
-	    throw new IllegalArgumentException("must give a constructor method");
-	}
+        if (!sym.isConstructor()) {
+            throw new IllegalArgumentException("must give a constructor method");
+        }
         return ctors.get(sym.getType());
     }
 
@@ -421,7 +483,7 @@ public abstract class ClassSymbol extends ReferenceType {
      * @return true iff this ClassSymbol is a class or enum.
      */
     public boolean isClassLike() {
-	return isEnum() || isClass();
+        return isEnum() || isClass();
     }
 
     /**
@@ -429,7 +491,7 @@ public abstract class ClassSymbol extends ReferenceType {
      * @return true iff this ClassSymbol is an enum.
      */
     public boolean isEnum() {
-	return classKind == ClassKind.ENUM;
+        return classKind == ClassKind.ENUM;
     }
 
     /**
@@ -437,7 +499,7 @@ public abstract class ClassSymbol extends ReferenceType {
      * @return true iff this ClassSymbol is a class.
      */
     public boolean isClass() {
-	return classKind == ClassKind.CLASS;
+        return classKind == ClassKind.CLASS;
     }
 
     /**
@@ -445,7 +507,7 @@ public abstract class ClassSymbol extends ReferenceType {
      * @return true iff this ClassSymbol is an interface or annotation.
      */
     public boolean isInterfaceLike() {
-	return isInterface() || isAnnotation();
+        return isInterface() || isAnnotation();
     }
 
     /**
@@ -453,7 +515,7 @@ public abstract class ClassSymbol extends ReferenceType {
      * @return true iff this ClassSymbol is an interface.
      */
     public boolean isInterface() {
-	return classKind == ClassKind.INTERFACE;
+        return classKind == ClassKind.INTERFACE;
     }
 
     /**
@@ -461,7 +523,7 @@ public abstract class ClassSymbol extends ReferenceType {
      * @return true iff this ClassSymbol is an annotation.
      */
     public boolean isAnnotation() {
-	return classKind == ClassKind.ANNOTATION;
+        return classKind == ClassKind.ANNOTATION;
     }
 
     /**
@@ -469,7 +531,7 @@ public abstract class ClassSymbol extends ReferenceType {
      * @return true iff this ClassSymbol is boxed
      */
     public boolean isBoxed() {
-	return boxed;
+        return boxed;
     }
 
     /**
@@ -477,7 +539,23 @@ public abstract class ClassSymbol extends ReferenceType {
      * @return the Package this ClassSymbol is declared in
      */
     public Package getPackage() {
-	return pkg;
+        return pkg;
+    }
+
+    /**
+     * Sets the CompilationUnit of this ClassSymbol
+     * @param unit the CompilationUnit of this ClassSymbol
+     */
+    public void setCompilationUnit(CompilationUnit unit) {
+        this.unit = unit;
+    }
+
+    /**
+     * Gets the CompilationUnit of this ClassSymbol
+     * @return the CompilationUnit of this ClassSymbol
+     */
+    public CompilationUnit getCompilationUnit() {
+        return unit;
     }
 
     @Override
@@ -522,6 +600,9 @@ public abstract class ClassSymbol extends ReferenceType {
      * @return true iff this ClassSymbol extends `cls`
      */
     public boolean extendsClass(ClassSymbol cls) {
+        if (isInterfaceLike() || superClass == null) {
+            return false;
+        }
         return superClass.getClassSymbol().equals(cls) ||
             superClass.getClassSymbol().extendsClass(cls);
     }
@@ -533,12 +614,17 @@ public abstract class ClassSymbol extends ReferenceType {
      * @return true iff this ClassSymbol implements `intf`
      */
     public boolean implementsInterface(ClassSymbol intf) {
+        ClassSymbol sym;
         for (Type type : interfaces) {
-            if (type.getClassSymbol().equals(intf)) {
+            sym = type.getClassSymbol();
+            if (sym.equals(intf) || sym.implementsInterface(intf)) {
                 return true;
             }
         }
-        return superClass.getClassSymbol().implementsInterface(intf);
+        if (superClass != null) {
+            return superClass.getClassSymbol().implementsInterface(intf);
+        }
+        return false;
     }
 
     /**
@@ -577,26 +663,9 @@ public abstract class ClassSymbol extends ReferenceType {
      *         implemented
      */
     public List<MethodSymbol> getUnimplementedMethods() {
-        // TODO still have to hook up tables,
-        // this wont work if superclass's superclass has abstract methods that
-        // superclass left unimplemented
-        List<MethodSymbol> abstractMethods = new ArrayList<>();
         List<MethodSymbol> ret = new ArrayList<>();
-        for (MethodSymbol method : superClass.getClassSymbol().getMethods()) {
+        for (MethodSymbol method : methods) {
             if (method.hasModifier(Modifier.ABSTRACT)) {
-                abstractMethods.add(method);
-            }
-        }
-        for (Type intf : interfaces) {
-            for (MethodSymbol method: intf.getClassSymbol().getMethods()) {
-                if (method.hasModifier(Modifier.ABSTRACT)) {
-                    abstractMethods.add(method);
-                }
-            }
-        }
-
-        for (MethodSymbol method : abstractMethods) {
-            if (getMethod(method) == null) {
                 ret.add(method);
             }
         }
@@ -630,8 +699,9 @@ public abstract class ClassSymbol extends ReferenceType {
                 names.add(cur.getName());
                 cur = cur.getDeclaringClass();
             }
-            for (int i = names.size() - 1; i >= 0; i--) {
-                sb.append(names.get(i));
+            Collections.reverse(names);
+            sb.append(String.join(".", names));
+            if (names.size() > 0) {
                 sb.append(".");
             }
         }
@@ -646,6 +716,15 @@ public abstract class ClassSymbol extends ReferenceType {
     }
 
     /**
+     * Determines if this class is an unchecked exception
+     * @return true iff this class is an unchecked exception
+     */
+    public boolean isUncheckedException() {
+        ClassSymbol sym = fetch("RuntimeException");
+        return equals(sym) || extendsClass(sym);
+    }
+
+    /**
      * Substitutes type arguments for type parameters in this
      * ClassSymbol's members.
      * @param args the Types to substitute with
@@ -653,16 +732,43 @@ public abstract class ClassSymbol extends ReferenceType {
      *         substituted with the given Type arguments
      */
     public ClassSymbol substitute(Type[] args) {
-        List<Type> argList = Collections.unmodifiableList(Arrays.asList(args));
+        if (java.util.Arrays.equals(paramArr, args)) {
+           return makeNew();
+        }
+
+        Map<TypeVariable, Type> subMap = new HashMap<>();
+        for (int i = 0; i < paramArr.length; i++) {
+            subMap.put(paramArr[i], args[i]);
+            paramArr[i].setIndex(i);
+        }
+        return lookupOrAdapt(subMap, true);
+    }
+
+    /**
+     * Determines the adapted version of this ClassSymbol. If this ClassSymbol
+     * has already been adapted with the given arguments, the cached Symbol is
+     * returned, otherwise the ClassSymbol is adapted and cached for future use.
+     * @param map the Map mapping type variables to the types that replace them
+     * @param first true iff this substitution is top-level
+     * @return the adapted ClassSymbol
+     */
+    private ClassSymbol lookupOrAdapt(Map<TypeVariable, Type> map,
+                                      boolean first) {
+        List<TypeVariable> ordered = new ArrayList<>(map.keySet());
+        Collections.sort(ordered, (a, b) -> a.getIndex() - b.getIndex());
+        List<Type> args = new ArrayList<>();
+        for (TypeVariable tv : ordered) {
+            args.add(map.get(tv));
+        }
+
+        List<Type> argList = Collections.unmodifiableList(args);
         ClassSymbol adapted = adaptationCache.get(argList);
         if (adapted == null) {
-            Map<TypeVariable, Type> subMap = new HashMap<>();
-            for (int i = 0; i < paramArr.length; i++) {
-                subMap.put(paramArr[i], args[i]);
-            }
-            adapted = this.adapt(subMap, true);
+            adapted = makeNew();
             adaptationCache.put(argList, adapted);
+            adapt(adapted, map, first);
         }
+
         return adapted;
     }
 
@@ -673,39 +779,72 @@ public abstract class ClassSymbol extends ReferenceType {
      * @param first true iff this substitution is top-level
      */
     protected static void adapt(ClassSymbol cls,
-				Map<TypeVariable, Type> map,
-				boolean first) {
+                                Map<TypeVariable, Type> map,
+                                boolean first) {
+        Map<TypeVariable, Type> toUse = map;
         if (!first) {
-            // allow type parameters to shadow outer scopes'
-            for (TypeVariable param : cls.paramArr) {
-                if (map.containsKey(param)) {
-                    map.remove(param);
+            if (cls.isGeneric()) {
+                toUse = new HashMap<>(map);
+                // allow type parameters to shadow outer scopes'
+                for (TypeVariable mParam : cls.paramArr) {
+                    for (TypeVariable subParam : map.keySet()) {
+                        if (subParam.getName().equals(mParam.getName()) &&
+                            mParam.getDeclaringClass().equals(subParam.getDeclaringClass())) {
+                            toUse.remove(mParam);
+                            break;
+                        }
+                    }
+                }
+                if (toUse.isEmpty()) {
+                    return;
                 }
             }
         }
+
         if (cls.superClass != null){
-            cls.superClass = cls.superClass.adapt(map);
+            cls.superClass = cls.superClass.adapt(toUse);
         }
-        cls.interfaces = NamedSymbolTable.adaptTypes(cls.interfaces, map);
-        cls.innerClasses = NamedSymbolTable.adaptClasses(cls.innerClasses, map);
-        cls.memberTypes = NamedSymbolTable.adaptClasses(cls.memberTypes, map);
-        cls.fields = NamedSymbolTable.adaptVariables(cls.fields, map);
-        cls.methods = cls.methods.adapt(map);
-        cls.ctors = cls.ctors.adapt(map);
+        cls.interfaces = NamedSymbolTable.adaptTypes(cls.interfaces, toUse);
+        cls.innerClasses = NamedSymbolTable.adaptClasses(cls.innerClasses, toUse);
+        cls.memberTypes = NamedSymbolTable.adaptClasses(cls.memberTypes, toUse);
+        cls.fields = NamedSymbolTable.adaptVariables(cls.fields, toUse);
+        cls.methods = MethodSymbolTable.adaptMethods(cls.methods, toUse);
+        cls.ctors = MethodSymbolTable.adaptMethods(cls.ctors, toUse);
     }
 
     /**
      * Helper hook function to adapt
-     * @param map the substitution map
-     * @param first true iff this substitution is top-level
-     * @return the adapted ClassSymbol
+     * @return a new ClassSymbol
      */
-    protected abstract ClassSymbol adapt(Map<TypeVariable, Type> map,
-                                         boolean first);
+    protected abstract ClassSymbol makeNew();
+
+    /**
+     * Determines if this ClassSymbol is subject to adaptation
+     * @return true iff this class or any of its enclosing classes are generic
+     */
+    private boolean subjectToAdaptation() {
+        return isGeneric() ||
+            (getDeclaringClass() != null &&
+             getDeclaringClass().subjectToAdaptation());
+    }
 
     @Override
     public ClassSymbol adapt(Map<TypeVariable, Type> map) {
-        return adapt(map, false);
+        if (subjectToAdaptation()) {
+            if (isGeneric()) {
+                Map<TypeVariable, Type> newMap = new HashMap<>();
+                List<TypeVariable> ordered = new ArrayList<>(map.keySet());
+                Collections.sort(ordered, (a, b) -> a.getIndex() - b.getIndex());
+                TypeVariable[] toUse = params.getAllSymbols(new TypeVariable[params.totalSize()]);
+                for (int i = 0; i < ordered.size(); i++) {
+                    newMap.put(paramArr[i], map.get(ordered.get(i)));
+                }
+                return lookupOrAdapt(newMap, true);
+            } else {
+                return lookupOrAdapt(map, true);
+            }
+        }
+        return makeNew();
     }
 
     @Override
@@ -725,7 +864,7 @@ public abstract class ClassSymbol extends ReferenceType {
         if (hasTypeParameters()) {
             sb.append("<");
             sb.append(StringUtils.join(", ",
-                                       params,
+                                       paramArr,
                                        tp -> tp.getName()));
             sb.append(">");
         }
@@ -783,6 +922,29 @@ public abstract class ClassSymbol extends ReferenceType {
     }
 
     @Override
+    public boolean isSuperTypeOf(Type other) {
+        if (other instanceof ClassSymbol) {
+            ClassSymbol cls = (ClassSymbol)other;
+            if (isInterfaceLike()) {
+                if (!hasInterfaces()) {
+                    return cls.getQualifiedName().equals("java.lang.Object");
+                }
+                return cls.implementsInterface(this);
+            } else {
+                return cls.extendsClass(this);
+            }
+        } else if (other instanceof ArrayType) {
+            ArrayType type = (ArrayType)other;
+            return (type.getBaseType() instanceof PrimitiveType ||
+                    type.getBaseType().equals(fetch("Object"))) &&
+                (equals(fetch("Object")) ||
+                 equals(fetch("Cloneable")) ||
+                 equals(fetch("java.io.Serializable")));
+        }
+        return other == NilType.TYPE;
+    }
+
+    @Override
     public boolean canCastTo(Type target) {
         if (isClassLike()) {
             if (target instanceof ClassSymbol) {
@@ -834,23 +996,23 @@ public abstract class ClassSymbol extends ReferenceType {
         StringBuilder sb = new StringBuilder("====> " + this.toString());
         sb.append("\n");
 
-        if (level != Level.TOP) {
+        if (declarer != null) {
             sb.append("declared by: ");
             sb.append(declarer.getName());
             sb.append("\n");
         }
-        for (ClassSymbol inner : getInnerClasses()) {
+        for (ClassSymbol inner : getDeclaredInnerClasses()) {
             sb.append("inner class: ");
             sb.append(inner.getName());
             sb.append("\n");
         }
-        for (ClassSymbol mem : getMemberTypes()) {
+        for (ClassSymbol mem : getDeclaredMemberTypes()) {
             sb.append("member type: ");
             sb.append(mem.getName());
             sb.append("\n");
         }
 
-        for (VariableSymbol field : getFields()) {
+        for (VariableSymbol field : getDeclaredFields()) {
             sb.append(field.repr());
             sb.append("\n");
         }
@@ -858,7 +1020,7 @@ public abstract class ClassSymbol extends ReferenceType {
             sb.append(sym.repr());
             sb.append("\n");
         }
-        for (MethodSymbol sym : getMethods()) {
+        for (MethodSymbol sym : getDeclaredMethods()) {
             sb.append(sym.repr());
             sb.append("\n");
         }
@@ -871,6 +1033,50 @@ public abstract class ClassSymbol extends ReferenceType {
      * @param visitor the ASTVisitor to visit this ClassSymbol
      */
     public void visit(ASTVisitor visitor) {
-	// reflected classes are not visited
+        // reflected classes are not visited
+    }
+
+    /**
+     * Establishes the inheritance hierarchy of this class.  This hooks up the
+     * relevant symbol tables to point to those in parent classes. This method
+     * should be called once per instance.
+     */
+    public void establishInheritanceHierarchy() {
+
+        for (Type intf : interfaces) {
+            linkupType(intf);
+        }
+        if (superClass != null) {
+            linkupType(superClass);
+        }
+        for (ClassSymbol innerCls : innerClasses) {
+            if (!equals(innerCls)) {
+                innerCls.linkupType(this);
+            }
+        }
+        for (ClassSymbol memberType : memberTypes) {
+            if (!equals(memberType)) {
+                memberType.linkupType(this);
+            }
+        }
+        if (unit != null) {
+            importedTypes.addAncestor(unit.getImportedClasses());
+            methods.addAncestor(unit.getImportedMethods());
+            fields.addAncestor(unit.getImportedFields());
+        }
+    }
+
+    /**
+     * Links up the Type's class symbol's tables to be the ancestors of this
+     * class's corresponding tables.
+     * @param parent the Type whose class symbol's table are to be made ancestors
+     */
+    private void linkupType(Type parent) {
+        ClassSymbol sym = parent.getClassSymbol();
+        interfaces.addAncestor(sym.interfaces);
+        innerClasses.addAncestor(sym.innerClasses);
+        memberTypes.addAncestor(sym.memberTypes);
+        fields.addAncestor(sym.fields);
+        methods.addAncestor(sym.methods);
     }
 }

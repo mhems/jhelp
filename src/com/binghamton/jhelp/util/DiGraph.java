@@ -11,7 +11,10 @@ import java.util.Map;
  */
 public class DiGraph<E> {
 
-    private static enum Color { WHITE, GRAY, BLACK };
+    /**
+     * An enum enumerating the 'color' of a DiGraph node
+     */
+    private enum Color { WHITE, GRAY, BLACK };
     private final Map<DiGraphNode, List<DiGraphNode>> edgeMap = new HashMap<>();
     private final List<E> sorted = new ArrayList<>();
     private boolean acyclic = true;
@@ -27,7 +30,7 @@ public class DiGraph<E> {
          * Constructs a new DiGraphNode
          * @param value the element the Node is to hold
          */
-        public DiGraphNode(E value) {
+        DiGraphNode(E value) {
             this.value = value;
         }
 
@@ -135,15 +138,16 @@ public class DiGraph<E> {
 
     /**
      * Visits a node in depth-first order
+     * @param node the DiGraphNode to visit
      */
     private void visit(DiGraphNode node) {
         node.color = Color.GRAY;
         for (DiGraphNode adj : edgeMap.get(node)) {
-             if (adj.color == Color.WHITE) {
+            if (adj.color == Color.WHITE) {
                 visit(adj);
-             } else if (adj.color == Color.GRAY) {
-                 acyclic = false;
-             }
+            } else if (adj.color == Color.GRAY) {
+                acyclic = false;
+            }
         }
         node.color = Color.BLACK;
         sorted.add(0, node.value);

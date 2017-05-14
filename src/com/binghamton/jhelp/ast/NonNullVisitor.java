@@ -17,13 +17,12 @@ public class NonNullVisitor extends EmptyVisitor {
         return count;
     }
 
+    /**
+     * Asserts that an Object is not null
+     * @param o the Object to examine
+     */
     private void assertNonNull(Object o) {
-        assert(o != null);
-        // if (o instanceof Token) {
-        //     System.out.println(((Token)o).getText());
-        // } else {
-        //     System.out.println(o);
-        // }
+        assert o != null;
         ++count;
     }
 
@@ -111,17 +110,6 @@ public class NonNullVisitor extends EmptyVisitor {
         ast.getLHS().accept(this);
         assertNonNull(ast.getOperator());
         ast.getRHS().accept(this);
-    }
-
-    /**
-     * Visit a ASTNode node
-     * @param ast the AST node being visited
-     */
-    public void visit(ASTNode ast) {
-        if (!ast.isNil()) {
-        //     System.out.println("<" + ast.getFirstToken() + ", " +
-        //                              ast.getLastToken() + ">");
-        }
     }
 
     /**

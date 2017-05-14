@@ -113,7 +113,7 @@ public class MethodDeclaration extends Declaration {
      * @param annotations the annotations on the return type
      */
     public void setReturnTypeAnnotations(List<Annotation> annotations) {
-         returnTypeAnnotations = annotations.toArray(returnTypeAnnotations);
+        returnTypeAnnotations = annotations.toArray(returnTypeAnnotations);
     }
 
     /**

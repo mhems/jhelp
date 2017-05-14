@@ -41,6 +41,14 @@ public class ParamExpression extends Expression {
         return targs;
     }
 
+    /**
+     * Determines if this ParamExpression is the diamond operator.
+     * @return iff this ParamExpression has no type arguments
+     */
+    public boolean isDiamond() {
+        return targs.isEmpty();
+    }
+
     @Override
     public void accept(ASTVisitor v) {
         super.accept(v);

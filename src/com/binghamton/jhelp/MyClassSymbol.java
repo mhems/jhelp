@@ -1,12 +1,10 @@
 package com.binghamton.jhelp;
 
-import java.util.Map;
-
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.antlr.MyToken;
 import com.binghamton.jhelp.ast.ASTVisitor;
 import com.binghamton.jhelp.ast.BodyDeclaration;
+import com.binghamton.jhelp.error.SemanticError;
 
 import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
 
@@ -34,13 +32,21 @@ public class MyClassSymbol extends ClassSymbol {
     /**
      * Construct a new anonymous class
      * @param declarer the class this anonymous class is declared in
+     * @param cls the class this anonymous class is subclassing
      */
-    public MyClassSymbol(MyClassSymbol declarer) {
+    public MyClassSymbol(MyClassSymbol declarer, ClassSymbol cls) {
         super(declarer.nextAnonName());
         this.declarer = declarer;
+        this.superClass = cls;
         this.level = Level.ANONYMOUS;
         this.pkg = declarer.pkg;
         addModifier(Modifier.FINAL);
+        establishInheritanceHierarchy();
+    }
+
+    @Override
+    public MyClassSymbol copy() {
+        return new MyClassSymbol(this, false);
     }
 
     /**
@@ -98,7 +104,9 @@ public class MyClassSymbol extends ClassSymbol {
      */
     public boolean addInterface(Type sym) {
         if (!interfaces.put(sym)) {
-            System.err.println("class cannot implement same interface twice");
+            addError(token,
+                     "This class cannot implement the same interface twice",
+                     "Remove second duplicate interface");
             return false;
         }
         return true;
@@ -113,7 +121,8 @@ public class MyClassSymbol extends ClassSymbol {
         MethodSymbol parentMethod = null;
         if (superClass != null) {
             parentMethod = superClass.getClassSymbol().getMethod(sym);
-        } else {
+        }
+        if (parentMethod == null) {
             for (Type type : interfaces) {
                 parentMethod = type.getClassSymbol().getMethod(sym);
                 if (parentMethod != null) {
@@ -121,32 +130,47 @@ public class MyClassSymbol extends ClassSymbol {
                 }
             }
         }
+
         boolean good = true;
         if (parentMethod != null &&
             parentMethod.getAccessLevel() != AccessLevel.PRIVATE) {
             if (parentMethod.isFinal()) {
-                System.err.println("cannot override a final method");
+                addError(((MyMethodSymbol)sym).getToken(),
+                         "Cannot override a final method",
+                         "Change the method signature to not override");
                 good = false;
             } else if (parentMethod.isStatic() && !sym.isStatic()) {
-                System.err.println("an instance method cannot override a static method");
+                addError(((MyMethodSymbol)sym).getToken(),
+                         "An instance method cannot override a static method",
+                         "Change the method signature to not override");
                 good = false;
             } else if (sym.isStatic() && !parentMethod.isStatic()) {
-                System.err.println("a static method cannot hide an instance method");
+                addError(((MyMethodSymbol)sym).getToken(),
+                         "A static method cannot hide an instance method",
+                         "Change the method to not be 'static' or change the signature to not hide (override)");
                 good = false;
             }
             if (sym.hasCheckedExceptions() && !parentMethod.hasExceptions()) {
-                System.err.println("cannot override a method without any exceptions with a method that throws a checked exception");
+                addError(((MyMethodSymbol)sym).getToken(),
+                         "Cannot override a method with no exceptions with a method that throws a checked exception",
+                         "Alter the method so it does not throw the checked exceptions");
                 good = false;
             }
             if (sym.getAccessLevel().compareTo(parentMethod.getAccessLevel()) > 0) {
-                System.err.println("cannot override a method with a method that has more restrictive access than the method it is overriding");
+                addError(((MyMethodSymbol)sym).getToken(),
+                         "Cannot override a method with a method that has more restrictive access than the method it is overriding",
+                         "Alter this methods access to be at least as accessible as the parent method");
             }
-        } else if (sym.hasOverrideAnnotation()){
-            System.err.println("method is not being overridden!");
+        } else if (parentMethod == null && sym.hasOverrideAnnotation()){
+            addError(((MyMethodSymbol)sym).getToken(),
+                     "This method is not being overridden even if you think it is",
+                     "Change the method signature to match the signature of the parent method you wish to override");
         }
         if (good) {
             if (!methods.put(sym)) {
-                System.err.println("class cannot declare same method twice");
+                addError(token,
+                         "A class cannot declare the same method twice",
+                         "Change the method signature to name a unique method");
                 return false;
             }
             return true;
@@ -161,7 +185,9 @@ public class MyClassSymbol extends ClassSymbol {
      */
     public boolean addConstructor(MethodSymbol sym) {
         if (!ctors.put(sym)) {
-            System.err.println("class cannot declare same constructor twice");
+            addError(((MyMethodSymbol)sym).getToken(),
+                     "A class cannot declare the same constructor twice",
+                     "Change the constructor signature to name a unique constructor");
             return false;
         }
         return true;
@@ -174,7 +200,9 @@ public class MyClassSymbol extends ClassSymbol {
      */
     public boolean addField(VariableSymbol sym) {
         if (!fields.put(sym)) {
-            System.err.println("class cannot declare same field twice");
+            addError(((MyVariableSymbol)sym).getToken(),
+                     "A class cannot declare the same field twice",
+                     "Change the name of the field to be unique");
             return false;
         }
         return true;
@@ -187,10 +215,10 @@ public class MyClassSymbol extends ClassSymbol {
      */
     public boolean addTypeParameter(TypeVariable sym) {
         if (!params.put(sym)) {
-            System.err.println("class cannot declare same type variable twice");
             return false;
         }
-        paramArr = params.toArray(new TypeVariable[params.size()]);
+        sym.setIndex(paramArr.length);
+        paramArr = params.getSymbols(new TypeVariable[params.size()]);
         return true;
     }
 
@@ -202,7 +230,9 @@ public class MyClassSymbol extends ClassSymbol {
     public boolean addInnerClass(MyClassSymbol sym) {
         sym.level = Level.INNER;
         if (!innerClasses.put(sym)) {
-            System.err.println("class cannot declare same inner class twice");
+            addError(sym.token,
+                     "A class cannot declare the same inner class twice",
+                     "Change the name of the inner class to be unique");
             return false;
         }
         sym.declarer = this;
@@ -217,7 +247,9 @@ public class MyClassSymbol extends ClassSymbol {
     public boolean addMemberType(MyClassSymbol sym) {
         sym.level = Level.MEMBER;
         if (!memberTypes.put(sym)) {
-            System.err.println("class cannot declare same member class twice");
+            addError(sym.token,
+                     "A class cannot declare the same member class twice",
+                     "Change the name of the member type to be unique");
             return false;
         }
         sym.declarer = this;
@@ -232,7 +264,7 @@ public class MyClassSymbol extends ClassSymbol {
     }
 
     /**
-     * Sets the superclass of this class
+     * Sets the superclass of this class.
      * @param cls the superclass this class extends
      */
     public void setSuperClass(Type cls) {
@@ -251,14 +283,14 @@ public class MyClassSymbol extends ClassSymbol {
      * Sets the superclass for a class declared as an enum
      */
     public void setSuperClassForEnum() {
-        superClass = new ParameterizedType(fetch("Enum"), this);
-        MyMethodSymbol values = new MyMethodSymbol(new MyToken(0, "values"),
+        setSuperClass(new ParameterizedType(fetch("Enum"), this));
+        MyMethodSymbol values = new MyMethodSymbol("values",
                                                    new Modifiers(Modifier.PUBLIC,
                                                                  Modifier.STATIC));
         values.setReturnType(new ArrayType(this));
         values.constructType();
         addMethod(values);
-        MyMethodSymbol valueOf = new MyMethodSymbol(new MyToken(0, "valueOf"),
+        MyMethodSymbol valueOf = new MyMethodSymbol("valueOf",
                                                     new Modifiers(Modifier.PUBLIC,
                                                                   Modifier.STATIC));
         Type[] strings = {fetch("String")};
@@ -272,21 +304,21 @@ public class MyClassSymbol extends ClassSymbol {
      * Sets the superclass for a class declared as an annotation
      */
     public void setSuperClassForAnnotation() {
-        superClass = fetch("java.lang.annotation.Annotation");
+        setSuperClass(fetch("java.lang.annotation.Annotation"));
     }
 
     /**
      * Sets the superclass for a class declared as an class
      */
     public void setSuperClassForClass() {
-        superClass = fetch("Object");
+        setSuperClass(fetch("Object"));
     }
 
     /**
      * Sets the superclass for an enum constant's body
      */
     public void setSuperClassForEnumConstant() {
-        superClass = declarer;
+        setSuperClass(declarer);
     }
 
     /**
@@ -312,7 +344,6 @@ public class MyClassSymbol extends ClassSymbol {
     @Override
     public void visit(ASTVisitor visitor) {
         AST.accept(visitor);
-        // System.out.println(repr());
     }
 
     /**
@@ -324,9 +355,17 @@ public class MyClassSymbol extends ClassSymbol {
     }
 
     @Override
-    protected MyClassSymbol adapt(Map<TypeVariable, Type> map, boolean first) {
-        MyClassSymbol ret = new MyClassSymbol(this, false);
-        adapt(ret, map, first);
-        return ret;
+    protected MyClassSymbol makeNew() {
+        return new MyClassSymbol(this, false);
+    }
+
+    /**
+     * Adds a SemanticError to this Program
+     * @param token the offending Token
+     * @param msg the message explaining the error
+     * @param suggestion a suggestion proposing a possible solution to the error
+     */
+    private void addError(Token token, String msg, String suggestion) {
+        super.addError(new SemanticError(token, msg, suggestion));
     }
 }

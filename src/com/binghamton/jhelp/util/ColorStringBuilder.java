@@ -1,22 +1,26 @@
 package com.binghamton.jhelp.util;
 
 /**
- * Class composing a `StringBuffer` with the additional API of basic terminal
+ * Class composing a `StringBuilder` with the additional API of basic terminal
  * formatting and coloring via terminal codes.
  */
-public class ColorStringBuffer {
+public class ColorStringBuilder {
 
     /**
      * An enum enumerating available formats
      */
-    public static enum Format {
+    public enum Format {
         NORMAL(0), BOLD(1), DIM(2), UNDERSCORE(4), INVERSE(7);
 
-        private final static int DELTA = 20;
+        private final int DELTA = 20;
         private final int code;
         private final int resetCode;
 
-        private Format(int code) {
+        /**
+         * Constructs a Format with a given code
+         * @param code the corresponding int code of this Format
+         */
+        Format(int code) {
             this.code = code;
             this.resetCode = code + DELTA;
         }
@@ -25,51 +29,55 @@ public class ColorStringBuffer {
     /**
      * An enum enumerating available colors
      */
-    public static enum Color {
+    public enum Color {
         DEFAULT(39), BLACK(30), RED(31), GREEN(32), YELLOW(33), BLUE(34),
         MAGENTA(35), CYAN(36), LIGHT_GRAY(37), DARK_GRAY(90), LIGHT_RED(91),
         LIGHT_GREEN(92), LIGHT_YELLOW(93), LIGHT_BLUE(94), LIGHT_MAGENTA(95),
         LIGHT_CYAN(96), WHITE(97);
 
-        private final static int DELTA = 10;
+        private static final int DELTA = 10;
         private final int fgCode;
         private final int bgCode;
 
-        private Color(int fgCode) {
+        /**
+         * Constructs a Color with a given code
+         * @param fgCode the corresponding int code of this Color
+         */
+        Color(int fgCode) {
             this.fgCode = fgCode;
             this.bgCode = fgCode + DELTA;
         }
     };
 
-    private final static char ESCAPE_CHAR = 27;
+    private static final char ESCAPE_CHAR = 27;
 
-    private StringBuffer buffer;
+    private StringBuilder builder;
     private boolean allow;
 
     /**
-     * Construct a new ColorStringBuffer object
+     * Construct a new ColorStringBuilder object
      */
-    public ColorStringBuffer() {
-        this(true);
+    public ColorStringBuilder() {
+        this(System.console() != null);
     }
 
     /**
-     * Construct a new ColorStringBuffer object
+     * Construct a new ColorStringBuilder object
      * @param allow true iff formatting allowed, false iff formatting prevented
      */
-    public ColorStringBuffer(boolean allow) {
+    public ColorStringBuilder(boolean allow) {
         this.allow = allow;
-        buffer = new StringBuffer();
+        builder = new StringBuilder();
     }
 
     /**
-     * Internal subroutine to append formatting code to internal buffer, if
+     * Internal subroutine to append formatting code to internal builder, if
      * allowed
      * @param code the format code to append
      */
     private void appendCode(int code) {
         if (allow) {
-            buffer.append(String.format("%c[%dm", ESCAPE_CHAR, code));
+            builder.append(String.format("%c[%dm", ESCAPE_CHAR, code));
         }
     }
 
@@ -138,25 +146,25 @@ public class ColorStringBuffer {
     }
 
     /**
-     * Return formatted buffer contents
-     * @return the formatted buffer contents
+     * Return formatted builder contents
+     * @return the formatted builder contents
      */
     @Override
     public String toString() {
         clearAll();
-        return buffer.toString();
+        return builder.toString();
     }
 
     /**
-     * Append text to the buffer
+     * Append text to the builder
      * @param string the text to append
      */
     public void append(String string) {
-        buffer.append(string);
+        builder.append(string);
     }
 
     /**
-     * Appends formatted text to the buffer
+     * Appends formatted text to the builder
      * @param string the String to format and append
      * @param format the format to format the String with.
      *               Ignored if null.
@@ -166,7 +174,7 @@ public class ColorStringBuffer {
     }
 
     /**
-     * Appends colored text to the buffer
+     * Appends colored text to the builder
      * @param string the String to format and append
      * @param foregroundColor the color to make the foreground of the String.
      *                        Ignored if null.
@@ -180,7 +188,7 @@ public class ColorStringBuffer {
     }
 
     /**
-     * Appends colored and/or formatted text to the buffer
+     * Appends colored and/or formatted text to the builder
      * @param string the String to format and append
      * @param foregroundColor the color to make the foreground of the String.
      *                        Ignored if null.

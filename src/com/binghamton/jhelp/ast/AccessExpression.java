@@ -47,5 +47,6 @@ public class AccessExpression extends QualifiableExpression {
     @Override
     public void qualifyWith(Expression expr) {
         lhs = expr;
+        setFirstToken(lhs.getFirstToken());
     }
 }

@@ -18,6 +18,7 @@ public class NilExpression extends Expression {
      * A NilExpression is always nil
      * @return true
      */
+    @Override
     public boolean isNil() {
         return true;
     }

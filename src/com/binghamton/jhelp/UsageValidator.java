@@ -1,11 +1,11 @@
 package com.binghamton.jhelp;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.binghamton.jhelp.error.JHelpError;
 import com.binghamton.jhelp.error.InvalidUsageError;
 
 /**
@@ -15,56 +15,66 @@ import com.binghamton.jhelp.error.InvalidUsageError;
  */
 public class UsageValidator implements Validator {
 
-    public final Pattern WHITESPACE = Pattern.compile("\\s");
+    public static final Pattern WHITESPACE = Pattern.compile("\\s");
+
+    private List<File> fileList = new ArrayList<>();
 
     /**
      * Validates CLI input
-     * @param files the files to validate
-     * @return a List of JHelpErrors, if any, that occured during validation
      */
-    public List<JHelpError> validate(File[] files) {
-        List<JHelpError> errors = Validator.buildErrors();
+    @Override
+    public void validate(Program program) {
+        File[] files = program.getFiles();
         if (files.length == 0) {
-            errors.add(new InvalidUsageError() {
-                    public String getMessage() {
-                        return "must compile at least one file";
-                    }
-                });
+            program.addError(new InvalidUsageError("must specify at least one file or directory to compile"));
+        } else {
+            for (File file : files) {
+                if (file.exists() &&
+                    file.isFile() &&
+                    !file.getName().endsWith(".java")) {
+                    program.addError(new InvalidUsageError("The filename '%s' must be a Java file"));
+                }
+            }
+            validate(program, files);
+            File[] newFiles = fileList.toArray(new File[fileList.size()]);
+            if (newFiles.length == 0) {
+                program.addError(new InvalidUsageError("no Java files to compile were found"));
+            }
+            program.setFiles(newFiles);
         }
+    }
+
+    /**
+     * Validates and builds a list of Files to compile
+     * @param program the Program being validated
+     * @param files the starting Files and directories to validate and expand from
+     */
+    private void validate(Program program, File[] files) {
+        String filename;
+        Matcher matcher;
         for (File file : files) {
-            final String filename = file.getAbsolutePath();
-            final Matcher matcher = WHITESPACE.matcher(filename);
-            if (!file.exists() || !file.isFile()) {
-                errors.add(new InvalidUsageError(){
-                       @Override
-                       public String getMessage() {
-                           return String.format("The filename '%s' must name an existing file",
-                                                filename);
-                       }
-                    });
+            filename = file.getAbsolutePath();
+            matcher = WHITESPACE.matcher(filename);
+            if (!file.exists()) {
+                program.addError(new InvalidUsageError("The filename '%s' must name an existing file or directory",
+                                                       filename));
+            } else if (!file.isFile()) {
+                validate(program, file.listFiles());
             }
 
             if (matcher.find()) {
-                errors.add(new InvalidUsageError(){
-                       @Override
-                       public String getMessage() {
-                           return String.format("The filename '%s' must not contain whitespace (characters %d to %d)",
-                                                filename,
-                                                matcher.start(),
-                                                matcher.end() - 1);
-                       }
-                    });
-            }
-            if (!filename.endsWith(".java")) {
-                errors.add(new InvalidUsageError(){
-                       @Override
-                       public String getMessage() {
-                           return String.format("The filename '%s' must end with '.java'",
-                                                filename);
-                       }
-                    });
+                program.addError(new InvalidUsageError("The filename '%s' must not contain whitespace (characters %d to %d)",
+                                                       filename,
+                                                       matcher.start(),
+                                                       matcher.end() - 1));
+            } else if (filename.endsWith(".java")) {
+                fileList.add(file);
             }
         }
-        return errors;
+    }
+
+    @Override
+    public String getExitExplanation() {
+        return "Invalid command-line arguments were supplied";
     }
 }

@@ -104,7 +104,12 @@
   <target name="cleanall" depends="clean">
     <description>Removes class and back-up files and antlr-generated files.</description>
     <delete>
-      <fileset dir="${java-src.dir}/antlr"/>
+      <fileset dir="${java-src.dir}/antlr">
+        <include name="*.tokens"/>
+        <include name="*Lexer.java"/>
+        <include name="*Parser.java"/>
+        <include name="Balance.java"/>
+      </fileset>
     </delete>
   </target>
 

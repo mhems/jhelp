@@ -8,6 +8,19 @@ CP="$CWD/target/jhelp.jar:$CWD/lib/antlr-4.6-complete.jar"
 PKG='com.binghamton.jhelp'
 MAIN='JHelp'
 
+if [ "$1" = "-cp" ]
+then
+    if [ -n "$2" ]
+    then
+        CP="$2:$CP"
+        shift
+        shift
+    else
+        echo $USAGE
+        exit
+    fi
+fi
+
 if [ "$1" = "-m" ]
 then
     if [ -n "$2" ]

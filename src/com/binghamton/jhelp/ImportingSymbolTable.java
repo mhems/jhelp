@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -35,9 +34,13 @@ public class ImportingSymbolTable extends NamedSymbolTable<ClassSymbol> {
      * Constructs a new ImportingSymbolTable
      */
     public ImportingSymbolTable() {
-
+        ancestors.add(ROOT);
     }
 
+    @Override
+    public void addAncestor(SymbolTable<String, ClassSymbol> ancestor) {
+        ancestors.add(ancestors.size() - 1, ancestor);
+    }
 
     /**
      * Constructs a new ImportingSymbolTable
@@ -137,20 +140,10 @@ public class ImportingSymbolTable extends NamedSymbolTable<ClassSymbol> {
      * Imports a class type into this table
      * @param classname the name of the class to try to import
      * @return true iff the import was successful
+     * @throws ClassNotFoundException if classname does not name a pre-compiled class
      */
-    public boolean importType(String classname) {
-        ReflectedClassSymbol cls = null;
-        try {
-            cls = ImportManager.getOrImport(classname);
-        } catch(ClassNotFoundException e) {
-            System.err.println("could not import " + classname);
-        }
-        if (cls != null &&
-            !put(cls) &&
-            !get(classname).equals(cls)) {
-            System.err.println("cannot import two different classes with same name");
-        }
-        return cls != null;
+    public boolean importType(String classname) throws ClassNotFoundException {
+        return put(ImportManager.getOrImport(classname));
     }
 
     /**
@@ -161,5 +154,16 @@ public class ImportingSymbolTable extends NamedSymbolTable<ClassSymbol> {
     public boolean importTypesOnDemand(String classname) {
         onDemandPackages.add(classname);
         return true;
+    }
+
+    /**
+     * Performs a deep-copy of this table into a new table
+     * @return a new SymbolTable holding a deep-copy of this table's contents
+     */
+    public ImportingSymbolTable copy() {
+        ImportingSymbolTable ret = new ImportingSymbolTable();
+        ret.onDemandPackages.addAll(this.onDemandPackages);
+        copy(ret, this, i -> i.copy(), () -> new ImportingSymbolTable());
+        return ret;
     }
 }

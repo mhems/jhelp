@@ -55,12 +55,11 @@ grammar Java8;
 
 @header {
     import java.util.ArrayList;
-    import java.util.HashSet;
     import java.util.List;
-    import java.util.Set;
 
     import com.binghamton.jhelp.*;
     import com.binghamton.jhelp.ast.*;
+    import com.binghamton.jhelp.error.SyntacticError;
 
     import static com.binghamton.jhelp.ast.NameExpression.*;
     import static com.binghamton.jhelp.ast.BodyDeclaration.Kind.*;
@@ -68,10 +67,17 @@ grammar Java8;
 
 @parser::members {
     private void checkModifiers(List<Modifier> modifiers) {
-        Set<Modifier> modSet = new HashSet<>();
+        List<Modifier> mods = new ArrayList<>();
         for (Modifier mod : modifiers) {
-            if (!modSet.add(mod)) {
-                // TODO throw error (notifyErrorListeners)
+            if (mods.contains(mod)) {
+                notifyErrorListeners(mod.getToken(),
+                                     null,
+                                     new RepeatModifierException(this,
+                                                                 getInputStream(),
+                                                                 getRuleContext(),
+                                                                 (MyToken)mods.get(mods.indexOf(mod)).getToken()));
+            } else {
+                mods.add(mod);
             }
         }
     }
@@ -302,7 +308,7 @@ packageOrTypeName returns [NameExpression ret]
 expressionName returns [NameExpression ret]
     :   id = Identifier { $ret = createExpressionName($id); }
     |   a = ambiguousName '.' id = Identifier
-        {$ret = new NameExpression($a.ret, createExpressionName($id));}
+        {$ret = new NameExpression($a.ret, createAmbiguousName($id));}
     ;
 
 ambiguousName returns [NameExpression ret]
@@ -1456,7 +1462,7 @@ tryWithResourcesStatement returns [TryCatchBlock ret]
 
 resourceSpecification returns [List<VariableDeclaration> ret]
     :   {$ret = new ArrayList<>();}
-        '(' (l = resourceList ';' {$ret = $l.ret;})? ')'
+        '(' (l = resourceList (';'?) {$ret = $l.ret;})? ')'
     ;
 
 resourceList returns [List<VariableDeclaration> ret]
@@ -1625,6 +1631,7 @@ primaryNoNewArray_lfno_primary_lfno_arrayAccess_lfno_primary returns [Expression
 
 classInstanceCreationExpression returns [InstantiationExpression ret]
     locals [Expression methodExpr,
+            Token tok,
             NameExpression prev,
             List<Annotation> ans = new ArrayList<>(),
             List<Annotation> ans2 = new ArrayList<>(),
@@ -1636,12 +1643,14 @@ classInstanceCreationExpression returns [InstantiationExpression ret]
         (a = annotation {$ans.add($a.ret);})*
         id = Identifier
         {
+            $tok = $id;
             $prev = createTypeName($id, $ans);
             $methodExpr = $prev;
         }
 
         ('.' (a2 = annotation {$ans2.add($a2.ret);})* id2 = Identifier
             {
+                $tok = $id2;
                 $prev.setKind(NameExpression.Kind.PACKAGE_OR_TYPE);
                 $prev = createTypeName($id2, $ans2);
                 $methodExpr = new AccessExpression($methodExpr, $prev);
@@ -1657,7 +1666,7 @@ classInstanceCreationExpression returns [InstantiationExpression ret]
         '(' (l = argumentList {$args = $l.ret;})? last = ')'
         {
             $ret = new InstantiationExpression($kw, $last,
-                                               $methodExpr,
+                                               $methodExpr, $tok,
                                                $args, $targs);
             $anon = $ret.getAnonymousClass();
         }
@@ -1669,6 +1678,7 @@ classInstanceCreationExpression returns [InstantiationExpression ret]
         (a = annotation {$ans.add($a.ret);})*
         id = Identifier
         {
+            $tok = $id;
             $methodExpr = new AccessExpression($name.ret,
                                                createTypeName($id, $ans));
         }
@@ -1681,7 +1691,7 @@ classInstanceCreationExpression returns [InstantiationExpression ret]
         '(' (l = argumentList {$args = $l.ret;})? last = ')'
         {
             $ret = new InstantiationExpression($kw, $last,
-                                               $methodExpr,
+                                               $methodExpr, $tok,
                                                $args, $targs);
             $anon = $ret.getAnonymousClass();
         }
@@ -1691,6 +1701,7 @@ classInstanceCreationExpression returns [InstantiationExpression ret]
         (a = annotation {$ans.add($a.ret);})*
         id = Identifier
         {
+            $tok = $id;
             $methodExpr = new AccessExpression($p.ret,
                                                createTypeName($id, $ans));
         }
@@ -1703,7 +1714,7 @@ classInstanceCreationExpression returns [InstantiationExpression ret]
         '(' (l = argumentList {$args = $l.ret;})? last = ')'
         {
             $ret = new InstantiationExpression($kw, $last,
-                                               $methodExpr,
+                                               $methodExpr, $tok,
                                                $args, $targs);
             $anon = $ret.getAnonymousClass();
         }
@@ -1713,6 +1724,7 @@ classInstanceCreationExpression returns [InstantiationExpression ret]
 classInstanceCreationExpression_lf_primary returns [InstantiationExpression ret]
     locals [List<Annotation> ans = new ArrayList<>(),
             ConcreteBodyDeclaration anon,
+            Token tok,
             List<TypeArgument> targs = new ArrayList<>(),
             List<Expression> args = new ArrayList<>(),
             Expression methodExpr]
@@ -1721,6 +1733,7 @@ classInstanceCreationExpression_lf_primary returns [InstantiationExpression ret]
         (a = annotation {$ans.add($a.ret);})*
         id = Identifier
         {
+            $tok = $id;
             $methodExpr = createTypeName($id, $ans);
         }
         (
@@ -1732,7 +1745,7 @@ classInstanceCreationExpression_lf_primary returns [InstantiationExpression ret]
         '(' (l = argumentList {$args = $l.ret;})? last = ')'
         {
             $ret = new InstantiationExpression($kw, $last,
-                                               $methodExpr,
+                                               $methodExpr, $tok,
                                                $args, $targs);
             $anon = $ret.getAnonymousClass();
         }
@@ -1741,6 +1754,7 @@ classInstanceCreationExpression_lf_primary returns [InstantiationExpression ret]
 
 classInstanceCreationExpression_lfno_primary returns [InstantiationExpression ret]
     locals [Expression methodExpr,
+            Token tok,
             List<Annotation> ans = new ArrayList<>(),
             List<Annotation> ans2 = new ArrayList<>(),
             ConcreteBodyDeclaration anon,
@@ -1750,10 +1764,12 @@ classInstanceCreationExpression_lfno_primary returns [InstantiationExpression re
         (a = annotation {$ans.add($a.ret);})*
         id = Identifier
         {
+            $tok = $id;
             $methodExpr = createPackageOrTypeName($id, $ans);
         }
         ('.' (a2 = annotation {$ans2.add($a2.ret);})* id2 = Identifier
             {
+                $tok = $id2;
                 $methodExpr = new AccessExpression($methodExpr,
                                                    createPackageOrTypeName($id2, $ans2));
                 $ans2.clear();
@@ -1768,7 +1784,7 @@ classInstanceCreationExpression_lfno_primary returns [InstantiationExpression re
         '(' (l = argumentList {$args = $l.ret;})? last = ')'
         {
             $ret = new InstantiationExpression($kw, $last,
-                                               $methodExpr,
+                                               $methodExpr, $tok,
                                                $args, $targs);
             $anon = $ret.getAnonymousClass();
         }
@@ -1778,6 +1794,7 @@ classInstanceCreationExpression_lfno_primary returns [InstantiationExpression re
         (a = annotation {$ans.add($a.ret);})*
         id = Identifier
         {
+            $tok = $id;
             $methodExpr = new AccessExpression($name.ret,
                                                 createTypeName($id, $ans));
         }
@@ -1790,7 +1807,7 @@ classInstanceCreationExpression_lfno_primary returns [InstantiationExpression re
         '(' (l = argumentList {$args = $l.ret;})? last = ')'
         {
             $ret = new InstantiationExpression($kw, $last,
-                                               $methodExpr,
+                                               $methodExpr, $tok,
                                                $args, $targs);
             $anon = $ret.getAnonymousClass();
         }
@@ -2265,7 +2282,7 @@ unaryExpression returns [Expression ret]
     |   first = '+' ex = unaryExpression
         {$ret = new UnaryExpression($first, $ex.ret, UnaryOperator.PLUS);}
     |   first = '-' ex = unaryExpression
-        {$ret = new UnaryExpression($first, $ex.ret, UnaryOperator.NEGATION);}
+        {$ret = new UnaryExpression($first, $ex.ret, UnaryOperator.MINUS);}
     |   npm = unaryExpressionNotPlusMinus {$ret = $npm.ret;}
     ;
 

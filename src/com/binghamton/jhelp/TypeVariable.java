@@ -1,5 +1,7 @@
 package com.binghamton.jhelp;
 
+import java.lang.reflect.GenericDeclaration;
+import java.lang.reflect.Executable;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -13,6 +15,36 @@ import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
 public class TypeVariable extends ReferenceType {
     private Type[] bounds = {};
     private Symbol declarer;
+    private int index = -1;
+
+    /**
+     * Constructs a new named TypeVariable
+     * @param var the pre-compiled TypeVariable to reflect
+     */
+    public TypeVariable(java.lang.reflect.TypeVariable<?> var) {
+        this(var.getName());
+        GenericDeclaration decl = var.getGenericDeclaration();
+        Class<?> declCls = null;
+        if (decl instanceof Class) {
+            declCls = (Class)decl;
+        } else if (decl instanceof Executable) {
+            declCls = ((Executable)decl).getDeclaringClass();
+        }
+        declarer = ReflectedClassSymbol.get(declCls);
+    }
+
+    /**
+     * Copy constructs a new TypeVariable
+     * @param var the TypeVariable to copy from
+     */
+    public TypeVariable(TypeVariable var) {
+        this(var.name, copyTypes(var.bounds));
+    }
+
+    @Override
+    public TypeVariable copy() {
+        return new TypeVariable(this);
+    }
 
     /**
      * Constructs a new named TypeVariable
@@ -30,6 +62,22 @@ public class TypeVariable extends ReferenceType {
     public TypeVariable(String name, Type... bounds) {
         super(name);
         this.bounds = bounds;
+    }
+
+    /**
+     * Gets this TypeVariable's index in the class that declared it
+     * @return the index in the class that declared this TypeVariable
+     */
+    public int getIndex() {
+        return index;
+    }
+
+    /**
+     * Sets the index of this TypeVariable in the class that declared it
+     * @param i the index in the class that declared this TypeVariable
+     */
+    public void setIndex(int i) {
+        index = i;
     }
 
     @Override
@@ -112,6 +160,7 @@ public class TypeVariable extends ReferenceType {
      * @return true iff this TypeVariable has the same name as `other`
      */
     public boolean nameEquivalent(TypeVariable other) {
+        // System.out.println("tv: " + name + " vs " + other.name);
         return name.equals(other.name);
     }
 
@@ -119,8 +168,11 @@ public class TypeVariable extends ReferenceType {
     public boolean equals(Object other) {
         if (other instanceof TypeVariable) {
             TypeVariable type = (TypeVariable)other;
-            return name.equals(type.name) &&
-                Arrays.equals(bounds, type.bounds);
+            // System.out.println("tv decl: " + declarer.getName() + " vs " + type.declarer.getName());
+            return nameEquivalent(type)
+                // && declarer.equals(type.declarer)
+                && Arrays.equals(bounds, type.bounds)
+                ;
         }
         return false;
     }

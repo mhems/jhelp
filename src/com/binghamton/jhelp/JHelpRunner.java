@@ -1,35 +1,28 @@
 package com.binghamton.jhelp;
 
-import java.io.File;
 import java.io.FileFilter;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import com.binghamton.jhelp.error.JHelpError;
+import com.binghamton.jhelp.util.ColorStringBuilder;
 
 /**
  * A class responsible for validating input and tracking errors.
  */
 public class JHelpRunner {
     public static final FileFilter JAVA_FILTER = pathname -> pathname.getName().endsWith(".java");
-    private final String[] args;
-    private final boolean profiling = true;
+    private final boolean PROFILING = false;
     private final List<Validator> validators = new ArrayList<>();
-    private final List<JHelpError> errors = new ArrayList<>();
-    private File[] files;
+    private final Program program;
 
     /**
-     * Construct a JHelpRunner from CLI input
-     * @param args the application arguments
+     * Constructs a new JHelpRunner with a command-line invocation
+     * @param args the command-line arguments given to JHelp
      */
     public JHelpRunner(String[] args) {
-        this.args = args;
-        files = new File[args.length];
-        for (int i = 0; i < files.length; i++) {
-            files[i] = new File(args[i]);
-        }
-        files = expandFiles(files).toArray(new File[0]);
+        program = new Program(args);
     }
 
     /**
@@ -45,19 +38,29 @@ public class JHelpRunner {
      * @return the number of errors produced
      */
     public int run() {
-        List<JHelpError> errs;
         long start, stop;
         int i = 1;
+        System.out.println("JHelp Version " + JHelp.VERSION);
         for (Validator v : validators) {
             start = System.nanoTime();
-            errs = v.validate(files);
+            v.validate(program);
             stop = System.nanoTime();
-            if (profiling) {
-                System.out.printf("validator %d took '%f' ms\n", i, (stop - start)/1e6);
+            if (PROFILING) {
+                System.out.printf("validator %s took '%f' ms\n",
+                                  v.getClass().getSimpleName(),
+                                  (stop - start)/1e6);
             }
-            errors.addAll(errs);
-            if (v.isFatal() && !errs.isEmpty()) {
-                return report();
+            if (program.hasFatalErrors()) {
+                int num = report();
+                System.out.println("----------------------------------------");
+                ColorStringBuilder sb = new ColorStringBuilder();
+                sb.append(v.getExitExplanation());
+                sb.append(", ");
+                sb.append("exiting now",
+                      ColorStringBuilder.Color.RED,
+                      null);
+                System.out.println(sb.toString());
+                return num;
             }
             ++i;
         }
@@ -69,32 +72,24 @@ public class JHelpRunner {
      * @return the number of errors reported
      */
     public int report() {
+        ColorStringBuilder sb = new ColorStringBuilder();
         int num = 1;
-        for (JHelpError error : errors) {
-            System.out.println(num + ".) " + error.getMessage());
-            ++num;
+        if (program.hasErrors()) {
+            for (JHelpError error : program.getErrors()) {
+                sb = new ColorStringBuilder();
+                sb.append(num + ".)", ColorStringBuilder.Color.WHITE, null);
+                sb.append(" ");
+                sb.append(error.getMessage());
+                System.out.println(sb);
+                System.out.println();
+                ++num;
+            }
+        } else {
+            sb.append("NO ERRORS DETECTED",
+                      ColorStringBuilder.Color.GREEN,
+                      null);
+            System.out.println(sb);
         }
         return num - 1;
-    }
-
-    /**
-     * Expands all directory files to include all of its contained
-     * files.
-     * @param files the list of Files to expand
-     * @return a list of all Files contained within the Files in
-     *         `files`
-     */
-    private static List<File> expandFiles(File[] files) {
-        List<File> ret = new ArrayList<>();
-        for (File file : files) {
-            if (file.exists()) {
-                if (file.isDirectory()) {
-                    ret.addAll(expandFiles(file.listFiles()));
-                } else if (file.getName().endsWith(".java")) {
-                    ret.add(file);
-                }
-            }
-        }
-        return ret;
     }
 }

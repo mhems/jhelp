@@ -29,7 +29,7 @@ public class PrimitiveType extends Type {
     private static final Map<PrimitiveType, PrimitiveType> SUBTYPE_MAP = new HashMap<>();
     private static final Map<PrimitiveType, List<PrimitiveType>> WIDENING_MAP = new HashMap<>();
     private static final Map<PrimitiveType, List<PrimitiveType>> NARROWING_MAP = new HashMap<>();
-    public static final Map<String, PrimitiveType> UNBOX_MAP = new HashMap<>();
+    private static final Map<String, PrimitiveType> UNBOX_MAP = new HashMap<>();
 
     static {
         for (Primitive p : Primitive.values()) {
@@ -43,15 +43,15 @@ public class PrimitiveType extends Type {
         SUBTYPE_MAP.put(SHORT, INT);
         SUBTYPE_MAP.put(BYTE, SHORT);
 
-        UNBOX_MAP.put("boolean", BOOLEAN);
-        UNBOX_MAP.put("byte", BYTE);
-        UNBOX_MAP.put("char", CHAR);
-        UNBOX_MAP.put("short", SHORT);
-        UNBOX_MAP.put("int", INT);
-        UNBOX_MAP.put("long", LONG);
-        UNBOX_MAP.put("float", FLOAT);
-        UNBOX_MAP.put("double", DOUBLE);
-        UNBOX_MAP.put("void", VOID);
+        UNBOX_MAP.put("Boolean", BOOLEAN);
+        UNBOX_MAP.put("Byte", BYTE);
+        UNBOX_MAP.put("Character", CHAR);
+        UNBOX_MAP.put("Short", SHORT);
+        UNBOX_MAP.put("Integer", INT);
+        UNBOX_MAP.put("Long", LONG);
+        UNBOX_MAP.put("Float", FLOAT);
+        UNBOX_MAP.put("Double", DOUBLE);
+        UNBOX_MAP.put("Void", VOID);
 
         WIDENING_MAP.put(BYTE, new ArrayList<>(Arrays.asList(SHORT, INT, LONG,
                                                              FLOAT, DOUBLE)));
@@ -85,6 +85,33 @@ public class PrimitiveType extends Type {
     public PrimitiveType(Token primitive) {
         this.token = primitive;
         this.primitive = PRIMITIVE_MAP.get(token.getText());
+    }
+
+    /**
+     * Determines if a name names a valid primitive type
+     * @param name the name to inquire about
+     * @return true iff the given name names a valid primitive type
+     */
+    public static boolean isPrimitiveName(String name) {
+        return PRIMITIVE_MAP.containsKey(name);
+    }
+
+    /**
+     * Gets the PrimitiveType associated with its boxed class name
+     * @param name the name of a boxed primitive class
+     * @return the corresponding PrimitiveType to the given boxed name
+     */
+    public static PrimitiveType fromBoxedName(String name) {
+        return UNBOX_MAP.get(name);
+    }
+
+    /**
+     * Gets the PrimitiveType associated with a primitive name
+     * @param name the name of the primitive
+     * @return the corresponding PrimitiveType to the given primitive name
+     */
+    public static PrimitiveType fromPrimitiveName(String name) {
+        return new PrimitiveType(PRIMITIVE_MAP.get(name));
     }
 
     @Override
@@ -201,6 +228,17 @@ public class PrimitiveType extends Type {
             this.name = name;
             this.classname = classname;
         }
+    }
+
+    /**
+     * Copies this Type into a new PrimitiveType
+     * @return a new PrimitiveType with a copy of this type's contents
+     */
+    public PrimitiveType copy() {
+        if (token != null) {
+            return new PrimitiveType(token);
+        }
+        return this;
     }
 
     /**

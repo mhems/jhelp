@@ -21,6 +21,21 @@ public class MyVariableSymbol extends VariableSymbol {
     }
 
     /**
+     * Construct a new synthesized variable
+     * @param name the name of the variable
+     * @param modifiers the Modifiers the variable is declared with
+     */
+    public MyVariableSymbol(String name, Modifiers modifiers) {
+        super(name, modifiers);
+        this.token = null;
+    }
+
+    @Override
+    public MyVariableSymbol copy() {
+        return new MyVariableSymbol(this);
+    }
+
+    /**
      * Copy constructs a variable
      * @param var the variable to copy from
      */
@@ -30,11 +45,27 @@ public class MyVariableSymbol extends VariableSymbol {
     }
 
     /**
+     * Gets the Token holding this variable's name
+     * @return the Token holding this variable's name
+     */
+    public Token getToken() {
+        return token;
+    }
+
+    /**
      * Sets this variable's type
      * @param type this variable's type
      */
     public void setType(Type type) {
         this.type = type;
+    }
+
+    /**
+     * Sets this variable's kind
+     * @param kind the kind of this variable
+     */
+    public void setKind(VariableKind kind) {
+        varKind = kind;
     }
 
     /**

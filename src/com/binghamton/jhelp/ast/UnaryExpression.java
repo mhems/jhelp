@@ -51,8 +51,9 @@ public class UnaryExpression extends Expression {
     }
 
     /**
-     * Determines if this Expression is a prefix Expression
-     * @return true iff this Expression is a prefix Expression
+     * Determines if a UnaryOperator is a prefix operator
+     * @param op the UnaryOperator to examine
+     * @return true iff the given UnaryOperator is a prefix operator
      */
     private static boolean isPrefix(UnaryOperator op) {
         return op == UnaryOperator.PRE_DECREMENT ||

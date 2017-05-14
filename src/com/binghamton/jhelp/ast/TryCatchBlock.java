@@ -55,8 +55,10 @@ public class TryCatchBlock extends Statement {
                          List<CatchBlock> catches,
                          Block finallyBody) {
         super(keyword,
-              (finallyBody.isNil() ? catches.get(catches.size() - 1)
-                                   : finallyBody).getLastToken());
+              (finallyBody.isNil() ? (catches.isEmpty() ? tryBody
+                                                        : catches.get(catches.size() - 1))
+                                   : finallyBody)
+              .getLastToken());
         this.resources = resources;
         this.tryBody = tryBody;
         this.catches = catches;

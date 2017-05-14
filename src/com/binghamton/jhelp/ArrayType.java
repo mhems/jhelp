@@ -4,9 +4,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.binghamton.jhelp.antlr.MyToken;
-import com.binghamton.jhelp.ast.ASTVisitor;
-
 import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
 
 /**
@@ -41,6 +38,19 @@ public class ArrayType extends ReferenceType {
     }
 
     /**
+     * Copy construct an ArrayType
+     * @param type the ArrayType to initialize this type with
+     */
+    public ArrayType(ArrayType type) {
+        this(type.copy(), type.annotations);
+    }
+
+    @Override
+    public ArrayType copy() {
+        return new ArrayType(this);
+    }
+
+    /**
      * Gets the base type of this ArrayType
      * @return the base type of this ArrayType
      */
@@ -48,28 +58,16 @@ public class ArrayType extends ReferenceType {
         return base;
     }
 
-    /**
-     * Gets the type name of this ArrayType
-     * @return the type name of this ArrayType
-     */
     @Override
     public String getTypeName() {
         return base.getTypeName() + "[]";
     }
 
-    /**
-     * Gets the simple name of this ArrayType
-     * @return the simple name of this ArrayType
-     */
     @Override
     public String getName() {
         return base.getName() + "[]";
     }
 
-    /**
-     * Gets the number of dimensions of this ArrayType
-     * @return the number of dimensions of this ArrayType
-     */
     @Override
     public int rank() {
         return 1 + base.rank();
@@ -80,7 +78,7 @@ public class ArrayType extends ReferenceType {
         if (other instanceof ArrayType) {
             ArrayType type = (ArrayType)other;
             return Arrays.equals(annotations, type.annotations) &&
-                base.equals(type);
+                base.equals(type.base);
         }
         return false;
     }
@@ -90,33 +88,26 @@ public class ArrayType extends ReferenceType {
         return base.hashCode() ^ annotations.length;
     }
 
-    /**
-     * Computes the type erasure of this ArrayType
-     * @return a new Type which is this type's erasure
-     */
     @Override
     public Type erase() {
         return base.erase();
     }
 
-    /**
-     * Adapts this type with the substitutions specified
-     * @param map the substition map that associates type variables
-     * with the types to substitute in their place
-     * @return the adaptation of this type
-     */
     @Override
     public ArrayType adapt(Map<TypeVariable, Type> map) {
         return new ArrayType(base.adapt(map), annotations);
     }
 
-    /**
-     * Gets the ClassSymbol reflecting this type
-     * @return the ClassSymbol reflecting this type
-     */
     @Override
     public ClassSymbol getClassSymbol() {
         return cache.get(base);
+    }
+
+    @Override
+    public boolean isSuperTypeOf(Type other) {
+        return (other instanceof ArrayType &&
+                base.isSuperTypeOf(((ArrayType)other).getBaseType())) ||
+            other == NilType.TYPE;
     }
 
     /**
@@ -128,38 +119,21 @@ public class ArrayType extends ReferenceType {
         return base.getDeclaringClass();
     }
 
-    /**
-     * Determines if this type is reifiable
-     * @return true iff this type is reifiable
-     */
     @Override
     public boolean isReifiable() {
         return base.isReifiable();
     }
 
-    /**
-     * Determines if this type is raw
-     * @return true iff this type is raw
-     */
     @Override
     public boolean isRaw() {
         return base.isRaw();
     }
 
-    /**
-     * Determines if this type can be used as a class literal type
-     * @return true iff this type can be used as a class literal type
-     */
     @Override
     public boolean isValidClassLiteralType() {
         return base.isValidClassLiteralType();
     }
 
-    /**
-     * Determines if this type can be cast to another Type
-     * @param target the Type attempting to be cast to
-     * @return true iff this Type can be cast to `target`
-     */
     @Override
     public boolean canCastTo(Type target) {
         if (target instanceof ClassSymbol) {
@@ -191,31 +165,37 @@ public class ArrayType extends ReferenceType {
         private Type baseType;
 
         static {
-            lengthField = new MyVariableSymbol(new MyToken(0, "length"),
+            lengthField = new MyVariableSymbol("length",
                                                new Modifiers(Modifier.PUBLIC,
                                                              Modifier.FINAL));
             lengthField.setType(PrimitiveType.INT);
         }
 
-	/**
-	 * Construct a new ArrayClassSymbol from its base Type
-	 * @param baseType the base Type of the array
-	 */
+        /**
+         * Construct a new ArrayClassSymbol from its base Type
+         * @param baseType the base Type of the array
+         */
         private ArrayClassSymbol(Type baseType) {
             super("[" + baseType.getName());
             this.baseType = baseType;
             superClass = fetch("Object");
         }
 
-	/**
-	 * Initializes the members of this ClassSymbol.
-	 * Must be called once per instance before any other operations.
-	 */
+        @Override
+        public ArrayClassSymbol copy() {
+            return new ArrayClassSymbol(baseType);
+        }
+
+        /**
+         * Initializes the members of this ClassSymbol.
+         * Must be called once per instance before any other operations.
+         * Automatically called by all constructors.
+         */
         private void init() {
             interfaces.put(fetch("java.io.Serializable"));
             interfaces.put(fetch("Cloneable"));
             fields.put(lengthField);
-            MyMethodSymbol cloneMethod = new MyMethodSymbol(new MyToken(0, "clone"),
+            MyMethodSymbol cloneMethod = new MyMethodSymbol("clone",
                                                             new Modifiers(Modifier.PUBLIC));
             cloneMethod.setReturnType(new ArrayType(baseType));
             methods.put(cloneMethod);
@@ -226,42 +206,42 @@ public class ArrayType extends ReferenceType {
             throw new UnsupportedOperationException("a synthetic array class has no declaring class");
         }
 
-	@Override
+        @Override
         public boolean isEnum() {
             return false;
         }
 
-	@Override
+        @Override
         public boolean isClass() {
             return false;
         }
 
-	@Override
+        @Override
         public boolean isInterface() {
             return false;
         }
 
-	@Override
+        @Override
         public boolean isAnnotation() {
             return false;
         }
 
-	@Override
+        @Override
         public boolean isBoxed() {
             return false;
         }
 
-	@Override
+        @Override
         public Package getPackage() {
             return null;
         }
 
-	@Override
+        @Override
         public String getQualifiedName() {
             return getName();
         }
 
-	@Override
+        @Override
         public String getTypeName() {
             return getName();
         }
@@ -272,9 +252,8 @@ public class ArrayType extends ReferenceType {
         }
 
         @Override
-        protected ArrayClassSymbol adapt(Map<TypeVariable, Type> map,
-                                         boolean b) {
-            return adapt(map);
+        protected ArrayClassSymbol makeNew() {
+            return new ArrayClassSymbol(baseType);
         }
     }
 }

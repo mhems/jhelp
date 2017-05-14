@@ -16,15 +16,17 @@ public class InstantiationExpression extends CallExpression {
      * @param first the first token of this ASTNode
      * @param last the last token of this ASTNode
      * @param classExpr the Expression yielding the class being instantiated
+     * @param name the Token holding the name of the class being instantiated
      * @param arguments the arguments to the constructor call
      * @param typeArgs the type arguments to the constructor call
      */
     public InstantiationExpression(Token first,
                                    Token last,
                                    Expression classExpr,
+                                   Token name,
                                    List<Expression> arguments,
                                    List<TypeArgument> typeArgs) {
-        super(first, last, classExpr, arguments, typeArgs);
+        super(first, last, classExpr, name, arguments, typeArgs);
     }
 
     /**
