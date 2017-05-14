@@ -60,8 +60,6 @@ Compile Errors
 * malformed function declaration
 * malformed class declaration
 * malformed main method
-* code at top level
-* nested functions
 * local variables have modifiers
 * missing `new`
 * primitives in generics

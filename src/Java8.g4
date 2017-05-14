@@ -88,6 +88,12 @@ grammar Java8;
                                           getRuleContext(),
                                           suggestion);
     }
+
+    private void handleMissingClass(ASTNode ast) {
+        notifyErrorListeners(ast.getFirstToken(),
+                             "This code is outside a class/interface body",
+                             createMyException("Create a class or interface to hold this code"));
+    }
 }
 
 /*
@@ -414,6 +420,7 @@ typeDeclaration returns [BodyDeclaration ret]
     :   c = classDeclaration {$ret = $c.ret;}
     |   i = interfaceDeclaration {$ret = $i.ret;}
     |   ';'
+    |   e = expression {handleMissingClass($e.ret);}
     ;
 
 /*
@@ -496,6 +503,12 @@ classBodyDeclaration [ConcreteBodyDeclaration ret]
     |   i = instanceInitializer {$ret.addInstanceInitializer($i.ret);}
     |   s = staticInitializer {$ret.addStaticInitializer($s.ret);}
     |   ct = constructorDeclaration {$ret.addConstructor($ct.ret);}
+    |   stmt = statement
+        {
+            notifyErrorListeners($stmt.ret.getFirstToken(),
+                                 "Statements must go inside methods or initialization blocks",
+                                 createMyException("Put the statement inside a method"));
+        }
     ;
 
 classMemberDeclaration [ConcreteBodyDeclaration ret]
