@@ -13,10 +13,18 @@ import com.binghamton.jhelp.error.RepeatModifierError;
 import com.binghamton.jhelp.error.SyntacticError;
 import com.binghamton.jhelp.util.ColorStringBuilder;
 
+/**
+ * A wrapper around the basic error listener to report syntax errors in an
+ * application consistent manner.
+ */
 public class SyntaxErrorListener extends ConsoleErrorListener {
 
     private Program program;
 
+    /**
+     * Constructs a new SyntaxErrorListener over a given Program
+     * @param program the Program this listener is attached to
+     */
     public SyntaxErrorListener(Program program) {
         this.program = program;
     }
