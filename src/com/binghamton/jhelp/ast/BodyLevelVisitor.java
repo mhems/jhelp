@@ -209,7 +209,7 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
         }
 
         for (MethodSymbol ctor : currentClass.getConstructors()) {
-            if (ctor.hasModifier(Modifier.PUBLIC) ||
+            if (ctor.isPublic() ||
                 ctor.hasModifier(Modifier.PROTECTED)) {
                 addError(((MyMethodSymbol)ctor).getToken(),
                          "An enum cannot have a public or protected constructor",
@@ -258,13 +258,13 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
         for (MethodSymbol method : objCls.getDeclaredMethods()) {
             currentMethod = currentClass.getDeclaredMethod(method);
             if (currentMethod != null) {
-                if (method.getAccessLevel() == Symbol.AccessLevel.PUBLIC &&
+                if (method.isPublic() &&
                     !currentMethod.isAbstract()) {
                     addError(((MyMethodSymbol)currentMethod).getToken(),
                              "An interface cannot declare a method when that method is a final method of Object",
                              "Change the method signature to no longer override the method of Object");
                 }
-            } else if (method.getAccessLevel() == Symbol.AccessLevel.PUBLIC &&
+            } else if (method.isPublic() &&
                        !currentClass.hasInterfaces()) {
                 currentMethod = new MethodSymbol(method);
                 currentMethod.addModifier(Modifier.ABSTRACT);
@@ -543,6 +543,12 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
             var.addModifier(Modifier.STATIC);
             var.addModifier(Modifier.FINAL);
             var.setAccessLevel(Symbol.AccessLevel.PUBLIC);
+        }
+
+        if (var.isPublic() && !var.isFinal()) {
+            addError(new StyleWarning(ast,
+                                      "Non-final class fields should typically not be made public",
+                                      "Change the access level of the field to be private"));
         }
     }
 

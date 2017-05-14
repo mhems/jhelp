@@ -42,6 +42,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
     private Set<String> labels;
     private boolean inJumpContext = false;
     private boolean staticContext = false;
+    private boolean inTry = false;
     private MyMethodSymbol currentMethod;
     private NamedSymbolTable<VariableSymbol> currentScope;
     private final BodyLevelVisitor superVisitor;
@@ -311,6 +312,14 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                          "Change either the left or right hand side such that the types are compatible");
             }
         }
+
+        if (lval != null && ast.getRHS().getSymbol() != null) {
+            if (lval.equals(ast.getRHS().getSymbol())) {
+                addError(new StyleWarning(ast,
+                                          "This assignment has no effect, both sides of the assignment represent the same entity",
+                                          "Change one of sides to refer to a different entity or remove the unnecessary statement"));
+            }
+        }
         ast.setType(lType.captureConvert());
     }
 
@@ -377,6 +386,21 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             }
             ast.setType(PrimitiveType.BOOLEAN);
         } else if (op.isEquality()) {
+            if (ast.getLHS() instanceof LiteralExpression ||
+                ast.getRHS() instanceof LiteralExpression) {
+                if (ast.getLHS().getText().equals("true") ||
+                    ast.getRHS().getText().equals("true")) {
+                    addError(new StyleWarning(ast,
+                                              "Comparing a boolean against true is redundant",
+                                              "Remove the redundant '== true' portion"));
+                }
+                if (ast.getLHS().getText().equals("false") ||
+                    ast.getRHS().getText().equals("false")) {
+                    addError(new StyleWarning(ast,
+                                              "Comparing a boolean against false is redundant",
+                                              "Remove the redundant '== false' portion and replace it with the negation operator '!'"));
+                }
+            }
             if ((isNumericLike(lType) && isNumericLike(rType)) ||
                 (isBooleanLike(lType) && isBooleanLike(rType))) {
                 ast.setType(PrimitiveType.BOOLEAN);
@@ -388,6 +412,14 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                     addError(ast,
                              "The left hand side could never be equal to the right hand side",
                              "Change either side such that they could be equal or use the 'equals' method");
+                }
+                if (lType != NilType.TYPE &&
+                    rType != NilType.TYPE &&
+                    !lType.getClassSymbol().isEnum() &&
+                    !rType.getClassSymbol().isEnum()) {
+                    addError(new StyleWarning(ast,
+                                              "Objects should be tested for equality using the equals method, not the '==' operator",
+                                              "Use the equals method instead of '=='"));
                 }
                 ast.setType(PrimitiveType.BOOLEAN);
             } else {
@@ -559,6 +591,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                                                          "Multi-catch clauses"));
             }
             ast.getVariable().setSymbol(var);
+            checkForShadowing(ast.getVariable());
             currentScope.put(var);
             visit((Block)ast);
             currentScope.exitScope();
@@ -748,6 +781,16 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             addError(ast.getCondition(),
                      "The condition in an if statement must evaluate to a boolean",
                      "Change the condition to result in a boolean");
+        }
+        if (ast.getThenBlock().isEmpty() && !ast.getElseBlock().isNil()) {
+            addError(new StyleWarning(ast.getCondition(),
+                                      "An empty if block with a non-empty else block should be converted to just an if block",
+                                      "Negate the condition, move the contents of the else block to the if block and remove the now empty else block"));
+        }
+        if (!ast.getElseBlock().isNil() && ast.getElseBlock().isEmpty()) {
+            addError(new StyleWarning(ast.getElseBlock(),
+                                      "An empty else should be removed",
+                                      "Remove the empty else block"));
         }
         ast.getThenBlock().accept(this);
         ast.getElseBlock().accept(this);
@@ -1193,6 +1236,11 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                 }
             }
         }
+        if (!seenDefault) {
+            addError(ast.getFirstToken(),
+                     "Switch statement has no default label",
+                     "Consider adding a default case for when no other cases are true");
+        }
         currentScope.exitScope();
     }
 
@@ -1301,6 +1349,25 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                          "Change the statement to throw null or an unchecked exception or add the exception to the list of the exceptions this methods throws");
             }
         }
+
+        if (expr instanceof InstantiationExpression) {
+            if (((InstantiationExpression)expr).getNumArguments() == 0) {
+                addError(expr,
+                         "Exceptions should be constructed with a message",
+                         "Add a message detailing the nature of the exception");
+            }
+            if (type.equals(fetch("NullPointerException"))) {
+                addError(ast,
+                         "A NullPointerException should not be explicitly created",
+                         "Let Java create the exception for you and remove this throw statement");
+            }
+        }
+
+        if (inTry) {
+            addError(ast,
+                     "Are you sure you want to be throwing an exception from within a try block?",
+                     "Consider removing this throw statement");
+        }
     }
 
     /**
@@ -1318,7 +1385,9 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                          "Change the type of the resource or have it implement the AutoCloseable interface");
             }
         }
+        inTry = true;
         ast.getTryBody().accept(this);
+        inTry = false;
         currentScope.exitScope();
         for (CatchBlock cB : ast.getCatches()) {
             cB.accept(this);
@@ -1400,6 +1469,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             checkForRawType(var.getType(), ast.getExpression());
         }
         if (!var.isField()) {
+            checkForShadowing(ast);
             currentScope.put(var);
         }
         visitAnnotations(ast.getAnnotations());
@@ -1853,5 +1923,17 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         superVisitor.currentClass = currentClass;
         superVisitor.currentUnit = currentUnit;
         superVisitor.pkg = pkg;
+    }
+
+    /**
+     * Checks if a variable being declared shadows an earlier variable.
+     * @param var the declared variable to examine for shadowing
+     */
+    private void checkForShadowing(VariableDeclaration var) {
+        if (currentScope.shadows(var.getName().getText())) {
+            addError(new StyleWarning(var,
+                                      "This variable shadows (hides) an earlier variable with the same name",
+                                      "Either rename one of the variables or be careful which variable you refer to"));
+        }
     }
 }

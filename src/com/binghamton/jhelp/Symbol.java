@@ -116,6 +116,14 @@ public abstract class Symbol {
     }
 
     /**
+     * Determines if this Symbol has public access
+     * @return true iff this Symbol has public access
+     */
+    public boolean isPublic() {
+        return access == AccessLevel.PUBLIC;
+    }
+
+    /**
      * Gets a particular Modifier of this Symbol, if it exists
      * @param modifier the Modifier to get
      * @return the corresponding Modifier of this Symbol if it exists,
