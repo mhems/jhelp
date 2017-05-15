@@ -5,7 +5,7 @@ package com.binghamton.jhelp;
  */
 public class JHelp {
 
-    public static final String VERSION = "0.3";
+    public static final String VERSION = "0.6";
 
     /**
      * Construct a new JHelp instance
@@ -22,17 +22,12 @@ public class JHelp {
         JHelpRunner runner = new JHelpRunner(args);
         runner.addValidator(new EnvironmentValidator());
         runner.addValidator(new UsageValidator());
-        // runner.addValidator(new BalancedValidator());
+        runner.addValidator(new BalancedValidator());
         runner.addValidator(new SyntaxValidator());
         runner.addValidator(new TopLevelValidator());
         MemberLevelValidator mV = new MemberLevelValidator();
         runner.addValidator(mV);
         runner.addValidator(new CodeLevelValidator(mV));
-        try {
-            System.exit(runner.run());
-        } catch (Exception e) {
-            System.out.flush();
-            e.printStackTrace(System.err);
-        }
+        System.exit(runner.run());
     }
 }

@@ -452,7 +452,6 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             try {
                 stmt.accept(this);
             } catch (Exception e) {
-                // e.printStackTrace();
                 // squelched
             }
         }
@@ -471,16 +470,23 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             try {
                 v.accept(this);
             } catch (Exception e) {
-                // e.printStackTrace();
                 // squelched
             }
         }
         for (MethodDeclaration m : ast.getMethods()) {
-            m.accept(this);
+            try {
+                m.accept(this);
+            } catch (Exception e) {
+                // squelched
+            }
         }
         MyClassSymbol tmp = currentClass;
         for (BodyDeclaration body : ast.getInnerBodies()) {
-            body.accept(this);
+            try {
+                body.accept(this);
+            } catch (Exception e) {
+                // squelched
+            }
             currentClass = tmp;
         }
 
@@ -604,17 +610,29 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
      */
     public void visit(ConcreteBodyDeclaration ast) {
         for (MethodDeclaration ctor : ast.getConstructors()) {
-            ctor.accept(this);
+            try {
+                ctor.accept(this);
+            } catch (Exception e) {
+                // squelched
+            }
         }
         for (Block sB : ast.getStaticInitializers()) {
             inJumpContext = false;
             labels = new HashSet<>();
-            sB.accept(this);
+            try {
+                sB.accept(this);
+            } catch (Exception e) {
+                // squelched
+            }
         }
         for (Block iB : ast.getInstanceInitializers()) {
             inJumpContext = false;
             labels = new HashSet<>();
-            iB.accept(this);
+            try {
+                iB.accept(this);
+            } catch (Exception e) {
+                // squelched
+            }
         }
 
     }

@@ -59,7 +59,6 @@ Compile Errors
 * accessing instance member from static context
 * malformed function declaration
 * malformed class declaration
-* malformed main method
 * local variables have modifiers
 * missing `new`
 * primitives in generics

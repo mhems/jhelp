@@ -16,6 +16,7 @@ import com.binghamton.jhelp.Program;
 import com.binghamton.jhelp.Type;
 import com.binghamton.jhelp.TypeVariable;
 import com.binghamton.jhelp.VariableSymbol;
+import com.binghamton.jhelp.error.ApplicationError;
 import com.binghamton.jhelp.error.JHelpError;
 import com.binghamton.jhelp.error.SemanticError;
 import com.binghamton.jhelp.error.StyleWarning;
@@ -190,7 +191,11 @@ public class FileLevelVisitor extends EmptyVisitor {
         }
 
         for (BodyDeclaration decl : ast.getBodyDeclarations()) {
-            decl.accept(this);
+            try {
+                decl.accept(this);
+            } catch(Exception e) {
+                // squelched
+            }
         }
 
         // visit import stmts after classes to check naming conflicts
@@ -441,8 +446,11 @@ public class FileLevelVisitor extends EmptyVisitor {
             filename = new File(unit.getFilename()).getName();
             filename = filename.substring(0,
                                           filename.length() - ".java".length());
-            System.out.println("\nvisiting file " + filename + "\n");
-            unit.accept(this);
+            try {
+                unit.accept(this);
+            } catch (Exception e) {
+                addError(new ApplicationError(e, filename + ".java"));
+            }
         }
     }
 

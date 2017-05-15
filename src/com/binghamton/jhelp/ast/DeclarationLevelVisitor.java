@@ -142,8 +142,7 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
             try {
                 decl.accept(this);
             } catch (Exception e) {
-                // e.printStackTrace();
-                // squelch
+                // squelched
             }
         }
     }

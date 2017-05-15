@@ -565,7 +565,11 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
         for (ClassSymbol cls : program.getAllClasses()) {
             if (cls.isTop()) {
                 currentUnit = cls.getCompilationUnit();
-                cls.visit(this);
+                try {
+                    cls.visit(this);
+                } catch(Exception e) {
+                    // squelched
+                }
             }
         }
     }
@@ -577,23 +581,31 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
      */
     protected void visitMembers(BodyDeclaration ast, ASTVisitor visitor) {
         for (VariableDeclaration v : ast.getFields()) {
-            v.accept(visitor);
-            currentClass.addField(v.getSymbol());
-            if (currentClass.isInner() &&
-                v.getSymbol().isStatic() &&
-                !v.getSymbol().isConstant()) {
-                addError(v.getName(),
-                         "Non-constant static fields cannot be declared inside an inner class",
-                         "Change the field's declaration or value, or move the field outside the inner class");
+            try {
+                v.accept(visitor);
+                currentClass.addField(v.getSymbol());
+                if (currentClass.isInner() &&
+                    v.getSymbol().isStatic() &&
+                    !v.getSymbol().isConstant()) {
+                    addError(v.getName(),
+                             "Non-constant static fields cannot be declared inside an inner class",
+                             "Change the field's declaration or value, or move the field outside the inner class");
+                }
+            } catch (Exception e) {
+                // squelched
             }
         }
         for (MethodDeclaration m : ast.getMethods()) {
-            m.accept(visitor);
-            currentClass.addMethod(m.getSymbol());
-            if (currentClass.isInner() && m.getSymbol().isStatic()) {
-                addError(m.getName(),
-                         "Static methods cannot be declared inside an inner class",
-                         "Remove the method's 'static' modifier or move the method outside the inner class");
+            try {
+                m.accept(visitor);
+                currentClass.addMethod(m.getSymbol());
+                if (currentClass.isInner() && m.getSymbol().isStatic()) {
+                    addError(m.getName(),
+                             "Static methods cannot be declared inside an inner class",
+                             "Remove the method's 'static' modifier or move the method outside the inner class");
+                }
+            } catch (Exception e) {
+                // squelched
             }
         }
     }

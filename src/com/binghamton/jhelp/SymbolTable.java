@@ -127,7 +127,6 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
     public boolean put(V symbol) {
         K key = valueToKey.apply(symbol);
         if (hasInCurrentScope(key)) {
-            System.out.println("**** PUT FAILED, ERROR SHOULD FOLLOW...");
             return false;
         }
         table.peekFirst().put(key, symbol);
