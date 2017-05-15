@@ -2,7 +2,6 @@ package com.binghamton.jhelp;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -11,6 +10,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.binghamton.jhelp.error.SemanticError;
+
+import static com.binghamton.jhelp.util.ArrayUtils.trim;
 
 /**
  * A class encapsulating a symbol table over a Java compilation unit
@@ -127,7 +128,6 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
     public boolean put(V symbol) {
         K key = valueToKey.apply(symbol);
         if (hasInCurrentScope(key)) {
-            System.out.println("**** PUT FAILED, ERROR SHOULD FOLLOW...");
             return false;
         }
         table.peekFirst().put(key, symbol);
@@ -379,7 +379,8 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
                 member.getName().equals(memberName)) {
                 added = true;
                 if (!put(member)) {
-                    member.addError(new SemanticError("cannot import two members with same name"));
+                    member.addError(new SemanticError("Cannot import two members with same name ('%s')",
+                                        member));
                     return false;
                 }
             }
@@ -395,7 +396,8 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
     public boolean importStaticMemberOnDemand(V[] members) {
         for (V member : members) {
             if (member.isStatic() && !put(member)) {
-                member.addError(new SemanticError("cannot import two members with same name"));
+                member.addError(new SemanticError("Cannot import two members with same name ('%s')",
+                                                  member.getName()));
                 return false;
             }
         }
@@ -415,19 +417,5 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
                 map.put(key, sym);
             }
         }
-    }
-
-    /**
-     * Trims any trailing null elements in a given array
-     * @param <V> the type of array elements
-     * @param src the array to be trimmed
-     * @return the trimmed array
-     */
-    private static <V> V[] trim(V[] src) {
-        int i = 0;
-        while (i < src.length && src[i] != null) {
-            ++i;
-        }
-        return Arrays.copyOf(src, i);
     }
 }

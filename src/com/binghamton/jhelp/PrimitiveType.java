@@ -24,6 +24,8 @@ public class PrimitiveType extends Type {
     public static final PrimitiveType FLOAT   = new PrimitiveType(Primitive.FLOAT);
     public static final PrimitiveType DOUBLE  = new PrimitiveType(Primitive.DOUBLE);
     public static final PrimitiveType VOID    = new PrimitiveType(Primitive.VOID);
+    public static final PrimitiveType[] NUMERICS = {BYTE, CHAR, SHORT, INT,
+                                                    LONG, FLOAT, DOUBLE};
 
     private static final Map<String, Primitive> PRIMITIVE_MAP = new HashMap<>();
     private static final Map<PrimitiveType, PrimitiveType> SUBTYPE_MAP = new HashMap<>();

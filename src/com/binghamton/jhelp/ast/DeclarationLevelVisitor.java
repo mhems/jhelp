@@ -66,8 +66,9 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         while (enclosingSym != null) {
             if (enclosingSym.getName().equals(currentClass.getName())) {
                 addError(currentClass.getToken(),
-                         "An inner body cannot have same name as one of its enclosing classes",
-                         "Rename the inner body to have a different name");
+                         "An inner body cannot have the same name as one of its enclosing classes",
+                         String.format("Rename the inner body or enclosing class to have a name other than '%s'",
+                                       currentClass.getName()));
                 break;
             }
             enclosingSym = enclosingSym.getDeclaringClass();
@@ -83,12 +84,14 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
             if (currentClass.hasModifier(Modifier.PROTECTED)) {
                 addError(currentClass.getModifier(Modifier.PROTECTED),
                          "A member type in an interface cannot be protected",
-                         "Remove the protected modifier");
+                         String.format("Remove the protected modifier on '%s'",
+                                       currentClass.getName()));
             }
             if (currentClass.hasModifier(Modifier.PRIVATE)) {
                 addError(currentClass.getModifier(Modifier.PRIVATE),
                          "A member type in an interface cannot be private",
-                         "Remove the private modifier");
+                         String.format("Remove the private modifier on '%s'",
+                                       currentClass.getName()));
             }
         }
 
@@ -110,15 +113,20 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
             if (superCls.equals(fetch("Enum"))) {
                 addError(ast.getName(),
                          "A class cannot directly subclass java.lang.Enum",
-                         "Use 'enum' instead of 'class'");
+                         String.format("Use 'enum' instead of 'class' when declaring '%s'",
+                                       ast.getName().getText()));
             } else if (superCls.isInterfaceLike()) {
                 addError(ast.getSuperClass(),
-                         "A class can only subclass other classes",
+                         "A class can only subclass other classes, not interfaces",
                          "Do you mean 'implements' instead of 'extends'?");
             } else if (superCls.hasModifier(Modifier.FINAL)) {
                 addError(ast.getName(),
-                         "A class cannot extend a final class or enum",
-                         "If you have access to the source code of " + superCls.getName() + ", remove the 'final' modifier, otherwise you need to rethink your design");
+                         String.format("A class cannot extend the final class '%s'",
+                                       superCls.getName()),
+                         String.format("If you have access to the source code of '%s', remove the 'final' modifier, otherwise '%s' cannot subclass '%s'",
+                                       superCls.getName(),
+                                       currentClass.getName(),
+                                       superCls.getName()));
             } else {
                 currentClass.setSuperClass(ast.getSuperClass().getType());
             }
@@ -142,8 +150,7 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
             try {
                 decl.accept(this);
             } catch (Exception e) {
-                // e.printStackTrace();
-                // squelch
+                // squelched
             }
         }
     }
@@ -178,12 +185,14 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
         if (currentClass.hasModifier(Modifier.FINAL)) {
             addError(currentClass.getModifier(Modifier.FINAL),
                      "An enum cannot be final",
-                     "Remove the 'final' modifier");
+                     String.format("Remove the 'final' modifier on '%s'",
+                                   currentClass.getName()));
         }
         if (currentClass.hasModifier(Modifier.ABSTRACT)) {
             addError(currentClass.getModifier(Modifier.ABSTRACT),
                      "An enum cannot be abstract",
-                     "Remove the 'abstract' modifier");
+                     String.format("Remove the 'abstract' modifier on '%s'",
+                                   currentClass.getName()));
         }
 
         if (currentClass.isInner() &&
@@ -257,8 +266,11 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
                         tArgs[pos] = arg.getType();
                         if (arg.getType() instanceof PrimitiveType) {
                             addError(arg,
-                                     "Cannot specify a primitive type as a type argument",
-                                     "Specify the class version of the primitive type, such as Integer instead of int");
+                                     String.format("Cannot specify the primitive type '%s' as a type argument",
+                                                   arg.getType().getName()),
+                                     String.format("Specify '%s' instead of '%s'",
+                                                   arg.getType().box().getName(),
+                                                   arg.getType().getName()));
                         }
                         ++pos;
                     }
@@ -274,8 +286,9 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
                 }
             } else {
                 addError(ast,
-                         "Cannot parameterize a non-generic class",
-                         "Remove the type arguments or make " + sym.getName() + " generic");
+                         String.format("Cannot parameterize (give type arguments to) the non-generic class '%s'",
+                                       sym.getName()),
+                         "Remove the type arguments or declare " + sym.getName() + " to be generic");
             }
         } else {
             addError(ast,
@@ -354,7 +367,7 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
             cur = expr.getType();
             if (cur.getClassSymbol().isClassLike()) {
                 addError(expr,
-                         "Can only implement a interfaces",
+                         "You can only implement interfaces, not classes",
                          "Do you mean 'extends' instead of 'implements'?");
             } else {
                 currentClass.addInterface(cur);

@@ -14,26 +14,13 @@ Secondary Design Principles
 Warnings (Style/Good Practice)
 ---
 Those things that will compile but should be mentioned
-* `if (list.isEmpty() == true)` => unnecessary comparison
 * `if (list.size >0 && list != null)` => swap order of conditions
-* `if (str1 == str2)` => Objects should be compared with `equals`
-* `try { throw new Exception(); } catch(Exception e) { }` => do not catch what you throw
-* `throw new Exception();` => include message in exception
-* `throw new NullPointerException` => unnecessary throw
 * `return 5; doMore();` => unreachable statement
 * `throw new Exception(); doMore();` => unreachable statement
-* `i = i; ` => assignment has no effect
-* if (condition) { } else { foo(); }` => invert condition, drop else
-* if (condition) { foo(); } else { }` => drop empty else
 * `a = a + b` => `a += b`
-* prevent shadowing
-* missing access modifier
-* no package
 * use @Override
 * overloading instead of overriding
-* empty if with non-empty else/ empty else
 * fallthrough
-* no default switch case
 * casting
 * static abuse
 * unused imports
@@ -64,7 +51,6 @@ Compile Errors
   * comparsion
   * arithmetic
 * array vs. arraylist confusion
-* unbalanced matching pairs
 * not all branches return
 * trying to override private/static
 * missing return statement
@@ -73,16 +59,11 @@ Compile Errors
 * accessing instance member from static context
 * malformed function declaration
 * malformed class declaration
-* malformed main method
-* code at top level
-* nested functions
 * local variables have modifiers
 * missing `new`
 * primitives in generics
 * call non-static from static context
 * access modifier in local vars
-* single quote strings
-* miscapitalized true/false/null/...
 * unchecked exceptions
 
 Anticipated Challenges

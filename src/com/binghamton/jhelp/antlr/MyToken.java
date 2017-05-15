@@ -68,22 +68,42 @@ public class MyToken extends CommonToken implements Comparable<MyToken> {
         this.stream = stream;
     }
 
+    /**
+     * Gets the FileBuffer this Token originated from
+     * @return the FileBuffer this Token originated from
+     */
     public FileBuffer getFileBuffer() {
         return buffer;
     }
 
+    /**
+     * Sets the FileBuffer this Token originated from
+     * @param buffer the FileBuffer this Token originates from
+     */
     public void setFileBuffer(FileBuffer buffer) {
         this.buffer = buffer;
     }
 
+    /**
+     * Gets the line of the file this Token originated from
+     * @return the line of the file this Token originated from
+     */
     public String getLineText() {
         return buffer.getLine(line);
     }
 
+    /**
+     * Gets the column offset this Token starts at within its line
+     * @return the column offset this Token starts at within its line
+     */
     public int getColStart() {
         return charPositionInLine;
     }
 
+    /**
+     * Gets the column offset this Token stops at within its line
+     * @return the column offset this Token stops at within its line
+     */
     public int getColStop() {
         return charPositionInLine + getText().length();
     }
@@ -116,12 +136,22 @@ public class MyToken extends CommonToken implements Comparable<MyToken> {
                              charPositionInLine);
     }
 
+    /**
+     * Constructs a colored String of the line this Token originated from, with
+     * the token test highlighted.
+     * @return the highlighted line this Token originated from
+     */
     public String getHighlightedLine() {
         return highlight(getLineText(),
                          charPositionInLine,
                          charPositionInLine + getText().length());
     }
 
+    /**
+     * Determines if other Tokens originate from the line this Token occurs on.
+     * @param tokens the other Tokens to examine
+     * @return true iff all the given Tokens occur on the same line as this Token
+     */
     public boolean onSameLine(MyToken... tokens) {
         for (MyToken tok : tokens) {
             if (tok.line != this.line) {
@@ -131,6 +161,14 @@ public class MyToken extends CommonToken implements Comparable<MyToken> {
         return true;
     }
 
+    /**
+     * Highlights multiple Tokens on the same line
+     * @param first the first Token to highlight
+     * @param tokens any other Tokens to highlight
+     * @return the highlighted line the given Tokens occur on
+     * @throws IllegalArgumentException iff the given Tokens do not all occur on
+     * the same line or are not in order of lexical appearance
+     */
     public static String getHighlightedLine(MyToken first, MyToken... tokens) {
         int line = first.line;
         int start = first.getColStart();
@@ -160,12 +198,24 @@ public class MyToken extends CommonToken implements Comparable<MyToken> {
         return sb.toString();
     }
 
+    /**
+     * Gets the highlighted line the given AST occurs on
+     * @param ast the ASTNode to highlight in-line
+     * @return a line with the given AST highlighted
+     */
     public static String getHighlightedLine(ASTNode ast) {
         return highlight(ast.getFirstToken().getLineText(),
                          ast.getFirstToken().getColStart(),
                          ast.getLastToken().getColStop());
     }
 
+    /**
+     * Highlights a substring of a line of text
+     * @param line the line of text to highlight
+     * @param start the index within the String to start highlighting
+     * @param stop the index within the String to stop highlighting
+     * @return the given line with the substring highlighted
+     */
     private static String highlight(String line, int start, int stop) {
         ColorStringBuilder sb = new ColorStringBuilder();
         sb.append(line.substring(0, start));

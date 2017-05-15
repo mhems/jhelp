@@ -5,6 +5,7 @@ import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.binghamton.jhelp.error.ApplicationError;
 import com.binghamton.jhelp.error.JHelpError;
 import com.binghamton.jhelp.util.ColorStringBuilder;
 
@@ -43,7 +44,11 @@ public class JHelpRunner {
         System.out.println("JHelp Version " + JHelp.VERSION);
         for (Validator v : validators) {
             start = System.nanoTime();
-            v.validate(program);
+            try {
+                v.validate(program);
+            } catch(Exception e) {
+                program.addError(new ApplicationError(e));
+            }
             stop = System.nanoTime();
             if (PROFILING) {
                 System.out.printf("validator %s took '%f' ms\n",

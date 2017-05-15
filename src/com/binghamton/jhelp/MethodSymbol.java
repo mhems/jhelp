@@ -175,6 +175,20 @@ public class MethodSymbol extends Symbol {
     }
 
     /**
+     * Determines if this method has the signature of a main method.
+     * @return true iff this method has the signature of a main method.
+     */
+    public boolean isMainMethodSignature() {
+        return getName().equals("main") &&
+            isPublic() &&
+            isStatic() &&
+            returnType.equals(PrimitiveType.VOID) &&
+            paramTypes.length == 1 &&
+            paramTypes[0].rank() == 1 &&
+            ((ArrayType)paramTypes[0]).getBaseType().equals(fetch("String"));
+    }
+
+    /**
      * Gets the number of arguments this method accepts
      * @return the number of arguments this method accepts
      */

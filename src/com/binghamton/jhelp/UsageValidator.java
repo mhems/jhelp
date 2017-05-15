@@ -26,7 +26,7 @@ public class UsageValidator implements Validator {
     public void validate(Program program) {
         File[] files = program.getFiles();
         if (files.length == 0) {
-            program.addError(new InvalidUsageError("must specify at least one file or directory to compile"));
+            program.addError(new InvalidUsageError("You must specify at least one file or directory to compile"));
         } else {
             for (File file : files) {
                 if (file.exists() &&
@@ -38,7 +38,7 @@ public class UsageValidator implements Validator {
             validate(program, files);
             File[] newFiles = fileList.toArray(new File[fileList.size()]);
             if (newFiles.length == 0) {
-                program.addError(new InvalidUsageError("no Java files to compile were found"));
+                program.addError(new InvalidUsageError("No Java files to compile were found"));
             }
             program.setFiles(newFiles);
         }
@@ -56,14 +56,14 @@ public class UsageValidator implements Validator {
             filename = file.getAbsolutePath();
             matcher = WHITESPACE.matcher(filename);
             if (!file.exists()) {
-                program.addError(new InvalidUsageError("The filename '%s' must name an existing file or directory",
+                program.addError(new InvalidUsageError("The file '%s' must name an existing file or directory",
                                                        filename));
             } else if (!file.isFile()) {
                 validate(program, file.listFiles());
             }
 
             if (matcher.find()) {
-                program.addError(new InvalidUsageError("The filename '%s' must not contain whitespace (characters %d to %d)",
+                program.addError(new InvalidUsageError("The file '%s' must not contain whitespace (characters %d to %d)",
                                                        filename,
                                                        matcher.start(),
                                                        matcher.end() - 1));

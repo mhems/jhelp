@@ -2,7 +2,6 @@ package com.binghamton.jhelp;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -13,6 +12,7 @@ import com.binghamton.jhelp.antlr.Java8Parser;
 import com.binghamton.jhelp.antlr.MyTokenFactory;
 import com.binghamton.jhelp.antlr.SyntaxErrorListener;
 import com.binghamton.jhelp.ast.CompilationUnit;
+import com.binghamton.jhelp.error.ApplicationError;
 import com.binghamton.jhelp.error.JHelpError;
 import com.binghamton.jhelp.util.FileBuffer;
 
@@ -48,12 +48,8 @@ public class SyntaxValidator implements Validator {
                 try {
                     cu = parser.compilationUnit().ret;
                 } catch (Exception e) {
-                    // e.printStackTrace();
-                    List<String> stack = parser.getRuleInvocationStack();
-                    java.util.Collections.reverse(stack);
-                    System.out.println(stack);
-                    throw e;
-                    // continue;
+                    program.addError(new ApplicationError(e, file.getName()));
+                    continue;
                 }
                 if (parser.getNumberOfSyntaxErrors() == 0 &&
                     program.numErrors() == old) {
@@ -61,7 +57,7 @@ public class SyntaxValidator implements Validator {
                     program.addCompilationUnit(cu);
                 }
             } catch (IOException e) {
-                program.addError(new JHelpError("An IO error occured while processing '%s'",
+                program.addError(new JHelpError("An IO error has occured while parsing the file '%s', skipping it",
                                                 file.getName()));
             }
         }

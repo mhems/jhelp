@@ -12,9 +12,6 @@ public class TopLevelValidator implements Validator {
     public void validate(Program program) {
         new FileLevelVisitor(program).visitAll();
         new DeclarationLevelVisitor(program).visitAll();
-        for (ClassSymbol sym : program.getAllClasses()) {
-            System.out.println(sym.repr());
-        }
     }
 
     @Override

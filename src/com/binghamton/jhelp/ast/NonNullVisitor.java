@@ -22,7 +22,9 @@ public class NonNullVisitor extends EmptyVisitor {
      * @param o the Object to examine
      */
     private void assertNonNull(Object o) {
-        assert o != null;
+        if (o == null) {
+            throw new IllegalArgumentException("object is null");
+        }
         ++count;
     }
 
