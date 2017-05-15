@@ -105,8 +105,9 @@ public class MyClassSymbol extends ClassSymbol {
     public boolean addInterface(Type sym) {
         if (!interfaces.put(sym)) {
             addError(token,
-                     "This class cannot implement the same interface twice",
-                     "Remove second duplicate interface");
+                     String.format("This class cannot implement the '%s' interface twice",
+                                   sym.getName()),
+                     "Remove the second duplicate interface");
             return false;
         }
         return true;
@@ -137,40 +138,46 @@ public class MyClassSymbol extends ClassSymbol {
             if (parentMethod.isFinal()) {
                 addError(((MyMethodSymbol)sym).getToken(),
                          "Cannot override a final method",
-                         "Change the method signature to not override");
+                         String.format("Change the method signature to not override '%s'",
+                                       sym.toString()));
                 good = false;
             } else if (parentMethod.isStatic() && !sym.isStatic()) {
                 addError(((MyMethodSymbol)sym).getToken(),
                          "An instance method cannot override a static method",
-                         "Change the method signature to not override");
+                         String.format("Change the method signature to not override '%s'",
+                                       sym.toString()));
                 good = false;
             } else if (sym.isStatic() && !parentMethod.isStatic()) {
                 addError(((MyMethodSymbol)sym).getToken(),
                          "A static method cannot hide an instance method",
-                         "Change the method to not be 'static' or change the signature to not hide (override)");
+                         String.format("Change the method to not be 'static' or change the signature to not hide (override) '%s'",
+                             sym));
                 good = false;
             }
             if (sym.hasCheckedExceptions() && !parentMethod.hasExceptions()) {
                 addError(((MyMethodSymbol)sym).getToken(),
                          "Cannot override a method with no exceptions with a method that throws a checked exception",
-                         "Alter the method so it does not throw the checked exceptions");
+                         String.format("Alter the method so it does not throw checked exceptions or no longer overrides '%s'",
+                                       sym.toString()));
                 good = false;
             }
             if (sym.getAccessLevel().compareTo(parentMethod.getAccessLevel()) > 0) {
                 addError(((MyMethodSymbol)sym).getToken(),
                          "Cannot override a method with a method that has more restrictive access than the method it is overriding",
-                         "Alter this methods access to be at least as accessible as the parent method");
+                         String.format("Alter this method's access to be '%s' or more public",
+                                       parentMethod.getAccessLevel().name().toLowerCase()));
             }
         } else if (parentMethod == null && sym.hasOverrideAnnotation()){
             addError(((MyMethodSymbol)sym).getToken(),
-                     "This method is not being overridden even if you think it is",
+                     "This method is not being overridden even with the '@Override' annotation",
                      "Change the method signature to match the signature of the parent method you wish to override");
         }
         if (good) {
             if (!methods.put(sym)) {
                 addError(token,
                          "A class cannot declare the same method twice",
-                         "Change the method signature to name a unique method");
+                         String.format("Change the method signature to name a unique method other than '%s'",
+                             sym));
                 return false;
             }
             return true;
@@ -187,7 +194,8 @@ public class MyClassSymbol extends ClassSymbol {
         if (!ctors.put(sym)) {
             addError(((MyMethodSymbol)sym).getToken(),
                      "A class cannot declare the same constructor twice",
-                     "Change the constructor signature to name a unique constructor");
+                     String.format("Change the constructor signature to name a unique constructor other than '%s'",
+                         sym));
             return false;
         }
         return true;
@@ -202,7 +210,8 @@ public class MyClassSymbol extends ClassSymbol {
         if (!fields.put(sym)) {
             addError(((MyVariableSymbol)sym).getToken(),
                      "A class cannot declare the same field twice",
-                     "Change the name of the field to be unique");
+                     String.format("Change the name of the field to be something other than '%s'",
+                                   sym.getName()));
             return false;
         }
         return true;
@@ -232,7 +241,8 @@ public class MyClassSymbol extends ClassSymbol {
         if (!innerClasses.put(sym)) {
             addError(sym.token,
                      "A class cannot declare the same inner class twice",
-                     "Change the name of the inner class to be unique");
+                     String.format("Change the name of the inner class to be something other than '%s'",
+                                   sym.getName()));
             return false;
         }
         sym.declarer = this;
@@ -249,7 +259,8 @@ public class MyClassSymbol extends ClassSymbol {
         if (!memberTypes.put(sym)) {
             addError(sym.token,
                      "A class cannot declare the same member class twice",
-                     "Change the name of the member type to be unique");
+                     String.format("Change the name of the member type to be something other than '%s'",
+                                   sym.getName()));
             return false;
         }
         sym.declarer = this;

@@ -2,7 +2,6 @@ package com.binghamton.jhelp;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.CommonTokenStream;

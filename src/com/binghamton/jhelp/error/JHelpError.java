@@ -10,10 +10,10 @@ import com.binghamton.jhelp.ast.ASTNode;
  */
 public class JHelpError {
 
-    private ASTNode ast;
-    private MyToken token;
-    private String msg;
-    private String suggestion;
+    protected ASTNode ast;
+    protected MyToken token;
+    protected String msg;
+    protected String suggestion;
 
     /**
      * Constructs an empty JHelpError

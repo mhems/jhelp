@@ -83,12 +83,14 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
             if (refMethod != null && refMethod.getAccessLevel().compareTo(Symbol.AccessLevel.PROTECTED) <= 0) {
                 addError(((MyMethodSymbol)method).getToken(),
                          "An annotation cannot declare an element that is override-equivalent to a method in Object or Annotation",
-                         "Change the method to not override");
+                         String.format("Change the method to no longer override '%s'",
+                                       refMethod));
             }
             if (method.getReturnType().equals(currentClass)) {
                 addError(((MyMethodSymbol)method).getToken(),
                          "An annotation cannot declare an element of its own type",
-                         "Remove the element or change its return type");
+                         String.format("Remove the element or change its return type to not be '%s'",
+                                       currentClass.getName()));
             }
         }
     }
@@ -109,8 +111,12 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
             currentClass = tmp;
             if (currentClass.isInner() && body.getSymbol().isStatic()) {
                 addError(body.getName(),
-                         "Static bodies cannot be declared inside inner classes",
-                         "Mark the class as not static or move it outside the inner class");
+                         String.format("The static body '%s' cannot be declared inside the inner class '%s'",
+                                       body.getSymbol().getName(),
+                                       currentClass.getName()),
+                         String.format("Remove the static modifier on '%s' or move that class outside the inner class '%s'",
+                                       body.getSymbol().getName(),
+                                       currentClass.getName()));
             }
         }
     }
@@ -144,8 +150,8 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
         if (currentClass.isClassLike() && !currentClass.isAbstract()) {
             for (MethodSymbol m : currentClass.getUnimplementedMethods()) {
                 addError(currentClass.getToken(),
-                         "Cannot leave method " + m.getName() + " unimplemented",
-                         "Implement the method " + m.getName());
+                         "Cannot leave the abstract method " + m.getName() + " unimplemented",
+                         String.format("Implement the method '%s'", m.toString()));
             }
         }
     }
@@ -213,7 +219,8 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
                 ctor.hasModifier(Modifier.PROTECTED)) {
                 addError(((MyMethodSymbol)ctor).getToken(),
                          "An enum cannot have a public or protected constructor",
-                         "Remove the forbidden modifier");
+                         String.format("Modify '%s' to either have the 'private' modifier or no modifier at all",
+                                       currentClass.getName()));
             }
         }
         boolean hasAbstract = false;
@@ -224,14 +231,16 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
             }
             if (method.getName().equals("finalize") && method.overrides(FINALIZE)) {
                 addError(((MyMethodSymbol)method).getToken(),
-                         "An enum cannot have a finalizer as it cannot be finalized",
-                         "Remove the 'finalize' method");
+                         "An enum cannot have a finalizer as enums cannot be finalized",
+                         String.format("Remove the 'finalize' method in the '%s' enum",
+                                       currentClass.getName()));
             }
         }
         if (hasAbstract && (ast.getConstants().size() == 0 || !allEmpty)) {
             addError(ast.getName(),
-                     "An enum with constants with bodies cannot have abstract methods",
-                     "Remove the 'abstract' modifier from all methods or do not declare any constants with bodies");
+                     "An enum with constants with bodies cannot declare abstract methods",
+                     String.format("Remove all abstract methods from the '%s' enum or do not declare any constants with bodies",
+                                   currentClass.getName()));
         }
     }
 
@@ -248,8 +257,9 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
                 objMethod != null &&
                 objMethod.getAccessLevel() != Symbol.AccessLevel.PRIVATE) {
                 addError(((MyMethodSymbol)method).getToken(),
-                         "The default method of an interface cannot be override-equivalent to non-private method of Object",
-                         "Change the method signature or provide no implementation");
+                         "The default method of an interface cannot be override-equivalent to a non-private method of Object",
+                         String.format("Change the method signature to no longer override '%s', or remove the 'default' modifier",
+                                       method.toString()));
             }
         }
 
@@ -262,7 +272,8 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
                     !currentMethod.isAbstract()) {
                     addError(((MyMethodSymbol)currentMethod).getToken(),
                              "An interface cannot declare a method when that method is a final method of Object",
-                             "Change the method signature to no longer override the method of Object");
+                             String.format("Change the method signature to no longer override Object's method '%s'",
+                                           currentMethod.toString()));
                 }
             } else if (method.isPublic() &&
                        !currentClass.hasInterfaces()) {
@@ -305,14 +316,17 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
                 if (!currentClass.isAbstract()) {
                     addError(ast.getName(),
                              "A class with an abstract method must be declared abstract",
-                             "Add an 'abstract' modifier to the class or remove this abstract method");
+                             String.format("Add an 'abstract' modifier to the '%s' class or remove the abstract '%s' method",
+                                           currentClass.getName(),
+                                           method.getName()));
                 }
             }
             if (method.hasModifier(Modifier.NATIVE)) {
                 if (!ast.getBody().isNil()) {
                     addError(ast.getName(),
                              "A native method must have no body",
-                             "Remove the body or the 'native' modifier");
+                             String.format("Remove the body or the 'native' modifier on the '%s' method",
+                                           method.getName()));
                 }
                 if (method.hasModifier(Modifier.STRICT_FP)) {
                     addError(ast.getName(),
@@ -333,7 +347,7 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
                 if (method.hasModifier(Modifier.STRICT_FP)) {
                     addError(ast.getName(),
                              "An interface method cannot both be abstract and strictfp",
-                             "Remove the 'abstract' or 'strictfp' modifiers");
+                             "Remove the 'abstract' or 'strictfp' modifier");
                 }
             }
             if (method.isStatic()) {
@@ -360,7 +374,8 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
             if (count > 1) {
                 addError(ast.getName(),
                          "An interface method can only have one of the 'abstract', 'default', and 'static' modifiers",
-                    "Remove the extra modifiers so only one is present");
+                         String.format("Remove the extra modifiers so that only one is present on the '%s' method",
+                                       method.getName()));
             }
             // TODO 9.4.1.3
         }
@@ -370,7 +385,7 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
             !method.isAbstract() &&
             !method.hasModifier(Modifier.NATIVE)) {
             addError(ast.getName(),
-                     "A method with no body must be abstract or native",
+                     "A method with no body must be declared 'abstract' or 'native'",
                      "Add a 'abstract' or 'native' modifier or specify a body");
         }
 
@@ -389,7 +404,8 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
             if (!v.isReceiverParameter()) {
                 if (!paramNames.add(v.getName().getText())) {
                     addError(v.getName(),
-                             "A parameter with that name already exists",
+                             String.format("This method already declares a parameter with the name '%s'",
+                                           v.getName().getText()),
                              "Rename or remove one of the parameters");
                 }
                 v.getExpression().accept(this);
@@ -411,7 +427,9 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
             if (!excTypes[pos].isSubTypeOf(fetch("Throwable"))) {
                 addError(ex,
                          "A method can only throw classes that extend java.lang.Throwable",
-                         "Make the class being thrown an exception or remove it from the throws clause");
+                         "Make the class being thrown extend the 'Throwable' class or remove it from the throws clause",
+                         fetch("Throwable"),
+                         excTypes[pos]);
             }
             ++pos;
         }
@@ -421,7 +439,7 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
             if (!method.getName().equals(currentClass.getName())) {
                 addError(ast.getName(),
                          "Constructors must have the same name as the class they are declared in",
-                         "Change the name to " + currentClass.getName() + " or specify a return type if you meant to declare a constructor");
+                         "Change the method name to " + currentClass.getName() + " or specify a return type if you meant to declare a method");
             }
             method.setConstructor(true);
             method.setReturnType(currentClass);
@@ -436,7 +454,9 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
                 (type instanceof ArrayType &&
                  !validAnnotationReturnType(((ArrayType)type).getBaseType()))) {
                 addError(ret,
-                         "An annotation element cannot have type " + type,
+                         String.format("The annotation element '%s' cannot have type %s",
+                                       method.getName(),
+                                       type),
                          "Change the element type to an acceptable type, such as a primitive or String");
             }
         }
@@ -449,8 +469,8 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
                 if (type instanceof TypeVariable &&
                     !method.equals(((TypeVariable)type).getDeclaringSymbol())) {
                     addError(ast.getTypeParameters().get(index),
-                             "A static method cannot use any type variables except those it declares",
-                             "Declare a method type variable named " + type.getName());
+                             "A static method cannot use any type variables except those it directly declares",
+                             "Declare the method to have a type variable named " + type.getName());
                 }
                 ++index;
             }
@@ -460,7 +480,8 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
                         if (!m.isStatic() && method.hasSameSubsignature(m)) {
                             addError(((MyMethodSymbol)m).getToken(),
                                      "A static method in an interface cannot hide an instance method of a super interface",
-                                     "Change the method signature so that it no longer overrides");
+                                     String.format("Change the method signature to no longer override '%s'",
+                                                   m));
                         }
                     }
                 }
@@ -470,7 +491,7 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
         if (method.getName().equals("main") && !method.isMainMethodSignature()) {
             addError(new StyleWarning(ast.getName(),
                                       "Malformed main method detected",
-                                      "If you are trying to declare a main method, it needs to exactly be 'public static void main(String[] args)'"));
+                                      "If you are trying to declare a main method, it needs to be exactly 'public static void main(String[] args)'"));
         }
     }
 
@@ -541,7 +562,8 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
             var.hasModifier(Modifier.VOLATILE)) {
             addError(ast.getName(),
                      "A field cannot both be 'final' and 'volatile'",
-                     "Remove the 'final' or 'volatile' modifier");
+                     String.format("Remove the 'final' or 'volatile' modifier on the '%s' field",
+                                   var.getName()));
         }
 
         if (currentClass.isInterfaceLike()) {
@@ -554,7 +576,8 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
         if (var.isPublic() && !var.isFinal()) {
             addError(new StyleWarning(ast,
                                       "Non-final class fields should typically not be made public",
-                                      "Change the access level of the field to be private"));
+                                      String.format("Change the access level of the '%s' field to be private",
+                                                    var.getName())));
         }
     }
 
@@ -589,7 +612,8 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
                     !v.getSymbol().isConstant()) {
                     addError(v.getName(),
                              "Non-constant static fields cannot be declared inside an inner class",
-                             "Change the field's declaration or value, or move the field outside the inner class");
+                             String.format("Change the field to have a constant value or not be static, or move the field outside the inner '%s' class",
+                                           currentClass.getName()));
                 }
             } catch (Exception e) {
                 // squelched
@@ -602,7 +626,8 @@ public class BodyLevelVisitor extends DeclarationLevelVisitor {
                 if (currentClass.isInner() && m.getSymbol().isStatic()) {
                     addError(m.getName(),
                              "Static methods cannot be declared inside an inner class",
-                             "Remove the method's 'static' modifier or move the method outside the inner class");
+                             String.format("Remove the method's 'static' modifier or move the method outside the inner '%s' class",
+                                           currentClass.getName()));
                 }
             } catch (Exception e) {
                 // squelched

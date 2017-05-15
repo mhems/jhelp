@@ -20,6 +20,7 @@ import com.binghamton.jhelp.error.ApplicationError;
 import com.binghamton.jhelp.error.JHelpError;
 import com.binghamton.jhelp.error.SemanticError;
 import com.binghamton.jhelp.error.StyleWarning;
+import com.binghamton.jhelp.error.TypeMismatchError;
 
 import static com.binghamton.jhelp.ast.NameExpression.Kind;
 
@@ -114,13 +115,13 @@ public class FileLevelVisitor extends EmptyVisitor {
     public void visit(BodyDeclaration ast) {
         if (!Character.isUpperCase(ast.getName().getText().charAt(0))) {
             addError(new StyleWarning(ast.getName(),
-                                      "Body names should be capitalized",
-                                      "Capitalize the name"));
+                                      "Names of classes and interfaces should be capitalized",
+                                      "Capitalize the name '" + ast.getName().getText() + "'"));
         }
         if (ast.getName().getText().equals(filename) &&
             !ast.getModifiers().contains(Modifier.PUBLIC)) {
             addError(new StyleWarning(ast.getName(),
-                                      "Bodies with same name as its file should be declared public\n",
+                                      "Bodies with the same name as its file should be declared 'public'",
                                       "Declare " + ast.getName().getText() + " to be public"));
 
         }
@@ -168,7 +169,8 @@ public class FileLevelVisitor extends EmptyVisitor {
             for (TypeVariable var : makeTypeParameters(ast.getTypeParameters())) {
                 if (!currentClass.addTypeParameter(var)) {
                     addError(ast.getTypeParameters().get(index),
-                             "A class cannot declare the same type parameter",
+                             String.format("A class cannot declare the same type parameter ('%s')",
+                                           var.getName()),
                              "Change the name of the type parameter to be unique");
                 }
                 ++index;
@@ -186,9 +188,10 @@ public class FileLevelVisitor extends EmptyVisitor {
         if (ast.hasPackage()) {
             ast.getPackageStatement().accept(this);
         } else {
-            addError(new StyleWarning("The file '%s.java' declares no package",
-                                      filename));
-        }
+            addError(new StyleWarning(String.format("The file '%s.java' is not declared inside a package.\n" +
+                                                    "Declare the file to be inside a package.",
+                                                    filename)));
+         }
 
         for (BodyDeclaration decl : ast.getBodyDeclarations()) {
             try {
@@ -206,7 +209,8 @@ public class FileLevelVisitor extends EmptyVisitor {
         }
 
         if (pkg.getClassTable().get(filename) == null) {
-            addError("The file '%s.java' must declare a body with name of this file (%s)\n",
+            addError("The file '%s.java' must declare a body with the name of this file\n." +
+                     "Declare a class or interface named %s.",
                      filename,
                      filename);
         }
@@ -259,7 +263,9 @@ public class FileLevelVisitor extends EmptyVisitor {
                     cls = nameExpr.getType().getClassSymbol();
                 } else {
                     addError(nameExpr,
-                             "Cannot import a member from a non-existent class",
+                             String.format("Cannot import the member '%s' from the unknown class '%s'",
+                                           memberName,
+                                           name),
                              "Correct the import to name an existing class or remove it");
                 }
             }
@@ -277,7 +283,8 @@ public class FileLevelVisitor extends EmptyVisitor {
                         added = true;
                         if (pkg.getClassTable().has(memberName)) {
                             addError(ast.getNameExpression(),
-                                     "Cannot import a class with same name as a class you have created",
+                                     String.format("Cannot import the class '%s' because it has the same name as a class you have created",
+                                                   memberName),
                                      "Rename your class or remove the import");
                         }
                     }
@@ -286,7 +293,8 @@ public class FileLevelVisitor extends EmptyVisitor {
                     if (!added) {
                         addError(ast.getNameExpression(),
                                  "Static imports must import at least one member",
-                                 "Modify the import to import at least one member");
+                                 String.format("Modify the import to import at least one member with the name '%s'",
+                                               memberName));
                     }
                 }
             }
@@ -297,7 +305,8 @@ public class FileLevelVisitor extends EmptyVisitor {
                 String simpleName = ast.getNameExpression().getSimpleName();
                 if (pkg.getClassTable().has(simpleName)) {
                     addError(ast.getNameExpression().getToken(),
-                             "Cannot import a class with same name as a class you have created",
+                             String.format("Cannot import the class '%s' because it has the same name as a class you have created",
+                                           simpleName),
                              "Rename your class or remove the import");
                 } else {
                     try {
@@ -308,7 +317,8 @@ public class FileLevelVisitor extends EmptyVisitor {
                             currentUnit.importType(ast.getNameExpression().getType().getClassSymbol());
                         } else {
                             addError(ast.getNameExpression(),
-                                     "Cannot import a non-existent class",
+                                     String.format("Cannot import the unknown class '%s'",
+                                                   name),
                                      "Correct the import to name an existing class or remove it");
                         }
                     }
@@ -329,7 +339,8 @@ public class FileLevelVisitor extends EmptyVisitor {
             for (TypeVariable var : makeTypeParameters(ast.getTypeParameters())) {
                 if (!currentClass.addTypeParameter(var)) {
                     addError(ast.getTypeParameters().get(index),
-                             "An interface cannot declare the same type parameter",
+                             String.format("An interface cannot declare the same type parameter ('%s')",
+                                           var.getName()),
                              "Change the name of the type parameter to be unique");
                 }
                 ++index;
@@ -375,8 +386,8 @@ public class FileLevelVisitor extends EmptyVisitor {
             } else {
                 if (kind == Kind.TYPE) {
                     addError(ast,
-                             "Unknown identifier",
-                             "Did you forget an import or make a typo");
+                             String.format("Unknown type '%s'", ast.getText()),
+                             "Did you forget an import or make a typo?");
                 } else {
                     ast.setKind(Kind.PACKAGE);
                 }
@@ -506,5 +517,65 @@ public class FileLevelVisitor extends EmptyVisitor {
      */
     public void addError(JHelpError error) {
         program.addError(error);
+    }
+
+    /**
+     * Constructs and adds a TypeMismatchError to this Visitor's Program
+     * @param token the Token this error originated from
+     * @param msg the message explaining the error
+     * @param suggestion the suggestion suggesting a fix to the error
+     * @param expected the Type this token was expected to yield
+     * @param actual the Type this token actually yielded
+     */
+    public void addError(Token token,
+                         String msg,
+                         String suggestion,
+                         Type expected,
+                         Type actual) {
+        program.addError(new TypeMismatchError(token,
+                                               msg,
+                                               suggestion,
+                                               expected,
+                                               actual));
+    }
+
+    /**
+     * Constructs a new TypeMismatchError on an offending ASTNode
+     * @param ast the ASTNode this error originated from
+     * @param msg the message explaining the error
+     * @param suggestion the suggestion suggesting a fix to the error
+     * @param expected the Type this ASTNode was expected to yield
+     * @param actual the Type this ASTNode actually yielded
+     */
+    public void addError(ASTNode ast,
+                         String msg,
+                         String suggestion,
+                         Type expected,
+                         Type actual) {
+        program.addError(new TypeMismatchError(ast,
+                                               msg,
+                                               suggestion,
+                                               expected,
+                                               actual));
+    }
+
+    /**
+     * Constructs a new TypeMismatchError on an offending ASTNode
+     * @param ast the ASTNode this error originated from
+     * @param msg the message explaining the error
+     * @param suggestion the suggestion suggesting a fix to the error
+     * @param expected all Types this ASTNode was expected to yield
+     * @param actual the Type this ASTNode actually yielded
+     */
+    public void addError(ASTNode ast,
+                         String msg,
+                         String suggestion,
+                         Type[] expected,
+                         Type actual) {
+        program.addError(new TypeMismatchError(ast,
+                                               msg,
+                                               suggestion,
+                                               expected,
+                                               actual));
     }
 }
