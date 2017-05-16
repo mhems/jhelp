@@ -73,7 +73,11 @@ public class JHelpRunner {
         if (program.hasErrors()) {
             for (JHelpError error : program.getErrors()) {
                 sb = new ColorStringBuilder();
-                sb.append(num + ".)", ColorStringBuilder.Color.WHITE, null);
+                if (error.isFatal()) {
+                    sb.append(num + ".)", ColorStringBuilder.Color.RED, null);
+                } else {
+                    sb.append(num + ".)", ColorStringBuilder.Color.YELLOW, null);
+                }
                 sb.append(" ");
                 sb.append(error.getMessage());
                 System.out.println(sb);
