@@ -152,7 +152,6 @@ public class Block extends Statement {
     public void addStatement(int index, Statement stmt) {
         statements.add(index, stmt);
     }
-
     /**
      * Double dispatch this class on parameter
      * @param v the visitor to accept

@@ -84,6 +84,7 @@ public class TypeMismatchError extends SemanticError {
             sb.append(token.getHighlightedLine());
         }
         sb.append("\n");
+        sb.append("\n");
         sb.append("    Expected type: ");
         if (expected.length == 1) {
             sb.append(expected[0].getName());
@@ -95,6 +96,7 @@ public class TypeMismatchError extends SemanticError {
         sb.append("\n");
         sb.append("    Actual type:   ");
         sb.append(actual.getName());
+        sb.append("\n");
         sb.append("\n");
         sb.append(suggestion);
         return sb.toString();

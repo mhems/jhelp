@@ -15,12 +15,74 @@ import com.binghamton.jhelp.util.StringUtils;
  * A class to represent a program consisting of compilation units.
  */
 public class Program {
+
+    /**
+     * A simple record of a Program's configuration options
+     */
+    public static class Configuration {
+        public final boolean NO_WARNINGS;
+        public final boolean INVOKE_JAVAC;
+        public final boolean NO_COLOR;
+
+        /**
+         * Constructs a Configuration with default settings
+         */
+        private Configuration() {
+            this(false, false, false);
+        }
+
+        /**
+         * Constructs a Configuration
+         * @param nw true iff this Program should issue no warnings
+         * @param j true iff this Program should invoke javac if no errors are
+         * found
+         * @param nc true iff this Program should not color output
+         */
+        public Configuration(boolean nw, boolean j, boolean nc) {
+            NO_WARNINGS = nw;
+            INVOKE_JAVAC = j;
+            NO_COLOR = nc;
+        }
+    }
+
+    public static Configuration config = new Configuration();
+    private static final String USAGE;
     private final List<MyPackage> packages = new ArrayList<>();
     private final List<CompilationUnit> units = new ArrayList<>();
     private final List<JHelpError> errors = new ArrayList<>();
     private final String[] args;
     private List<ClassSymbol> classes;
     private File[] files;
+
+    static {
+        StringBuilder sb = new StringBuilder();
+        sb.append("JHelp Version ");
+        sb.append(JHelp.VERSION);
+        sb.append("\n");
+        sb.append("usage: jhelp [options] [FILE | DIR ...]");
+        sb.append("\n");
+        sb.append("\n");
+        sb.append("JHelp - a Java recognizer and error detecter");
+        sb.append("\n");
+        sb.append("\n");
+        sb.append("optional arguments:");
+        sb.append("\n");
+        sb.append("  -h            show this help message and exit");
+        sb.append("\n");
+        sb.append("  -cp           specify the classpath");
+        sb.append("\n");
+        sb.append("  -nw           ignore warnings, only show errors");
+        sb.append("\n");
+        sb.append("  -nc           do not use color when outputting messages");
+        sb.append("\n");
+        sb.append("\n");
+        sb.append("positional arguments:");
+        sb.append("\n");
+        sb.append("  FILE | DIR    the files or directories to check for errors,");
+        sb.append("\n");
+        sb.append("                or the current directory if none specified");
+        USAGE = sb.toString();
+    }
 
     {
         packages.add(MyPackage.DEFAULT_PACKAGE);
@@ -32,12 +94,32 @@ public class Program {
      */
     public Program(String[] args) {
         this.args = args;
-        // TODO
-        // for now, just copy directly
-        files = new File[args.length];
-        for (int i = 0; i < files.length; i++) {
-            files[i] = new File(args[i]);
+        List<File> tmp = new ArrayList<>();
+        boolean[] flags = new boolean[3];
+        for (String arg : args) {
+            switch (arg) {
+            case "-nw":
+                flags[0] = true;
+                break;
+            case "-j":
+                flags[1] = true;
+                break;
+            case "-nc":
+                flags[2] = true;
+                break;
+            case "-h":
+                System.out.println(USAGE);
+                System.exit(0);
+                break;
+            default:
+                tmp.add(new File(arg));
+            }
         }
+        files = tmp.toArray(new File[tmp.size()]);
+        if (files.length == 0) {
+            files = new File[]{new File(System.getProperty("user.dir"))};
+        }
+        config = new Configuration(flags[0], flags[1], flags[2]);
     }
 
     /**
@@ -136,7 +218,9 @@ public class Program {
      * @param error the error to add
      */
     public void addError(JHelpError error) {
-        errors.add(error);
+        if (!config.NO_WARNINGS || error.isFatal()) {
+            errors.add(error);
+        }
     }
 
     /**
@@ -145,7 +229,7 @@ public class Program {
      */
     public void addErrors(JHelpError... errors) {
         for (JHelpError error: errors) {
-            this.errors.add(error);
+            addError(error);
         }
     }
 
@@ -154,7 +238,9 @@ public class Program {
      * @param errors the errors to add
      */
     public void addErrors(Collection<JHelpError> errors) {
-        this.errors.addAll(errors);
+        for (JHelpError error : errors) {
+            addError(error);
+        }
     }
 
     /**

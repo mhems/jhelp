@@ -89,13 +89,9 @@ public class BalancedValidator implements Validator {
                     MyToken top = delims.peek();
                     if (!PAIRS.get(top.getText()).equals(token.getText())) {
                         errors.add(new UnbalancedBracesError(top, token));
-                        // TODO make configurable
-                        if (true) { // to avoid cascading errors
-                            delims.pop();
-                        }
-                    } else {
-                        delims.pop();
                     }
+                    // unconditionally pop to avoid cascading errors
+                    delims.pop();
                 }
             break;
             }
