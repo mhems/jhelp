@@ -8,6 +8,7 @@ import java.util.List;
 import com.binghamton.jhelp.error.ApplicationError;
 import com.binghamton.jhelp.error.JHelpError;
 import com.binghamton.jhelp.util.ColorStringBuilder;
+import com.binghamton.jhelp.util.Compiler;
 
 /**
  * A class responsible for validating input and tracking errors.
@@ -60,7 +61,15 @@ public class JHelpRunner {
             }
             ++i;
         }
-        return report();
+        int numErrs = report();
+        if (numErrs == 0 && Program.config.INVOKE_JAVAC) {
+            System.out.println("invoking `javac`");
+            int res = Compiler.run(program.getFiles());
+            if (res == 0) {
+                System.out.println("`javac` completed successfully");
+            }
+        }
+        return numErrs;
     }
 
     /**
