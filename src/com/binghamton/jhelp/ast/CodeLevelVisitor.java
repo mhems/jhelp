@@ -791,7 +791,6 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                      "For each loops must iterate over arrays or an implementor of the Iterable interface",
                      "Specify an array or Iterable to iterate over");
         }
-        // TODO this is wrong!
         visit((Block)ast);
         currentScope.exitScope();
     }
@@ -1015,7 +1014,6 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         ConcreteBodyDeclaration cls = ast.getDeclaration();
         cls.setKind(BodyDeclaration.Kind.LOCAL);
 
-        // TODO
         // TODO also sidenote, check other uses of super, do those states need to synced
         //        should i be making protected static versions of those super methods that get called so I can call them from down here?
         //        or just duplicate the necessary logic if its enough of a subset/specialized?
@@ -1736,14 +1734,13 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
      * @return true iff rType is assignable to lType
      */
     private static boolean isAssignable(Type lType, Type rType) {
-        // TODO incomplete, non-recursive
         if (lType.equals(rType) ||
             rType.canWidenTo(lType) ||
             rType == NilType.TYPE && lType.isReference()) {
             return true;
         }
         Type boxedRType = rType.box();
-        if (boxedRType != null && boxedRType.canWidenTo(lType)) {
+        if (boxedRType != null && isAssignable(lType, boxedRType)) {
             return true;
         }
         Type unboxedRType = rType.unbox();

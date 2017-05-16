@@ -1,5 +1,7 @@
 package com.binghamton.jhelp.util;
 
+import com.binghamton.jhelp.Program;
+
 /**
  * Class composing a `StringBuilder` with the additional API of basic terminal
  * formatting and coloring via terminal codes.
@@ -58,7 +60,7 @@ public class ColorStringBuilder {
      * Construct a new ColorStringBuilder object
      */
     public ColorStringBuilder() {
-        this(System.console() != null);
+        this(Program.config.NO_COLOR ? false : System.console() != null);
     }
 
     /**

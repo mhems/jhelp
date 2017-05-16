@@ -27,19 +27,6 @@ import static com.binghamton.jhelp.ast.NameExpression.Kind;
 /**
  * The file (highest) level Visitor for visiting packages, imports, and
  * symbol names.
- *
- * This visitor is responsible for:
- * - establishing the package hierarchy
- * - importing established symbols as necessary into the proper bodies
- * - adding bodies' names to the class symbol table
- *
- * This visitor does not visit declarations, just their names.
- *
- * This visitor detects the following errors:
- * - warning for use of default package (TODO if configured)
- * - inability to import symbols
- * - a file does not contain a body with same name as file
- * - more than one public body per file
  */
 public class FileLevelVisitor extends EmptyVisitor {
     protected MyPackage pkg;

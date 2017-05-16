@@ -8,13 +8,13 @@ import java.util.List;
 import com.binghamton.jhelp.error.ApplicationError;
 import com.binghamton.jhelp.error.JHelpError;
 import com.binghamton.jhelp.util.ColorStringBuilder;
+import com.binghamton.jhelp.util.Compiler;
 
 /**
  * A class responsible for validating input and tracking errors.
  */
 public class JHelpRunner {
     public static final FileFilter JAVA_FILTER = pathname -> pathname.getName().endsWith(".java");
-    private final boolean PROFILING = false;
     private final List<Validator> validators = new ArrayList<>();
     private final Program program;
 
@@ -39,21 +39,13 @@ public class JHelpRunner {
      * @return the number of errors produced
      */
     public int run() {
-        long start, stop;
         int i = 1;
         System.out.println("JHelp Version " + JHelp.VERSION);
         for (Validator v : validators) {
-            start = System.nanoTime();
             try {
                 v.validate(program);
             } catch(Exception e) {
                 program.addError(new ApplicationError(e));
-            }
-            stop = System.nanoTime();
-            if (PROFILING) {
-                System.out.printf("validator %s took '%f' ms\n",
-                                  v.getClass().getSimpleName(),
-                                  (stop - start)/1e6);
             }
             if (program.hasFatalErrors()) {
                 int num = report();
@@ -69,7 +61,15 @@ public class JHelpRunner {
             }
             ++i;
         }
-        return report();
+        int numErrs = report();
+        if (numErrs == 0 && Program.config.INVOKE_JAVAC) {
+            System.out.println("invoking `javac`");
+            int res = Compiler.run(program.getFiles());
+            if (res == 0) {
+                System.out.println("`javac` completed successfully");
+            }
+        }
+        return numErrs;
     }
 
     /**
@@ -82,7 +82,11 @@ public class JHelpRunner {
         if (program.hasErrors()) {
             for (JHelpError error : program.getErrors()) {
                 sb = new ColorStringBuilder();
-                sb.append(num + ".)", ColorStringBuilder.Color.WHITE, null);
+                if (error.isFatal()) {
+                    sb.append(num + ".)", ColorStringBuilder.Color.RED, null);
+                } else {
+                    sb.append(num + ".)", ColorStringBuilder.Color.YELLOW, null);
+                }
                 sb.append(" ");
                 sb.append(error.getMessage());
                 System.out.println(sb);

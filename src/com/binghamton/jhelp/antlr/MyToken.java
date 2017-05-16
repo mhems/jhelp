@@ -130,10 +130,13 @@ public class MyToken extends CommonToken implements Comparable<MyToken> {
      * @return a formatted string of this Token
      */
     public String getLocationString() {
-        return String.format("%s, line %d, col %d",
-                             buffer.getName(),
-                             line,
-                             charPositionInLine);
+        ColorStringBuilder sb = new ColorStringBuilder();
+        sb.append(buffer.getName(), ColorStringBuilder.Format.BOLD);
+        sb.append(", line ");
+        sb.append(line + "", ColorStringBuilder.Format.BOLD);
+        sb.append(", col ");
+        sb.append(charPositionInLine + "", ColorStringBuilder.Format.BOLD);
+        return sb.toString();
     }
 
     /**
