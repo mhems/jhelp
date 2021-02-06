@@ -8,6 +8,8 @@ import java.util.List;
 
 import com.binghamton.jhelp.ast.CompilationUnit;
 import com.binghamton.jhelp.error.JHelpError;
+import com.binghamton.jhelp.symbols.ClassSymbol;
+import com.binghamton.jhelp.types.Type;
 import com.binghamton.jhelp.util.DiGraph;
 import com.binghamton.jhelp.util.StringUtils;
 

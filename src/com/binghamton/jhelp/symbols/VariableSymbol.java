@@ -1,7 +1,12 @@
-package com.binghamton.jhelp;
+package com.binghamton.jhelp.symbols;
 
 import java.lang.reflect.Field;
 import java.util.Map;
+
+import com.binghamton.jhelp.Modifiers;
+import com.binghamton.jhelp.types.PrimitiveType;
+import com.binghamton.jhelp.types.Type;
+import com.binghamton.jhelp.types.TypeVariable;
 
 import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
 

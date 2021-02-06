@@ -9,6 +9,7 @@ import com.binghamton.jhelp.error.ApplicationError;
 import com.binghamton.jhelp.error.JHelpError;
 import com.binghamton.jhelp.util.ColorStringBuilder;
 import com.binghamton.jhelp.util.Compiler;
+import com.binghamton.jhelp.validators.Validator;
 
 /**
  * A class responsible for validating input and tracking errors.
@@ -42,6 +43,7 @@ public class JHelpRunner {
         int i = 1;
         System.out.println("JHelp Version " + JHelp.VERSION);
         for (Validator v : validators) {
+            System.out.println("validating with " + v.getClass().getSimpleName());
             try {
                 v.validate(program);
             } catch(Exception e) {

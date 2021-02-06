@@ -1,4 +1,4 @@
-package com.binghamton.jhelp;
+package com.binghamton.jhelp.symbols;
 
 import java.util.Map;
 
@@ -6,7 +6,17 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.GenericArrayType;
 
+import com.binghamton.jhelp.Modifier;
+import com.binghamton.jhelp.Modifiers;
+import com.binghamton.jhelp.Program;
 import com.binghamton.jhelp.error.JHelpError;
+import com.binghamton.jhelp.types.ArrayType;
+import com.binghamton.jhelp.types.Type;
+import com.binghamton.jhelp.types.ParameterizedType;
+import com.binghamton.jhelp.types.PrimitiveType;
+import com.binghamton.jhelp.types.ReferenceType;
+import com.binghamton.jhelp.types.TypeVariable;
+import com.binghamton.jhelp.types.WildcardType;
 
 /**
  * A class representing the abstract notion of a Java symbol

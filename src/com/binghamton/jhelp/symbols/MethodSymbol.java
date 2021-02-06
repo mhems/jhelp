@@ -1,4 +1,4 @@
-package com.binghamton.jhelp;
+package com.binghamton.jhelp.symbols;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Executable;
@@ -9,6 +9,14 @@ import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.binghamton.jhelp.Modifier;
+import com.binghamton.jhelp.Modifiers;
+import com.binghamton.jhelp.types.ArrayType;
+import com.binghamton.jhelp.types.MethodType;
+import com.binghamton.jhelp.types.ParameterizedType;
+import com.binghamton.jhelp.types.PrimitiveType;
+import com.binghamton.jhelp.types.Type;
+import com.binghamton.jhelp.types.TypeVariable;
 import com.binghamton.jhelp.util.StringUtils;
 
 import static com.binghamton.jhelp.ImportingSymbolTable.fetch;

@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import org.antlr.v4.runtime.Token;
 
 import com.binghamton.jhelp.Modifier;
-import com.binghamton.jhelp.MyClassSymbol;
+import com.binghamton.jhelp.symbols.MyClassSymbol;
 
 /**
  * An abstract class representing a structure declaration.

@@ -6,7 +6,7 @@ import org.antlr.v4.runtime.Token;
 
 import com.binghamton.jhelp.Modifier;
 import com.binghamton.jhelp.Modifiers;
-import com.binghamton.jhelp.Symbol;
+import com.binghamton.jhelp.symbols.Symbol;
 
 /**
  * Abstract base class for all Java declarations

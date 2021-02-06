@@ -3,6 +3,8 @@ package com.binghamton.jhelp;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.binghamton.jhelp.symbols.ReflectedClassSymbol;
+
 /**
  * A class to manage imports in Java source programs.
  * Lazily populates cache associating symbol names to Class reflection Objects.

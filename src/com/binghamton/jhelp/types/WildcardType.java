@@ -1,7 +1,10 @@
-package com.binghamton.jhelp;
+package com.binghamton.jhelp.types;
 
 import java.util.Arrays;
 import java.util.Map;
+
+import com.binghamton.jhelp.Modifiers;
+import com.binghamton.jhelp.symbols.ClassSymbol;
 
 import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
 

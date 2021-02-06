@@ -1,8 +1,12 @@
-package com.binghamton.jhelp;
+package com.binghamton.jhelp.symbols;
 
 import java.util.Map;
 
 import org.antlr.v4.runtime.Token;
+
+import com.binghamton.jhelp.Modifiers;
+import com.binghamton.jhelp.types.Type;
+import com.binghamton.jhelp.types.TypeVariable;
 
 /**
  * A class representing a user-created variable

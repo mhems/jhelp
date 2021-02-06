@@ -5,7 +5,7 @@ import java.util.HashMap;
 
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.ClassSymbol;
+import com.binghamton.jhelp.symbols.ClassSymbol;
 
 /**
  * A class representing the use of Java annotation

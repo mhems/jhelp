@@ -1,10 +1,15 @@
-package com.binghamton.jhelp;
+package com.binghamton.jhelp.types;
 
 import java.lang.reflect.GenericDeclaration;
 import java.lang.reflect.Executable;
 import java.util.Arrays;
 import java.util.Map;
 
+import com.binghamton.jhelp.symbols.ClassSymbol;
+import com.binghamton.jhelp.symbols.MethodSymbol;
+import com.binghamton.jhelp.symbols.ReflectedClassSymbol;
+import com.binghamton.jhelp.symbols.Symbol;
+import com.binghamton.jhelp.types.ReferenceType;
 import com.binghamton.jhelp.util.StringUtils;
 
 import static com.binghamton.jhelp.ImportingSymbolTable.fetch;

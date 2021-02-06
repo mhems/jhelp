@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.TypeVariable;
+import com.binghamton.jhelp.types.TypeVariable;
 
 /**
  * A class representing a Java type parameter

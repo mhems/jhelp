@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.ArrayType;
+import com.binghamton.jhelp.types.ArrayType;
 
 /**
  * A class representing a Java array initializer

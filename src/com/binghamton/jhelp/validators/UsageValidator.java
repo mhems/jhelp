@@ -1,4 +1,4 @@
-package com.binghamton.jhelp;
+package com.binghamton.jhelp.validators;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.binghamton.jhelp.Program;
 import com.binghamton.jhelp.error.InvalidUsageError;
 
 /**

@@ -1,4 +1,4 @@
-package com.binghamton.jhelp;
+package com.binghamton.jhelp.validators;
 
 import java.io.IOException;
 import java.io.File;
@@ -13,6 +13,7 @@ import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.Lexer;
 
+import com.binghamton.jhelp.Program;
 import com.binghamton.jhelp.antlr.Balance;
 import com.binghamton.jhelp.antlr.MyToken;
 import com.binghamton.jhelp.antlr.MyTokenFactory;

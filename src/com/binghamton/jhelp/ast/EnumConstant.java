@@ -6,7 +6,7 @@ import java.util.List;
 import org.antlr.v4.runtime.Token;
 
 import com.binghamton.jhelp.Modifier;
-import com.binghamton.jhelp.MyVariableSymbol;
+import com.binghamton.jhelp.symbols.MyVariableSymbol;
 
 /**
  * A class representing a constant in a Java enum

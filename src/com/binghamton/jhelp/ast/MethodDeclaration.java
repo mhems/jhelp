@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.binghamton.jhelp.Modifier;
-import com.binghamton.jhelp.MyMethodSymbol;
+import com.binghamton.jhelp.symbols.MyMethodSymbol;
 
 /**
  * A class representing the declaration of a Java method

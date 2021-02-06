@@ -1,6 +1,8 @@
-package com.binghamton.jhelp;
+package com.binghamton.jhelp.types;
 
 import java.util.Map;
+
+import com.binghamton.jhelp.symbols.ClassSymbol;
 
 /**
  * A singleton class to represent the type of a null reference

@@ -73,18 +73,17 @@ public class Block extends Statement {
      * @param statements the statements comprising this block
      */
     public Block(List<Statement> statements) {
-        super(statements.get(0).getFirstToken(),
-              statements.get(statements.size()-1).getLastToken());
-        this.statements = statements;
+        this(statements.get(0).getFirstToken(),
+             statements.get(statements.size()-1).getLastToken(),
+             statements);
     }
 
     /**
-     * Deep-copy construct a block from another
+     * Copy construct a block from another
      * @param block the other block whose values are to copied
      */
     public Block(Block block) {
-        super(block.getFirstToken(), block.getLastToken());
-        this.statements = new ArrayList<>(block.statements);
+        this(block.getFirstToken(), block.getLastToken(), block.statements);
     }
 
     /**

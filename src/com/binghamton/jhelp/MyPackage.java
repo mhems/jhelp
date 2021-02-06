@@ -3,6 +3,9 @@ package com.binghamton.jhelp;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.binghamton.jhelp.symbols.AnnotationSymbol;
+import com.binghamton.jhelp.symbols.ClassSymbol;
+
 /**
  * A class representing a user-created Java package
  */

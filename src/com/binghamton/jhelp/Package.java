@@ -1,5 +1,7 @@
 package com.binghamton.jhelp;
 
+import com.binghamton.jhelp.symbols.ClassSymbol;
+
 /**
  * A base class representing a Java package
  */

@@ -5,22 +5,23 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.ClassSymbol;
 import com.binghamton.jhelp.ImportManager;
 import com.binghamton.jhelp.Modifier;
-import com.binghamton.jhelp.MethodSymbol;
-import com.binghamton.jhelp.MyClassSymbol;
 import com.binghamton.jhelp.MyPackage;
 import com.binghamton.jhelp.Package;
 import com.binghamton.jhelp.Program;
-import com.binghamton.jhelp.Type;
-import com.binghamton.jhelp.TypeVariable;
-import com.binghamton.jhelp.VariableSymbol;
 import com.binghamton.jhelp.error.ApplicationError;
 import com.binghamton.jhelp.error.JHelpError;
 import com.binghamton.jhelp.error.SemanticError;
 import com.binghamton.jhelp.error.StyleWarning;
 import com.binghamton.jhelp.error.TypeMismatchError;
+import com.binghamton.jhelp.symbols.ClassSymbol;
+import com.binghamton.jhelp.symbols.MethodSymbol;
+import com.binghamton.jhelp.symbols.MyClassSymbol;
+import com.binghamton.jhelp.symbols.VariableSymbol;
+import com.binghamton.jhelp.types.Type;
+import com.binghamton.jhelp.types.TypeVariable;
+import com.binghamton.jhelp.util.Logger;
 
 import static com.binghamton.jhelp.ast.NameExpression.Kind;
 
@@ -184,7 +185,7 @@ public class FileLevelVisitor extends EmptyVisitor {
             try {
                 decl.accept(this);
             } catch(Exception e) {
-                // squelched
+                Logger.log(e);
             }
         }
 

@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.MethodSymbol;
+import com.binghamton.jhelp.symbols.MethodSymbol;
 
 /**
  * A class representing a Java method call, including explicit constructor calls

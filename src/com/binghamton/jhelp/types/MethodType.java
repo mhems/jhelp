@@ -1,8 +1,10 @@
-package com.binghamton.jhelp;
+package com.binghamton.jhelp.types;
 
 import java.util.Arrays;
 import java.util.Map;
 
+import com.binghamton.jhelp.symbols.ClassSymbol;
+import com.binghamton.jhelp.symbols.MethodSymbol;
 import com.binghamton.jhelp.util.StringUtils;
 
 /**

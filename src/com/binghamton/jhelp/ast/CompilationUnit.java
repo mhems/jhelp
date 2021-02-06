@@ -3,14 +3,14 @@ package com.binghamton.jhelp.ast;
 import java.util.List;
 
 import com.binghamton.jhelp.MyPackage;
-import com.binghamton.jhelp.ClassSymbol;
-import com.binghamton.jhelp.MethodSymbol;
-import com.binghamton.jhelp.MethodType;
-import com.binghamton.jhelp.VariableSymbol;
 import com.binghamton.jhelp.ImportingSymbolTable;
 import com.binghamton.jhelp.NamedSymbolTable;
 import com.binghamton.jhelp.MethodSymbolTable;
-import com.binghamton.jhelp.Type;
+import com.binghamton.jhelp.symbols.ClassSymbol;
+import com.binghamton.jhelp.symbols.MethodSymbol;
+import com.binghamton.jhelp.symbols.VariableSymbol;
+import com.binghamton.jhelp.types.MethodType;
+import com.binghamton.jhelp.types.Type;
 
 /**
  * A class representing a Java compilation unit (file)

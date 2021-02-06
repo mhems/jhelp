@@ -1,4 +1,4 @@
-package com.binghamton.jhelp;
+package com.binghamton.jhelp.types;
 
 import java.util.Arrays;
 import java.util.ArrayList;
@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.antlr.v4.runtime.Token;
+
+import com.binghamton.jhelp.Modifiers;
+import com.binghamton.jhelp.symbols.ClassSymbol;
 
 import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
 

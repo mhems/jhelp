@@ -1,8 +1,18 @@
-package com.binghamton.jhelp;
+package com.binghamton.jhelp.types;
 
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+
+import com.binghamton.jhelp.Modifier;
+import com.binghamton.jhelp.Modifiers;
+import com.binghamton.jhelp.Package;
+import com.binghamton.jhelp.symbols.AnnotationSymbol;
+import com.binghamton.jhelp.symbols.ClassSymbol;
+import com.binghamton.jhelp.symbols.MyMethodSymbol;
+import com.binghamton.jhelp.symbols.MyVariableSymbol;
+import com.binghamton.jhelp.types.ArrayType;
+import com.binghamton.jhelp.types.Type;
 
 import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
 

@@ -1,5 +1,6 @@
-package com.binghamton.jhelp;
+package com.binghamton.jhelp.validators;
 
+import com.binghamton.jhelp.Program;
 import com.binghamton.jhelp.ast.CodeLevelVisitor;
 
 /**

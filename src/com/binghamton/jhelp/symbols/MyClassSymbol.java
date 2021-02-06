@@ -1,9 +1,17 @@
-package com.binghamton.jhelp;
+package com.binghamton.jhelp.symbols;
 
 import org.antlr.v4.runtime.Token;
 
+import com.binghamton.jhelp.Modifier;
+import com.binghamton.jhelp.Modifiers;
+import com.binghamton.jhelp.MyPackage;
+import com.binghamton.jhelp.Program;
 import com.binghamton.jhelp.ast.ASTVisitor;
 import com.binghamton.jhelp.ast.BodyDeclaration;
+import com.binghamton.jhelp.types.ArrayType;
+import com.binghamton.jhelp.types.ParameterizedType;
+import com.binghamton.jhelp.types.Type;
+import com.binghamton.jhelp.types.TypeVariable;
 import com.binghamton.jhelp.error.SemanticError;
 
 import static com.binghamton.jhelp.ImportingSymbolTable.fetch;

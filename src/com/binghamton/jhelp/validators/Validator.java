@@ -1,4 +1,6 @@
-package com.binghamton.jhelp;
+package com.binghamton.jhelp.validators;
+
+import com.binghamton.jhelp.Program;
 
 /**
  * An interface capturing the ability to validate a set of input according to

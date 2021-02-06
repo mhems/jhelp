@@ -6,7 +6,7 @@ import java.util.List;
 import org.antlr.v4.runtime.Token;
 
 import com.binghamton.jhelp.Modifier;
-import com.binghamton.jhelp.Type;
+import com.binghamton.jhelp.types.Type;
 
 /**
  * A class representing a Java class declaration

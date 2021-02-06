@@ -1,24 +1,24 @@
 // Generated from Java8.g4 by ANTLR 4.6
 package com.binghamton.jhelp.antlr;
 
-    import java.util.ArrayList;
-    import java.util.List;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
-    import com.binghamton.jhelp.*;
-    import com.binghamton.jhelp.ast.*;
-    import com.binghamton.jhelp.error.SyntacticError;
+import com.binghamton.jhelp.*;
+import com.binghamton.jhelp.ast.*;
+import com.binghamton.jhelp.error.SyntacticError;
+import com.binghamton.jhelp.types.PrimitiveType;
 
-    import static com.binghamton.jhelp.ast.NameExpression.*;
-    import static com.binghamton.jhelp.ast.BodyDeclaration.Kind.*;
+import static com.binghamton.jhelp.ast.NameExpression.*;
+import static com.binghamton.jhelp.ast.BodyDeclaration.Kind.*;
 
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.*;
 import org.antlr.v4.runtime.tree.*;
-import java.util.List;
-import java.util.Iterator;
-import java.util.ArrayList;
+
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
 public class Java8Parser extends Parser {
@@ -28,199 +28,199 @@ public class Java8Parser extends Parser {
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
 	public static final int
-		ABSTRACT=1, ASSERT=2, BOOLEAN=3, BREAK=4, BYTE=5, CASE=6, CATCH=7, CHAR=8, 
-		CLASS=9, CONST=10, CONTINUE=11, DEFAULT=12, DO=13, DOUBLE=14, ELSE=15, 
-		ENUM=16, EXTENDS=17, FINAL=18, FINALLY=19, FLOAT=20, FOR=21, IF=22, GOTO=23, 
-		IMPLEMENTS=24, IMPORT=25, INSTANCEOF=26, INT=27, INTERFACE=28, LONG=29, 
-		NATIVE=30, NEW=31, PACKAGE=32, PRIVATE=33, PROTECTED=34, PUBLIC=35, RETURN=36, 
-		SHORT=37, STATIC=38, STRICTFP=39, SUPER=40, SWITCH=41, SYNCHRONIZED=42, 
-		THIS=43, THROW=44, THROWS=45, TRANSIENT=46, TRY=47, VOID=48, VOLATILE=49, 
-		WHILE=50, IntegerLiteral=51, FloatingPointLiteral=52, BooleanLiteral=53, 
-		BadBooleanLiteral=54, CharacterLiteral=55, StringLiteral=56, BadStringLiteral=57, 
-		NullLiteral=58, BadNullLiteral=59, LPAREN=60, RPAREN=61, LBRACE=62, RBRACE=63, 
-		LBRACK=64, RBRACK=65, SEMI=66, COMMA=67, DOT=68, ASSIGN=69, GT=70, LT=71, 
-		BANG=72, TILDE=73, QUESTION=74, COLON=75, EQUAL=76, LE=77, GE=78, NOTEQUAL=79, 
-		AND=80, OR=81, INC=82, DEC=83, ADD=84, SUB=85, MUL=86, DIV=87, BITAND=88, 
-		BITOR=89, CARET=90, MOD=91, ARROW=92, COLONCOLON=93, ADD_ASSIGN=94, SUB_ASSIGN=95, 
-		MUL_ASSIGN=96, DIV_ASSIGN=97, AND_ASSIGN=98, OR_ASSIGN=99, XOR_ASSIGN=100, 
-		MOD_ASSIGN=101, LSHIFT_ASSIGN=102, RSHIFT_ASSIGN=103, URSHIFT_ASSIGN=104, 
+		ABSTRACT=1, ASSERT=2, BOOLEAN=3, BREAK=4, BYTE=5, CASE=6, CATCH=7, CHAR=8,
+		CLASS=9, CONST=10, CONTINUE=11, DEFAULT=12, DO=13, DOUBLE=14, ELSE=15,
+		ENUM=16, EXTENDS=17, FINAL=18, FINALLY=19, FLOAT=20, FOR=21, IF=22, GOTO=23,
+		IMPLEMENTS=24, IMPORT=25, INSTANCEOF=26, INT=27, INTERFACE=28, LONG=29,
+		NATIVE=30, NEW=31, PACKAGE=32, PRIVATE=33, PROTECTED=34, PUBLIC=35, RETURN=36,
+		SHORT=37, STATIC=38, STRICTFP=39, SUPER=40, SWITCH=41, SYNCHRONIZED=42,
+		THIS=43, THROW=44, THROWS=45, TRANSIENT=46, TRY=47, VOID=48, VOLATILE=49,
+		WHILE=50, IntegerLiteral=51, FloatingPointLiteral=52, BooleanLiteral=53,
+		BadBooleanLiteral=54, CharacterLiteral=55, StringLiteral=56, BadStringLiteral=57,
+		NullLiteral=58, BadNullLiteral=59, LPAREN=60, RPAREN=61, LBRACE=62, RBRACE=63,
+		LBRACK=64, RBRACK=65, SEMI=66, COMMA=67, DOT=68, ASSIGN=69, GT=70, LT=71,
+		BANG=72, TILDE=73, QUESTION=74, COLON=75, EQUAL=76, LE=77, GE=78, NOTEQUAL=79,
+		AND=80, OR=81, INC=82, DEC=83, ADD=84, SUB=85, MUL=86, DIV=87, BITAND=88,
+		BITOR=89, CARET=90, MOD=91, ARROW=92, COLONCOLON=93, ADD_ASSIGN=94, SUB_ASSIGN=95,
+		MUL_ASSIGN=96, DIV_ASSIGN=97, AND_ASSIGN=98, OR_ASSIGN=99, XOR_ASSIGN=100,
+		MOD_ASSIGN=101, LSHIFT_ASSIGN=102, RSHIFT_ASSIGN=103, URSHIFT_ASSIGN=104,
 		Identifier=105, AT=106, ELLIPSIS=107, WS=108, COMMENT=109, LINE_COMMENT=110;
 	public static final int
-		RULE_literal = 0, RULE_type_ = 1, RULE_primitiveType = 2, RULE_numericType = 3, 
-		RULE_integralType = 4, RULE_floatingPointType = 5, RULE_referenceType = 6, 
-		RULE_classOrInterfaceType = 7, RULE_classType = 8, RULE_classType_lfno_classOrInterfaceType = 9, 
-		RULE_typeVariable = 10, RULE_arrayType = 11, RULE_dims = 12, RULE_typeParameter = 13, 
-		RULE_typeParameterModifier = 14, RULE_typeBound = 15, RULE_additionalBound = 16, 
-		RULE_typeArguments = 17, RULE_typeArgumentList = 18, RULE_typeArgument = 19, 
-		RULE_wildcard = 20, RULE_wildcardBounds = 21, RULE_typeName = 22, RULE_packageOrTypeName = 23, 
-		RULE_expressionName = 24, RULE_ambiguousName = 25, RULE_compilationUnit = 26, 
-		RULE_packageDeclaration = 27, RULE_packageModifier = 28, RULE_importDeclaration = 29, 
-		RULE_singleTypeImportDeclaration = 30, RULE_typeImportOnDemandDeclaration = 31, 
-		RULE_singleStaticImportDeclaration = 32, RULE_staticImportOnDemandDeclaration = 33, 
-		RULE_typeDeclaration = 34, RULE_classDeclaration = 35, RULE_normalClassDeclaration = 36, 
-		RULE_classModifier = 37, RULE_typeParameters = 38, RULE_typeParameterList = 39, 
-		RULE_superclass = 40, RULE_superinterfaces = 41, RULE_interfaceTypeList = 42, 
-		RULE_classBody = 43, RULE_classBodyDeclaration = 44, RULE_classMemberDeclaration = 45, 
-		RULE_fieldDeclaration = 46, RULE_fieldModifier = 47, RULE_variableDeclaratorList = 48, 
-		RULE_variableDeclarator = 49, RULE_variableDeclaratorId = 50, RULE_typedVariableDeclaratorId = 51, 
-		RULE_variableInitializer = 52, RULE_unannType = 53, RULE_unannPrimitiveType = 54, 
-		RULE_unannReferenceType = 55, RULE_unannClassOrInterfaceType = 56, RULE_unannClassType = 57, 
-		RULE_unannClassType_lfno_unannClassOrInterfaceType = 58, RULE_unannTypeVariable = 59, 
-		RULE_unannArrayType = 60, RULE_methodDeclaration = 61, RULE_methodModifier = 62, 
-		RULE_methodHeader = 63, RULE_result = 64, RULE_methodDeclarator = 65, 
-		RULE_formalParameterList = 66, RULE_formalParameters = 67, RULE_formalParameter = 68, 
-		RULE_variableModifier = 69, RULE_lastFormalParameter = 70, RULE_receiverParameter = 71, 
-		RULE_throws_ = 72, RULE_exceptionTypeList = 73, RULE_exceptionType = 74, 
-		RULE_methodBody = 75, RULE_instanceInitializer = 76, RULE_staticInitializer = 77, 
-		RULE_constructorDeclaration = 78, RULE_constructorModifier = 79, RULE_constructorDeclarator = 80, 
-		RULE_constructorBody = 81, RULE_explicitConstructorInvocation = 82, RULE_enumDeclaration = 83, 
-		RULE_enumBody = 84, RULE_enumConstantList = 85, RULE_enumConstant = 86, 
-		RULE_enumBodyDeclarations = 87, RULE_interfaceDeclaration = 88, RULE_normalInterfaceDeclaration = 89, 
-		RULE_interfaceModifier = 90, RULE_extendsInterfaces = 91, RULE_interfaceBody = 92, 
-		RULE_interfaceMemberDeclaration = 93, RULE_constantDeclaration = 94, RULE_constantModifier = 95, 
-		RULE_interfaceMethodDeclaration = 96, RULE_interfaceMethodModifier = 97, 
-		RULE_annotationTypeDeclaration = 98, RULE_annotationTypeBody = 99, RULE_annotationTypeMemberDeclaration = 100, 
-		RULE_annotationTypeElementDeclaration = 101, RULE_annotationTypeElementModifier = 102, 
-		RULE_defaultValue = 103, RULE_annotation = 104, RULE_normalAnnotation = 105, 
-		RULE_elementValuePairList = 106, RULE_elementValuePair = 107, RULE_elementValue = 108, 
-		RULE_elementValueArrayInitializer = 109, RULE_elementValueList = 110, 
-		RULE_markerAnnotation = 111, RULE_singleElementAnnotation = 112, RULE_arrayInitializer = 113, 
-		RULE_variableInitializerList = 114, RULE_block = 115, RULE_blockStatements = 116, 
-		RULE_blockStatement = 117, RULE_localVariableDeclarationStatement = 118, 
-		RULE_localVariableDeclaration = 119, RULE_statement = 120, RULE_statementNoShortIf = 121, 
-		RULE_statementWithoutTrailingSubstatement = 122, RULE_emptyStatement = 123, 
-		RULE_labeledStatement = 124, RULE_labeledStatementNoShortIf = 125, RULE_expressionStatement = 126, 
-		RULE_statementExpression = 127, RULE_ifThenStatement = 128, RULE_ifThenElseStatement = 129, 
-		RULE_ifThenElseStatementNoShortIf = 130, RULE_assertStatement = 131, RULE_switchStatement = 132, 
-		RULE_switchBlock = 133, RULE_switchBlockStatementGroup = 134, RULE_switchLabels = 135, 
-		RULE_switchLabel = 136, RULE_whileStatement = 137, RULE_whileStatementNoShortIf = 138, 
-		RULE_doStatement = 139, RULE_forStatement = 140, RULE_forStatementNoShortIf = 141, 
-		RULE_basicForStatement = 142, RULE_basicForStatementNoShortIf = 143, RULE_forInit = 144, 
-		RULE_forUpdate = 145, RULE_statementExpressionList = 146, RULE_enhancedForStatement = 147, 
-		RULE_enhancedForStatementNoShortIf = 148, RULE_breakStatement = 149, RULE_continueStatement = 150, 
-		RULE_returnStatement = 151, RULE_throwStatement = 152, RULE_synchronizedStatement = 153, 
-		RULE_tryStatement = 154, RULE_catches = 155, RULE_catchClause = 156, RULE_catchFormalParameter = 157, 
-		RULE_catchType = 158, RULE_finally_ = 159, RULE_tryWithResourcesStatement = 160, 
-		RULE_resourceSpecification = 161, RULE_resourceList = 162, RULE_resource = 163, 
-		RULE_primary = 164, RULE_primaryNoNewArray = 165, RULE_primaryNoNewArray_typeAccess = 166, 
-		RULE_primaryNoNewArray_lf_arrayAccess = 167, RULE_primaryNoNewArray_lfno_arrayAccess = 168, 
-		RULE_primaryNoNewArray_lf_primary = 169, RULE_primaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primary = 170, 
-		RULE_primaryNoNewArray_lfno_primary = 171, RULE_primaryNoNewArray_lfno_primary_lf_arrayAccess_lfno_primary = 172, 
-		RULE_primaryNoNewArray_lfno_primary_lfno_arrayAccess_lfno_primary = 173, 
-		RULE_classInstanceCreationExpression = 174, RULE_classInstanceCreationExpression_lf_primary = 175, 
-		RULE_classInstanceCreationExpression_lfno_primary = 176, RULE_typeArgumentsOrDiamond = 177, 
-		RULE_fieldAccess = 178, RULE_fieldAccess_lf_primary = 179, RULE_fieldAccess_lfno_primary = 180, 
-		RULE_arrayAccess = 181, RULE_arrayAccess_lf_primary = 182, RULE_arrayAccess_lfno_primary = 183, 
-		RULE_methodInvocation = 184, RULE_methodInvocation_lf_primary = 185, RULE_methodInvocation_lfno_primary = 186, 
-		RULE_argumentList = 187, RULE_methodReference = 188, RULE_methodReference_lf_primary = 189, 
-		RULE_methodReference_lfno_primary = 190, RULE_arrayCreationExpression = 191, 
-		RULE_dimExprs = 192, RULE_dimExpr = 193, RULE_constantExpression = 194, 
-		RULE_expression = 195, RULE_lambdaExpression = 196, RULE_lambdaParameters = 197, 
-		RULE_inferredFormalParameterList = 198, RULE_lambdaBody = 199, RULE_assignmentExpression = 200, 
-		RULE_assignment = 201, RULE_leftHandSide = 202, RULE_assignmentOperator = 203, 
-		RULE_conditionalExpression = 204, RULE_conditionalOrExpression = 205, 
-		RULE_conditionalAndExpression = 206, RULE_inclusiveOrExpression = 207, 
-		RULE_exclusiveOrExpression = 208, RULE_andExpression = 209, RULE_equalityExpression = 210, 
-		RULE_relationalExpression = 211, RULE_shiftExpression = 212, RULE_additiveExpression = 213, 
-		RULE_multiplicativeExpression = 214, RULE_unaryExpression = 215, RULE_preIncrementExpression = 216, 
-		RULE_preDecrementExpression = 217, RULE_unaryExpressionNotPlusMinus = 218, 
-		RULE_postfixExpression = 219, RULE_postIncrementExpression = 220, RULE_postDecrementExpression = 221, 
+		RULE_literal = 0, RULE_type_ = 1, RULE_primitiveType = 2, RULE_numericType = 3,
+		RULE_integralType = 4, RULE_floatingPointType = 5, RULE_referenceType = 6,
+		RULE_classOrInterfaceType = 7, RULE_classType = 8, RULE_classType_lfno_classOrInterfaceType = 9,
+		RULE_typeVariable = 10, RULE_arrayType = 11, RULE_dims = 12, RULE_typeParameter = 13,
+		RULE_typeParameterModifier = 14, RULE_typeBound = 15, RULE_additionalBound = 16,
+		RULE_typeArguments = 17, RULE_typeArgumentList = 18, RULE_typeArgument = 19,
+		RULE_wildcard = 20, RULE_wildcardBounds = 21, RULE_typeName = 22, RULE_packageOrTypeName = 23,
+		RULE_expressionName = 24, RULE_ambiguousName = 25, RULE_compilationUnit = 26,
+		RULE_packageDeclaration = 27, RULE_packageModifier = 28, RULE_importDeclaration = 29,
+		RULE_singleTypeImportDeclaration = 30, RULE_typeImportOnDemandDeclaration = 31,
+		RULE_singleStaticImportDeclaration = 32, RULE_staticImportOnDemandDeclaration = 33,
+		RULE_typeDeclaration = 34, RULE_classDeclaration = 35, RULE_normalClassDeclaration = 36,
+		RULE_classModifier = 37, RULE_typeParameters = 38, RULE_typeParameterList = 39,
+		RULE_superclass = 40, RULE_superinterfaces = 41, RULE_interfaceTypeList = 42,
+		RULE_classBody = 43, RULE_classBodyDeclaration = 44, RULE_classMemberDeclaration = 45,
+		RULE_fieldDeclaration = 46, RULE_fieldModifier = 47, RULE_variableDeclaratorList = 48,
+		RULE_variableDeclarator = 49, RULE_variableDeclaratorId = 50, RULE_typedVariableDeclaratorId = 51,
+		RULE_variableInitializer = 52, RULE_unannType = 53, RULE_unannPrimitiveType = 54,
+		RULE_unannReferenceType = 55, RULE_unannClassOrInterfaceType = 56, RULE_unannClassType = 57,
+		RULE_unannClassType_lfno_unannClassOrInterfaceType = 58, RULE_unannTypeVariable = 59,
+		RULE_unannArrayType = 60, RULE_methodDeclaration = 61, RULE_methodModifier = 62,
+		RULE_methodHeader = 63, RULE_result = 64, RULE_methodDeclarator = 65,
+		RULE_formalParameterList = 66, RULE_formalParameters = 67, RULE_formalParameter = 68,
+		RULE_variableModifier = 69, RULE_lastFormalParameter = 70, RULE_receiverParameter = 71,
+		RULE_throws_ = 72, RULE_exceptionTypeList = 73, RULE_exceptionType = 74,
+		RULE_methodBody = 75, RULE_instanceInitializer = 76, RULE_staticInitializer = 77,
+		RULE_constructorDeclaration = 78, RULE_constructorModifier = 79, RULE_constructorDeclarator = 80,
+		RULE_constructorBody = 81, RULE_explicitConstructorInvocation = 82, RULE_enumDeclaration = 83,
+		RULE_enumBody = 84, RULE_enumConstantList = 85, RULE_enumConstant = 86,
+		RULE_enumBodyDeclarations = 87, RULE_interfaceDeclaration = 88, RULE_normalInterfaceDeclaration = 89,
+		RULE_interfaceModifier = 90, RULE_extendsInterfaces = 91, RULE_interfaceBody = 92,
+		RULE_interfaceMemberDeclaration = 93, RULE_constantDeclaration = 94, RULE_constantModifier = 95,
+		RULE_interfaceMethodDeclaration = 96, RULE_interfaceMethodModifier = 97,
+		RULE_annotationTypeDeclaration = 98, RULE_annotationTypeBody = 99, RULE_annotationTypeMemberDeclaration = 100,
+		RULE_annotationTypeElementDeclaration = 101, RULE_annotationTypeElementModifier = 102,
+		RULE_defaultValue = 103, RULE_annotation = 104, RULE_normalAnnotation = 105,
+		RULE_elementValuePairList = 106, RULE_elementValuePair = 107, RULE_elementValue = 108,
+		RULE_elementValueArrayInitializer = 109, RULE_elementValueList = 110,
+		RULE_markerAnnotation = 111, RULE_singleElementAnnotation = 112, RULE_arrayInitializer = 113,
+		RULE_variableInitializerList = 114, RULE_block = 115, RULE_blockStatements = 116,
+		RULE_blockStatement = 117, RULE_localVariableDeclarationStatement = 118,
+		RULE_localVariableDeclaration = 119, RULE_statement = 120, RULE_statementNoShortIf = 121,
+		RULE_statementWithoutTrailingSubstatement = 122, RULE_emptyStatement = 123,
+		RULE_labeledStatement = 124, RULE_labeledStatementNoShortIf = 125, RULE_expressionStatement = 126,
+		RULE_statementExpression = 127, RULE_ifThenStatement = 128, RULE_ifThenElseStatement = 129,
+		RULE_ifThenElseStatementNoShortIf = 130, RULE_assertStatement = 131, RULE_switchStatement = 132,
+		RULE_switchBlock = 133, RULE_switchBlockStatementGroup = 134, RULE_switchLabels = 135,
+		RULE_switchLabel = 136, RULE_whileStatement = 137, RULE_whileStatementNoShortIf = 138,
+		RULE_doStatement = 139, RULE_forStatement = 140, RULE_forStatementNoShortIf = 141,
+		RULE_basicForStatement = 142, RULE_basicForStatementNoShortIf = 143, RULE_forInit = 144,
+		RULE_forUpdate = 145, RULE_statementExpressionList = 146, RULE_enhancedForStatement = 147,
+		RULE_enhancedForStatementNoShortIf = 148, RULE_breakStatement = 149, RULE_continueStatement = 150,
+		RULE_returnStatement = 151, RULE_throwStatement = 152, RULE_synchronizedStatement = 153,
+		RULE_tryStatement = 154, RULE_catches = 155, RULE_catchClause = 156, RULE_catchFormalParameter = 157,
+		RULE_catchType = 158, RULE_finally_ = 159, RULE_tryWithResourcesStatement = 160,
+		RULE_resourceSpecification = 161, RULE_resourceList = 162, RULE_resource = 163,
+		RULE_primary = 164, RULE_primaryNoNewArray = 165, RULE_primaryNoNewArray_typeAccess = 166,
+		RULE_primaryNoNewArray_lf_arrayAccess = 167, RULE_primaryNoNewArray_lfno_arrayAccess = 168,
+		RULE_primaryNoNewArray_lf_primary = 169, RULE_primaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primary = 170,
+		RULE_primaryNoNewArray_lfno_primary = 171, RULE_primaryNoNewArray_lfno_primary_lf_arrayAccess_lfno_primary = 172,
+		RULE_primaryNoNewArray_lfno_primary_lfno_arrayAccess_lfno_primary = 173,
+		RULE_classInstanceCreationExpression = 174, RULE_classInstanceCreationExpression_lf_primary = 175,
+		RULE_classInstanceCreationExpression_lfno_primary = 176, RULE_typeArgumentsOrDiamond = 177,
+		RULE_fieldAccess = 178, RULE_fieldAccess_lf_primary = 179, RULE_fieldAccess_lfno_primary = 180,
+		RULE_arrayAccess = 181, RULE_arrayAccess_lf_primary = 182, RULE_arrayAccess_lfno_primary = 183,
+		RULE_methodInvocation = 184, RULE_methodInvocation_lf_primary = 185, RULE_methodInvocation_lfno_primary = 186,
+		RULE_argumentList = 187, RULE_methodReference = 188, RULE_methodReference_lf_primary = 189,
+		RULE_methodReference_lfno_primary = 190, RULE_arrayCreationExpression = 191,
+		RULE_dimExprs = 192, RULE_dimExpr = 193, RULE_constantExpression = 194,
+		RULE_expression = 195, RULE_lambdaExpression = 196, RULE_lambdaParameters = 197,
+		RULE_inferredFormalParameterList = 198, RULE_lambdaBody = 199, RULE_assignmentExpression = 200,
+		RULE_assignment = 201, RULE_leftHandSide = 202, RULE_assignmentOperator = 203,
+		RULE_conditionalExpression = 204, RULE_conditionalOrExpression = 205,
+		RULE_conditionalAndExpression = 206, RULE_inclusiveOrExpression = 207,
+		RULE_exclusiveOrExpression = 208, RULE_andExpression = 209, RULE_equalityExpression = 210,
+		RULE_relationalExpression = 211, RULE_shiftExpression = 212, RULE_additiveExpression = 213,
+		RULE_multiplicativeExpression = 214, RULE_unaryExpression = 215, RULE_preIncrementExpression = 216,
+		RULE_preDecrementExpression = 217, RULE_unaryExpressionNotPlusMinus = 218,
+		RULE_postfixExpression = 219, RULE_postIncrementExpression = 220, RULE_postDecrementExpression = 221,
 		RULE_castExpression = 222;
 	public static final String[] ruleNames = {
-		"literal", "type_", "primitiveType", "numericType", "integralType", "floatingPointType", 
-		"referenceType", "classOrInterfaceType", "classType", "classType_lfno_classOrInterfaceType", 
-		"typeVariable", "arrayType", "dims", "typeParameter", "typeParameterModifier", 
-		"typeBound", "additionalBound", "typeArguments", "typeArgumentList", "typeArgument", 
-		"wildcard", "wildcardBounds", "typeName", "packageOrTypeName", "expressionName", 
-		"ambiguousName", "compilationUnit", "packageDeclaration", "packageModifier", 
-		"importDeclaration", "singleTypeImportDeclaration", "typeImportOnDemandDeclaration", 
-		"singleStaticImportDeclaration", "staticImportOnDemandDeclaration", "typeDeclaration", 
-		"classDeclaration", "normalClassDeclaration", "classModifier", "typeParameters", 
-		"typeParameterList", "superclass", "superinterfaces", "interfaceTypeList", 
-		"classBody", "classBodyDeclaration", "classMemberDeclaration", "fieldDeclaration", 
-		"fieldModifier", "variableDeclaratorList", "variableDeclarator", "variableDeclaratorId", 
-		"typedVariableDeclaratorId", "variableInitializer", "unannType", "unannPrimitiveType", 
-		"unannReferenceType", "unannClassOrInterfaceType", "unannClassType", "unannClassType_lfno_unannClassOrInterfaceType", 
-		"unannTypeVariable", "unannArrayType", "methodDeclaration", "methodModifier", 
-		"methodHeader", "result", "methodDeclarator", "formalParameterList", "formalParameters", 
-		"formalParameter", "variableModifier", "lastFormalParameter", "receiverParameter", 
-		"throws_", "exceptionTypeList", "exceptionType", "methodBody", "instanceInitializer", 
-		"staticInitializer", "constructorDeclaration", "constructorModifier", 
-		"constructorDeclarator", "constructorBody", "explicitConstructorInvocation", 
-		"enumDeclaration", "enumBody", "enumConstantList", "enumConstant", "enumBodyDeclarations", 
-		"interfaceDeclaration", "normalInterfaceDeclaration", "interfaceModifier", 
-		"extendsInterfaces", "interfaceBody", "interfaceMemberDeclaration", "constantDeclaration", 
-		"constantModifier", "interfaceMethodDeclaration", "interfaceMethodModifier", 
-		"annotationTypeDeclaration", "annotationTypeBody", "annotationTypeMemberDeclaration", 
-		"annotationTypeElementDeclaration", "annotationTypeElementModifier", "defaultValue", 
-		"annotation", "normalAnnotation", "elementValuePairList", "elementValuePair", 
-		"elementValue", "elementValueArrayInitializer", "elementValueList", "markerAnnotation", 
-		"singleElementAnnotation", "arrayInitializer", "variableInitializerList", 
-		"block", "blockStatements", "blockStatement", "localVariableDeclarationStatement", 
-		"localVariableDeclaration", "statement", "statementNoShortIf", "statementWithoutTrailingSubstatement", 
-		"emptyStatement", "labeledStatement", "labeledStatementNoShortIf", "expressionStatement", 
-		"statementExpression", "ifThenStatement", "ifThenElseStatement", "ifThenElseStatementNoShortIf", 
-		"assertStatement", "switchStatement", "switchBlock", "switchBlockStatementGroup", 
-		"switchLabels", "switchLabel", "whileStatement", "whileStatementNoShortIf", 
-		"doStatement", "forStatement", "forStatementNoShortIf", "basicForStatement", 
-		"basicForStatementNoShortIf", "forInit", "forUpdate", "statementExpressionList", 
-		"enhancedForStatement", "enhancedForStatementNoShortIf", "breakStatement", 
-		"continueStatement", "returnStatement", "throwStatement", "synchronizedStatement", 
-		"tryStatement", "catches", "catchClause", "catchFormalParameter", "catchType", 
-		"finally_", "tryWithResourcesStatement", "resourceSpecification", "resourceList", 
-		"resource", "primary", "primaryNoNewArray", "primaryNoNewArray_typeAccess", 
-		"primaryNoNewArray_lf_arrayAccess", "primaryNoNewArray_lfno_arrayAccess", 
-		"primaryNoNewArray_lf_primary", "primaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primary", 
-		"primaryNoNewArray_lfno_primary", "primaryNoNewArray_lfno_primary_lf_arrayAccess_lfno_primary", 
-		"primaryNoNewArray_lfno_primary_lfno_arrayAccess_lfno_primary", "classInstanceCreationExpression", 
-		"classInstanceCreationExpression_lf_primary", "classInstanceCreationExpression_lfno_primary", 
-		"typeArgumentsOrDiamond", "fieldAccess", "fieldAccess_lf_primary", "fieldAccess_lfno_primary", 
-		"arrayAccess", "arrayAccess_lf_primary", "arrayAccess_lfno_primary", "methodInvocation", 
-		"methodInvocation_lf_primary", "methodInvocation_lfno_primary", "argumentList", 
-		"methodReference", "methodReference_lf_primary", "methodReference_lfno_primary", 
-		"arrayCreationExpression", "dimExprs", "dimExpr", "constantExpression", 
-		"expression", "lambdaExpression", "lambdaParameters", "inferredFormalParameterList", 
-		"lambdaBody", "assignmentExpression", "assignment", "leftHandSide", "assignmentOperator", 
-		"conditionalExpression", "conditionalOrExpression", "conditionalAndExpression", 
-		"inclusiveOrExpression", "exclusiveOrExpression", "andExpression", "equalityExpression", 
-		"relationalExpression", "shiftExpression", "additiveExpression", "multiplicativeExpression", 
-		"unaryExpression", "preIncrementExpression", "preDecrementExpression", 
-		"unaryExpressionNotPlusMinus", "postfixExpression", "postIncrementExpression", 
+		"literal", "type_", "primitiveType", "numericType", "integralType", "floatingPointType",
+		"referenceType", "classOrInterfaceType", "classType", "classType_lfno_classOrInterfaceType",
+		"typeVariable", "arrayType", "dims", "typeParameter", "typeParameterModifier",
+		"typeBound", "additionalBound", "typeArguments", "typeArgumentList", "typeArgument",
+		"wildcard", "wildcardBounds", "typeName", "packageOrTypeName", "expressionName",
+		"ambiguousName", "compilationUnit", "packageDeclaration", "packageModifier",
+		"importDeclaration", "singleTypeImportDeclaration", "typeImportOnDemandDeclaration",
+		"singleStaticImportDeclaration", "staticImportOnDemandDeclaration", "typeDeclaration",
+		"classDeclaration", "normalClassDeclaration", "classModifier", "typeParameters",
+		"typeParameterList", "superclass", "superinterfaces", "interfaceTypeList",
+		"classBody", "classBodyDeclaration", "classMemberDeclaration", "fieldDeclaration",
+		"fieldModifier", "variableDeclaratorList", "variableDeclarator", "variableDeclaratorId",
+		"typedVariableDeclaratorId", "variableInitializer", "unannType", "unannPrimitiveType",
+		"unannReferenceType", "unannClassOrInterfaceType", "unannClassType", "unannClassType_lfno_unannClassOrInterfaceType",
+		"unannTypeVariable", "unannArrayType", "methodDeclaration", "methodModifier",
+		"methodHeader", "result", "methodDeclarator", "formalParameterList", "formalParameters",
+		"formalParameter", "variableModifier", "lastFormalParameter", "receiverParameter",
+		"throws_", "exceptionTypeList", "exceptionType", "methodBody", "instanceInitializer",
+		"staticInitializer", "constructorDeclaration", "constructorModifier",
+		"constructorDeclarator", "constructorBody", "explicitConstructorInvocation",
+		"enumDeclaration", "enumBody", "enumConstantList", "enumConstant", "enumBodyDeclarations",
+		"interfaceDeclaration", "normalInterfaceDeclaration", "interfaceModifier",
+		"extendsInterfaces", "interfaceBody", "interfaceMemberDeclaration", "constantDeclaration",
+		"constantModifier", "interfaceMethodDeclaration", "interfaceMethodModifier",
+		"annotationTypeDeclaration", "annotationTypeBody", "annotationTypeMemberDeclaration",
+		"annotationTypeElementDeclaration", "annotationTypeElementModifier", "defaultValue",
+		"annotation", "normalAnnotation", "elementValuePairList", "elementValuePair",
+		"elementValue", "elementValueArrayInitializer", "elementValueList", "markerAnnotation",
+		"singleElementAnnotation", "arrayInitializer", "variableInitializerList",
+		"block", "blockStatements", "blockStatement", "localVariableDeclarationStatement",
+		"localVariableDeclaration", "statement", "statementNoShortIf", "statementWithoutTrailingSubstatement",
+		"emptyStatement", "labeledStatement", "labeledStatementNoShortIf", "expressionStatement",
+		"statementExpression", "ifThenStatement", "ifThenElseStatement", "ifThenElseStatementNoShortIf",
+		"assertStatement", "switchStatement", "switchBlock", "switchBlockStatementGroup",
+		"switchLabels", "switchLabel", "whileStatement", "whileStatementNoShortIf",
+		"doStatement", "forStatement", "forStatementNoShortIf", "basicForStatement",
+		"basicForStatementNoShortIf", "forInit", "forUpdate", "statementExpressionList",
+		"enhancedForStatement", "enhancedForStatementNoShortIf", "breakStatement",
+		"continueStatement", "returnStatement", "throwStatement", "synchronizedStatement",
+		"tryStatement", "catches", "catchClause", "catchFormalParameter", "catchType",
+		"finally_", "tryWithResourcesStatement", "resourceSpecification", "resourceList",
+		"resource", "primary", "primaryNoNewArray", "primaryNoNewArray_typeAccess",
+		"primaryNoNewArray_lf_arrayAccess", "primaryNoNewArray_lfno_arrayAccess",
+		"primaryNoNewArray_lf_primary", "primaryNoNewArray_lf_primary_lfno_arrayAccess_lf_primary",
+		"primaryNoNewArray_lfno_primary", "primaryNoNewArray_lfno_primary_lf_arrayAccess_lfno_primary",
+		"primaryNoNewArray_lfno_primary_lfno_arrayAccess_lfno_primary", "classInstanceCreationExpression",
+		"classInstanceCreationExpression_lf_primary", "classInstanceCreationExpression_lfno_primary",
+		"typeArgumentsOrDiamond", "fieldAccess", "fieldAccess_lf_primary", "fieldAccess_lfno_primary",
+		"arrayAccess", "arrayAccess_lf_primary", "arrayAccess_lfno_primary", "methodInvocation",
+		"methodInvocation_lf_primary", "methodInvocation_lfno_primary", "argumentList",
+		"methodReference", "methodReference_lf_primary", "methodReference_lfno_primary",
+		"arrayCreationExpression", "dimExprs", "dimExpr", "constantExpression",
+		"expression", "lambdaExpression", "lambdaParameters", "inferredFormalParameterList",
+		"lambdaBody", "assignmentExpression", "assignment", "leftHandSide", "assignmentOperator",
+		"conditionalExpression", "conditionalOrExpression", "conditionalAndExpression",
+		"inclusiveOrExpression", "exclusiveOrExpression", "andExpression", "equalityExpression",
+		"relationalExpression", "shiftExpression", "additiveExpression", "multiplicativeExpression",
+		"unaryExpression", "preIncrementExpression", "preDecrementExpression",
+		"unaryExpressionNotPlusMinus", "postfixExpression", "postIncrementExpression",
 		"postDecrementExpression", "castExpression"
 	};
 
 	private static final String[] _LITERAL_NAMES = {
-		null, "'abstract'", "'assert'", "'boolean'", "'break'", "'byte'", "'case'", 
-		"'catch'", "'char'", "'class'", "'const'", "'continue'", "'default'", 
-		"'do'", "'double'", "'else'", "'enum'", "'extends'", "'final'", "'finally'", 
-		"'float'", "'for'", "'if'", "'goto'", "'implements'", "'import'", "'instanceof'", 
-		"'int'", "'interface'", "'long'", "'native'", "'new'", "'package'", "'private'", 
-		"'protected'", "'public'", "'return'", "'short'", "'static'", "'strictfp'", 
-		"'super'", "'switch'", "'synchronized'", "'this'", "'throw'", "'throws'", 
-		"'transient'", "'try'", "'void'", "'volatile'", "'while'", null, null, 
-		null, null, null, null, null, "'null'", null, "'('", "')'", "'{'", "'}'", 
-		"'['", "']'", "';'", "','", "'.'", "'='", "'>'", "'<'", "'!'", "'~'", 
-		"'?'", "':'", "'=='", "'<='", "'>='", "'!='", "'&&'", "'||'", "'++'", 
-		"'--'", "'+'", "'-'", "'*'", "'/'", "'&'", "'|'", "'^'", "'%'", "'->'", 
-		"'::'", "'+='", "'-='", "'*='", "'/='", "'&='", "'|='", "'^='", "'%='", 
+		null, "'abstract'", "'assert'", "'boolean'", "'break'", "'byte'", "'case'",
+		"'catch'", "'char'", "'class'", "'const'", "'continue'", "'default'",
+		"'do'", "'double'", "'else'", "'enum'", "'extends'", "'final'", "'finally'",
+		"'float'", "'for'", "'if'", "'goto'", "'implements'", "'import'", "'instanceof'",
+		"'int'", "'interface'", "'long'", "'native'", "'new'", "'package'", "'private'",
+		"'protected'", "'public'", "'return'", "'short'", "'static'", "'strictfp'",
+		"'super'", "'switch'", "'synchronized'", "'this'", "'throw'", "'throws'",
+		"'transient'", "'try'", "'void'", "'volatile'", "'while'", null, null,
+		null, null, null, null, null, "'null'", null, "'('", "')'", "'{'", "'}'",
+		"'['", "']'", "';'", "','", "'.'", "'='", "'>'", "'<'", "'!'", "'~'",
+		"'?'", "':'", "'=='", "'<='", "'>='", "'!='", "'&&'", "'||'", "'++'",
+		"'--'", "'+'", "'-'", "'*'", "'/'", "'&'", "'|'", "'^'", "'%'", "'->'",
+		"'::'", "'+='", "'-='", "'*='", "'/='", "'&='", "'|='", "'^='", "'%='",
 		"'<<='", "'>>='", "'>>>='", null, "'@'", "'...'"
 	};
 	private static final String[] _SYMBOLIC_NAMES = {
-		null, "ABSTRACT", "ASSERT", "BOOLEAN", "BREAK", "BYTE", "CASE", "CATCH", 
-		"CHAR", "CLASS", "CONST", "CONTINUE", "DEFAULT", "DO", "DOUBLE", "ELSE", 
-		"ENUM", "EXTENDS", "FINAL", "FINALLY", "FLOAT", "FOR", "IF", "GOTO", "IMPLEMENTS", 
-		"IMPORT", "INSTANCEOF", "INT", "INTERFACE", "LONG", "NATIVE", "NEW", "PACKAGE", 
-		"PRIVATE", "PROTECTED", "PUBLIC", "RETURN", "SHORT", "STATIC", "STRICTFP", 
-		"SUPER", "SWITCH", "SYNCHRONIZED", "THIS", "THROW", "THROWS", "TRANSIENT", 
-		"TRY", "VOID", "VOLATILE", "WHILE", "IntegerLiteral", "FloatingPointLiteral", 
-		"BooleanLiteral", "BadBooleanLiteral", "CharacterLiteral", "StringLiteral", 
-		"BadStringLiteral", "NullLiteral", "BadNullLiteral", "LPAREN", "RPAREN", 
-		"LBRACE", "RBRACE", "LBRACK", "RBRACK", "SEMI", "COMMA", "DOT", "ASSIGN", 
-		"GT", "LT", "BANG", "TILDE", "QUESTION", "COLON", "EQUAL", "LE", "GE", 
-		"NOTEQUAL", "AND", "OR", "INC", "DEC", "ADD", "SUB", "MUL", "DIV", "BITAND", 
-		"BITOR", "CARET", "MOD", "ARROW", "COLONCOLON", "ADD_ASSIGN", "SUB_ASSIGN", 
-		"MUL_ASSIGN", "DIV_ASSIGN", "AND_ASSIGN", "OR_ASSIGN", "XOR_ASSIGN", "MOD_ASSIGN", 
-		"LSHIFT_ASSIGN", "RSHIFT_ASSIGN", "URSHIFT_ASSIGN", "Identifier", "AT", 
+		null, "ABSTRACT", "ASSERT", "BOOLEAN", "BREAK", "BYTE", "CASE", "CATCH",
+		"CHAR", "CLASS", "CONST", "CONTINUE", "DEFAULT", "DO", "DOUBLE", "ELSE",
+		"ENUM", "EXTENDS", "FINAL", "FINALLY", "FLOAT", "FOR", "IF", "GOTO", "IMPLEMENTS",
+		"IMPORT", "INSTANCEOF", "INT", "INTERFACE", "LONG", "NATIVE", "NEW", "PACKAGE",
+		"PRIVATE", "PROTECTED", "PUBLIC", "RETURN", "SHORT", "STATIC", "STRICTFP",
+		"SUPER", "SWITCH", "SYNCHRONIZED", "THIS", "THROW", "THROWS", "TRANSIENT",
+		"TRY", "VOID", "VOLATILE", "WHILE", "IntegerLiteral", "FloatingPointLiteral",
+		"BooleanLiteral", "BadBooleanLiteral", "CharacterLiteral", "StringLiteral",
+		"BadStringLiteral", "NullLiteral", "BadNullLiteral", "LPAREN", "RPAREN",
+		"LBRACE", "RBRACE", "LBRACK", "RBRACK", "SEMI", "COMMA", "DOT", "ASSIGN",
+		"GT", "LT", "BANG", "TILDE", "QUESTION", "COLON", "EQUAL", "LE", "GE",
+		"NOTEQUAL", "AND", "OR", "INC", "DEC", "ADD", "SUB", "MUL", "DIV", "BITAND",
+		"BITOR", "CARET", "MOD", "ARROW", "COLONCOLON", "ADD_ASSIGN", "SUB_ASSIGN",
+		"MUL_ASSIGN", "DIV_ASSIGN", "AND_ASSIGN", "OR_ASSIGN", "XOR_ASSIGN", "MOD_ASSIGN",
+		"LSHIFT_ASSIGN", "RSHIFT_ASSIGN", "URSHIFT_ASSIGN", "Identifier", "AT",
 		"ELLIPSIS", "WS", "COMMENT", "LINE_COMMENT"
 	};
 	public static final Vocabulary VOCABULARY = new VocabularyImpl(_LITERAL_NAMES, _SYMBOLIC_NAMES);
@@ -346,7 +346,7 @@ public class Java8Parser extends Parser {
 				            } else {
 				                ((LiteralContext)_localctx).ret =  new LiteralExpression(((LiteralContext)_localctx).i, PrimitiveType.INT);
 				            }
-				        
+
 				}
 				break;
 			case FloatingPointLiteral:
@@ -361,7 +361,7 @@ public class Java8Parser extends Parser {
 				            } else {
 				                ((LiteralContext)_localctx).ret =  new LiteralExpression(((LiteralContext)_localctx).f, PrimitiveType.FLOAT);
 				            }
-				        
+
 				}
 				break;
 			case BooleanLiteral:
@@ -405,7 +405,7 @@ public class Java8Parser extends Parser {
 				            notifyErrorListeners(((LiteralContext)_localctx).e,
 				                                 "Strings must be enclosed in double quotes (\"\"), not single quotes (\'\')",
 				                                 createMyException("Use \"\" instead of \'\'"));
-				        
+
 				}
 				break;
 			case BadBooleanLiteral:
@@ -417,7 +417,7 @@ public class Java8Parser extends Parser {
 				            notifyErrorListeners(((LiteralContext)_localctx).e,
 				                                 "Boolean value has wrong capitalization",
 				                                 createMyException("boolean values must be all lowercase"));
-				        
+
 				}
 				break;
 			case BadNullLiteral:
@@ -429,7 +429,7 @@ public class Java8Parser extends Parser {
 				            notifyErrorListeners(((LiteralContext)_localctx).e,
 				                                 "The null literal has the wrong capitalization",
 				                                 createMyException("the null literal must be all lowercase"));
-				        
+
 				}
 				break;
 			default:
@@ -863,7 +863,7 @@ public class Java8Parser extends Parser {
 			            if (((ClassOrInterfaceTypeContext)_localctx).co.targs != null) {
 			                ((ClassOrInterfaceTypeContext)_localctx).ret =  new ParamExpression(_localctx.ret, ((ClassOrInterfaceTypeContext)_localctx).co.targs, ((ClassOrInterfaceTypeContext)_localctx).co.last);
 			            }
-			        
+
 			setState(542);
 			_errHandler.sync(this);
 			_alt = getInterpreter().adaptivePredict(_input,9,_ctx);
@@ -880,9 +880,9 @@ public class Java8Parser extends Parser {
 					                if (((ClassOrInterfaceTypeContext)_localctx).c.targs != null) {
 					                    ((ClassOrInterfaceTypeContext)_localctx).ret =  new ParamExpression(_localctx.ret, ((ClassOrInterfaceTypeContext)_localctx).c.targs, ((ClassOrInterfaceTypeContext)_localctx).c.last);
 					                }
-					            
+
 					}
-					} 
+					}
 				}
 				setState(544);
 				_errHandler.sync(this);
@@ -999,7 +999,7 @@ public class Java8Parser extends Parser {
 
 				            ((ClassTypeContext)_localctx).ret =  new AccessExpression(((ClassTypeContext)_localctx).st.ret,
 				                                        createPackageOrTypeName(((ClassTypeContext)_localctx).id, _localctx.anns));
-				        
+
 				setState(575);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
@@ -1310,7 +1310,7 @@ public class Java8Parser extends Parser {
 					((DimsContext)_localctx).l = match(RBRACK);
 					_localctx.ls.add(new Dimension(((DimsContext)_localctx).f, ((DimsContext)_localctx).l, _localctx.ans));
 					}
-					} 
+					}
 				}
 				setState(646);
 				_errHandler.sync(this);
@@ -1853,7 +1853,7 @@ public class Java8Parser extends Parser {
 				{
 				setState(740);
 				((TypeNameContext)_localctx).id = match(Identifier);
-				 ((TypeNameContext)_localctx).ret =  createTypeName(((TypeNameContext)_localctx).id); 
+				 ((TypeNameContext)_localctx).ret =  createTypeName(((TypeNameContext)_localctx).id);
 				}
 				break;
 			case 2:
@@ -1913,7 +1913,7 @@ public class Java8Parser extends Parser {
 			{
 			setState(750);
 			((PackageOrTypeNameContext)_localctx).id = match(Identifier);
-			 ((PackageOrTypeNameContext)_localctx).ret =  createPackageOrTypeName(((PackageOrTypeNameContext)_localctx).id); 
+			 ((PackageOrTypeNameContext)_localctx).ret =  createPackageOrTypeName(((PackageOrTypeNameContext)_localctx).id);
 			}
 			_ctx.stop = _input.LT(-1);
 			setState(759);
@@ -1937,7 +1937,7 @@ public class Java8Parser extends Parser {
 					((PackageOrTypeNameContext)_localctx).id = match(Identifier);
 					((PackageOrTypeNameContext)_localctx).ret =  new NameExpression(((PackageOrTypeNameContext)_localctx).p.ret, createTypeName(((PackageOrTypeNameContext)_localctx).id));
 					}
-					} 
+					}
 				}
 				setState(761);
 				_errHandler.sync(this);
@@ -1982,7 +1982,7 @@ public class Java8Parser extends Parser {
 				{
 				setState(762);
 				((ExpressionNameContext)_localctx).id = match(Identifier);
-				 ((ExpressionNameContext)_localctx).ret =  createExpressionName(((ExpressionNameContext)_localctx).id); 
+				 ((ExpressionNameContext)_localctx).ret =  createExpressionName(((ExpressionNameContext)_localctx).id);
 				}
 				break;
 			case 2:
@@ -2042,7 +2042,7 @@ public class Java8Parser extends Parser {
 			{
 			setState(772);
 			((AmbiguousNameContext)_localctx).id = match(Identifier);
-			 ((AmbiguousNameContext)_localctx).ret =  createAmbiguousName(((AmbiguousNameContext)_localctx).id); 
+			 ((AmbiguousNameContext)_localctx).ret =  createAmbiguousName(((AmbiguousNameContext)_localctx).id);
 			}
 			_ctx.stop = _input.LT(-1);
 			setState(781);
@@ -2066,7 +2066,7 @@ public class Java8Parser extends Parser {
 					((AmbiguousNameContext)_localctx).id = match(Identifier);
 					((AmbiguousNameContext)_localctx).ret =  new NameExpression(((AmbiguousNameContext)_localctx).a.ret, createAmbiguousName(((AmbiguousNameContext)_localctx).id));
 					}
-					} 
+					}
 				}
 				setState(783);
 				_errHandler.sync(this);
@@ -2245,7 +2245,7 @@ public class Java8Parser extends Parser {
 
 				                ((PackageDeclarationContext)_localctx).name =  new NameExpression(_localctx.name,
 				                                           createPackageName(((PackageDeclarationContext)_localctx).id));
-				            
+
 				}
 				}
 				setState(827);
@@ -2404,7 +2404,7 @@ public class Java8Parser extends Parser {
 			((SingleTypeImportDeclarationContext)_localctx).t = typeName();
 			setState(850);
 			((SingleTypeImportDeclarationContext)_localctx).last = match(SEMI);
-			 ((SingleTypeImportDeclarationContext)_localctx).ret =  new ImportStatement(((SingleTypeImportDeclarationContext)_localctx).kw, ((SingleTypeImportDeclarationContext)_localctx).last, ((SingleTypeImportDeclarationContext)_localctx).t.ret, false, false); 
+			 ((SingleTypeImportDeclarationContext)_localctx).ret =  new ImportStatement(((SingleTypeImportDeclarationContext)_localctx).kw, ((SingleTypeImportDeclarationContext)_localctx).last, ((SingleTypeImportDeclarationContext)_localctx).t.ret, false, false);
 			}
 		}
 		catch (RecognitionException re) {
@@ -2503,7 +2503,7 @@ public class Java8Parser extends Parser {
 			                                                          createAmbiguousName(((SingleStaticImportDeclarationContext)_localctx).id)),
 			                                       true,
 			                                       false);
-			        
+
 			}
 		}
 		catch (RecognitionException re) {
@@ -3294,7 +3294,7 @@ public class Java8Parser extends Parser {
 				            notifyErrorListeners(((ClassBodyDeclarationContext)_localctx).stmt.ret.getFirstToken(),
 				                                 "Statements must go inside methods or initialization blocks",
 				                                 createMyException("Put the statement inside a method"));
-				        
+
 				}
 				break;
 			}
@@ -3701,7 +3701,7 @@ public class Java8Parser extends Parser {
 			            if (_localctx.decl != null) {
 			                _localctx.decl.addField(_localctx.var);
 			            }
-			        
+
 			setState(1075);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
@@ -3817,7 +3817,7 @@ public class Java8Parser extends Parser {
 			                ((TypedVariableDeclaratorIdContext)_localctx).expr =  new ArrayTypeExpression(((TypedVariableDeclaratorIdContext)_localctx).t.ret, ((TypedVariableDeclaratorIdContext)_localctx).id.d);
 			            }
 			            ((TypedVariableDeclaratorIdContext)_localctx).ret =  new VariableDeclaration(((TypedVariableDeclaratorIdContext)_localctx).id.ret, _localctx.expr, _localctx.mods, _localctx.ans);
-			        
+
 			}
 		}
 		catch (RecognitionException re) {
@@ -4135,9 +4135,9 @@ public class Java8Parser extends Parser {
 					                if (((UnannClassOrInterfaceTypeContext)_localctx).c.targs != null) {
 					                    ((UnannClassOrInterfaceTypeContext)_localctx).ret =  new ParamExpression(_localctx.ret, ((UnannClassOrInterfaceTypeContext)_localctx).c.targs, ((UnannClassOrInterfaceTypeContext)_localctx).c.last);
 					                }
-					            
+
 					}
-					} 
+					}
 				}
 				setState(1137);
 				_errHandler.sync(this);
@@ -4205,7 +4205,7 @@ public class Java8Parser extends Parser {
 				            if (((UnannClassTypeContext)_localctx).b.targs != null) {
 				                ((UnannClassTypeContext)_localctx).ret =  new ParamExpression(_localctx.ret, ((UnannClassTypeContext)_localctx).b.targs, ((UnannClassTypeContext)_localctx).b.last);
 				            }
-				        
+
 				}
 				break;
 			}
@@ -4682,7 +4682,7 @@ public class Java8Parser extends Parser {
 				            if (_localctx.ans.size() > 0) {
 				                _localctx.ret.setReturnTypeAnnotations(_localctx.ans);
 				            }
-				        
+
 				setState(1228);
 				((MethodHeaderContext)_localctx).rt = result();
 				_localctx.ret.setReturnType(((MethodHeaderContext)_localctx).rt.ret);
@@ -4832,7 +4832,7 @@ public class Java8Parser extends Parser {
 				                _localctx.ret.setReturnType(new ArrayTypeExpression(_localctx.ret.getReturnTypeExpression(),
 				                                                           ((MethodDeclaratorContext)_localctx).d.ret));
 				            }
-				        
+
 				}
 			}
 
@@ -4966,7 +4966,7 @@ public class Java8Parser extends Parser {
 						((FormalParametersContext)_localctx).f = formalParameter();
 						_localctx.ls.add(((FormalParametersContext)_localctx).f.ret);
 						}
-						} 
+						}
 					}
 					setState(1286);
 					_errHandler.sync(this);
@@ -4996,7 +4996,7 @@ public class Java8Parser extends Parser {
 						((FormalParametersContext)_localctx).f = formalParameter();
 						_localctx.ls.add(((FormalParametersContext)_localctx).f.ret);
 						}
-						} 
+						}
 					}
 					setState(1300);
 					_errHandler.sync(this);
@@ -5246,7 +5246,7 @@ public class Java8Parser extends Parser {
 				                ((LastFormalParameterContext)_localctx).type =  new ArrayTypeExpression(((LastFormalParameterContext)_localctx).t.ret, ((LastFormalParameterContext)_localctx).n.d);
 				            }
 				            ((LastFormalParameterContext)_localctx).ret =  new VariableDeclaration(((LastFormalParameterContext)_localctx).n.ret, _localctx.type, _localctx.mods, _localctx.ans, ((LastFormalParameterContext)_localctx).e, _localctx.ans2);
-				        
+
 				}
 				break;
 			case 2:
@@ -5595,7 +5595,7 @@ public class Java8Parser extends Parser {
 
 			            ((StaticInitializerContext)_localctx).ret =  ((StaticInitializerContext)_localctx).body.ret;
 			            ((StaticInitializerContext)_localctx).body.ret.setFirstToken(((StaticInitializerContext)_localctx).kw);
-			        
+
 			}
 		}
 		catch (RecognitionException re) {
@@ -6066,7 +6066,7 @@ public class Java8Parser extends Parser {
 				                                      ((ExplicitConstructorInvocationContext)_localctx).kw,
 				                                      _localctx.args,
 				                                      _localctx.targs);
-				        
+
 				}
 				break;
 			case 4:
@@ -6113,7 +6113,7 @@ public class Java8Parser extends Parser {
 				                                      ((ExplicitConstructorInvocationContext)_localctx).kw,
 				                                      _localctx.args,
 				                                      _localctx.targs);
-				        
+
 				}
 				break;
 			}
@@ -6351,7 +6351,7 @@ public class Java8Parser extends Parser {
 					setState(1570);
 					enumConstant(_localctx.ret);
 					}
-					} 
+					}
 				}
 				setState(1575);
 				_errHandler.sync(this);
@@ -6451,7 +6451,7 @@ public class Java8Parser extends Parser {
 			            ((EnumConstantContext)_localctx).cons =  new EnumConstant(((EnumConstantContext)_localctx).id, _localctx.ans, _localctx.args);
 			            ((EnumConstantContext)_localctx).body =  _localctx.cons.getBody();
 			            _localctx.ret.addConstant(_localctx.cons);
-			        
+
 			setState(1596);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
@@ -7367,7 +7367,7 @@ public class Java8Parser extends Parser {
 					default:
 						throw new NoViableAltException(this);
 					}
-					} 
+					}
 				}
 				setState(1744);
 				_errHandler.sync(this);
@@ -7647,7 +7647,7 @@ public class Java8Parser extends Parser {
 
 				                ((AnnotationTypeElementDeclarationContext)_localctx).expr =  ((AnnotationTypeElementDeclarationContext)_localctx).dv.ret;
 				                _localctx.mods.add(Modifier.DEFAULT);
-				            
+
 				}
 			}
 
@@ -7662,7 +7662,7 @@ public class Java8Parser extends Parser {
 			            _localctx.ret.setName(((AnnotationTypeElementDeclarationContext)_localctx).id);
 			            _localctx.ret.setReturnType(_localctx.type);
 			            _localctx.ret.setBody(new Block(_localctx.expr));
-			        
+
 			}
 		}
 		catch (RecognitionException re) {
@@ -8146,7 +8146,7 @@ public class Java8Parser extends Parser {
 					((ElementValueListContext)_localctx).v = elementValue();
 					_localctx.ls.add(((ElementValueListContext)_localctx).v.ret);
 					}
-					} 
+					}
 				}
 				setState(1881);
 				_errHandler.sync(this);
@@ -8338,7 +8338,7 @@ public class Java8Parser extends Parser {
 				            notifyErrorListeners(((ArrayInitializerContext)_localctx).first,
 				                                 "Array initialization uses curly braces instead of brackets",
 				                                 createMyException("Replace the curly braces with square brackets"));
-				        
+
 				}
 				break;
 			default:
@@ -8398,7 +8398,7 @@ public class Java8Parser extends Parser {
 					((VariableInitializerListContext)_localctx).v = variableInitializer();
 					_localctx.ls.add(((VariableInitializerListContext)_localctx).v.ret);
 					}
-					} 
+					}
 				}
 				setState(1930);
 				_errHandler.sync(this);
@@ -9689,7 +9689,7 @@ public class Java8Parser extends Parser {
 					((SwitchBlockContext)_localctx).m = switchBlockStatementGroup();
 					_localctx.blocks.add(((SwitchBlockContext)_localctx).m.ret);
 					}
-					} 
+					}
 				}
 				setState(2155);
 				_errHandler.sync(this);
@@ -10224,7 +10224,7 @@ public class Java8Parser extends Parser {
 			match(RPAREN);
 			setState(2258);
 			((BasicForStatementContext)_localctx).s = statement();
-			((BasicForStatementContext)_localctx).ret =  new ForStatement(((BasicForStatementContext)_localctx).kw, _localctx.forIn, _localctx.expr, _localctx.forUp, new Block(((BasicForStatementContext)_localctx).s.ret));
+			((BasicForStatementContext)_localctx).ret =  new ForStatement(((BasicForStatementContext)_localctx).kw, _localctx.forIn, _localctx.expr, _localctx.forUp, ((BasicForStatementContext)_localctx).s.ret);
 			}
 		}
 		catch (RecognitionException re) {
@@ -10318,7 +10318,7 @@ public class Java8Parser extends Parser {
 			match(RPAREN);
 			setState(2281);
 			((BasicForStatementNoShortIfContext)_localctx).s = statementNoShortIf();
-			((BasicForStatementNoShortIfContext)_localctx).ret =  new ForStatement(((BasicForStatementNoShortIfContext)_localctx).kw, _localctx.forIn, _localctx.expr, _localctx.forUp, new Block(((BasicForStatementNoShortIfContext)_localctx).s.ret));
+			((BasicForStatementNoShortIfContext)_localctx).ret =  new ForStatement(((BasicForStatementNoShortIfContext)_localctx).kw, _localctx.forIn, _localctx.expr, _localctx.forUp, ((BasicForStatementNoShortIfContext)_localctx).s.ret);
 			}
 		}
 		catch (RecognitionException re) {
@@ -10373,7 +10373,7 @@ public class Java8Parser extends Parser {
 				            for (VariableDeclaration var : ((ForInitContext)_localctx).d.ret) {
 				                _localctx.ret.add(var);
 				            }
-				        
+
 				}
 				break;
 			}
@@ -10575,7 +10575,7 @@ public class Java8Parser extends Parser {
 			match(RPAREN);
 			setState(2326);
 			((EnhancedForStatementContext)_localctx).s = statement();
-			((EnhancedForStatementContext)_localctx).ret =  new ForEachStatement(((EnhancedForStatementContext)_localctx).kw, ((EnhancedForStatementContext)_localctx).v.ret, ((EnhancedForStatementContext)_localctx).e.ret, new Block(((EnhancedForStatementContext)_localctx).s.ret));
+			((EnhancedForStatementContext)_localctx).ret =  new ForEachStatement(((EnhancedForStatementContext)_localctx).kw, ((EnhancedForStatementContext)_localctx).v.ret, ((EnhancedForStatementContext)_localctx).e.ret, ((EnhancedForStatementContext)_localctx).s.ret);
 			}
 		}
 		catch (RecognitionException re) {
@@ -10681,7 +10681,7 @@ public class Java8Parser extends Parser {
 			match(RPAREN);
 			setState(2346);
 			((EnhancedForStatementNoShortIfContext)_localctx).s = statementNoShortIf();
-			((EnhancedForStatementNoShortIfContext)_localctx).ret =  new ForEachStatement(((EnhancedForStatementNoShortIfContext)_localctx).kw, ((EnhancedForStatementNoShortIfContext)_localctx).v.ret, ((EnhancedForStatementNoShortIfContext)_localctx).e.ret, new Block(((EnhancedForStatementNoShortIfContext)_localctx).s.ret));
+			((EnhancedForStatementNoShortIfContext)_localctx).ret =  new ForEachStatement(((EnhancedForStatementNoShortIfContext)_localctx).kw, ((EnhancedForStatementNoShortIfContext)_localctx).v.ret, ((EnhancedForStatementNoShortIfContext)_localctx).e.ret, ((EnhancedForStatementNoShortIfContext)_localctx).s.ret);
 			}
 		}
 		catch (RecognitionException re) {
@@ -11118,7 +11118,7 @@ public class Java8Parser extends Parser {
 
 			            _localctx.ret.setStatements(((CatchClauseContext)_localctx).b.ret.getStatements());
 			            _localctx.ret.setLastToken(((CatchClauseContext)_localctx).b.ret.getLastToken());
-			        
+
 			}
 		}
 		catch (RecognitionException re) {
@@ -11499,7 +11499,7 @@ public class Java8Parser extends Parser {
 					((ResourceListContext)_localctx).re = resource();
 					_localctx.vars.add(((ResourceListContext)_localctx).re.ret);
 					}
-					} 
+					}
 				}
 				setState(2495);
 				_errHandler.sync(this);
@@ -11601,7 +11601,7 @@ public class Java8Parser extends Parser {
 
 			            ((ResourceContext)_localctx).v.ret.setInitializer(((ResourceContext)_localctx).e.ret);
 			            ((ResourceContext)_localctx).ret =  ((ResourceContext)_localctx).v.ret;
-			        
+
 			}
 		}
 		catch (RecognitionException re) {
@@ -11675,9 +11675,9 @@ public class Java8Parser extends Parser {
 
 					                ((PrimaryContext)_localctx).p.ret.qualifyWith(_localctx.ret);
 					                ((PrimaryContext)_localctx).ret =  ((PrimaryContext)_localctx).p.ret;
-					            
+
 					}
-					} 
+					}
 				}
 				setState(2529);
 				_errHandler.sync(this);
@@ -11899,7 +11899,7 @@ public class Java8Parser extends Parser {
 				                ((PrimaryNoNewArray_typeAccessContext)_localctx).expr =  new ArrayTypeExpression(_localctx.expr, _localctx.ls);
 				            }
 				            ((PrimaryNoNewArray_typeAccessContext)_localctx).ret =  new ClassLiteralExpression(_localctx.expr, ((PrimaryNoNewArray_typeAccessContext)_localctx).kw);
-				        
+
 				}
 				break;
 			case 2:
@@ -11938,7 +11938,7 @@ public class Java8Parser extends Parser {
 				                ((PrimaryNoNewArray_typeAccessContext)_localctx).expr =  new ArrayTypeExpression(_localctx.expr, _localctx.ls);
 				            }
 				            ((PrimaryNoNewArray_typeAccessContext)_localctx).ret =  new ClassLiteralExpression(_localctx.expr, ((PrimaryNoNewArray_typeAccessContext)_localctx).kw);
-				        
+
 				}
 				break;
 			case 3:
@@ -11964,7 +11964,7 @@ public class Java8Parser extends Parser {
 				((PrimaryNoNewArray_typeAccessContext)_localctx).kw = match(THIS);
 
 				            ((PrimaryNoNewArray_typeAccessContext)_localctx).ret =  new NameExpression(((PrimaryNoNewArray_typeAccessContext)_localctx).t.ret, createTypeName(((PrimaryNoNewArray_typeAccessContext)_localctx).kw));
-				        
+
 				}
 				break;
 			}
@@ -12402,7 +12402,7 @@ public class Java8Parser extends Parser {
 				                ((PrimaryNoNewArray_lfno_primaryContext)_localctx).lhs =  new ArrayTypeExpression(((PrimaryNoNewArray_lfno_primaryContext)_localctx).a3.ret, _localctx.ls);
 				            }
 				            ((PrimaryNoNewArray_lfno_primaryContext)_localctx).ret =  new ClassLiteralExpression(_localctx.lhs, ((PrimaryNoNewArray_lfno_primaryContext)_localctx).kw);
-				        
+
 				}
 				break;
 			case 4:
@@ -12605,7 +12605,7 @@ public class Java8Parser extends Parser {
 				                ((PrimaryNoNewArray_lfno_primary_lfno_arrayAccess_lfno_primaryContext)_localctx).lhs =  new ArrayTypeExpression(((PrimaryNoNewArray_lfno_primary_lfno_arrayAccess_lfno_primaryContext)_localctx).a3.ret, _localctx.ls);
 				            }
 				            ((PrimaryNoNewArray_lfno_primary_lfno_arrayAccess_lfno_primaryContext)_localctx).ret =  new ClassLiteralExpression(_localctx.lhs, ((PrimaryNoNewArray_lfno_primary_lfno_arrayAccess_lfno_primaryContext)_localctx).kw);
-				        
+
 				}
 				break;
 			case 4:
@@ -12773,7 +12773,7 @@ public class Java8Parser extends Parser {
 				            ((ClassInstanceCreationExpressionContext)_localctx).tok =  ((ClassInstanceCreationExpressionContext)_localctx).id;
 				            ((ClassInstanceCreationExpressionContext)_localctx).prev =  createTypeName(((ClassInstanceCreationExpressionContext)_localctx).id, _localctx.ans);
 				            ((ClassInstanceCreationExpressionContext)_localctx).methodExpr =  _localctx.prev;
-				        
+
 				setState(2772);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
@@ -12805,7 +12805,7 @@ public class Java8Parser extends Parser {
 					                ((ClassInstanceCreationExpressionContext)_localctx).prev =  createTypeName(((ClassInstanceCreationExpressionContext)_localctx).id2, _localctx.ans2);
 					                ((ClassInstanceCreationExpressionContext)_localctx).methodExpr =  new AccessExpression(_localctx.methodExpr, _localctx.prev);
 					                _localctx.ans2.clear();
-					            
+
 					}
 					}
 					setState(2774);
@@ -12821,7 +12821,7 @@ public class Java8Parser extends Parser {
 					((ClassInstanceCreationExpressionContext)_localctx).ta = typeArgumentsOrDiamond();
 
 					                ((ClassInstanceCreationExpressionContext)_localctx).methodExpr =  new ParamExpression(_localctx.methodExpr, ((ClassInstanceCreationExpressionContext)_localctx).ta.ret, ((ClassInstanceCreationExpressionContext)_localctx).ta.last);
-					            
+
 					}
 				}
 
@@ -12845,7 +12845,7 @@ public class Java8Parser extends Parser {
 				                                               _localctx.methodExpr, _localctx.tok,
 				                                               _localctx.args, _localctx.targs);
 				            ((ClassInstanceCreationExpressionContext)_localctx).anon =  _localctx.ret.getAnonymousClass();
-				        
+
 				setState(2789);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
@@ -12899,7 +12899,7 @@ public class Java8Parser extends Parser {
 				            ((ClassInstanceCreationExpressionContext)_localctx).tok =  ((ClassInstanceCreationExpressionContext)_localctx).id;
 				            ((ClassInstanceCreationExpressionContext)_localctx).methodExpr =  new AccessExpression(((ClassInstanceCreationExpressionContext)_localctx).name.ret,
 				                                               createTypeName(((ClassInstanceCreationExpressionContext)_localctx).id, _localctx.ans));
-				        
+
 				setState(2812);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
@@ -12909,7 +12909,7 @@ public class Java8Parser extends Parser {
 					((ClassInstanceCreationExpressionContext)_localctx).ta = typeArgumentsOrDiamond();
 
 					                ((ClassInstanceCreationExpressionContext)_localctx).methodExpr =  new ParamExpression(_localctx.methodExpr, ((ClassInstanceCreationExpressionContext)_localctx).ta.ret, ((ClassInstanceCreationExpressionContext)_localctx).ta.last);
-					            
+
 					}
 				}
 
@@ -12933,7 +12933,7 @@ public class Java8Parser extends Parser {
 				                                               _localctx.methodExpr, _localctx.tok,
 				                                               _localctx.args, _localctx.targs);
 				            ((ClassInstanceCreationExpressionContext)_localctx).anon =  _localctx.ret.getAnonymousClass();
-				        
+
 				setState(2823);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
@@ -12987,7 +12987,7 @@ public class Java8Parser extends Parser {
 				            ((ClassInstanceCreationExpressionContext)_localctx).tok =  ((ClassInstanceCreationExpressionContext)_localctx).id;
 				            ((ClassInstanceCreationExpressionContext)_localctx).methodExpr =  new AccessExpression(((ClassInstanceCreationExpressionContext)_localctx).p.ret,
 				                                               createTypeName(((ClassInstanceCreationExpressionContext)_localctx).id, _localctx.ans));
-				        
+
 				setState(2846);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
@@ -12997,7 +12997,7 @@ public class Java8Parser extends Parser {
 					((ClassInstanceCreationExpressionContext)_localctx).ta = typeArgumentsOrDiamond();
 
 					                ((ClassInstanceCreationExpressionContext)_localctx).methodExpr =  new ParamExpression(_localctx.methodExpr, ((ClassInstanceCreationExpressionContext)_localctx).ta.ret, ((ClassInstanceCreationExpressionContext)_localctx).ta.last);
-					            
+
 					}
 				}
 
@@ -13021,7 +13021,7 @@ public class Java8Parser extends Parser {
 				                                               _localctx.methodExpr, _localctx.tok,
 				                                               _localctx.args, _localctx.targs);
 				            ((ClassInstanceCreationExpressionContext)_localctx).anon =  _localctx.ret.getAnonymousClass();
-				        
+
 				setState(2857);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
@@ -13129,7 +13129,7 @@ public class Java8Parser extends Parser {
 
 			            ((ClassInstanceCreationExpression_lf_primaryContext)_localctx).tok =  ((ClassInstanceCreationExpression_lf_primaryContext)_localctx).id;
 			            ((ClassInstanceCreationExpression_lf_primaryContext)_localctx).methodExpr =  createTypeName(((ClassInstanceCreationExpression_lf_primaryContext)_localctx).id, _localctx.ans);
-			        
+
 			setState(2881);
 			_errHandler.sync(this);
 			_la = _input.LA(1);
@@ -13139,7 +13139,7 @@ public class Java8Parser extends Parser {
 				((ClassInstanceCreationExpression_lf_primaryContext)_localctx).ta = typeArgumentsOrDiamond();
 
 				                ((ClassInstanceCreationExpression_lf_primaryContext)_localctx).methodExpr =  new ParamExpression(_localctx.methodExpr, ((ClassInstanceCreationExpression_lf_primaryContext)_localctx).ta.ret, ((ClassInstanceCreationExpression_lf_primaryContext)_localctx).ta.last);
-				            
+
 				}
 			}
 
@@ -13163,7 +13163,7 @@ public class Java8Parser extends Parser {
 			                                               _localctx.methodExpr, _localctx.tok,
 			                                               _localctx.args, _localctx.targs);
 			            ((ClassInstanceCreationExpression_lf_primaryContext)_localctx).anon =  _localctx.ret.getAnonymousClass();
-			        
+
 			setState(2892);
 			_errHandler.sync(this);
 			switch ( getInterpreter().adaptivePredict(_input,236,_ctx) ) {
@@ -13281,7 +13281,7 @@ public class Java8Parser extends Parser {
 
 				            ((ClassInstanceCreationExpression_lfno_primaryContext)_localctx).tok =  ((ClassInstanceCreationExpression_lfno_primaryContext)_localctx).id;
 				            ((ClassInstanceCreationExpression_lfno_primaryContext)_localctx).methodExpr =  createPackageOrTypeName(((ClassInstanceCreationExpression_lfno_primaryContext)_localctx).id, _localctx.ans);
-				        
+
 				setState(2923);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
@@ -13312,7 +13312,7 @@ public class Java8Parser extends Parser {
 					                ((ClassInstanceCreationExpression_lfno_primaryContext)_localctx).methodExpr =  new AccessExpression(_localctx.methodExpr,
 					                                                   createPackageOrTypeName(((ClassInstanceCreationExpression_lfno_primaryContext)_localctx).id2, _localctx.ans2));
 					                _localctx.ans2.clear();
-					            
+
 					}
 					}
 					setState(2925);
@@ -13328,7 +13328,7 @@ public class Java8Parser extends Parser {
 					((ClassInstanceCreationExpression_lfno_primaryContext)_localctx).ta = typeArgumentsOrDiamond();
 
 					                ((ClassInstanceCreationExpression_lfno_primaryContext)_localctx).methodExpr =  new ParamExpression(_localctx.methodExpr, ((ClassInstanceCreationExpression_lfno_primaryContext)_localctx).ta.ret, ((ClassInstanceCreationExpression_lfno_primaryContext)_localctx).ta.last);
-					            
+
 					}
 				}
 
@@ -13352,7 +13352,7 @@ public class Java8Parser extends Parser {
 				                                               _localctx.methodExpr, _localctx.tok,
 				                                               _localctx.args, _localctx.targs);
 				            ((ClassInstanceCreationExpression_lfno_primaryContext)_localctx).anon =  _localctx.ret.getAnonymousClass();
-				        
+
 				setState(2940);
 				_errHandler.sync(this);
 				switch ( getInterpreter().adaptivePredict(_input,243,_ctx) ) {
@@ -13406,7 +13406,7 @@ public class Java8Parser extends Parser {
 				            ((ClassInstanceCreationExpression_lfno_primaryContext)_localctx).tok =  ((ClassInstanceCreationExpression_lfno_primaryContext)_localctx).id;
 				            ((ClassInstanceCreationExpression_lfno_primaryContext)_localctx).methodExpr =  new AccessExpression(((ClassInstanceCreationExpression_lfno_primaryContext)_localctx).name.ret,
 				                                                createTypeName(((ClassInstanceCreationExpression_lfno_primaryContext)_localctx).id, _localctx.ans));
-				        
+
 				setState(2963);
 				_errHandler.sync(this);
 				_la = _input.LA(1);
@@ -13416,7 +13416,7 @@ public class Java8Parser extends Parser {
 					((ClassInstanceCreationExpression_lfno_primaryContext)_localctx).ta = typeArgumentsOrDiamond();
 
 					                ((ClassInstanceCreationExpression_lfno_primaryContext)_localctx).methodExpr =  new ParamExpression(_localctx.methodExpr, ((ClassInstanceCreationExpression_lfno_primaryContext)_localctx).ta.ret, ((ClassInstanceCreationExpression_lfno_primaryContext)_localctx).ta.last);
-					            
+
 					}
 				}
 
@@ -13440,7 +13440,7 @@ public class Java8Parser extends Parser {
 				                                               _localctx.methodExpr, _localctx.tok,
 				                                               _localctx.args, _localctx.targs);
 				            ((ClassInstanceCreationExpression_lfno_primaryContext)_localctx).anon =  _localctx.ret.getAnonymousClass();
-				        
+
 				setState(2974);
 				_errHandler.sync(this);
 				switch ( getInterpreter().adaptivePredict(_input,248,_ctx) ) {
@@ -13588,7 +13588,7 @@ public class Java8Parser extends Parser {
 				            ((FieldAccessContext)_localctx).ret =  new AccessExpression(new AccessExpression(((FieldAccessContext)_localctx).t.ret,
 				                                                             createTypeName(((FieldAccessContext)_localctx).kw)),
 				                                        createExpressionName(((FieldAccessContext)_localctx).id));
-				        
+
 				}
 				break;
 			}
@@ -13627,7 +13627,7 @@ public class Java8Parser extends Parser {
 
 			            ((FieldAccess_lf_primaryContext)_localctx).ret =  new AccessExpression(new NilExpression(),
 			                                        createExpressionName(((FieldAccess_lf_primaryContext)_localctx).id));
-			        
+
 			}
 		}
 		catch (RecognitionException re) {
@@ -13675,7 +13675,7 @@ public class Java8Parser extends Parser {
 
 				            ((FieldAccess_lfno_primaryContext)_localctx).ret =  new AccessExpression(createTypeName(((FieldAccess_lfno_primaryContext)_localctx).kw),
 				                                        createExpressionName(((FieldAccess_lfno_primaryContext)_localctx).id));
-				        
+
 				}
 				break;
 			case Identifier:
@@ -13695,7 +13695,7 @@ public class Java8Parser extends Parser {
 				            ((FieldAccess_lfno_primaryContext)_localctx).ret =  new AccessExpression(new AccessExpression(((FieldAccess_lfno_primaryContext)_localctx).t.ret,
 				                                                             createTypeName(((FieldAccess_lfno_primaryContext)_localctx).kw)),
 				                                        createExpressionName(((FieldAccess_lfno_primaryContext)_localctx).id));
-				        
+
 				}
 				break;
 			default:
@@ -13872,7 +13872,7 @@ public class Java8Parser extends Parser {
 					((ArrayAccess_lf_primaryContext)_localctx).last = match(RBRACK);
 					((ArrayAccess_lf_primaryContext)_localctx).ret =  new ArrayAccessExpression(((ArrayAccess_lf_primaryContext)_localctx).last, _localctx.ret, ((ArrayAccess_lf_primaryContext)_localctx).i2.ret);
 					}
-					} 
+					}
 				}
 				setState(3061);
 				_errHandler.sync(this);
@@ -13980,7 +13980,7 @@ public class Java8Parser extends Parser {
 					((ArrayAccess_lfno_primaryContext)_localctx).last = match(RBRACK);
 					((ArrayAccess_lfno_primaryContext)_localctx).ret =  new ArrayAccessExpression(((ArrayAccess_lfno_primaryContext)_localctx).last, _localctx.ret, ((ArrayAccess_lfno_primaryContext)_localctx).i2.ret);
 					}
-					} 
+					}
 				}
 				setState(3086);
 				_errHandler.sync(this);
@@ -14107,7 +14107,7 @@ public class Java8Parser extends Parser {
 				                                      ((MethodInvocationContext)_localctx).id,
 				                                      _localctx.args,
 				                                      _localctx.targs);
-				        
+
 				}
 				break;
 			case 3:
@@ -14152,7 +14152,7 @@ public class Java8Parser extends Parser {
 				                                      ((MethodInvocationContext)_localctx).id,
 				                                      _localctx.args,
 				                                      _localctx.targs);
-				        
+
 				}
 				break;
 			case 4:
@@ -14197,7 +14197,7 @@ public class Java8Parser extends Parser {
 				                                      ((MethodInvocationContext)_localctx).id,
 				                                      _localctx.args,
 				                                      _localctx.targs);
-				        
+
 				}
 				break;
 			case 5:
@@ -14247,7 +14247,7 @@ public class Java8Parser extends Parser {
 				                                      ((MethodInvocationContext)_localctx).id,
 				                                      _localctx.args,
 				                                      _localctx.targs);
-				        
+
 				}
 				break;
 			}
@@ -14439,7 +14439,7 @@ public class Java8Parser extends Parser {
 				                                      ((MethodInvocation_lfno_primaryContext)_localctx).id,
 				                                      _localctx.args,
 				                                      _localctx.targs);
-				        
+
 				}
 				break;
 			case 3:
@@ -14484,7 +14484,7 @@ public class Java8Parser extends Parser {
 				                                      ((MethodInvocation_lfno_primaryContext)_localctx).id,
 				                                      _localctx.args,
 				                                      _localctx.targs);
-				        
+
 				}
 				break;
 			case 4:
@@ -14534,7 +14534,7 @@ public class Java8Parser extends Parser {
 				                                      ((MethodInvocation_lfno_primaryContext)_localctx).id,
 				                                      _localctx.args,
 				                                      _localctx.targs);
-				        
+
 				}
 				break;
 			}
@@ -14682,7 +14682,7 @@ public class Java8Parser extends Parser {
 				            ((MethodReferenceContext)_localctx).ret =  new MethodReferenceExpression(((MethodReferenceContext)_localctx).en.ret,
 				                                                 createMethodName(((MethodReferenceContext)_localctx).id),
 				                                                 _localctx.targs);
-				        
+
 				}
 				break;
 			case 2:
@@ -14709,7 +14709,7 @@ public class Java8Parser extends Parser {
 				            ((MethodReferenceContext)_localctx).ret =  new MethodReferenceExpression(((MethodReferenceContext)_localctx).r.ret,
 				                                                 createMethodName(((MethodReferenceContext)_localctx).id),
 				                                                 _localctx.targs);
-				        
+
 				}
 				break;
 			case 3:
@@ -14736,7 +14736,7 @@ public class Java8Parser extends Parser {
 				            ((MethodReferenceContext)_localctx).ret =  new MethodReferenceExpression(((MethodReferenceContext)_localctx).p.ret,
 				                                                 createMethodName(((MethodReferenceContext)_localctx).id),
 				                                                 _localctx.targs);
-				        
+
 				}
 				break;
 			case 4:
@@ -14763,7 +14763,7 @@ public class Java8Parser extends Parser {
 				            ((MethodReferenceContext)_localctx).ret =  new MethodReferenceExpression(createTypeName(((MethodReferenceContext)_localctx).kw),
 				                                                 createMethodName(((MethodReferenceContext)_localctx).id),
 				                                                 _localctx.targs);
-				        
+
 				}
 				break;
 			case 5:
@@ -14795,7 +14795,7 @@ public class Java8Parser extends Parser {
 				                                                                    createTypeName(((MethodReferenceContext)_localctx).kw)),
 				                                                 createMethodName(((MethodReferenceContext)_localctx).id),
 				                                                 _localctx.targs);
-				        
+
 				}
 				break;
 			case 6:
@@ -14822,7 +14822,7 @@ public class Java8Parser extends Parser {
 				            ((MethodReferenceContext)_localctx).ret =  new MethodReferenceExpression(((MethodReferenceContext)_localctx).c.ret,
 				                                                 createMethodName(((MethodReferenceContext)_localctx).kw),
 				                                                 _localctx.targs);
-				        
+
 				}
 				break;
 			case 7:
@@ -14838,7 +14838,7 @@ public class Java8Parser extends Parser {
 				            ((MethodReferenceContext)_localctx).ret =  new MethodReferenceExpression(((MethodReferenceContext)_localctx).a.ret,
 				                                                 createMethodName(((MethodReferenceContext)_localctx).kw),
 				                                                 _localctx.targs);
-				        
+
 				}
 				break;
 			}
@@ -14895,7 +14895,7 @@ public class Java8Parser extends Parser {
 			            ((MethodReference_lf_primaryContext)_localctx).ret =  new MethodReferenceExpression(new NilExpression(),
 			                                                 createMethodName(((MethodReference_lf_primaryContext)_localctx).id),
 			                                                 _localctx.targs);
-			        
+
 			}
 		}
 		catch (RecognitionException re) {
@@ -14977,7 +14977,7 @@ public class Java8Parser extends Parser {
 				            ((MethodReference_lfno_primaryContext)_localctx).ret =  new MethodReferenceExpression(((MethodReference_lfno_primaryContext)_localctx).en.ret,
 				                                                 createMethodName(((MethodReference_lfno_primaryContext)_localctx).id),
 				                                                 _localctx.targs);
-				        
+
 				}
 				break;
 			case 2:
@@ -15004,7 +15004,7 @@ public class Java8Parser extends Parser {
 				            ((MethodReference_lfno_primaryContext)_localctx).ret =  new MethodReferenceExpression(((MethodReference_lfno_primaryContext)_localctx).r.ret,
 				                                                 createMethodName(((MethodReference_lfno_primaryContext)_localctx).id),
 				                                                 _localctx.targs);
-				        
+
 				}
 				break;
 			case 3:
@@ -15031,7 +15031,7 @@ public class Java8Parser extends Parser {
 				            ((MethodReference_lfno_primaryContext)_localctx).ret =  new MethodReferenceExpression(createTypeName(((MethodReference_lfno_primaryContext)_localctx).kw),
 				                                                 createMethodName(((MethodReference_lfno_primaryContext)_localctx).id),
 				                                                 _localctx.targs);
-				        
+
 				}
 				break;
 			case 4:
@@ -15063,7 +15063,7 @@ public class Java8Parser extends Parser {
 				                                                                      createTypeName(((MethodReference_lfno_primaryContext)_localctx).kw)),
 				                                                 createMethodName(((MethodReference_lfno_primaryContext)_localctx).id),
 				                                                 _localctx.targs);
-				        
+
 				}
 				break;
 			case 5:
@@ -15090,7 +15090,7 @@ public class Java8Parser extends Parser {
 				            ((MethodReference_lfno_primaryContext)_localctx).ret =  new MethodReferenceExpression(((MethodReference_lfno_primaryContext)_localctx).c.ret,
 				                                                 createMethodName(((MethodReference_lfno_primaryContext)_localctx).kw),
 				                                                 _localctx.targs);
-				        
+
 				}
 				break;
 			case 6:
@@ -15106,7 +15106,7 @@ public class Java8Parser extends Parser {
 				            ((MethodReference_lfno_primaryContext)_localctx).ret =  new MethodReferenceExpression(((MethodReference_lfno_primaryContext)_localctx).a.ret,
 				                                                 createMethodName(((MethodReference_lfno_primaryContext)_localctx).kw),
 				                                                 _localctx.targs);
-				        
+
 				}
 				break;
 			}
@@ -15283,7 +15283,7 @@ public class Java8Parser extends Parser {
 					((DimExprsContext)_localctx).d = dimExpr();
 					_localctx.ret.add(((DimExprsContext)_localctx).d.ret);
 					}
-					} 
+					}
 				}
 				setState(3438);
 				_errHandler.sync(this);
@@ -15532,7 +15532,7 @@ public class Java8Parser extends Parser {
 				            _localctx.vars.add(new VariableDeclaration(((LambdaParametersContext)_localctx).id));
 				            ((LambdaParametersContext)_localctx).ret =  _localctx.vars;
 				            ((LambdaParametersContext)_localctx).first =  ((LambdaParametersContext)_localctx).id;
-				        
+
 				}
 				break;
 			case 2:
@@ -16133,7 +16133,7 @@ public class Java8Parser extends Parser {
 					((ConditionalOrExpressionContext)_localctx).c2 = conditionalAndExpression(0);
 					((ConditionalOrExpressionContext)_localctx).ret =  new BinaryExpression(((ConditionalOrExpressionContext)_localctx).c1.ret, BinaryOperator.OR, ((ConditionalOrExpressionContext)_localctx).c2.ret);
 					}
-					} 
+					}
 				}
 				setState(3581);
 				_errHandler.sync(this);
@@ -16211,7 +16211,7 @@ public class Java8Parser extends Parser {
 					((ConditionalAndExpressionContext)_localctx).r = inclusiveOrExpression(0);
 					((ConditionalAndExpressionContext)_localctx).ret =  new BinaryExpression(((ConditionalAndExpressionContext)_localctx).l.ret, BinaryOperator.AND, ((ConditionalAndExpressionContext)_localctx).r.ret);
 					}
-					} 
+					}
 				}
 				setState(3595);
 				_errHandler.sync(this);
@@ -16289,7 +16289,7 @@ public class Java8Parser extends Parser {
 					((InclusiveOrExpressionContext)_localctx).r = exclusiveOrExpression(0);
 					((InclusiveOrExpressionContext)_localctx).ret =  new BinaryExpression(((InclusiveOrExpressionContext)_localctx).l.ret,BinaryOperator.BITWISE_OR, ((InclusiveOrExpressionContext)_localctx).r.ret);
 					}
-					} 
+					}
 				}
 				setState(3609);
 				_errHandler.sync(this);
@@ -16367,7 +16367,7 @@ public class Java8Parser extends Parser {
 					((ExclusiveOrExpressionContext)_localctx).r = andExpression(0);
 					((ExclusiveOrExpressionContext)_localctx).ret =  new BinaryExpression(((ExclusiveOrExpressionContext)_localctx).l.ret, BinaryOperator.BITWISE_XOR, ((ExclusiveOrExpressionContext)_localctx).r.ret);
 					}
-					} 
+					}
 				}
 				setState(3623);
 				_errHandler.sync(this);
@@ -16445,7 +16445,7 @@ public class Java8Parser extends Parser {
 					((AndExpressionContext)_localctx).r = equalityExpression(0);
 					((AndExpressionContext)_localctx).ret =  new BinaryExpression(((AndExpressionContext)_localctx).l.ret, BinaryOperator.BITWISE_AND, ((AndExpressionContext)_localctx).r.ret);
 					}
-					} 
+					}
 				}
 				setState(3637);
 				_errHandler.sync(this);
@@ -16544,7 +16544,7 @@ public class Java8Parser extends Parser {
 						}
 						break;
 					}
-					} 
+					}
 				}
 				setState(3656);
 				_errHandler.sync(this);
@@ -16692,7 +16692,7 @@ public class Java8Parser extends Parser {
 						}
 						break;
 					}
-					} 
+					}
 				}
 				setState(3690);
 				_errHandler.sync(this);
@@ -16814,7 +16814,7 @@ public class Java8Parser extends Parser {
 						}
 						break;
 					}
-					} 
+					}
 				}
 				setState(3718);
 				_errHandler.sync(this);
@@ -16913,7 +16913,7 @@ public class Java8Parser extends Parser {
 						}
 						break;
 					}
-					} 
+					}
 				}
 				setState(3737);
 				_errHandler.sync(this);
@@ -17027,7 +17027,7 @@ public class Java8Parser extends Parser {
 						}
 						break;
 					}
-					} 
+					}
 				}
 				setState(3761);
 				_errHandler.sync(this);
@@ -17386,7 +17386,7 @@ public class Java8Parser extends Parser {
 					default:
 						throw new NoViableAltException(this);
 					}
-					} 
+					}
 				}
 				setState(3821);
 				_errHandler.sync(this);

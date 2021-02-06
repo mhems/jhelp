@@ -1,4 +1,4 @@
-package com.binghamton.jhelp;
+package com.binghamton.jhelp.symbols;
 
 import java.util.Arrays;
 import java.util.ArrayList;
@@ -8,8 +8,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.binghamton.jhelp.ImportingSymbolTable;
+import com.binghamton.jhelp.MethodSymbolTable;
+import com.binghamton.jhelp.Modifier;
+import com.binghamton.jhelp.Modifiers;
+import com.binghamton.jhelp.NamedSymbolTable;
+import com.binghamton.jhelp.Package;
 import com.binghamton.jhelp.ast.ASTVisitor;
 import com.binghamton.jhelp.ast.CompilationUnit;
+import com.binghamton.jhelp.error.JHelpError;
+import com.binghamton.jhelp.types.ArrayType;
+import com.binghamton.jhelp.types.MethodType;
+import com.binghamton.jhelp.types.NilType;
+import com.binghamton.jhelp.types.ParameterizedType;
+import com.binghamton.jhelp.types.PrimitiveType;
+import com.binghamton.jhelp.types.ReferenceType;
+import com.binghamton.jhelp.types.Type;
+import com.binghamton.jhelp.types.TypeVariable;
 import com.binghamton.jhelp.util.StringUtils;
 
 import static com.binghamton.jhelp.ImportingSymbolTable.fetch;

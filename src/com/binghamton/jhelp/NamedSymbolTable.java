@@ -3,6 +3,12 @@ package com.binghamton.jhelp;
 import java.util.Map;
 import java.util.function.Function;
 
+import com.binghamton.jhelp.symbols.ClassSymbol;
+import com.binghamton.jhelp.symbols.Symbol;
+import com.binghamton.jhelp.symbols.VariableSymbol;
+import com.binghamton.jhelp.types.Type;
+import com.binghamton.jhelp.types.TypeVariable;
+
 /**
  * A specialization of a SymbolTable that keys Symbols by their name
  * @param <T> the type of Symbol this SymbolTable holds

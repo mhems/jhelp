@@ -3,6 +3,7 @@ package com.binghamton.jhelp;
 import java.util.Map;
 import java.util.function.Function;
 
+import com.binghamton.jhelp.symbols.Symbol;
 import com.binghamton.jhelp.util.StringMatcher;
 
 /**

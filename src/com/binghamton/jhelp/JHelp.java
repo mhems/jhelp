@@ -1,5 +1,8 @@
 package com.binghamton.jhelp;
 
+import com.binghamton.jhelp.util.Logger;
+import com.binghamton.jhelp.validators.*;
+
 /**
  * JHelp application entry point
  */
@@ -28,6 +31,8 @@ public class JHelp {
         MemberLevelValidator mV = new MemberLevelValidator();
         runner.addValidator(mV);
         runner.addValidator(new CodeLevelValidator(mV));
-        System.exit(runner.run());
+        int rc = runner.run();
+        Logger.close();
+        System.exit(rc);
     }
 }

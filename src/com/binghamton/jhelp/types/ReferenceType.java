@@ -1,6 +1,10 @@
-package com.binghamton.jhelp;
+package com.binghamton.jhelp.types;
 
 import java.util.Map;
+
+import com.binghamton.jhelp.Modifiers;
+import com.binghamton.jhelp.symbols.AnnotationSymbol;
+import com.binghamton.jhelp.symbols.Symbol;
 
 /**
  * A base class representing Java reference types:
