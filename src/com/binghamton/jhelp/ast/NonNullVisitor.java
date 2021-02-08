@@ -311,8 +311,8 @@ public class NonNullVisitor extends EmptyVisitor {
      */
     public void visit(IfElseStatement ast) {
         ast.getCondition().accept(this);
-        ast.getThenBlock().accept(this);
-        ast.getElseBlock().accept(this);
+        ast.getThenStatement().accept(this);
+        ast.getElseStatement().accept(this);
     }
 
     /**

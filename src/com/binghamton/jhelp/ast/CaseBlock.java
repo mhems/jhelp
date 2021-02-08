@@ -7,8 +7,9 @@ import java.util.List;
 /**
  * A class representing a Java case block of a Java switch statement
  */
-public class CaseBlock extends Block {
+public class CaseBlock extends Statement {
     private List<Expression> labels;
+    private Statement body;
 
     /**
      * Construct a new, empty case block with one label
@@ -25,9 +26,9 @@ public class CaseBlock extends Block {
      */
     public CaseBlock(List<Expression> labels, Block body) {
         super(labels.get(0).getFirstToken(),
-              labels.get(labels.size()-1).getLastToken(),
-              body.getStatements());
+              labels.get(labels.size()-1).getLastToken());
         this.labels = labels;
+        this.body = body;
     }
 
     /**
@@ -53,6 +54,14 @@ public class CaseBlock extends Block {
      */
     public int getNumLabels() {
         return labels.size();
+    }
+
+    /**
+     * Gets the body of this case block
+     * @return the body of this case block
+     */
+    public Statement getBody() {
+        return body;
     }
 
     /**

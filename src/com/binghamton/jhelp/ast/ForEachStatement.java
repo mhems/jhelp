@@ -5,39 +5,27 @@ import org.antlr.v4.runtime.Token;
 /**
  * A class representing a Java for-each statement
  */
-public class ForEachStatement extends Block {
+public class ForEachStatement extends Statement {
     private VariableDeclaration variable;
     private Expression iterable;
-
-    /**
-     * Construct a new for each statement with a one statement body
-     * @param keyword the for keyword Token
-     * @param variable the iteration variable
-     * @param iterable the iterable being iterated
-     * @param statement the single statement of the for each statement
-     */
-    public ForEachStatement(Token keyword,
-                            VariableDeclaration variable,
-                            Expression iterable,
-                            Statement statement) {
-        this(keyword, variable, iterable, new Block(statement));
-    }
+    private Statement body;
 
     /**
      * Construct a new for each statement
      * @param keyword the for keyword Token
      * @param variable the iteration variable
      * @param iterable the iterable being iterated
-     * @param body the body of the for loop
+     * @param statement the body of the for each loop
      */
     public ForEachStatement(Token keyword,
                             VariableDeclaration variable,
                             Expression iterable,
-                            Block body) {
-        super(body);
+                            Statement statement) {
+        super(keyword);
         setFirstToken(keyword);
         this.variable = variable;
         this.iterable = iterable;
+        this.body = statement;
     }
 
     /**
@@ -54,6 +42,14 @@ public class ForEachStatement extends Block {
      */
     public Expression getIterable() {
         return iterable;
+    }
+
+    /**
+     * Gets the body of this statement
+     * @return the body of this statement
+     */
+    public Statement getBody() {
+        return body;
     }
 
     /**

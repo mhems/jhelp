@@ -5,9 +5,10 @@ import org.antlr.v4.runtime.Token;
 /**
  * A class representing a Java (do) while statement
  */
-public class WhileStatement extends Block {
+public class WhileStatement extends Statement {
     private final Expression condition;
     private final boolean isDo;
+    private Statement body;
 
     /**
      * Construct a new while statement
@@ -15,11 +16,12 @@ public class WhileStatement extends Block {
      * @param condition the condition whose truth dictates iteration
      * @param body the code to conditionally execute
      */
-    public WhileStatement(Token keyword, Expression condition, Block body) {
-        super(body);
+    public WhileStatement(Token keyword, Expression condition, Statement body) {
+        super(keyword);
         setFirstToken(keyword);
         this.condition = condition;
         this.isDo = false;
+        this.body = body;
     }
 
     /**
@@ -32,13 +34,13 @@ public class WhileStatement extends Block {
     public WhileStatement(Token keyword,
                           Token last,
                           Expression condition,
-                          Block body) {
-        super(body);
+                          Statement body) {
+        super(keyword, last);
         setFirstToken(keyword);
         setLastToken(last);
         this.condition = condition;
         this.isDo = true;
-
+        this.body = body;
     }
 
     /**
@@ -47,6 +49,14 @@ public class WhileStatement extends Block {
      */
     public Expression getCondition() {
         return condition;
+    }
+
+    /**
+     * Gets the statement this statement envelops
+     * @return the statement this statement envelops
+     */
+    public Statement getBody() {
+        return body;
     }
 
     /**

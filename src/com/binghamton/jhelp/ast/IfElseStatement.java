@@ -7,18 +7,18 @@ import org.antlr.v4.runtime.Token;
  */
 public class IfElseStatement extends Statement {
     private final Expression condition;
-    private final Block thenBody;
-    private Block elseBody = new NilBlock();
+    private final Statement thenBody;
+    private Statement elseBody = null;
 
     /**
-     * Construct a new if statement with no else block
+     * Construct a new if statement with no else statement
      * @param keyword the if keyword
      * @param condition the condition being examined
-     * @param thenBody the block to execute iff condition evalutes to true
+     * @param thenBody the statement to execute iff condition evalutes to true
      */
     public IfElseStatement(Token keyword,
                            Expression condition,
-                           Block thenBody) {
+                           Statement thenBody) {
         super(keyword, thenBody.getLastToken());
         this.condition = condition;
         this.thenBody = thenBody;
@@ -28,13 +28,13 @@ public class IfElseStatement extends Statement {
      * Construct a new if/else statement
      * @param keyword the if keyword
      * @param condition the condition being examined
-     * @param thenBody the block to execute if condition evalutes to true
-     * @param elseBody the block to execute if condition evalutes to false
+     * @param thenBody the statement to execute if condition evalutes to true
+     * @param elseBody the statement to execute if condition evalutes to false
      */
     public IfElseStatement(Token keyword,
                            Expression condition,
-                           Block thenBody,
-                           Block elseBody) {
+                           Statement thenBody,
+                           Statement elseBody) {
         super(keyword, (elseBody.isNil() ? thenBody : elseBody).getLastToken());
         this.condition = condition;
         this.thenBody = thenBody;
@@ -50,43 +50,50 @@ public class IfElseStatement extends Statement {
     }
 
     /**
-     * Gets this statement's then block
-     * @return this statement's then block
+     * Gets this statement's then statement
+     * @return this statement's then statement
      */
-    public Block getThenBlock() {
+    public Statement getThenStatement() {
         return thenBody;
     }
 
     /**
-     * Gets this statement's else block
-     * @return this statement's else block
+     * Gets this statement's else statement
+     * @return this statement's else statement
      */
-    public Block getElseBlock() {
+    public Statement getElseStatement() {
         return elseBody;
     }
 
     /**
-     * Determines if this statement has an else block
-     * @return true iff this statement has an else block
+     * Determines if this statement has an else statement
+     * @return true iff this statement has an else statement
      */
-    public boolean hasElse() {
-        return !elseBody.isNil();
+    public boolean hasElseStatement() {
+        boolean ret = (elseBody != null);
+
+        if (ret && (elseBody instanceof Block))
+        {
+            ret = ((Block)elseBody).isNil();
+        }
+
+        return ret;
     }
 
     /**
-     * Determines if this statement has an empty then block
-     * @return true iff this statement has an empty then block
+     * Determines if this statement has an empty then statement
+     * @return true iff this statement has an empty then statement
      */
-    public boolean hasEmptyThenBlock() {
-        return thenBody.isEmpty();
+    public boolean hasEmptyThenStatement() {
+        return (thenBody instanceof Block) && ((Block)thenBody).isEmpty();
     }
 
     /**
-     * Determines if this statement has a empty else block
-     * @return true iff this statement has an empty else block
+     * Determines if this statement has a empty else statement
+     * @return true iff this statement has an empty else statement
      */
-    public boolean hasEmptyElseBlock() {
-        return elseBody.isEmpty();
+    public boolean hasEmptyElseStatement() {
+        return (elseBody instanceof Block) && ((Block)elseBody).isEmpty();
     }
 
     /**

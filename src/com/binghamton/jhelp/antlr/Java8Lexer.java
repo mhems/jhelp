@@ -1,15 +1,13 @@
 // Generated from Java8.g4 by ANTLR 4.6
 package com.binghamton.jhelp.antlr;
 
-    import java.util.ArrayList;
-    import java.util.List;
+import com.binghamton.jhelp.*;
+import com.binghamton.jhelp.ast.*;
+import com.binghamton.jhelp.error.SyntacticError;
+import com.binghamton.jhelp.types.PrimitiveType;
 
-    import com.binghamton.jhelp.*;
-    import com.binghamton.jhelp.ast.*;
-    import com.binghamton.jhelp.error.SyntacticError;
-
-    import static com.binghamton.jhelp.ast.NameExpression.*;
-    import static com.binghamton.jhelp.ast.BodyDeclaration.Kind.*;
+import static com.binghamton.jhelp.ast.NameExpression.*;
+import static com.binghamton.jhelp.ast.BodyDeclaration.Kind.*;
 
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;

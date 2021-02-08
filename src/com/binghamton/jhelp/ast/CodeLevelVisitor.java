@@ -479,11 +479,11 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(Block ast) {
-        System.out.println("visiting block");
+        //System.out.println("visiting block");
         currentScope.enterScope();
         for (Statement stmt : ast.getStatements()) {
             try {
-                System.out.println("accepting stmt: " + stmt);
+                //System.out.println("accepting stmt: " + stmt);
                 stmt.accept(this);
             } catch (Exception e) {
                 Logger.log(e);
@@ -558,6 +558,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         for (Expression e : ast.getLabels()) {
             e.accept(this);
         }
+        ast.getBody().accept(this);
     }
 
     /**
@@ -794,7 +795,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                      "For each loops must iterate over arrays or an implementor of the Iterable interface",
                      "Specify an array or Iterable to iterate over");
         }
-        visit((Block)ast);
+        ast.getBody().accept(this);
         currentScope.exitScope();
     }
 
@@ -824,7 +825,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         for (Statement up : ast.getUpdaters()) {
             up.accept(this);
         }
-        visit((Block)ast);
+        ast.getBody().accept(this);
         currentScope.exitScope();
     }
 
@@ -841,20 +842,18 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                      PrimitiveType.BOOLEAN,
                      ast.getCondition().getType());
         }
-        if (ast.getThenBlock().isEmpty() && !ast.getElseBlock().isNil()) {
+        if (ast.hasEmptyThenStatement() && ast.hasElseStatement()) {
             addError(new StyleWarning(ast.getCondition(),
                                       "An empty if block with a non-empty else block should be converted to just an if block, with no else",
                                       "Negate the condition, move the contents of the else block to the if block and remove the now empty else block"));
         }
-        if (!ast.getElseBlock().isNil() && ast.getElseBlock().isEmpty()) {
-            addError(new StyleWarning(ast.getElseBlock(),
+        if (ast.hasElseStatement() && ast.hasEmptyElseStatement()) {
+            addError(new StyleWarning(ast.getElseStatement(),
                                       "An empty else should be removed",
                                       "Remove the empty else block"));
         }
-        System.out.println("accepting then block");
-        ast.getThenBlock().accept(this);
-        System.out.println("accepting else block");
-        ast.getElseBlock().accept(this);
+        ast.getThenStatement().accept(this);
+        ast.getElseStatement().accept(this);
     }
 
     /**
@@ -1597,6 +1596,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                      PrimitiveType.BOOLEAN,
                      ast.getCondition().getType());
         }
+        ast.getBody().accept(this);
     }
 
     /**
