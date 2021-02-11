@@ -61,4 +61,24 @@ public class ForEachStatement extends Statement {
         v.visit(this);
         // must visit block statements explicitly
     }
+
+    /**
+     * Visits the implementor's constituents and then the implementor
+     * @param visitor the visitor to visit with
+     * @param order the order to vist the implementor with respect to its constituents
+     */
+    public void acceptRec(ASTVisitor visitor, Visitable.Order order)
+     {
+         if (order == Visitable.Order.PRE)
+         {
+             this.accept(visitor);
+         }
+         variable.acceptRec(visitor, order);
+         iterable.acceptRec(visitor, order);
+         body.acceptRec(visitor, order);
+         if (order == Visitable.Order.POST)
+         {
+             this.accept(visitor);
+         }
+     }
 }

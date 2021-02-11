@@ -190,6 +190,33 @@ public class CallExpression extends QualifiableExpression {
         v.visit(this);
     }
 
+    /**
+     * Visits the implementor's constituents and then the implementor
+     * @param visitor the visitor to visit with
+     * @param order the order to vist the implementor with respect to its constituents
+     */
+    public void acceptRec(ASTVisitor visitor, Visitable.Order order)
+     {
+         if (order == Visitable.Order.PRE)
+         {
+             this.accept(visitor);
+         }
+         methodExpr.acceptRec(visitor, order);
+         nameExpr.acceptRec(visitor, order);
+         for (TypeArgument ta : typeArgs)
+         {
+             ta.acceptRec(visitor, order);
+         }
+         for (Expression e : args)
+         {
+             e.acceptRec(visitor, order);
+         }
+         if (order == Visitable.Order.POST)
+         {
+             this.accept(visitor);
+         }
+     }
+
     @Override
     public void qualifyWith(Expression expr) {
         methodExpr = new AccessExpression(expr, nameExpr);

@@ -63,6 +63,26 @@ public class ArrayAccessExpression extends QualifiableExpression {
         v.visit(this);
     }
 
+    /**
+     * Visits the implementor's constituents and then the implementor
+     * @param visitor the visitor to visit with
+     * @param order the order to vist the implementor with respect to its constituents
+     */
+    public void acceptRec(ASTVisitor visitor, Visitable.Order order)
+     {
+         if (order == Visitable.Order.PRE)
+         {
+             this.accept(visitor);
+         }
+         qualExpr.acceptRec(visitor, order);
+         arrayExpr.acceptRec(visitor, order);
+         indexExpr.acceptRec(visitor, order);
+         if (order == Visitable.Order.POST)
+         {
+             this.accept(visitor);
+         }
+     }
+
     @Override
     public void qualifyWith(Expression expr) {
         qualExpr.qualifyWith(expr);

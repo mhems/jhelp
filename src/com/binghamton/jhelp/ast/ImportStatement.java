@@ -70,4 +70,22 @@ public class ImportStatement extends Statement {
         super.accept(v);
         v.visit(this);
     }
+
+    /**
+     * Visits the implementor's constituents and then the implementor
+     * @param visitor the visitor to visit with
+     * @param order the order to vist the implementor with respect to its constituents
+     */
+    public void acceptRec(ASTVisitor visitor, Visitable.Order order)
+     {
+         if (order == Visitable.Order.PRE)
+         {
+             this.accept(visitor);
+         }
+         nameExpr.acceptRec(visitor, order);
+         if (order == Visitable.Order.POST)
+         {
+             this.accept(visitor);
+         }
+     }
 }

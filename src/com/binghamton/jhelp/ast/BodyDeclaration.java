@@ -179,4 +179,33 @@ public abstract class BodyDeclaration extends Declaration {
         super.accept(v);
         v.visit(this);
     }
+
+    /**
+     * Visits the implementor's constituents and then the implementor
+     * @param visitor the visitor to visit with
+     * @param order the order to vist the implementor with respect to its constituents
+     */
+    public void acceptRec(ASTVisitor visitor, Visitable.Order order)
+     {
+         if (order == Visitable.Order.PRE)
+         {
+             this.accept(visitor);
+         }
+         for (VariableDeclaration v : fields)
+         {
+             v.acceptRec(visitor, order);
+         }
+         for (BodyDeclaration b : innerBodies)
+         {
+             b.acceptRec(visitor, order);
+         }
+         for (MethodDeclaration m : methods)
+         {
+             m.acceptRec(visitor, order);
+         }
+         if (order == Visitable.Order.POST)
+         {
+             this.accept(visitor);
+         }
+     }
 }

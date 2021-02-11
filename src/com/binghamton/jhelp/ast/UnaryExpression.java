@@ -51,6 +51,24 @@ public class UnaryExpression extends Expression {
     }
 
     /**
+     * Visits the implementor's constituents and then the implementor
+     * @param visitor the visitor to visit with
+     * @param order the order to vist the implementor with respect to its constituents
+     */
+    public void acceptRec(ASTVisitor visitor, Visitable.Order order)
+     {
+         if (order == Visitable.Order.PRE)
+         {
+             this.accept(visitor);
+         }
+         expr.acceptRec(visitor, order);
+         if (order == Visitable.Order.POST)
+         {
+             this.accept(visitor);
+         }
+     }
+
+    /**
      * Determines if a UnaryOperator is a prefix operator
      * @param op the UnaryOperator to examine
      * @return true iff the given UnaryOperator is a prefix operator

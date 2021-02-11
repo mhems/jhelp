@@ -1,3 +1,4 @@
+
 package com.binghamton.jhelp.ast;
 
 /**
@@ -5,9 +6,21 @@ package com.binghamton.jhelp.ast;
  */
 public interface Visitable {
 
+    enum Order {
+        PRE,
+        POST,
+    }
+
     /**
-     * Default action is to double dispatch on parameter
-     * @param visitor the visitor to accept
+     * Visits the implementor with `visitor`
+     * @param visitor the visitor to visit with
      */
     void accept(ASTVisitor visitor);
+
+    /**
+     * Visits the implementor's constituents and then the implementor
+     * @param visitor the visitor to visit with
+     * @param order the order to vist the implementor with respect to its constituents
+     */
+    void acceptRec(ASTVisitor visitor, Visitable.Order order);
 }

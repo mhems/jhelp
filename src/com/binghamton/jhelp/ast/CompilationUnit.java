@@ -251,4 +251,30 @@ public class CompilationUnit extends ASTNode {
         super.accept(v);
         v.visit(this);
     }
+
+    /**
+     * Visits the implementor's constituents and then the implementor
+     * @param visitor the visitor to visit with
+     * @param order the order to vist the implementor with respect to its constituents
+     */
+    public void acceptRec(ASTVisitor visitor, Visitable.Order order)
+     {
+         if (order == Visitable.Order.PRE)
+         {
+             this.accept(visitor);
+         }
+         pkg.acceptRec(visitor, order);
+         for (ImportStatement is : imports)
+         {
+             is.acceptRec(visitor, order);
+         }
+         for (BodyDeclaration b : bodies)
+         {
+             b.acceptRec(visitor, order);
+         }
+         if (order == Visitable.Order.POST)
+         {
+             this.accept(visitor);
+         }
+     }
 }
