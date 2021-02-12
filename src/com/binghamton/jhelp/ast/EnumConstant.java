@@ -41,7 +41,7 @@ public class EnumConstant extends Declaration {
      * @return the field associated with this declaration
      */
     public MyVariableSymbol getSymbol() {
-        return (MyVariableSymbol)sym;
+        return (MyVariableSymbol)super.getSymbol();
     }
 
     /**
@@ -87,7 +87,11 @@ public class EnumConstant extends Declaration {
      {
          if (order == Visitable.Order.PRE)
          {
-             this.accept(visitor);
+             visitor.visit(this);
+         }
+         for (Annotation a : getAnnotations())
+         {
+             a.acceptRec(visitor, order);
          }
          for (Expression e : arguments)
          {
@@ -96,7 +100,7 @@ public class EnumConstant extends Declaration {
          body.acceptRec(visitor, order);
          if (order == Visitable.Order.POST)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
      }
 }

@@ -155,7 +155,7 @@ public class VariableDeclaration extends Declaration {
      * @return the VariableSymbol this declaration declares
      */
     public MyVariableSymbol getSymbol() {
-        return (MyVariableSymbol)sym;
+        return (MyVariableSymbol)super.getSymbol();
     }
 
     /**
@@ -177,9 +177,13 @@ public class VariableDeclaration extends Declaration {
      {
          if (order == Visitable.Order.PRE)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
-         for (Annotation a : annotations)
+         for (Annotation a : getAnnotations())
+         {
+             a.acceptRec(visitor, order);
+         }
+         for (Annotation a : ellipsisAnnotations)
          {
              a.acceptRec(visitor, order);
          }
@@ -187,7 +191,7 @@ public class VariableDeclaration extends Declaration {
          initializer.acceptRec(visitor, order);
          if (order == Visitable.Order.POST)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
      }
 }

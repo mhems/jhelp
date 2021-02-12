@@ -167,7 +167,7 @@ public abstract class BodyDeclaration extends Declaration {
 
     @Override
     public MyClassSymbol getSymbol() {
-        return (MyClassSymbol)sym;
+        return (MyClassSymbol)super.getSymbol();
     }
 
     /**
@@ -189,7 +189,11 @@ public abstract class BodyDeclaration extends Declaration {
      {
          if (order == Visitable.Order.PRE)
          {
-             this.accept(visitor);
+             visitor.visit(this);
+         }
+         for (Annotation a : getAnnotations())
+         {
+             a.acceptRec(visitor, order);
          }
          for (VariableDeclaration v : fields)
          {
@@ -205,7 +209,7 @@ public abstract class BodyDeclaration extends Declaration {
          }
          if (order == Visitable.Order.POST)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
      }
 }

@@ -12,10 +12,10 @@ import com.binghamton.jhelp.symbols.Symbol;
  * Abstract base class for all Java declarations
  */
 public abstract class Declaration extends Statement {
-    protected Symbol sym;
-    protected Token name;
-    protected Modifiers modifiers = new Modifiers();
-    protected Annotation[] annotations = {};
+    private Symbol sym;
+    private Token name;
+    private Modifiers modifiers = new Modifiers();
+    private Annotation[] annotations = {};
 
     /**
      * Construct an empty declaration
@@ -64,7 +64,10 @@ public abstract class Declaration extends Statement {
      * Gets the Symbol this Declaration declares
      * @return the Symbol this Declaration declares
      */
-    public abstract Symbol getSymbol();
+    public Symbol getSymbol()
+    {
+        return sym;
+    }
 
     /**
      * Sets the Symbol this Declaration declares
@@ -125,7 +128,7 @@ public abstract class Declaration extends Statement {
      {
          if (order == Visitable.Order.PRE)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
          for (Annotation a : annotations)
          {
@@ -133,7 +136,7 @@ public abstract class Declaration extends Statement {
          }
          if (order == Visitable.Order.POST)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
      }
 }

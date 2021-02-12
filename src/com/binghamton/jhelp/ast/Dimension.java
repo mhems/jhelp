@@ -57,7 +57,7 @@ public class Dimension extends ASTNode {
      {
          if (order == Visitable.Order.PRE)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
          for (Annotation a : annotations)
          {
@@ -65,7 +65,7 @@ public class Dimension extends ASTNode {
          }
          if (order == Visitable.Order.POST)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
      }
 }

@@ -79,7 +79,7 @@ public class SwitchStatement extends Statement {
      {
          if (order == Visitable.Order.PRE)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
          condition.acceptRec(visitor, order);
          for (CaseBlock cb : cases)
@@ -88,7 +88,7 @@ public class SwitchStatement extends Statement {
          }
          if (order == Visitable.Order.POST)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
      }
 }

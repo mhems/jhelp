@@ -74,13 +74,13 @@ public class AssignmentExpression extends Expression {
      {
          if (order == Visitable.Order.PRE)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
          lhs.acceptRec(visitor, order);
          rhs.acceptRec(visitor, order);
          if (order == Visitable.Order.POST)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
      }
 }

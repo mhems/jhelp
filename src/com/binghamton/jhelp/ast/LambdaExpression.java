@@ -77,7 +77,7 @@ public class LambdaExpression extends Expression {
      {
          if (order == Visitable.Order.PRE)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
          for (VariableDeclaration vd : params)
          {
@@ -86,7 +86,7 @@ public class LambdaExpression extends Expression {
          body.acceptRec(visitor, order);
          if (order == Visitable.Order.POST)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
      }
 }

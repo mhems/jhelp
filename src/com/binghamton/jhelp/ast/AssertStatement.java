@@ -79,13 +79,13 @@ public class AssertStatement extends Statement {
      {
          if (order == Visitable.Order.PRE)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
          condition.acceptRec(visitor, order);
          message.acceptRec(visitor, order);
          if (order == Visitable.Order.POST)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
      }
 }

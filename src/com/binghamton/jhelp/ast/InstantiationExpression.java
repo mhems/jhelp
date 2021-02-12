@@ -64,12 +64,22 @@ public class InstantiationExpression extends CallExpression {
      {
          if (order == Visitable.Order.PRE)
          {
-             this.accept(visitor);
+             visitor.visit(this);
+         }
+         getMethod().acceptRec(visitor, order);
+         getNameExpression().acceptRec(visitor, order);
+         for (TypeArgument ta : getTypeArguments())
+         {
+             ta.acceptRec(visitor, order);
+         }
+         for (Expression e : getArguments())
+         {
+             e.acceptRec(visitor, order);
          }
          classBody.acceptRec(visitor, order);
          if (order == Visitable.Order.POST)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
      }
 }

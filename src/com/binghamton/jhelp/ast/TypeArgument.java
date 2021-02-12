@@ -135,7 +135,7 @@ public class TypeArgument extends ASTNode {
      {
          if (order == Visitable.Order.PRE)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
          for (Annotation a : annotations)
          {
@@ -144,7 +144,7 @@ public class TypeArgument extends ASTNode {
          typeExpr.acceptRec(visitor, order);
          if (order == Visitable.Order.POST)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
      }
 

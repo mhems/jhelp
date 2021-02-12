@@ -123,7 +123,7 @@ public class ForStatement extends Statement {
      {
          if (order == Visitable.Order.PRE)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
          for (Statement s : initializers)
          {
@@ -137,7 +137,7 @@ public class ForStatement extends Statement {
          body.acceptRec(visitor, order);
          if (order == Visitable.Order.POST)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
      }
 }

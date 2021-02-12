@@ -174,7 +174,7 @@ public class TryCatchBlock extends Statement {
      {
          if (order == Visitable.Order.PRE)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
          tryBody.acceptRec(visitor, order);
          for (VariableDeclaration vd : resources)
@@ -188,7 +188,7 @@ public class TryCatchBlock extends Statement {
          finallyBody.acceptRec(visitor, order);
          if (order == Visitable.Order.POST)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
      }
 }

@@ -68,14 +68,14 @@ public class TernaryExpression extends Expression {
      {
          if (order == Visitable.Order.PRE)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
          condition.acceptRec(visitor, order);
          thenExpr.acceptRec(visitor, order);
          elseExpr.acceptRec(visitor, order);
          if (order == Visitable.Order.POST)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
      }
 }

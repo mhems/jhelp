@@ -80,16 +80,20 @@ public class CatchBlock extends Block {
      {
          if (order == Visitable.Order.PRE)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
          for (Expression e : types)
          {
              e.acceptRec(visitor, order);
          }
          var.acceptRec(visitor, order);
+         for (Statement s : getStatements())
+         {
+             s.acceptRec(visitor, order);
+         }
          if (order == Visitable.Order.POST)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
      }
 }

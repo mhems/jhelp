@@ -145,7 +145,7 @@ public class MethodDeclaration extends Declaration {
      * @return the MethodSymbol associated with this declaration
      */
     public MyMethodSymbol getSymbol() {
-        return (MyMethodSymbol)sym;
+        return (MyMethodSymbol)super.getSymbol();
     }
 
     /**
@@ -191,9 +191,9 @@ public class MethodDeclaration extends Declaration {
      {
          if (order == Visitable.Order.PRE)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
-         for (Annotation a : annotations)
+         for (Annotation a : getAnnotations())
          {
              a.acceptRec(visitor, order);
          }
@@ -213,7 +213,7 @@ public class MethodDeclaration extends Declaration {
          body.acceptRec(visitor, order);
          if (order == Visitable.Order.POST)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
      }
 }

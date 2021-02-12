@@ -64,7 +64,7 @@ public class ParamExpression extends Expression {
      {
          if (order == Visitable.Order.PRE)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
          expr.acceptRec(visitor, order);
          for (TypeArgument ta : targs)
@@ -73,7 +73,7 @@ public class ParamExpression extends Expression {
          }
          if (order == Visitable.Order.POST)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
      }
 }

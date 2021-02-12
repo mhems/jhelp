@@ -171,7 +171,7 @@ public class Block extends Statement {
      {
          if (order == Visitable.Order.PRE)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
          for (Statement s : statements)
          {
@@ -179,7 +179,7 @@ public class Block extends Statement {
          }
          if (order == Visitable.Order.POST)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
      }
 }

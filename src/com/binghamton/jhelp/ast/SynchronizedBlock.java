@@ -47,12 +47,16 @@ public class SynchronizedBlock extends Block {
      {
          if (order == Visitable.Order.PRE)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
          lock.acceptRec(visitor, order);
+         for (Statement s : getStatements())
+         {
+             s.acceptRec(visitor, order);
+         }
          if (order == Visitable.Order.POST)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
      }
 }

@@ -261,9 +261,12 @@ public class CompilationUnit extends ASTNode {
      {
          if (order == Visitable.Order.PRE)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
-         pkg.acceptRec(visitor, order);
+         if (hasPackage())
+         {
+             pkg.acceptRec(visitor, order);
+         }
          for (ImportStatement is : imports)
          {
              is.acceptRec(visitor, order);
@@ -274,7 +277,7 @@ public class CompilationUnit extends ASTNode {
          }
          if (order == Visitable.Order.POST)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
      }
 }

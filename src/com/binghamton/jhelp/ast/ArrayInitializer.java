@@ -74,7 +74,7 @@ public class ArrayInitializer extends Expression {
      {
          if (order == Visitable.Order.PRE)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
          for (Expression e : elements)
          {
@@ -82,7 +82,7 @@ public class ArrayInitializer extends Expression {
          }
          if (order == Visitable.Order.POST)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
      }
 }

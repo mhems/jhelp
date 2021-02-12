@@ -71,14 +71,14 @@ public class ForEachStatement extends Statement {
      {
          if (order == Visitable.Order.PRE)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
          variable.acceptRec(visitor, order);
          iterable.acceptRec(visitor, order);
          body.acceptRec(visitor, order);
          if (order == Visitable.Order.POST)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
      }
 }

@@ -147,7 +147,7 @@ public class Annotation extends Expression {
      {
          if (order == Visitable.Order.PRE)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
          expr.acceptRec(visitor, order);
          for (Expression e : nameValueMap.values())
@@ -156,7 +156,7 @@ public class Annotation extends Expression {
          }
          if (order == Visitable.Order.POST)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
      }
 

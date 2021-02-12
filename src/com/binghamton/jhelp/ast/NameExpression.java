@@ -315,16 +315,19 @@ public class NameExpression extends Expression {
      {
          if (order == Visitable.Order.PRE)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
          for (Annotation a : annotations)
          {
              a.acceptRec(visitor, order);
          }
-         qualifier.acceptRec(visitor, order);
+         if (isQualified())
+         {
+             qualifier.acceptRec(visitor, order);
+         }
          if (order == Visitable.Order.POST)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
      }
 }

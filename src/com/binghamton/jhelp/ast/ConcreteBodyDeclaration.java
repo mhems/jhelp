@@ -145,7 +145,11 @@ public abstract class ConcreteBodyDeclaration extends BodyDeclaration {
      {
          if (order == Visitable.Order.PRE)
          {
-             this.accept(visitor);
+             visitor.visit(this);
+         }
+         for (Annotation a : getAnnotations())
+         {
+             a.acceptRec(visitor, order);
          }
          for (Expression e : implementees)
          {
@@ -163,9 +167,21 @@ public abstract class ConcreteBodyDeclaration extends BodyDeclaration {
          {
              md.acceptRec(visitor, order);
          }
+         for (VariableDeclaration vd : getFields())
+         {
+             vd.acceptRec(visitor, order);
+         }
+         for (MethodDeclaration md : getMethods())
+         {
+             md.acceptRec(visitor, order);
+         }
+         for (BodyDeclaration bd : getInnerBodies())
+         {
+             bd.acceptRec(visitor, order);
+         }
          if (order == Visitable.Order.POST)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
      }
 }

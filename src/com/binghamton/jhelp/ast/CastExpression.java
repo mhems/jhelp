@@ -92,7 +92,7 @@ public class CastExpression extends Expression {
      {
          if (order == Visitable.Order.PRE)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
          source.acceptRec(visitor, order);
          target.acceptRec(visitor, order);
@@ -102,7 +102,7 @@ public class CastExpression extends Expression {
          }
          if (order == Visitable.Order.POST)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
      }
 }

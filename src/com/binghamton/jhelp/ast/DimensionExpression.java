@@ -62,7 +62,7 @@ public class DimensionExpression extends Expression {
      {
          if (order == Visitable.Order.PRE)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
          expr.acceptRec(visitor, order);
          for (Annotation a : annotations)
@@ -71,7 +71,7 @@ public class DimensionExpression extends Expression {
          }
          if (order == Visitable.Order.POST)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
      }
 }

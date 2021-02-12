@@ -124,7 +124,7 @@ public class ArrayConstruction extends Expression {
      {
          if (order == Visitable.Order.PRE)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
          expr.acceptRec(visitor, order);
          for (DimensionExpression de : dimExprs)
@@ -138,7 +138,7 @@ public class ArrayConstruction extends Expression {
          initializer.acceptRec(visitor, order);
          if (order == Visitable.Order.POST)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
      }
 }

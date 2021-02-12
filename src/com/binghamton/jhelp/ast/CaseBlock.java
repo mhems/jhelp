@@ -83,7 +83,7 @@ public class CaseBlock extends Statement {
      {
          if (order == Visitable.Order.PRE)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
          for (Expression e : labels)
          {
@@ -92,7 +92,7 @@ public class CaseBlock extends Statement {
          body.acceptRec(visitor, order);
          if (order == Visitable.Order.POST)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
      }
 }

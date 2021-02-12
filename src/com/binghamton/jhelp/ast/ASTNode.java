@@ -170,11 +170,11 @@ public abstract class ASTNode implements Visitable, Comparable<ASTNode> {
      {
          if (order == Visitable.Order.PRE)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
          if (order == Visitable.Order.POST)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
      }
 

@@ -108,6 +108,14 @@ public class CallExpression extends QualifiableExpression {
     }
 
     /**
+     * Gets this call's name Expression
+     * @return this call's name Expression
+     */
+    public Expression getNameExpression() {
+        return nameExpr;
+    }
+
+    /**
      * Gets the expression that yields the method being called
      * @return the expression that yields the method being called
      */
@@ -199,7 +207,7 @@ public class CallExpression extends QualifiableExpression {
      {
          if (order == Visitable.Order.PRE)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
          methodExpr.acceptRec(visitor, order);
          nameExpr.acceptRec(visitor, order);
@@ -213,7 +221,7 @@ public class CallExpression extends QualifiableExpression {
          }
          if (order == Visitable.Order.POST)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
      }
 

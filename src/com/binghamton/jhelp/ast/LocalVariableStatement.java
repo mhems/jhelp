@@ -55,7 +55,7 @@ public class LocalVariableStatement extends Statement {
      {
          if (order == Visitable.Order.PRE)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
          for (VariableDeclaration vd : vars)
          {
@@ -63,7 +63,7 @@ public class LocalVariableStatement extends Statement {
          }
          if (order == Visitable.Order.POST)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
      }
 }

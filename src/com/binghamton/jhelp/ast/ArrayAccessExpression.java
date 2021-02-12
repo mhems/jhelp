@@ -72,14 +72,14 @@ public class ArrayAccessExpression extends QualifiableExpression {
      {
          if (order == Visitable.Order.PRE)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
          qualExpr.acceptRec(visitor, order);
          arrayExpr.acceptRec(visitor, order);
          indexExpr.acceptRec(visitor, order);
          if (order == Visitable.Order.POST)
          {
-             this.accept(visitor);
+             visitor.visit(this);
          }
      }
 
