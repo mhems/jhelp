@@ -1,5 +1,7 @@
 package com.binghamton.jhelp.error;
 
+import java.io.PrintWriter;
+
 /**
  * A class to wrap uncaught exceptions thrown by the application so that the
  * end-user sees a program error, not an exception stack trace.
@@ -28,7 +30,9 @@ public class ApplicationError extends JHelpError {
 
     @Override
     public String getMessage() {
+        PrintWriter wr = null;
         StringBuilder sb = new StringBuilder("An application error has occured");
+
         if (filename != null) {
             sb.append(" while processing the file '");
             sb.append(filename);
@@ -37,6 +41,23 @@ public class ApplicationError extends JHelpError {
         sb.append(".\n");
         sb.append("This likely means an earlier error has put the application in an unrecoverable state.\n");
         sb.append("Try resolving the earlier errors and re-running the application");
+
+        try
+        {
+            wr = new PrintWriter("elog.txt");
+            e.printStackTrace(wr);
+        }
+        catch (Exception e)
+        {
+            System.err.println("cannot open file to dump errors to");
+        }
+        finally
+        {
+            if (wr != null)
+            {
+                wr.close();
+            }
+        }
         return sb.toString();
     }
 }
