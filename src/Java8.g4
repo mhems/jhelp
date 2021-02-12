@@ -2688,6 +2688,8 @@ StringLiteral
 
 BadStringLiteral
     :   '\'' StringCharacters? '\''
+    |   '"' StringCharacters? '\''
+    |   '\'' StringCharacters? '"'
     ;
 
 fragment
