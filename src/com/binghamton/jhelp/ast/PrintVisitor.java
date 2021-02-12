@@ -1,5 +1,7 @@
 package com.binghamton.jhelp.ast;
 
+import org.antlr.v4.runtime.Token;
+
 /**
  * Visits and prints each AST node
  */
@@ -9,12 +11,24 @@ public class PrintVisitor implements ASTVisitor {
 
     private void printNode(ASTNode node)
     {
+        Token t;
         for (int i = 0; i < indent; i++)
         {
             System.out.print(indent_string);
         }
         System.out.print(node.getClass().getSimpleName());
-        //System.out.println(": " + node.getText());
+        System.out.print("\t\t\t\t\t");
+        t = node.getFirstToken();
+        if (t != null)
+            System.out.print(t.getText());
+        else
+            System.out.print("NULL");
+        System.out.print("\t\t\t\t\t");
+        t = node.getLastToken();
+        if (t != null)
+            System.out.print(t.getText());
+        else
+            System.out.print("NULL");
         System.out.println();
     }
 
@@ -82,7 +96,7 @@ public class PrintVisitor implements ASTVisitor {
      * Visit a ASTNode node
      * @param ast the AST node being visited
      */
-    public void visit(ASTNode ast){ }
+    public void visit(ASTNode ast){ printNode(ast); }
 
     /**
      * Visit a BinaryExpression node
@@ -100,7 +114,7 @@ public class PrintVisitor implements ASTVisitor {
      * Visit a BodyDeclaration node
      * @param ast the AST node being visited
      */
-    public void visit(BodyDeclaration ast){ }
+    public void visit(BodyDeclaration ast){ printNode(ast); }
 
     /**
      * Visit a CallExpression node
@@ -132,26 +146,7 @@ public class PrintVisitor implements ASTVisitor {
      */
     public void visit(ClassDeclaration ast)
     {
-        System.out.println("ClassDeclaration - " + ast.getName().getText());
-        indent++;
-        for (Expression e: ast.implementees)
-        {
-            e.accept(this);
-        }
-        for (Block b : ast.staticInitializers)
-        {
-            b.accept(this);
-        }
-        for (Block b : ast.instanceInitializers)
-        {
-            b.accept(this);
-        }
-        for (MethodDeclaration m: ast.ctors)
-        {
-            m.accept(this);
-        }
-
-        indent--;
+        printNode(ast);
     }
 
     /**
@@ -167,25 +162,19 @@ public class PrintVisitor implements ASTVisitor {
     public void visit(CompilationUnit ast)
     {
         printNode(ast);
-        ast.getPackageStatement().accept(this);
-
-        for (ImportStatement s : ast.getImports())
-            s.accept(this);
-        for (BodyDeclaration d : ast.getBodyDeclarations())
-            d.accept(this);
     }
 
     /**
      * Visit a ConcreteBodyDeclaration node
      * @param ast the AST node being visited
      */
-    public void visit(ConcreteBodyDeclaration ast){ }
+    public void visit(ConcreteBodyDeclaration ast){ printNode(ast); }
 
     /**
      * Visit a Declaration node
      * @param ast the AST node being visited
      */
-    public void visit(Declaration ast){  }
+    public void visit(Declaration ast){ printNode(ast); }
 
     /**
      * Visit a Dimension node
@@ -347,7 +336,7 @@ public class PrintVisitor implements ASTVisitor {
      * Visit a Statement node
      * @param ast the AST node being visited
      */
-    public void visit(Statement ast){ }
+    public void visit(Statement ast){ printNode(ast); }
 
     /**
      * Visit a SwitchStatement node
