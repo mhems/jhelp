@@ -1279,9 +1279,9 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         currentScope.enterScope();
         for (CaseBlock cB: ast.getCases()) {
             cB.accept(this);
-            for (Expression labelExpr : cB.getLabels()) {
-                caseType = labelExpr.getType();
-                if (labelExpr.getText().equals("default")) {
+            for (CaseBlock.CaseExpression labelExpr : cB.getLabels()) {
+                caseType = labelExpr.getExpr().getType();
+                if (labelExpr.isDefaultCase()) {
                     if (seenDefault) {
                         addError(labelExpr,
                                  "A switch statement can only have one default case",

@@ -1310,17 +1310,17 @@ switchBlockStatementGroup returns [CaseBlock ret]
         {$ret = new CaseBlock($l.ret, new Block($s.ret));}
     ;
 
-switchLabels returns [List<Expression> ret]
-    locals [List<Expression> lbls = new ArrayList<>()]
+switchLabels returns [List<CaseBlock.CaseExpression> ret]
+    locals [List<CaseBlock.CaseExpression> lbls = new ArrayList<>()]
     :   (s = switchLabel {$lbls.add($s.ret);})
         (l = switchLabel {$lbls.add($l.ret);})*
         {$ret = $lbls;}
     ;
 
-switchLabel returns [Expression ret]
-    :   'case' c = constantExpression ':' {$ret = $c.ret;}
-    |   'case' id = Identifier ':' {$ret = createExpressionName($id);}
-    |   kw = 'default' ':' {$ret = new NilExpression();}
+switchLabel returns [CaseBlock.CaseExpression ret]
+    :   'case' c = constantExpression ':' {$ret = new CaseBlock.CaseExpression($c.ret);}
+    |   'case' id = Identifier ':' {$ret = new CaseBlock.CaseExpression(createExpressionName($id));}
+    |   kw = 'default' ':' {$ret = new CaseBlock.CaseExpression($kw);}
     ;
 
 whileStatement returns [WhileStatement ret]
