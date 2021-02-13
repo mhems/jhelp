@@ -27,10 +27,16 @@ public class JHelp {
         runner.addValidator(new UsageValidator());
         runner.addValidator(new BalancedValidator());
         runner.addValidator(new SyntaxValidator());
-        runner.addValidator(new TopLevelValidator());
-        MemberLevelValidator mV = new MemberLevelValidator();
-        runner.addValidator(mV);
-        runner.addValidator(new CodeLevelValidator(mV));
+
+        if (Program.config.PRETTY_PRINT) {
+            runner.addValidator(new ASTPrinter());
+        } else {
+            runner.addValidator(new TopLevelValidator());
+            MemberLevelValidator mV = new MemberLevelValidator();
+            runner.addValidator(mV);
+            runner.addValidator(new CodeLevelValidator(mV));
+        }
+
         int rc = runner.run();
         Logger.close();
         System.exit(rc);

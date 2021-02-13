@@ -25,12 +25,13 @@ public class Program {
         public final boolean NO_WARNINGS;
         public final boolean INVOKE_JAVAC;
         public final boolean NO_COLOR;
+        public final boolean PRETTY_PRINT;
 
         /**
          * Constructs a Configuration with default settings
          */
         private Configuration() {
-            this(false, false, false);
+            this(false, false, false, false);
         }
 
         /**
@@ -40,10 +41,11 @@ public class Program {
          * found
          * @param nc true iff this Program should not color output
          */
-        public Configuration(boolean nw, boolean j, boolean nc) {
+        public Configuration(boolean nw, boolean j, boolean nc, boolean pp) {
             NO_WARNINGS = nw;
             INVOKE_JAVAC = j;
             NO_COLOR = nc;
+            PRETTY_PRINT = pp;
         }
     }
 
@@ -97,7 +99,7 @@ public class Program {
     public Program(String[] args) {
         this.args = args;
         List<File> tmp = new ArrayList<>();
-        boolean[] flags = new boolean[3];
+        boolean[] flags = new boolean[4];
         for (String arg : args) {
             switch (arg) {
             case "-nw":
@@ -108,6 +110,9 @@ public class Program {
                 break;
             case "-nc":
                 flags[2] = true;
+                break;
+            case "-p":
+                flags[3] = true;
                 break;
             case "-h":
                 System.out.println(USAGE);
@@ -121,7 +126,7 @@ public class Program {
         if (files.length == 0) {
             files = new File[]{new File(System.getProperty("user.dir"))};
         }
-        config = new Configuration(flags[0], flags[1], flags[2]);
+        config = new Configuration(flags[0], flags[1], flags[2], flags[3]);
     }
 
     /**
