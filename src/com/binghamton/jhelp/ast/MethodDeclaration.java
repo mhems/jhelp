@@ -178,7 +178,6 @@ public class MethodDeclaration extends Declaration {
      */
     @Override
     public void accept(ASTVisitor v) {
-        super.accept(v);
         v.visit(this);
     }
 

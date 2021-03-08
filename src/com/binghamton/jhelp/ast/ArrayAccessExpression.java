@@ -38,6 +38,14 @@ public class ArrayAccessExpression extends QualifiableExpression {
     }
 
     /**
+     * Gets the expression qualifying the array to access
+     * @return the expression qualifying the array to access
+     */
+    public Expression getArrayQualifyingExpression() {
+        return qualExpr;
+    }
+
+    /**
      * Gets the expression yielding the array to access
      * @return the expression yielding the array to access
      */
@@ -59,7 +67,6 @@ public class ArrayAccessExpression extends QualifiableExpression {
      */
     @Override
     public void accept(ASTVisitor v) {
-        super.accept(v);
         v.visit(this);
     }
 

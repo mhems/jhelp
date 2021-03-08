@@ -50,6 +50,14 @@ public class TypeParameter extends ASTNode {
     }
 
     /**
+     * Determines if this TypeParameter has any Annotations
+     * @return true iff this TypeParameter has any Annotations
+     */
+    public boolean isAnnotated() {
+        return annotations.length > 0;
+    }
+
+    /**
      * Gets the Annotations on this TypeParameter
      * @return the Annotations on this TypeParameter
      */
@@ -111,7 +119,6 @@ public class TypeParameter extends ASTNode {
      */
     @Override
     public void accept(ASTVisitor v) {
-        super.accept(v);
         v.visit(this);
     }
 

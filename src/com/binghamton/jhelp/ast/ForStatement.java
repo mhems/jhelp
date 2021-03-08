@@ -101,7 +101,6 @@ public class ForStatement extends Statement {
     }
 
     public void acceptBody(ASTVisitor v) {
-        super.accept(v);
     }
 
     /**

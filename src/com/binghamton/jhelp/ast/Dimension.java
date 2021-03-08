@@ -44,7 +44,6 @@ public class Dimension extends ASTNode {
      */
     @Override
     public void accept(ASTVisitor v) {
-        super.accept(v);
         v.visit(this);
     }
 

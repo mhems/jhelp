@@ -16,7 +16,7 @@ public class ASTPrinter implements Validator {
         PrintVisitor v = new PrintVisitor();
         for (CompilationUnit u : program.getCompilationUnits())
         {
-            u.acceptRec(v, Visitable.Order.PRE);
+            u.accept(v);
         }
     }
 

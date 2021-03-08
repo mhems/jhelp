@@ -33,7 +33,6 @@ public abstract class AbstractBodyDeclaration extends BodyDeclaration {
      */
     @Override
     public void accept(ASTVisitor v) {
-        super.accept(v);
         v.visit(this);
     }
 

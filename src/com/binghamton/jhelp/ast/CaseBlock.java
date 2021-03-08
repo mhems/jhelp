@@ -10,62 +10,15 @@ import org.antlr.v4.runtime.Token;
  * A class representing a Java case block of a Java switch statement
  */
 public class CaseBlock extends Statement {
-    private List<CaseBlock.CaseExpression> labels;
+    private List<Expression> labels;
     private Statement body;
-
-    public static class CaseExpression extends Expression {
-        private Expression expr = new NilExpression();
-        private Token defaultKeyword;
-
-        public CaseExpression(Expression expr) {
-            super(expr.getFirstToken(), expr.getLastToken());
-            this.expr = expr;
-        }
-
-        public CaseExpression(Token defaultKeyword) {
-            super(defaultKeyword, defaultKeyword);
-            this.defaultKeyword = defaultKeyword;
-        }
-
-        public boolean isDefaultCase() {
-            return defaultKeyword != null;
-        }
-
-        public Expression getExpr() {
-            return expr;
-        }
-
-        /**
-         * Double dispatch this class on parameter
-         * @param v the visitor to accept
-         */
-        @Override
-        public void accept(ASTVisitor v) {
-            super.accept(v);
-            v.visit(this);
-        }
-
-        /**
-         * Visits the implementor's constituents and then the implementor
-         * @param visitor the visitor to visit with
-         * @param order the order to vist the implementor with respect to its constituents
-         */
-        public void acceptRec(ASTVisitor visitor, Visitable.Order order) {
-            if (order == Visitable.Order.PRE) {
-                visitor.visit(this);
-            }
-            expr.acceptRec(visitor, order);
-            if (order == Visitable.Order.POST) {
-                visitor.visit(this);
-            }
-        }
-    }
+    private Token defaultKw;
 
     /**
      * Construct a new, empty case block with one label
      * @param label the label for this case block
      */
-    public CaseBlock(CaseBlock.CaseExpression label) {
+    public CaseBlock(Expression label) {
         this(new ArrayList<>(Arrays.asList(label)), new NilBlock());
     }
 
@@ -74,7 +27,7 @@ public class CaseBlock extends Statement {
      * @param labels the list of labels for this case block
      * @param body the body of this case block
      */
-    public CaseBlock(List<CaseBlock.CaseExpression> labels, Block body) {
+    public CaseBlock(List<Expression> labels, Block body) {
         super(labels.get(0).getFirstToken(),
               labels.get(labels.size()-1).getLastToken());
         this.labels = labels;
@@ -85,7 +38,7 @@ public class CaseBlock extends Statement {
      * Gets the labels that execute this case block
      * @return the labels that execute this case block
      */
-    public List<CaseBlock.CaseExpression> getLabels() {
+    public List<Expression> getLabels() {
         return labels;
     }
 
@@ -94,7 +47,7 @@ public class CaseBlock extends Statement {
      * @param index the 0-indexed label to retrieve
      * @return the label at index `index`
      */
-    public CaseBlock.CaseExpression getLabel(int index) {
+    public Expression getLabel(int index) {
         return labels.get(index);
     }
 
@@ -120,7 +73,6 @@ public class CaseBlock extends Statement {
      */
     @Override
     public void accept(ASTVisitor v) {
-        super.accept(v);
         v.visit(this);
     }
 
@@ -135,7 +87,7 @@ public class CaseBlock extends Statement {
          {
              visitor.visit(this);
          }
-         for (CaseExpression e : labels)
+         for (Expression e : labels)
          {
              e.acceptRec(visitor, order);
          }

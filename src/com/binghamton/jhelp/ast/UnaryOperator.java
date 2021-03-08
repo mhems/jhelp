@@ -4,14 +4,21 @@ package com.binghamton.jhelp.ast;
  * Enum representing valid unary operators
  */
 public enum UnaryOperator {
-    BITWISE_NEGATION,
-    NEGATION,
-    PLUS,
-    MINUS,
-    INCREMENT,
-    PRE_INCREMENT,
-    DECREMENT,
-    PRE_DECREMENT;
+    BITWISE_NEGATION("~"),
+    NEGATION("!"),
+    PLUS("+"),
+    MINUS("-"),
+    INCREMENT("++"),
+    PRE_INCREMENT("++"),
+    DECREMENT("--"),
+    PRE_DECREMENT("--");
+
+    private String text;
+
+    UnaryOperator(String text)
+    {
+        this.text = text;
+    }
 
     /**
      * Determines if this operator is additive
@@ -43,5 +50,19 @@ public enum UnaryOperator {
      */
     public boolean isLogical() {
         return this == NEGATION;
+    }
+
+    /**
+     * Determines if this operator trails its operand
+     * @return true iff this operator trails its operand
+     */
+    public boolean isPostfix() {
+        return this == INCREMENT || this == DECREMENT;
+    }
+
+    @Override
+    public String toString()
+    {
+        return text;
     }
 }

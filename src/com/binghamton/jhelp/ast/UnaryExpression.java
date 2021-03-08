@@ -46,7 +46,6 @@ public class UnaryExpression extends Expression {
      */
     @Override
     public void accept(ASTVisitor v) {
-        super.accept(v);
         v.visit(this);
     }
 

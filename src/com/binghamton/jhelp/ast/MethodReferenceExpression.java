@@ -49,6 +49,14 @@ public class MethodReferenceExpression extends QualifiableExpression {
     }
 
     /**
+     * Determines if this Expression has type arguments
+     * @return true iff this Expression has type arguments
+     */
+    public boolean hasTypeArguments() {
+        return !targs.isEmpty();
+    }
+
+    /**
      * Gets the type arguments to this Expression
      * @return the List of type arguments to this Expression
      */
@@ -62,7 +70,6 @@ public class MethodReferenceExpression extends QualifiableExpression {
      */
     @Override
     public void accept(ASTVisitor v) {
-        super.accept(v);
         v.visit(this);
     }
 
