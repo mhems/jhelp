@@ -11,7 +11,7 @@ import org.antlr.v4.runtime.Token;
  */
 public class CaseBlock extends Statement {
     private List<Expression> labels;
-    private Statement body;
+    private List<Statement> statements;
     private Token defaultKw;
 
     /**
@@ -19,19 +19,19 @@ public class CaseBlock extends Statement {
      * @param label the label for this case block
      */
     public CaseBlock(Expression label) {
-        this(new ArrayList<>(Arrays.asList(label)), new NilBlock());
+        this(new ArrayList<>(Arrays.asList(label)), new ArrayList<Statement>());
     }
 
     /**
      * Construct a new, empty case block
      * @param labels the list of labels for this case block
-     * @param body the body of this case block
+     * @param statements the statements within this case block
      */
-    public CaseBlock(List<Expression> labels, Block body) {
+    public CaseBlock(List<Expression> labels, List<Statement> statements) {
         super(labels.get(0).getFirstToken(),
               labels.get(labels.size()-1).getLastToken());
         this.labels = labels;
-        this.body = body;
+        this.statements = statements;
     }
 
     /**
@@ -60,11 +60,11 @@ public class CaseBlock extends Statement {
     }
 
     /**
-     * Gets the body of this case block
-     * @return the body of this case block
+     * Gets the statements within this case block
+     * @return the statements within this case block
      */
-    public Statement getBody() {
-        return body;
+    public List<Statement> getStatements() {
+        return statements;
     }
 
     /**
@@ -91,7 +91,10 @@ public class CaseBlock extends Statement {
          {
              e.acceptRec(visitor, order);
          }
-         body.acceptRec(visitor, order);
+         for (Statement s : statements)
+         {
+             s.acceptRec(visitor, order);
+         }
          if (order == Visitable.Order.POST)
          {
              visitor.visit(this);

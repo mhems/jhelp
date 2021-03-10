@@ -57,6 +57,7 @@ public class PrintVisitor extends EmptyVisitor {
         boolean isBlock = (s instanceof Block);
         if (!isBlock)
         {
+            System.out.println();
             indent();
             print();
         }
@@ -68,40 +69,52 @@ public class PrintVisitor extends EmptyVisitor {
         return isBlock;
     }
 
+    private <K extends ASTNode> void printBlockList(List<K> elements)
+    {
+        printList(elements, "", true, true, true);
+    }
+
     private <K extends ASTNode> void printList(List<K> elements)
     {
-        printList(elements, "", true, true);
+        printList(elements, "", true, true, false);
     }
 
     private <K extends ASTNode> void printList(List<K> elements, boolean indent)
     {
-        printList(elements, "", indent, false);
+        printList(elements, "", indent, false, false);
     }
 
-    private <K extends ASTNode> void printList(List<K> elements, String separator)
+    private <K extends ASTNode> void printList(List<K> elements,
+                                               String separator)
     {
-        printList(elements, separator, false, false);
+        printList(elements, separator, false, false, false);
     }
 
-    private <K extends ASTNode> void printList(List<K> elements, String separator, boolean indent)
+    private <K extends ASTNode> void printList(List<K> elements,
+                                               String separator,
+                                               boolean indent)
     {
-        printList(elements, separator, indent, false);
+        printList(elements, separator, indent, false, false);
     }
 
-    private <K extends ASTNode> void printList(List<K> elements, String separator, boolean indent, boolean newline)
+    private <K extends ASTNode> void printList(List<K> elements,
+                                               String separator,
+                                               boolean indent,
+                                               boolean newline,
+                                               boolean isBlock)
     {
         int n = elements.size();
         int i;
         for (i = 0; i < n; i++)
         {
-            if (indent)
+            if (indent && (!isBlock || i > 0))
                 print();
             elements.get(i).accept(this);
             if (n > 1 && i < n - 1)
             {
                 System.out.print(separator);
             }
-            if (newline && n != 1)
+            if (newline && n != 1 && n > 1 && i < n -1 )
             {
                 System.out.println();
             }
@@ -276,6 +289,7 @@ public class PrintVisitor extends EmptyVisitor {
      */
     public void visit(Block ast)
     {
+        System.out.println();
         indent();
         printList(ast.getStatements());
         dedent();
@@ -318,7 +332,7 @@ public class PrintVisitor extends EmptyVisitor {
             }
         }
 
-        printStatementOrBlock(ast.getBody());
+        printList(ast.getStatements());
     }
 
     /**
@@ -349,10 +363,10 @@ public class PrintVisitor extends EmptyVisitor {
         System.out.print("catch ");
         printList(ast.getExceptionTypes(), " | ");
         System.out.print(" ");
-        System.out.println(ast.getVariable().getName().getText());
+        System.out.print(ast.getVariable().getName().getText());
 
         indent();
-        printList(ast.getStatements());
+        visit((Block)ast);
         dedent();
     }
 
@@ -386,8 +400,6 @@ public class PrintVisitor extends EmptyVisitor {
             printList(ast.getSuperInterfaces(), ", ");
         }
 
-        System.out.println();
-
         indent();
         if (ast.getInstanceInitializers().size() > 0)
         {
@@ -395,7 +407,7 @@ public class PrintVisitor extends EmptyVisitor {
         }
         if (ast.getStaticInitializers().size() > 0)
         {
-            println("static");
+            print("static");
             printList(ast.getStaticInitializers());
         }
         printList(ast.getConstructors());
@@ -477,8 +489,6 @@ public class PrintVisitor extends EmptyVisitor {
             System.out.print(")");
         }
 
-        System.out.println();
-
         if (ast.getBody() != null)
         {
             ast.getBody().accept(this);
@@ -511,7 +521,7 @@ public class PrintVisitor extends EmptyVisitor {
         }
         if (ast.getStaticInitializers().size() > 0)
         {
-            println("static");
+            print("static");
             printList(ast.getStaticInitializers());
         }
         printList(ast.getConstructors());
@@ -532,7 +542,6 @@ public class PrintVisitor extends EmptyVisitor {
         System.out.print(" : ");
         ast.getIterable().accept(this);
 
-        System.out.println();
         printStatementOrBlock(ast.getBody());
     }
 
@@ -549,7 +558,6 @@ public class PrintVisitor extends EmptyVisitor {
         System.out.print(" ; ");
         printList(ast.getUpdaters(), ", ");
 
-        System.out.println();
         printStatementOrBlock(ast.getBody());
     }
 
@@ -561,16 +569,9 @@ public class PrintVisitor extends EmptyVisitor {
     {
         System.out.print("if ");
         ast.getCondition().accept(this);
-        System.out.println();
-
-        if (!printStatementOrBlock(ast.getThenStatement()) && ast.hasElseStatement())
-        {
-            System.out.println();
-        }
 
         if (ast.hasElseStatement())
         {
-            println("else");
             printStatementOrBlock(ast.getElseStatement());
         }
     }
@@ -618,7 +619,6 @@ public class PrintVisitor extends EmptyVisitor {
 
         if (ast.hasAnonymousClass())
         {
-            System.out.println();
             indent();
             ast.getAnonymousClass().accept(this);
             dedent();
@@ -751,9 +751,8 @@ public class PrintVisitor extends EmptyVisitor {
             printList(ast.getExceptions(), ", ");
         }
 
-        System.out.println();
-
         ast.getBody().accept(this);
+        System.out.println();
     }
 
     /**
@@ -844,10 +843,9 @@ public class PrintVisitor extends EmptyVisitor {
     {
         System.out.print("synchronized ");
         ast.getLock().accept(this);
-        System.out.println();
 
         indent();
-        printList(ast.getStatements(), true);
+        visit((Block)ast);
         dedent();
     }
 
@@ -885,21 +883,14 @@ public class PrintVisitor extends EmptyVisitor {
         {
             printList(ast.getResources(), ", ");
         }
-        System.out.println();
 
         ast.getTryBody().accept(this);
-        if (ast.hasCatches())
-        {
-            System.out.println();
-        }
+        System.out.println();
         printList(ast.getCatches(), true);
-        if (ast.hasFinally())
-        {
-            System.out.println();
-        }
+        System.out.println();
         if (ast.getFinallyBody() != null && !ast.getFinallyBody().isNil())
         {
-            println("finally");
+            print("finally");
             ast.getFinallyBody().accept(this);
         }
     }
@@ -1003,13 +994,12 @@ public class PrintVisitor extends EmptyVisitor {
     {
         if (ast.isDoWhile())
         {
-            System.out.println("do");
+            System.out.print("do");
         }
         else
         {
             System.out.print("while ");
             ast.getCondition().accept(this);
-            System.out.println();
         }
 
         printStatementOrBlock(ast.getBody());

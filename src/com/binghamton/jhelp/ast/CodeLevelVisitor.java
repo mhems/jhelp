@@ -558,7 +558,9 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         for (Expression e : ast.getLabels()) {
             e.accept(this);
         }
-        ast.getBody().accept(this);
+        for (Statement s : ast.getStatements()) {
+            s.accept(this);
+        }
     }
 
     /**

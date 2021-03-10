@@ -1307,7 +1307,7 @@ switchBlock returns [List<CaseBlock> ret, Token last]
 
 switchBlockStatementGroup returns [CaseBlock ret]
     :   l = switchLabels s = blockStatements
-        {$ret = new CaseBlock($l.ret, new Block($s.ret));}
+        {$ret = new CaseBlock($l.ret, $s.ret);}
     ;
 
 switchLabels returns [List<Expression> ret]
