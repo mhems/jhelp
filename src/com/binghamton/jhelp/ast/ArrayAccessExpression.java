@@ -94,6 +94,7 @@ public class ArrayAccessExpression extends QualifiableExpression {
     public void qualifyWith(Expression expr) {
         qualExpr.qualifyWith(expr);
         arrayExpr = qualExpr;
+        qualExpr = null;
         setFirstToken(arrayExpr.getFirstToken());
     }
 }

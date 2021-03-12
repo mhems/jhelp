@@ -4,10 +4,11 @@ package com.binghamton.jhelp.ast;
  * Enum representing valid binary operators
  */
 public enum BinaryOperator {
+    EMPTY(""),
     ADDITION("+"),
     SUBTRACTION("-"),
     MULTIPLICATION("*"),
-    DIVISION("\\"),
+    DIVISION("/"),
     MODULUS("%"),
     LEFT_SHIFT("<<"),
     RIGHT_SHIFT(">>"),

@@ -2219,7 +2219,7 @@ leftHandSide returns [Expression ret]
     ;
 
 assignmentOperator returns [BinaryOperator ret]
-    :   '=' {$ret = null;}
+    :   '='  {$ret = BinaryOperator.EMPTY;}
     |   '*=' {$ret = BinaryOperator.MULTIPLICATION;}
     |   '/=' {$ret = BinaryOperator.DIVISION;}
     |   '%=' {$ret = BinaryOperator.MODULUS;}

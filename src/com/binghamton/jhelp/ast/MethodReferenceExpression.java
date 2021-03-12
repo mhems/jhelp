@@ -22,6 +22,7 @@ public class MethodReferenceExpression extends QualifiableExpression {
         super(lhs.getFirstToken(), rhs.getLastToken());
         this.lhs = lhs;
         this.rhs = rhs;
+        this.targs = targs;
     }
 
     /**

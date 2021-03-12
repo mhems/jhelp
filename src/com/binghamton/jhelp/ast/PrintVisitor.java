@@ -182,8 +182,8 @@ public class PrintVisitor extends EmptyVisitor {
     public void visit(AnnotationDeclaration ast)
     {
         printArray(ast.getAnnotations(), " ");
-        print(ast.getModifiers().toString());
-        println("@interface" + ast.getName().getText());
+        System.out.print(ast.getModifiers().toString());
+        println("@interface " + ast.getName().getText());
 
         indent();
         printList(ast.getFields());
@@ -198,7 +198,6 @@ public class PrintVisitor extends EmptyVisitor {
      */
     public void visit(ArrayAccessExpression ast)
     {
-        ast.getArrayQualifyingExpression().accept(this);
         ast.getArrayExpression().accept(this);
         System.out.print("[");
         ast.getIndexExpression().accept(this);
@@ -264,9 +263,8 @@ public class PrintVisitor extends EmptyVisitor {
     public void visit(AssignmentExpression ast)
     {
         ast.getLHS().accept(this);
-        System.out.print(" ");
         System.out.print(ast.getOperator().toString());
-        System.out.print("= ");
+        System.out.print(" = ");
         ast.getRHS().accept(this);
     }
 
@@ -376,42 +374,52 @@ public class PrintVisitor extends EmptyVisitor {
      */
     public void visit(ClassDeclaration ast)
     {
-        printArray(ast.getAnnotations(), " ");
-        System.out.print(ast.getModifiers().toString());
-        System.out.print(" class ");
-        System.out.print(ast.getName().getText() + " ");
-
-        if (ast.hasTypeParameters())
+        if (ast.kind != BodyDeclaration.Kind.ANONYMOUS)
         {
-            System.out.print("<");
-            printList(ast.getTypeParameters(), ", ");
-            System.out.print(">");
-        }
+            printArray(ast.getAnnotations(), " ");
+            System.out.print(ast.getModifiers().toString());
+            System.out.print(" class ");
+            System.out.print(ast.getName().getText() + " ");
 
-        if (ast.hasSuperClass())
-        {
-            System.out.print("extends ");
-            ast.getSuperClass().accept(this);
-        }
+            if (ast.hasTypeParameters())
+            {
+                System.out.print("<");
+                printList(ast.getTypeParameters(), ", ");
+                System.out.print(">");
+            }
 
-        if (ast.hasSuperInterfaces())
-        {
-            System.out.print("implements ");
-            printList(ast.getSuperInterfaces(), ", ");
+            if (ast.hasSuperClass())
+            {
+                System.out.print(" extends ");
+                ast.getSuperClass().accept(this);
+            }
+
+            if (ast.hasSuperInterfaces())
+            {
+                System.out.print(" implements ");
+                printList(ast.getSuperInterfaces(), ", ");
+            }
         }
 
         indent();
         if (ast.getInstanceInitializers().size() > 0)
         {
             printList(ast.getInstanceInitializers());
+            System.out.println();
         }
         if (ast.getStaticInitializers().size() > 0)
         {
+
             print("static");
             printList(ast.getStaticInitializers());
+            System.out.println();
         }
         printList(ast.getConstructors());
-        printList(ast.getFields());
+        if (ast.numFields() > 0)
+        {
+            System.out.println();
+            printList(ast.getFields());
+        }
         printList(ast.getMethods());
         printList(ast.getInnerBodies());
         dedent();
@@ -489,8 +497,9 @@ public class PrintVisitor extends EmptyVisitor {
             System.out.print(")");
         }
 
-        if (ast.getBody() != null)
+        if (!ast.getBody().isEmpty())
         {
+            System.out.println();
             ast.getBody().accept(this);
         }
     }
@@ -508,7 +517,7 @@ public class PrintVisitor extends EmptyVisitor {
 
         if (ast.hasSuperInterfaces())
         {
-            System.out.print("implements ");
+            System.out.print(" implements ");
             printList(ast.getSuperInterfaces(), ", ");
         }
         System.out.println();
@@ -645,7 +654,7 @@ public class PrintVisitor extends EmptyVisitor {
 
         if (ast.hasSuperInterfaces())
         {
-            System.out.print("implements ");
+            System.out.print(" implements ");
             printList(ast.getSuperInterfaces(), ", ");
         }
 
@@ -682,7 +691,7 @@ public class PrintVisitor extends EmptyVisitor {
     public void visit(LambdaExpression ast)
     {
         printList(ast.getParameters(), ", ");
-        println(" ->");
+        System.out.print(" ->");
         ast.getBody().accept(this);
     }
 
@@ -751,8 +760,11 @@ public class PrintVisitor extends EmptyVisitor {
             printList(ast.getExceptions(), ", ");
         }
 
-        ast.getBody().accept(this);
-        System.out.println();
+        if (ast.hasBody())
+        {
+            ast.getBody().accept(this);
+            System.out.println();
+        }
     }
 
     /**
