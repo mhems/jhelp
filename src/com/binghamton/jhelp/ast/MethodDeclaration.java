@@ -126,7 +126,7 @@ public class MethodDeclaration extends Declaration {
 
     /**
      * Determines if this method has a body
-     * @param true iff this method has a body
+     * @return true iff this method has a body
      */
     public boolean hasBody() {
         return !this.body.isNil();
