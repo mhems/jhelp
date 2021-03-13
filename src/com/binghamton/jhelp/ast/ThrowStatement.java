@@ -4,6 +4,7 @@ import org.antlr.v4.runtime.Token;
 
 /**
  * A class representing a Java throws statement
+ * throw new RuntimeException();
  */
 public class ThrowStatement extends Statement {
     private final Expression expr;

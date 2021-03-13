@@ -7,7 +7,7 @@ import org.antlr.v4.runtime.Token;
 
 /**
  * Class representing a scope-delimiting block,
- * i.e. { ... }
+ * e.g. { ... }
  */
 public class Block extends Statement {
     private List<Statement> statements = new ArrayList<>();

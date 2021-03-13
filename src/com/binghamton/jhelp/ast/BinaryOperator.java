@@ -2,6 +2,7 @@ package com.binghamton.jhelp.ast;
 
 /**
  * Enum representing valid binary operators
+ * e.g. *
  */
 public enum BinaryOperator {
     EMPTY(""),

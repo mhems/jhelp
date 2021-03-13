@@ -9,7 +9,7 @@ import com.binghamton.jhelp.Modifier;
 import com.binghamton.jhelp.symbols.MyClassSymbol;
 
 /**
- * An abstract class representing a structure declaration.
+ * An abstract class representing a body declaration.
  * This includes interfaces, annotations, classes, and enums.
  */
 public abstract class BodyDeclaration extends Declaration {

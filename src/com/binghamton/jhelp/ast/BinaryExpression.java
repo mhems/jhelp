@@ -2,6 +2,7 @@ package com.binghamton.jhelp.ast;
 
 /**
  * A class representing a Java binary expression
+ * e.g. 5 + 4
  */
 public class BinaryExpression extends Expression {
     private final Expression lhs;

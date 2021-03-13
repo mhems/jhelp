@@ -10,6 +10,7 @@ import com.binghamton.jhelp.symbols.MyVariableSymbol;
 
 /**
  * A class representing a constant in a Java enum
+ * e.g. Foo { ... }
  */
 public class EnumConstant extends Declaration {
     private final List<Expression> arguments;

@@ -9,6 +9,8 @@ import com.binghamton.jhelp.types.ArrayType;
 
 /**
  * A class representing the construction of a new array
+ * e.g. new int[4]
+ *      new int[]{1, 2, 3}
  */
 public class ArrayConstruction extends Expression {
     private final Expression expr;

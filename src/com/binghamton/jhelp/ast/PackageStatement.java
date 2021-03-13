@@ -6,6 +6,7 @@ import org.antlr.v4.runtime.Token;
 
 /**
  * A class representing a Java package statement
+ * e.g. package foo;
  */
 public class PackageStatement extends Statement {
     private Annotation[] annotations = {};

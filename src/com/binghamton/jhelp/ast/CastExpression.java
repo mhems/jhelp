@@ -7,6 +7,7 @@ import org.antlr.v4.runtime.Token;
 
 /**
  * A class representing a Java cast expression
+ * e.g. (float)5
  */
 public class CastExpression extends Expression {
     private Expression source;

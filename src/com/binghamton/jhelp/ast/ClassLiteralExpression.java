@@ -4,6 +4,7 @@ import org.antlr.v4.runtime.Token;
 
 /**
  * A class representing a Java class literal
+ * e.g. Integer.class
  */
 public class ClassLiteralExpression extends Expression {
     private final Expression typeExpr;

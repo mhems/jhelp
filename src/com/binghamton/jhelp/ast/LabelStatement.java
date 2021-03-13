@@ -4,6 +4,7 @@ import org.antlr.v4.runtime.Token;
 
 /**
  * A class representing a Java label statement
+ * e.g. OuterLoop:
  */
 public class LabelStatement extends Statement {
     private final Statement stmt;

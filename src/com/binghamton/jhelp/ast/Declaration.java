@@ -10,6 +10,7 @@ import com.binghamton.jhelp.symbols.Symbol;
 
 /**
  * Abstract base class for all Java declarations
+ * e.g. variables, methods, bodies
  */
 public abstract class Declaration extends Statement {
     private Symbol sym;

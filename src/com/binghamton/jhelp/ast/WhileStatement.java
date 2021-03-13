@@ -4,6 +4,8 @@ import org.antlr.v4.runtime.Token;
 
 /**
  * A class representing a Java (do) while statement
+ * e.g. while (True) { ... }
+ *      do { ... } while (True);
  */
 public class WhileStatement extends Statement {
     private final Expression condition;

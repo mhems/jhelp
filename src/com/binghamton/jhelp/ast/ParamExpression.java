@@ -6,6 +6,7 @@ import org.antlr.v4.runtime.Token;
 
 /**
  * A class representing a parameterized type expression
+ * e.g. ArrayList<Integer>::get
  */
 public class ParamExpression extends Expression {
     private final Expression expr;

@@ -2,6 +2,7 @@ package com.binghamton.jhelp.ast;
 
 /**
  * A class representing a Java ternary expression
+ * e.g. (a < 0 ? -a : a)
  */
 public class TernaryExpression extends Expression {
     private final Expression condition;

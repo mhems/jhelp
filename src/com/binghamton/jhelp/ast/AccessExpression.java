@@ -2,6 +2,7 @@ package com.binghamton.jhelp.ast;
 
 /**
  * A class representing a Java symbol access expression
+ * e.g. a.b
  */
 public class AccessExpression extends QualifiableExpression {
     private Expression lhs;

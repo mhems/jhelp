@@ -6,6 +6,7 @@ import org.antlr.v4.runtime.Token;
 
 /**
  * A class representing a statement declaring local variables
+ * e.g. { int i; }
  */
 public class LocalVariableStatement extends Statement {
     private final List<VariableDeclaration> vars;

@@ -4,6 +4,7 @@ import org.antlr.v4.runtime.Token;
 
 /**
  * A class representing a Java unary expression
+ * e.g. -5
  */
 public class UnaryExpression extends Expression {
     private final Expression expr;

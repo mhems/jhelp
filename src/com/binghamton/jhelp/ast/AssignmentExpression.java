@@ -2,6 +2,8 @@ package com.binghamton.jhelp.ast;
 
 /**
  * A class representing a Java assignment expression
+ * e.g. a = 4
+ *      a += 5
  */
 public class AssignmentExpression extends Expression {
     private final Expression lhs;

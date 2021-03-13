@@ -9,9 +9,9 @@ import com.binghamton.jhelp.symbols.ClassSymbol;
 
 /**
  * A class representing the use of Java annotation
+ * e.g. @Foo("example")
  */
 public class Annotation extends Expression {
-    // must extend Expression for element-value pairs
     private final Map<Token, Expression> nameValueMap = new HashMap<>();
     private final Expression expr;
 

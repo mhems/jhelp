@@ -7,6 +7,7 @@ import org.antlr.v4.runtime.Token;
 
 /**
  * A class representing a Java catch block
+ * e.g. catch(Exception e) { e.printStackTrace(); }
  */
 public class CatchBlock extends Block {
     private VariableDeclaration var;

@@ -8,6 +8,8 @@ import org.antlr.v4.runtime.Token;
 
 /**
  * A class representing a Java case block of a Java switch statement
+ * e.g. case 5:
+ *          System.out.println(5);
  */
 public class CaseBlock extends Statement {
     private List<Expression> labels;

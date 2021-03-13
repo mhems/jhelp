@@ -8,6 +8,7 @@ import com.binghamton.jhelp.types.ArrayType;
 
 /**
  * A class representing a Java array initializer
+ * e.g. {1,2,3}
  */
 public class ArrayInitializer extends Expression {
     private final List<Expression> elements;
