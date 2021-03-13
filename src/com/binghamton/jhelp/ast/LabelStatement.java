@@ -4,6 +4,7 @@ import org.antlr.v4.runtime.Token;
 
 /**
  * A class representing a Java label statement
+ * e.g. OuterLoop:
  */
 public class LabelStatement extends Statement {
     private final Statement stmt;
@@ -42,7 +43,24 @@ public class LabelStatement extends Statement {
      */
     @Override
     public void accept(ASTVisitor v) {
-        super.accept(v);
         v.visit(this);
     }
+
+    /**
+     * Visits the implementor's constituents and then the implementor
+     * @param visitor the visitor to visit with
+     * @param order the order to vist the implementor with respect to its constituents
+     */
+    public void acceptRec(ASTVisitor visitor, Visitable.Order order)
+     {
+         if (order == Visitable.Order.PRE)
+         {
+             visitor.visit(this);
+         }
+         stmt.acceptRec(visitor, order);
+         if (order == Visitable.Order.POST)
+         {
+             visitor.visit(this);
+         }
+     }
 }

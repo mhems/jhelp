@@ -10,6 +10,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.binghamton.jhelp.error.SemanticError;
+import com.binghamton.jhelp.symbols.Symbol;
 
 import static com.binghamton.jhelp.util.ArrayUtils.trim;
 
@@ -98,7 +99,7 @@ public abstract class SymbolTable<K, V extends Symbol> implements Iterable<V> {
      * @return the Symbol represented by the key, if one exists,
      *         otherwise null
      */
-    protected V getFromTable(K key) {
+    public V getFromTable(K key) {
         V sym = null;
         for (Map<K, V> scope : table) {
             sym = scope.get(key);

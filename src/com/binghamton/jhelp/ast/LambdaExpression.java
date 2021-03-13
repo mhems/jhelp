@@ -6,6 +6,7 @@ import org.antlr.v4.runtime.Token;
 
 /**
  * A class representing a Java lambda expression
+ * e.g. (int i) -> { ... }
  */
 public class LambdaExpression extends Expression {
     private final List<VariableDeclaration> params;
@@ -64,7 +65,28 @@ public class LambdaExpression extends Expression {
      */
     @Override
     public void accept(ASTVisitor v) {
-        super.accept(v);
         v.visit(this);
     }
+
+    /**
+     * Visits the implementor's constituents and then the implementor
+     * @param visitor the visitor to visit with
+     * @param order the order to vist the implementor with respect to its constituents
+     */
+    public void acceptRec(ASTVisitor visitor, Visitable.Order order)
+     {
+         if (order == Visitable.Order.PRE)
+         {
+             visitor.visit(this);
+         }
+         for (VariableDeclaration vd : params)
+         {
+             vd.acceptRec(visitor, order);
+         }
+         body.acceptRec(visitor, order);
+         if (order == Visitable.Order.POST)
+         {
+             visitor.visit(this);
+         }
+     }
 }

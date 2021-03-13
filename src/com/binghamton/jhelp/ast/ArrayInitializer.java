@@ -4,10 +4,11 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.ArrayType;
+import com.binghamton.jhelp.types.ArrayType;
 
 /**
  * A class representing a Java array initializer
+ * e.g. {1,2,3}
  */
 public class ArrayInitializer extends Expression {
     private final List<Expression> elements;
@@ -61,7 +62,27 @@ public class ArrayInitializer extends Expression {
      */
     @Override
     public void accept(ASTVisitor v) {
-        super.accept(v);
         v.visit(this);
     }
+
+    /**
+     * Visits the implementor's constituents and then the implementor
+     * @param visitor the visitor to visit with
+     * @param order the order to vist the implementor with respect to its constituents
+     */
+    public void acceptRec(ASTVisitor visitor, Visitable.Order order)
+     {
+         if (order == Visitable.Order.PRE)
+         {
+             visitor.visit(this);
+         }
+         for (Expression e : elements)
+         {
+             e.acceptRec(visitor, order);
+         }
+         if (order == Visitable.Order.POST)
+         {
+             visitor.visit(this);
+         }
+     }
 }

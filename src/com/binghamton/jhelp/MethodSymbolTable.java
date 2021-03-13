@@ -5,6 +5,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
+import com.binghamton.jhelp.symbols.MethodSymbol;
+import com.binghamton.jhelp.types.MethodType;
+import com.binghamton.jhelp.types.Type;
+import com.binghamton.jhelp.types.TypeVariable;
+
 /**
  * A SymbolTable specifically for holding methods, where methods are
  * keyed by their override signature.

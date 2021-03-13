@@ -4,6 +4,7 @@ import org.antlr.v4.runtime.Token;
 
 /**
  * A class to represent an empty statement in Java
+ * e.g. ;
  */
 public class EmptyStatement extends Statement {
 

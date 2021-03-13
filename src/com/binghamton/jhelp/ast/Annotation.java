@@ -5,13 +5,13 @@ import java.util.HashMap;
 
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.ClassSymbol;
+import com.binghamton.jhelp.symbols.ClassSymbol;
 
 /**
  * A class representing the use of Java annotation
+ * e.g. @Foo("example")
  */
 public class Annotation extends Expression {
-    // must extend Expression for element-value pairs
     private final Map<Token, Expression> nameValueMap = new HashMap<>();
     private final Expression expr;
 
@@ -134,9 +134,30 @@ public class Annotation extends Expression {
      */
     @Override
     public void accept(ASTVisitor v) {
-        super.accept(v);
         v.visit(this);
     }
+
+    /**
+     * Visits the implementor's constituents and then the implementor
+     * @param visitor the visitor to visit with
+     * @param order the order to vist the implementor with respect to its constituents
+     */
+    public void acceptRec(ASTVisitor visitor, Visitable.Order order)
+     {
+         if (order == Visitable.Order.PRE)
+         {
+             visitor.visit(this);
+         }
+         expr.acceptRec(visitor, order);
+         for (Expression e : nameValueMap.values())
+         {
+             e.acceptRec(visitor, order);
+         }
+         if (order == Visitable.Order.POST)
+         {
+             visitor.visit(this);
+         }
+     }
 
     @Override
     public ClassSymbol getType() {

@@ -7,6 +7,7 @@ import org.antlr.v4.runtime.Token;
 /**
  * A class representing an instantion (constructor call) with possible anonymous
  * inner class.
+ * e.g. new Foo() { ... }
  */
 public class InstantiationExpression extends CallExpression {
     private final ClassDeclaration classBody = new ClassDeclaration();
@@ -51,7 +52,34 @@ public class InstantiationExpression extends CallExpression {
      */
     @Override
     public void accept(ASTVisitor v) {
-        super.accept(v);
         v.visit(this);
     }
+
+    /**
+     * Visits the implementor's constituents and then the implementor
+     * @param visitor the visitor to visit with
+     * @param order the order to vist the implementor with respect to its constituents
+     */
+    public void acceptRec(ASTVisitor visitor, Visitable.Order order)
+     {
+         if (order == Visitable.Order.PRE)
+         {
+             visitor.visit(this);
+         }
+         getMethod().acceptRec(visitor, order);
+         getNameExpression().acceptRec(visitor, order);
+         for (TypeArgument ta : getTypeArguments())
+         {
+             ta.acceptRec(visitor, order);
+         }
+         for (Expression e : getArguments())
+         {
+             e.acceptRec(visitor, order);
+         }
+         classBody.acceptRec(visitor, order);
+         if (order == Visitable.Order.POST)
+         {
+             visitor.visit(this);
+         }
+     }
 }

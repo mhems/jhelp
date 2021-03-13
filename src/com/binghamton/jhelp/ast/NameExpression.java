@@ -11,6 +11,7 @@ import com.binghamton.jhelp.Package;
  * A class representing Java identifiers over several categories.
  * These identifiers may be qualified by another NameExpression,
  * yet each NameExpression represents a logically atomic name
+ * e.g. foo
  */
 public class NameExpression extends Expression {
 
@@ -302,7 +303,31 @@ public class NameExpression extends Expression {
      */
     @Override
     public void accept(ASTVisitor v) {
-        super.accept(v);
         v.visit(this);
     }
+
+    /**
+     * Visits the implementor's constituents and then the implementor
+     * @param visitor the visitor to visit with
+     * @param order the order to vist the implementor with respect to its constituents
+     */
+    public void acceptRec(ASTVisitor visitor, Visitable.Order order)
+     {
+         if (order == Visitable.Order.PRE)
+         {
+             visitor.visit(this);
+         }
+         for (Annotation a : annotations)
+         {
+             a.acceptRec(visitor, order);
+         }
+         if (isQualified())
+         {
+             qualifier.acceptRec(visitor, order);
+         }
+         if (order == Visitable.Order.POST)
+         {
+             visitor.visit(this);
+         }
+     }
 }

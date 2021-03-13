@@ -5,10 +5,11 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.TypeVariable;
+import com.binghamton.jhelp.types.TypeVariable;
 
 /**
  * A class representing a Java type parameter
+ * e.g. <K extends V & L>
  */
 public class TypeParameter extends ASTNode {
     private Token name;
@@ -47,6 +48,14 @@ public class TypeParameter extends ASTNode {
         this.annotations = annotations.toArray(new Annotation[annotations.size()]);
         this.name = name;
         this.superTypes = superTypes;
+    }
+
+    /**
+     * Determines if this TypeParameter has any Annotations
+     * @return true iff this TypeParameter has any Annotations
+     */
+    public boolean isAnnotated() {
+        return annotations.length > 0;
     }
 
     /**
@@ -111,9 +120,33 @@ public class TypeParameter extends ASTNode {
      */
     @Override
     public void accept(ASTVisitor v) {
-        super.accept(v);
         v.visit(this);
     }
+
+    /**
+     * Visits the implementor's constituents and then the implementor
+     * @param visitor the visitor to visit with
+     * @param order the order to vist the implementor with respect to its constituents
+     */
+    public void acceptRec(ASTVisitor visitor, Visitable.Order order)
+     {
+         if (order == Visitable.Order.PRE)
+         {
+             visitor.visit(this);
+         }
+         for (Annotation a : annotations)
+         {
+             a.acceptRec(visitor, order);
+         }
+         for (Expression e : superTypes)
+         {
+             e.acceptRec(visitor, order);
+         }
+         if (order == Visitable.Order.POST)
+         {
+             visitor.visit(this);
+         }
+     }
 
     /**
      * Gets the TypeVariable this TypeParameter evaluates to

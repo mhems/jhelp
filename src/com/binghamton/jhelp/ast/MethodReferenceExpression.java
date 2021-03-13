@@ -4,6 +4,7 @@ import java.util.List;
 
 /**
  * A class representing a Java8 method reference
+ * e.g. String::length
  */
 public class MethodReferenceExpression extends QualifiableExpression {
     private Expression lhs;
@@ -22,6 +23,7 @@ public class MethodReferenceExpression extends QualifiableExpression {
         super(lhs.getFirstToken(), rhs.getLastToken());
         this.lhs = lhs;
         this.rhs = rhs;
+        this.targs = targs;
     }
 
     /**
@@ -49,6 +51,14 @@ public class MethodReferenceExpression extends QualifiableExpression {
     }
 
     /**
+     * Determines if this Expression has type arguments
+     * @return true iff this Expression has type arguments
+     */
+    public boolean hasTypeArguments() {
+        return !targs.isEmpty();
+    }
+
+    /**
      * Gets the type arguments to this Expression
      * @return the List of type arguments to this Expression
      */
@@ -62,7 +72,6 @@ public class MethodReferenceExpression extends QualifiableExpression {
      */
     @Override
     public void accept(ASTVisitor v) {
-        super.accept(v);
         v.visit(this);
     }
 
@@ -71,4 +80,27 @@ public class MethodReferenceExpression extends QualifiableExpression {
         lhs = expr;
         setFirstToken(lhs.getFirstToken());
     }
+
+    /**
+     * Visits the implementor's constituents and then the implementor
+     * @param visitor the visitor to visit with
+     * @param order the order to vist the implementor with respect to its constituents
+     */
+    public void acceptRec(ASTVisitor visitor, Visitable.Order order)
+     {
+         if (order == Visitable.Order.PRE)
+         {
+             visitor.visit(this);
+         }
+         lhs.acceptRec(visitor, order);
+         rhs.acceptRec(visitor, order);
+         for (TypeArgument ta : targs)
+         {
+             ta.acceptRec(visitor, order);
+         }
+         if (order == Visitable.Order.POST)
+         {
+             visitor.visit(this);
+         }
+     }
 }

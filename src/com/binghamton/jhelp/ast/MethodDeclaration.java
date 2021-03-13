@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.binghamton.jhelp.Modifier;
-import com.binghamton.jhelp.MyMethodSymbol;
+import com.binghamton.jhelp.symbols.MyMethodSymbol;
 
 /**
  * A class representing the declaration of a Java method
@@ -125,6 +125,14 @@ public class MethodDeclaration extends Declaration {
     }
 
     /**
+     * Determines if this method has a body
+     * @return true iff this method has a body
+     */
+    public boolean hasBody() {
+        return !this.body.isNil();
+    }
+
+    /**
      * Sets this method's body
      * @param body this method's body
      */
@@ -145,7 +153,7 @@ public class MethodDeclaration extends Declaration {
      * @return the MethodSymbol associated with this declaration
      */
     public MyMethodSymbol getSymbol() {
-        return (MyMethodSymbol)sym;
+        return (MyMethodSymbol)super.getSymbol();
     }
 
     /**
@@ -178,7 +186,41 @@ public class MethodDeclaration extends Declaration {
      */
     @Override
     public void accept(ASTVisitor v) {
-        super.accept(v);
         v.visit(this);
     }
+
+    /**
+     * Visits the implementor's constituents and then the implementor
+     * @param visitor the visitor to visit with
+     * @param order the order to vist the implementor with respect to its constituents
+     */
+    public void acceptRec(ASTVisitor visitor, Visitable.Order order)
+     {
+         if (order == Visitable.Order.PRE)
+         {
+             visitor.visit(this);
+         }
+         for (Annotation a : getAnnotations())
+         {
+             a.acceptRec(visitor, order);
+         }
+         returnType.acceptRec(visitor, order);
+         for (TypeParameter tp : typeParams)
+         {
+             tp.acceptRec(visitor, order);
+         }
+         for (VariableDeclaration vd : params)
+         {
+             vd.acceptRec(visitor, order);
+         }
+         for (Expression e : exceptions)
+         {
+             e.acceptRec(visitor, order);
+         }
+         body.acceptRec(visitor, order);
+         if (order == Visitable.Order.POST)
+         {
+             visitor.visit(this);
+         }
+     }
 }

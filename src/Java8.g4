@@ -54,15 +54,13 @@ Total lexer+parser time 30844ms.
 grammar Java8;
 
 @header {
-    import java.util.ArrayList;
-    import java.util.List;
+import com.binghamton.jhelp.*;
+import com.binghamton.jhelp.ast.*;
+import com.binghamton.jhelp.error.SyntacticError;
+import com.binghamton.jhelp.types.PrimitiveType;
 
-    import com.binghamton.jhelp.*;
-    import com.binghamton.jhelp.ast.*;
-    import com.binghamton.jhelp.error.SyntacticError;
-
-    import static com.binghamton.jhelp.ast.NameExpression.*;
-    import static com.binghamton.jhelp.ast.BodyDeclaration.Kind.*;
+import static com.binghamton.jhelp.ast.NameExpression.*;
+import static com.binghamton.jhelp.ast.BodyDeclaration.Kind.*;
 }
 
 @parser::members {
@@ -1266,7 +1264,7 @@ statementExpression returns [Expression ret]
 
 ifThenStatement returns [IfElseStatement ret]
     :   kw = 'if' '(' e = expression ')' s = statement
-        {$ret = new IfElseStatement($kw, $e.ret, new Block($s.ret));}
+        {$ret = new IfElseStatement($kw, $e.ret, $s.ret);}
     ;
 
 ifThenElseStatement returns [IfElseStatement ret]
@@ -1274,8 +1272,8 @@ ifThenElseStatement returns [IfElseStatement ret]
         'else' el = statement
         {$ret = new IfElseStatement($kw,
                                     $e.ret,
-                                    new Block($t.ret),
-                                    new Block($el.ret));}
+                                    $t.ret,
+                                    $el.ret);}
     ;
 
 ifThenElseStatementNoShortIf returns [IfElseStatement ret]
@@ -1283,8 +1281,8 @@ ifThenElseStatementNoShortIf returns [IfElseStatement ret]
         'else' el = statementNoShortIf
         {$ret = new IfElseStatement($kw,
                                     $e.ret,
-                                    new Block($t.ret),
-                                    new Block($el.ret));}
+                                    $t.ret,
+                                    $el.ret);}
     ;
 
 assertStatement returns [AssertStatement ret]
@@ -1309,7 +1307,7 @@ switchBlock returns [List<CaseBlock> ret, Token last]
 
 switchBlockStatementGroup returns [CaseBlock ret]
     :   l = switchLabels s = blockStatements
-        {$ret = new CaseBlock($l.ret, new Block($s.ret));}
+        {$ret = new CaseBlock($l.ret, $s.ret);}
     ;
 
 switchLabels returns [List<Expression> ret]
@@ -1322,22 +1320,22 @@ switchLabels returns [List<Expression> ret]
 switchLabel returns [Expression ret]
     :   'case' c = constantExpression ':' {$ret = $c.ret;}
     |   'case' id = Identifier ':' {$ret = createExpressionName($id);}
-    |   kw = 'default' ':' {$ret = new NilExpression();}
+    |   kw = 'default' ':' {$ret = new NilExpression($kw);}
     ;
 
 whileStatement returns [WhileStatement ret]
     :   kw = 'while' '(' c = expression ')' s = statement
-        {$ret = new WhileStatement($kw, $c.ret, new Block($s.ret));}
+        {$ret = new WhileStatement($kw, $c.ret, $s.ret);}
     ;
 
 whileStatementNoShortIf returns [WhileStatement ret]
     :   kw = 'while' '(' c = expression ')' s = statementNoShortIf
-        {$ret = new WhileStatement($kw, $c.ret, new Block($s.ret));}
+        {$ret = new WhileStatement($kw, $c.ret, $s.ret);}
     ;
 
 doStatement returns [WhileStatement ret]
     :   kw = 'do' s = statement 'while' '(' c = expression ')' last = ';'
-        {$ret = new WhileStatement($kw, $last, $c.ret, new Block($s.ret));}
+        {$ret = new WhileStatement($kw, $last, $c.ret, $s.ret);}
     ;
 
 forStatement returns [Statement ret]
@@ -1358,7 +1356,7 @@ basicForStatement returns [ForStatement ret]
                        (e = expression {$expr = $e.ret;})? ';'
                        (u = forUpdate {$forUp = $u.ret;})? ')'
         s = statement
-        {$ret = new ForStatement($kw, $forIn, $expr, $forUp, new Block($s.ret));}
+        {$ret = new ForStatement($kw, $forIn, $expr, $forUp, $s.ret);}
     ;
 
 basicForStatementNoShortIf returns [ForStatement ret]
@@ -1369,7 +1367,7 @@ basicForStatementNoShortIf returns [ForStatement ret]
                        (e = expression {$expr = $e.ret;})? ';'
                        (u = forUpdate {$forUp = $u.ret;})? ')'
         s = statementNoShortIf
-        {$ret = new ForStatement($kw, $forIn, $expr, $forUp, new Block($s.ret));}
+        {$ret = new ForStatement($kw, $forIn, $expr, $forUp, $s.ret);}
     ;
 
 forInit returns [List<Statement> ret]
@@ -1405,7 +1403,7 @@ enhancedForStatement returns [ForEachStatement ret]
                         v = typedVariableDeclaratorId[$mods, $ans] ':'
                         e = expression ')'
                         s = statement
-        {$ret = new ForEachStatement($kw, $v.ret, $e.ret, new Block($s.ret));}
+        {$ret = new ForEachStatement($kw, $v.ret, $e.ret, $s.ret);}
     ;
 
 enhancedForStatementNoShortIf returns [ForEachStatement ret]
@@ -1419,7 +1417,7 @@ enhancedForStatementNoShortIf returns [ForEachStatement ret]
                         v = typedVariableDeclaratorId[$mods, $ans] ':'
                         e = expression ')'
                         s = statementNoShortIf
-        {$ret = new ForEachStatement($kw, $v.ret, $e.ret, new Block($s.ret));}
+        {$ret = new ForEachStatement($kw, $v.ret, $e.ret, $s.ret);}
     ;
 
 breakStatement returns [JumpStatement ret]
@@ -2221,7 +2219,7 @@ leftHandSide returns [Expression ret]
     ;
 
 assignmentOperator returns [BinaryOperator ret]
-    :   '=' {$ret = null;}
+    :   '='  {$ret = BinaryOperator.EMPTY;}
     |   '*=' {$ret = BinaryOperator.MULTIPLICATION;}
     |   '/=' {$ret = BinaryOperator.DIVISION;}
     |   '%=' {$ret = BinaryOperator.MODULUS;}
@@ -2690,6 +2688,8 @@ StringLiteral
 
 BadStringLiteral
     :   '\'' StringCharacters? '\''
+    |   '"' StringCharacters? '\''
+    |   '\'' StringCharacters? '"'
     ;
 
 fragment

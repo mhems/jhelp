@@ -6,10 +6,10 @@ import java.util.ArrayList;
 import org.antlr.v4.runtime.Token;
 
 import com.binghamton.jhelp.Modifier;
-import com.binghamton.jhelp.MyClassSymbol;
+import com.binghamton.jhelp.symbols.MyClassSymbol;
 
 /**
- * An abstract class representing a structure declaration.
+ * An abstract class representing a body declaration.
  * This includes interfaces, annotations, classes, and enums.
  */
 public abstract class BodyDeclaration extends Declaration {
@@ -167,7 +167,7 @@ public abstract class BodyDeclaration extends Declaration {
 
     @Override
     public MyClassSymbol getSymbol() {
-        return (MyClassSymbol)sym;
+        return (MyClassSymbol)super.getSymbol();
     }
 
     /**
@@ -176,7 +176,39 @@ public abstract class BodyDeclaration extends Declaration {
      */
     @Override
     public void accept(ASTVisitor v) {
-        super.accept(v);
         v.visit(this);
     }
+
+    /**
+     * Visits the implementor's constituents and then the implementor
+     * @param visitor the visitor to visit with
+     * @param order the order to vist the implementor with respect to its constituents
+     */
+    public void acceptRec(ASTVisitor visitor, Visitable.Order order)
+     {
+         if (order == Visitable.Order.PRE)
+         {
+             visitor.visit(this);
+         }
+         for (Annotation a : getAnnotations())
+         {
+             a.acceptRec(visitor, order);
+         }
+         for (VariableDeclaration v : fields)
+         {
+             v.acceptRec(visitor, order);
+         }
+         for (BodyDeclaration b : innerBodies)
+         {
+             b.acceptRec(visitor, order);
+         }
+         for (MethodDeclaration m : methods)
+         {
+             m.acceptRec(visitor, order);
+         }
+         if (order == Visitable.Order.POST)
+         {
+             visitor.visit(this);
+         }
+     }
 }

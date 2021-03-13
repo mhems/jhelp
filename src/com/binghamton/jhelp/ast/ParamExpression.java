@@ -6,6 +6,7 @@ import org.antlr.v4.runtime.Token;
 
 /**
  * A class representing a parameterized type expression
+ * e.g. ArrayList<Integer>::get
  */
 public class ParamExpression extends Expression {
     private final Expression expr;
@@ -51,7 +52,28 @@ public class ParamExpression extends Expression {
 
     @Override
     public void accept(ASTVisitor v) {
-        super.accept(v);
         v.visit(this);
     }
+
+    /**
+     * Visits the implementor's constituents and then the implementor
+     * @param visitor the visitor to visit with
+     * @param order the order to vist the implementor with respect to its constituents
+     */
+    public void acceptRec(ASTVisitor visitor, Visitable.Order order)
+     {
+         if (order == Visitable.Order.PRE)
+         {
+             visitor.visit(this);
+         }
+         expr.acceptRec(visitor, order);
+         for (TypeArgument ta : targs)
+         {
+             ta.acceptRec(visitor, order);
+         }
+         if (order == Visitable.Order.POST)
+         {
+             visitor.visit(this);
+         }
+     }
 }

@@ -7,7 +7,7 @@ import org.antlr.v4.runtime.Token;
 
 /**
  * Class representing a scope-delimiting block,
- * i.e. { ... }
+ * e.g. { ... }
  */
 public class Block extends Statement {
     private List<Statement> statements = new ArrayList<>();
@@ -73,18 +73,17 @@ public class Block extends Statement {
      * @param statements the statements comprising this block
      */
     public Block(List<Statement> statements) {
-        super(statements.get(0).getFirstToken(),
-              statements.get(statements.size()-1).getLastToken());
-        this.statements = statements;
+        this(statements.get(0).getFirstToken(),
+             statements.get(statements.size()-1).getLastToken(),
+             statements);
     }
 
     /**
-     * Deep-copy construct a block from another
+     * Copy construct a block from another
      * @param block the other block whose values are to copied
      */
     public Block(Block block) {
-        super(block.getFirstToken(), block.getLastToken());
-        this.statements = new ArrayList<>(block.statements);
+        this(block.getFirstToken(), block.getLastToken(), block.statements);
     }
 
     /**
@@ -152,13 +151,34 @@ public class Block extends Statement {
     public void addStatement(int index, Statement stmt) {
         statements.add(index, stmt);
     }
+
     /**
      * Double dispatch this class on parameter
      * @param v the visitor to accept
      */
     @Override
     public void accept(ASTVisitor v) {
-        super.accept(v);
         v.visit(this);
     }
+
+    /**
+     * Visits the implementor's constituents and then the implementor
+     * @param visitor the visitor to visit with
+     * @param order the order to vist the implementor with respect to its constituents
+     */
+    public void acceptRec(ASTVisitor visitor, Visitable.Order order)
+     {
+         if (order == Visitable.Order.PRE)
+         {
+             visitor.visit(this);
+         }
+         for (Statement s : statements)
+         {
+             s.acceptRec(visitor, order);
+         }
+         if (order == Visitable.Order.POST)
+         {
+             visitor.visit(this);
+         }
+     }
 }

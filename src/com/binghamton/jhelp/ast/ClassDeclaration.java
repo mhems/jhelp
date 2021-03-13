@@ -6,7 +6,7 @@ import java.util.List;
 import org.antlr.v4.runtime.Token;
 
 import com.binghamton.jhelp.Modifier;
-import com.binghamton.jhelp.Type;
+import com.binghamton.jhelp.types.Type;
 
 /**
  * A class representing a Java class declaration
@@ -103,7 +103,60 @@ public class ClassDeclaration extends ConcreteBodyDeclaration {
      */
     @Override
     public void accept(ASTVisitor v) {
-        super.accept(v);
         v.visit(this);
     }
+
+    /**
+     * Visits the implementor's constituents and then the implementor
+     * @param visitor the visitor to visit with
+     * @param order the order to vist the implementor with respect to its constituents
+     */
+    public void acceptRec(ASTVisitor visitor, Visitable.Order order)
+     {
+         if (order == Visitable.Order.PRE)
+         {
+             visitor.visit(this);
+         }
+         for (Annotation a : getAnnotations())
+         {
+             a.acceptRec(visitor, order);
+         }
+         for (TypeParameter tp : typeParams)
+         {
+             tp.acceptRec(visitor, order);
+         }
+         superClass.acceptRec(visitor, order);
+         for (Expression e : getSuperInterfaces())
+         {
+             e.acceptRec(visitor, order);
+         }
+         for (Block b : getStaticInitializers())
+         {
+             b.acceptRec(visitor, order);
+         }
+         for (Block b : getInstanceInitializers())
+         {
+             b.acceptRec(visitor, order);
+         }
+         for (MethodDeclaration md : getConstructors())
+         {
+             md.acceptRec(visitor, order);
+         }
+         for (VariableDeclaration vd : getFields())
+         {
+             vd.acceptRec(visitor, order);
+         }
+         for (MethodDeclaration md : getMethods())
+         {
+             md.acceptRec(visitor, order);
+         }
+         for (BodyDeclaration bd : getInnerBodies())
+         {
+             bd.acceptRec(visitor, order);
+         }
+         if (order == Visitable.Order.POST)
+         {
+             visitor.visit(this);
+         }
+     }
 }

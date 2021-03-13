@@ -2,10 +2,11 @@ package com.binghamton.jhelp.ast;
 
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.Type;
+import com.binghamton.jhelp.types.Type;
 
 /**
  * A class representing a Java literal
+ * e.g. True
  */
 public class LiteralExpression extends Expression {
     private final String value;
@@ -35,7 +36,6 @@ public class LiteralExpression extends Expression {
      */
     @Override
     public void accept(ASTVisitor v) {
-        super.accept(v);
         v.visit(this);
     }
 }

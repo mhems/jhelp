@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Function;
 
+import com.binghamton.jhelp.symbols.ClassSymbol;
 import com.binghamton.jhelp.util.SymbolFinder;
 
 /**

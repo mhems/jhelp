@@ -3,14 +3,14 @@ package com.binghamton.jhelp.ast;
 import java.util.List;
 
 import com.binghamton.jhelp.MyPackage;
-import com.binghamton.jhelp.ClassSymbol;
-import com.binghamton.jhelp.MethodSymbol;
-import com.binghamton.jhelp.MethodType;
-import com.binghamton.jhelp.VariableSymbol;
 import com.binghamton.jhelp.ImportingSymbolTable;
 import com.binghamton.jhelp.NamedSymbolTable;
 import com.binghamton.jhelp.MethodSymbolTable;
-import com.binghamton.jhelp.Type;
+import com.binghamton.jhelp.symbols.ClassSymbol;
+import com.binghamton.jhelp.symbols.MethodSymbol;
+import com.binghamton.jhelp.symbols.VariableSymbol;
+import com.binghamton.jhelp.types.MethodType;
+import com.binghamton.jhelp.types.Type;
 
 /**
  * A class representing a Java compilation unit (file)
@@ -248,7 +248,35 @@ public class CompilationUnit extends ASTNode {
      */
     @Override
     public void accept(ASTVisitor v) {
-        super.accept(v);
         v.visit(this);
     }
+
+    /**
+     * Visits the implementor's constituents and then the implementor
+     * @param visitor the visitor to visit with
+     * @param order the order to vist the implementor with respect to its constituents
+     */
+    public void acceptRec(ASTVisitor visitor, Visitable.Order order)
+     {
+         if (order == Visitable.Order.PRE)
+         {
+             visitor.visit(this);
+         }
+         if (hasPackage())
+         {
+             pkg.acceptRec(visitor, order);
+         }
+         for (ImportStatement is : imports)
+         {
+             is.acceptRec(visitor, order);
+         }
+         for (BodyDeclaration b : bodies)
+         {
+             b.acceptRec(visitor, order);
+         }
+         if (order == Visitable.Order.POST)
+         {
+             visitor.visit(this);
+         }
+     }
 }

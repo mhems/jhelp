@@ -2,28 +2,37 @@ package com.binghamton.jhelp.ast;
 
 /**
  * Enum representing valid binary operators
+ * e.g. *
  */
 public enum BinaryOperator {
-    ADDITION,
-    SUBTRACTION,
-    MULTIPLICATION,
-    DIVISION,
-    MODULUS,
-    LEFT_SHIFT,
-    RIGHT_SHIFT,
-    RIGHT_LOGICAL_SHIFT,
-    BITWISE_AND,
-    BITWISE_OR,
-    BITWISE_XOR,
-    AND,
-    OR,
-    EQUALITY,
-    INEQUALITY,
-    GREATER_THAN,
-    GREATER_THAN_OR_EQUAL,
-    LESS_THAN,
-    LESS_THAN_OR_EQUAL,
-    INSTANCE_OF;
+    EMPTY(""),
+    ADDITION("+"),
+    SUBTRACTION("-"),
+    MULTIPLICATION("*"),
+    DIVISION("/"),
+    MODULUS("%"),
+    LEFT_SHIFT("<<"),
+    RIGHT_SHIFT(">>"),
+    RIGHT_LOGICAL_SHIFT(">>>"),
+    BITWISE_AND("&"),
+    BITWISE_OR("|"),
+    BITWISE_XOR("^"),
+    AND("&&"),
+    OR("||"),
+    EQUALITY("=="),
+    INEQUALITY("!="),
+    GREATER_THAN(">"),
+    GREATER_THAN_OR_EQUAL(">="),
+    LESS_THAN("<"),
+    LESS_THAN_OR_EQUAL("<="),
+    INSTANCE_OF("instanceof");
+
+    private String text;
+
+    BinaryOperator(String text)
+    {
+        this.text = text;
+    }
 
     /**
      * Determines if this operator undergoes binary promotion
@@ -95,5 +104,11 @@ public enum BinaryOperator {
      */
     public boolean isLogical() {
         return this == AND || this == OR;
+    }
+
+    @Override
+    public String toString()
+    {
+        return text;
     }
 }

@@ -8,27 +8,28 @@ import java.util.function.BiFunction;
 
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.AnnotationSymbol;
-import com.binghamton.jhelp.ArrayType;
-import com.binghamton.jhelp.ClassSymbol;
-import com.binghamton.jhelp.MethodSymbol;
 import com.binghamton.jhelp.Modifier;
-import com.binghamton.jhelp.MyClassSymbol;
-import com.binghamton.jhelp.MyMethodSymbol;
-import com.binghamton.jhelp.MyVariableSymbol;
 import com.binghamton.jhelp.NamedSymbolTable;
-import com.binghamton.jhelp.NilType;
-import com.binghamton.jhelp.ParameterizedType;
-import com.binghamton.jhelp.PrimitiveType;
 import com.binghamton.jhelp.Program;
-import com.binghamton.jhelp.Symbol;
-import com.binghamton.jhelp.Type;
-import com.binghamton.jhelp.TypeVariable;
-import com.binghamton.jhelp.VariableSymbol;
-import com.binghamton.jhelp.WildcardType;
 import com.binghamton.jhelp.antlr.MyToken;
 import com.binghamton.jhelp.error.StyleWarning;
 import com.binghamton.jhelp.error.UnimplementedFeatureWarning;
+import com.binghamton.jhelp.symbols.AnnotationSymbol;
+import com.binghamton.jhelp.symbols.ClassSymbol;
+import com.binghamton.jhelp.symbols.MethodSymbol;
+import com.binghamton.jhelp.symbols.MyClassSymbol;
+import com.binghamton.jhelp.symbols.MyMethodSymbol;
+import com.binghamton.jhelp.symbols.MyVariableSymbol;
+import com.binghamton.jhelp.symbols.Symbol;
+import com.binghamton.jhelp.symbols.VariableSymbol;
+import com.binghamton.jhelp.types.ArrayType;
+import com.binghamton.jhelp.types.NilType;
+import com.binghamton.jhelp.types.ParameterizedType;
+import com.binghamton.jhelp.types.PrimitiveType;
+import com.binghamton.jhelp.types.Type;
+import com.binghamton.jhelp.types.TypeVariable;
+import com.binghamton.jhelp.types.WildcardType;
+import com.binghamton.jhelp.util.Logger;
 
 import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
 import static com.binghamton.jhelp.ast.NameExpression.Kind;
@@ -478,12 +479,14 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
      * @param ast the AST node being visited
      */
     public void visit(Block ast) {
+        //System.out.println("visiting block");
         currentScope.enterScope();
         for (Statement stmt : ast.getStatements()) {
             try {
+                //System.out.println("accepting stmt: " + stmt);
                 stmt.accept(this);
             } catch (Exception e) {
-                // squelched
+                Logger.log(e);
             }
         }
         currentScope.exitScope();
@@ -501,14 +504,14 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             try {
                 v.accept(this);
             } catch (Exception e) {
-                // squelched
+                Logger.log(e);
             }
         }
         for (MethodDeclaration m : ast.getMethods()) {
             try {
                 m.accept(this);
             } catch (Exception e) {
-                // squelched
+                Logger.log(e);
             }
         }
         MyClassSymbol tmp = currentClass;
@@ -516,7 +519,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             try {
                 body.accept(this);
             } catch (Exception e) {
-                // squelched
+                Logger.log(e);
             }
             currentClass = tmp;
         }
@@ -554,6 +557,9 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
     public void visit(CaseBlock ast) {
         for (Expression e : ast.getLabels()) {
             e.accept(this);
+        }
+        for (Statement s : ast.getStatements()) {
+            s.accept(this);
         }
     }
 
@@ -646,7 +652,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             try {
                 ctor.accept(this);
             } catch (Exception e) {
-                // squelched
+                Logger.log(e);
             }
         }
         for (Block sB : ast.getStaticInitializers()) {
@@ -655,7 +661,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             try {
                 sB.accept(this);
             } catch (Exception e) {
-                // squelched
+                Logger.log(e);
             }
         }
         for (Block iB : ast.getInstanceInitializers()) {
@@ -664,7 +670,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             try {
                 iB.accept(this);
             } catch (Exception e) {
-                // squelched
+                Logger.log(e);
             }
         }
 
@@ -791,7 +797,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                      "For each loops must iterate over arrays or an implementor of the Iterable interface",
                      "Specify an array or Iterable to iterate over");
         }
-        visit((Block)ast);
+        ast.getBody().accept(this);
         currentScope.exitScope();
     }
 
@@ -821,7 +827,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
         for (Statement up : ast.getUpdaters()) {
             up.accept(this);
         }
-        visit((Block)ast);
+        ast.getBody().accept(this);
         currentScope.exitScope();
     }
 
@@ -838,18 +844,18 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                      PrimitiveType.BOOLEAN,
                      ast.getCondition().getType());
         }
-        if (ast.getThenBlock().isEmpty() && !ast.getElseBlock().isNil()) {
+        if (ast.hasEmptyThenStatement() && ast.hasElseStatement()) {
             addError(new StyleWarning(ast.getCondition(),
                                       "An empty if block with a non-empty else block should be converted to just an if block, with no else",
                                       "Negate the condition, move the contents of the else block to the if block and remove the now empty else block"));
         }
-        if (!ast.getElseBlock().isNil() && ast.getElseBlock().isEmpty()) {
-            addError(new StyleWarning(ast.getElseBlock(),
+        if (ast.hasElseStatement() && ast.hasEmptyElseStatement()) {
+            addError(new StyleWarning(ast.getElseStatement(),
                                       "An empty else should be removed",
                                       "Remove the empty else block"));
         }
-        ast.getThenBlock().accept(this);
-        ast.getElseBlock().accept(this);
+        ast.getThenStatement().accept(this);
+        ast.getElseStatement().accept(this);
     }
 
     /**
@@ -1277,7 +1283,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             cB.accept(this);
             for (Expression labelExpr : cB.getLabels()) {
                 caseType = labelExpr.getType();
-                if (labelExpr.getText().equals("default")) {
+                if (labelExpr.isNil()) {
                     if (seenDefault) {
                         addError(labelExpr,
                                  "A switch statement can only have one default case",
@@ -1592,6 +1598,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
                      PrimitiveType.BOOLEAN,
                      ast.getCondition().getType());
         }
+        ast.getBody().accept(this);
     }
 
     /**
@@ -1740,7 +1747,7 @@ public class CodeLevelVisitor extends BodyLevelVisitor {
             return true;
         }
         Type boxedRType = rType.box();
-        if (boxedRType != null && isAssignable(lType, boxedRType)) {
+        if (boxedRType != null && boxedRType.canWidenTo(lType)) {
             return true;
         }
         Type unboxedRType = rType.unbox();

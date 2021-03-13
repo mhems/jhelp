@@ -6,10 +6,11 @@ import java.util.List;
 import org.antlr.v4.runtime.Token;
 
 import com.binghamton.jhelp.Modifier;
-import com.binghamton.jhelp.MyVariableSymbol;
+import com.binghamton.jhelp.symbols.MyVariableSymbol;
 
 /**
  * A class representing a constant in a Java enum
+ * e.g. Foo { ... }
  */
 public class EnumConstant extends Declaration {
     private final List<Expression> arguments;
@@ -41,7 +42,7 @@ public class EnumConstant extends Declaration {
      * @return the field associated with this declaration
      */
     public MyVariableSymbol getSymbol() {
-        return (MyVariableSymbol)sym;
+        return (MyVariableSymbol)super.getSymbol();
     }
 
     /**
@@ -74,7 +75,32 @@ public class EnumConstant extends Declaration {
      */
     @Override
     public void accept(ASTVisitor v) {
-        super.accept(v);
         v.visit(this);
     }
+
+    /**
+     * Visits the implementor's constituents and then the implementor
+     * @param visitor the visitor to visit with
+     * @param order the order to vist the implementor with respect to its constituents
+     */
+    public void acceptRec(ASTVisitor visitor, Visitable.Order order)
+     {
+         if (order == Visitable.Order.PRE)
+         {
+             visitor.visit(this);
+         }
+         for (Annotation a : getAnnotations())
+         {
+             a.acceptRec(visitor, order);
+         }
+         for (Expression e : arguments)
+         {
+             e.acceptRec(visitor, order);
+         }
+         body.acceptRec(visitor, order);
+         if (order == Visitable.Order.POST)
+         {
+             visitor.visit(this);
+         }
+     }
 }

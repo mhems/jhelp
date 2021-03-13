@@ -6,16 +6,17 @@ import org.antlr.v4.runtime.Token;
 
 import com.binghamton.jhelp.Modifier;
 import com.binghamton.jhelp.Modifiers;
-import com.binghamton.jhelp.Symbol;
+import com.binghamton.jhelp.symbols.Symbol;
 
 /**
  * Abstract base class for all Java declarations
+ * e.g. variables, methods, bodies
  */
 public abstract class Declaration extends Statement {
-    protected Symbol sym;
-    protected Token name;
-    protected Modifiers modifiers = new Modifiers();
-    protected Annotation[] annotations = {};
+    private Symbol sym;
+    private Token name;
+    private Modifiers modifiers = new Modifiers();
+    private Annotation[] annotations = {};
 
     /**
      * Construct an empty declaration
@@ -64,7 +65,10 @@ public abstract class Declaration extends Statement {
      * Gets the Symbol this Declaration declares
      * @return the Symbol this Declaration declares
      */
-    public abstract Symbol getSymbol();
+    public Symbol getSymbol()
+    {
+        return sym;
+    }
 
     /**
      * Sets the Symbol this Declaration declares
@@ -112,7 +116,27 @@ public abstract class Declaration extends Statement {
      */
     @Override
     public void accept(ASTVisitor v) {
-        super.accept(v);
         v.visit(this);
     }
+
+    /**
+     * Visits the implementor's constituents and then the implementor
+     * @param visitor the visitor to visit with
+     * @param order the order to vist the implementor with respect to its constituents
+     */
+    public void acceptRec(ASTVisitor visitor, Visitable.Order order)
+     {
+         if (order == Visitable.Order.PRE)
+         {
+             visitor.visit(this);
+         }
+         for (Annotation a : annotations)
+         {
+             a.acceptRec(visitor, order);
+         }
+         if (order == Visitable.Order.POST)
+         {
+             visitor.visit(this);
+         }
+     }
 }

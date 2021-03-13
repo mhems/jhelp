@@ -4,6 +4,7 @@ import org.antlr.v4.runtime.Token;
 
 /**
  * A class representing a Java array access
+ * e.g. a[0]
  */
 public class ArrayAccessExpression extends QualifiableExpression {
     private Expression arrayExpr;
@@ -38,6 +39,14 @@ public class ArrayAccessExpression extends QualifiableExpression {
     }
 
     /**
+     * Gets the expression qualifying the array to access
+     * @return the expression qualifying the array to access
+     */
+    public Expression getArrayQualifyingExpression() {
+        return qualExpr;
+    }
+
+    /**
      * Gets the expression yielding the array to access
      * @return the expression yielding the array to access
      */
@@ -59,14 +68,34 @@ public class ArrayAccessExpression extends QualifiableExpression {
      */
     @Override
     public void accept(ASTVisitor v) {
-        super.accept(v);
         v.visit(this);
     }
+
+    /**
+     * Visits the implementor's constituents and then the implementor
+     * @param visitor the visitor to visit with
+     * @param order the order to vist the implementor with respect to its constituents
+     */
+    public void acceptRec(ASTVisitor visitor, Visitable.Order order)
+     {
+         if (order == Visitable.Order.PRE)
+         {
+             visitor.visit(this);
+         }
+         qualExpr.acceptRec(visitor, order);
+         arrayExpr.acceptRec(visitor, order);
+         indexExpr.acceptRec(visitor, order);
+         if (order == Visitable.Order.POST)
+         {
+             visitor.visit(this);
+         }
+     }
 
     @Override
     public void qualifyWith(Expression expr) {
         qualExpr.qualifyWith(expr);
         arrayExpr = qualExpr;
+        qualExpr = null;
         setFirstToken(arrayExpr.getFirstToken());
     }
 }

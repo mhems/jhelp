@@ -2,7 +2,7 @@ package com.binghamton.jhelp.error;
 
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.Type;
+import com.binghamton.jhelp.types.Type;
 import com.binghamton.jhelp.antlr.MyToken;
 import com.binghamton.jhelp.ast.ASTNode;
 

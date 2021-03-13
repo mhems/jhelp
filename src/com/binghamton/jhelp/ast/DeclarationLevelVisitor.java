@@ -2,19 +2,20 @@ package com.binghamton.jhelp.ast;
 
 import java.util.List;
 
-import com.binghamton.jhelp.AnnotationSymbol;
-import com.binghamton.jhelp.ArrayType;
-import com.binghamton.jhelp.ClassSymbol;
-import com.binghamton.jhelp.MyClassSymbol;
 import com.binghamton.jhelp.Modifier;
-import com.binghamton.jhelp.ParameterizedType;
-import com.binghamton.jhelp.PrimitiveType;
 import com.binghamton.jhelp.Program;
-import com.binghamton.jhelp.ReferenceType;
-import com.binghamton.jhelp.Type;
-import com.binghamton.jhelp.TypeVariable;
-import com.binghamton.jhelp.WildcardType;
 import com.binghamton.jhelp.error.UnimplementedFeatureWarning;
+import com.binghamton.jhelp.symbols.AnnotationSymbol;
+import com.binghamton.jhelp.symbols.ClassSymbol;
+import com.binghamton.jhelp.symbols.MyClassSymbol;
+import com.binghamton.jhelp.types.ArrayType;
+import com.binghamton.jhelp.types.ParameterizedType;
+import com.binghamton.jhelp.types.PrimitiveType;
+import com.binghamton.jhelp.types.ReferenceType;
+import com.binghamton.jhelp.types.Type;
+import com.binghamton.jhelp.types.TypeVariable;
+import com.binghamton.jhelp.types.WildcardType;
+import com.binghamton.jhelp.util.Logger;
 
 import static com.binghamton.jhelp.ImportingSymbolTable.fetch;
 
@@ -150,7 +151,7 @@ public class DeclarationLevelVisitor extends FileLevelVisitor {
             try {
                 decl.accept(this);
             } catch (Exception e) {
-                // squelched
+                Logger.log(e);
             }
         }
     }

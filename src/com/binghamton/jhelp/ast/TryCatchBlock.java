@@ -7,6 +7,9 @@ import org.antlr.v4.runtime.Token;
 
 /**
  * A class representing a Java try/catch/finally block
+ * e.g. try (Resurce r = new Resource()) { ... }
+ *      catch (Exception e) {...}
+ *      finally { ... }
  */
 public class TryCatchBlock extends Statement {
     private Block tryBody;
@@ -161,7 +164,33 @@ public class TryCatchBlock extends Statement {
      */
     @Override
     public void accept(ASTVisitor v) {
-        super.accept(v);
         v.visit(this);
     }
+
+    /**
+     * Visits the implementor's constituents and then the implementor
+     * @param visitor the visitor to visit with
+     * @param order the order to vist the implementor with respect to its constituents
+     */
+    public void acceptRec(ASTVisitor visitor, Visitable.Order order)
+     {
+         if (order == Visitable.Order.PRE)
+         {
+             visitor.visit(this);
+         }
+         tryBody.acceptRec(visitor, order);
+         for (VariableDeclaration vd : resources)
+         {
+             vd.acceptRec(visitor, order);
+         }
+         for (CatchBlock cb : catches)
+         {
+             cb.acceptRec(visitor, order);
+         }
+         finallyBody.acceptRec(visitor, order);
+         if (order == Visitable.Order.POST)
+         {
+             visitor.visit(this);
+         }
+     }
 }

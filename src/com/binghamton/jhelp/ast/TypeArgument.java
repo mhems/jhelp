@@ -4,10 +4,12 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.Type;
+import com.binghamton.jhelp.types.Type;
 
 /**
  * A class representing a Java type argument
+ * e.g. <K>
+ *      <? extends V>
  */
 public class TypeArgument extends ASTNode {
     // either expresses a reference type or wildcard bound
@@ -122,9 +124,30 @@ public class TypeArgument extends ASTNode {
      */
     @Override
     public void accept(ASTVisitor v) {
-        super.accept(v);
         v.visit(this);
     }
+
+    /**
+     * Visits the implementor's constituents and then the implementor
+     * @param visitor the visitor to visit with
+     * @param order the order to vist the implementor with respect to its constituents
+     */
+    public void acceptRec(ASTVisitor visitor, Visitable.Order order)
+     {
+         if (order == Visitable.Order.PRE)
+         {
+             visitor.visit(this);
+         }
+         for (Annotation a : annotations)
+         {
+             a.acceptRec(visitor, order);
+         }
+         typeExpr.acceptRec(visitor, order);
+         if (order == Visitable.Order.POST)
+         {
+             visitor.visit(this);
+         }
+     }
 
     /**
      * Gets the Type this TypeArgument evaluates to

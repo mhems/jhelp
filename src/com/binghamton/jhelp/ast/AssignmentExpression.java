@@ -2,6 +2,8 @@ package com.binghamton.jhelp.ast;
 
 /**
  * A class representing a Java assignment expression
+ * e.g. a = 4
+ *      a += 5
  */
 public class AssignmentExpression extends Expression {
     private final Expression lhs;
@@ -61,7 +63,25 @@ public class AssignmentExpression extends Expression {
      */
     @Override
     public void accept(ASTVisitor v) {
-        super.accept(v);
         v.visit(this);
     }
+
+    /**
+     * Visits the implementor's constituents and then the implementor
+     * @param visitor the visitor to visit with
+     * @param order the order to vist the implementor with respect to its constituents
+     */
+    public void acceptRec(ASTVisitor visitor, Visitable.Order order)
+     {
+         if (order == Visitable.Order.PRE)
+         {
+             visitor.visit(this);
+         }
+         lhs.acceptRec(visitor, order);
+         rhs.acceptRec(visitor, order);
+         if (order == Visitable.Order.POST)
+         {
+             visitor.visit(this);
+         }
+     }
 }

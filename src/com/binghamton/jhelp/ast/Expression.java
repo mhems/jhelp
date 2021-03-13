@@ -2,8 +2,8 @@ package com.binghamton.jhelp.ast;
 
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.Type;
-import com.binghamton.jhelp.Symbol;
+import com.binghamton.jhelp.types.Type;
+import com.binghamton.jhelp.symbols.Symbol;
 
 /**
  * Base class representing a Java syntactic expression
@@ -44,7 +44,6 @@ public abstract class Expression extends Statement {
      */
     @Override
     public void accept(ASTVisitor v) {
-        super.accept(v);
         v.visit(this);
     }
 

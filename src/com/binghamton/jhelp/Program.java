@@ -8,6 +8,8 @@ import java.util.List;
 
 import com.binghamton.jhelp.ast.CompilationUnit;
 import com.binghamton.jhelp.error.JHelpError;
+import com.binghamton.jhelp.symbols.ClassSymbol;
+import com.binghamton.jhelp.types.Type;
 import com.binghamton.jhelp.util.DiGraph;
 import com.binghamton.jhelp.util.StringUtils;
 
@@ -20,28 +22,42 @@ public class Program {
      * A simple record of a Program's configuration options
      */
     public static class Configuration {
-        public final boolean NO_WARNINGS;
-        public final boolean INVOKE_JAVAC;
-        public final boolean NO_COLOR;
+        public boolean NO_WARNINGS;
+        public boolean INVOKE_JAVAC;
+        public boolean NO_COLOR;
+        public boolean PRETTY_PRINT;
 
-        /**
-         * Constructs a Configuration with default settings
-         */
-        private Configuration() {
-            this(false, false, false);
-        }
+        public File[] fromArgs(String[] args) {
+            File[] files;
+            List<File> tmp = new ArrayList<>();
 
-        /**
-         * Constructs a Configuration
-         * @param nw true iff this Program should issue no warnings
-         * @param j true iff this Program should invoke javac if no errors are
-         * found
-         * @param nc true iff this Program should not color output
-         */
-        public Configuration(boolean nw, boolean j, boolean nc) {
-            NO_WARNINGS = nw;
-            INVOKE_JAVAC = j;
-            NO_COLOR = nc;
+            for (String arg : args) {
+                switch (arg) {
+                case "-nw":
+                    NO_WARNINGS = true;
+                    break;
+                case "-j":
+                    INVOKE_JAVAC = true;
+                    break;
+                case "-nc":
+                    NO_COLOR = true;
+                    break;
+                case "-p":
+                    PRETTY_PRINT = true;
+                    break;
+                case "-h":
+                    System.out.println(USAGE);
+                    System.exit(0);
+                    break;
+                default:
+                    tmp.add(new File(arg));
+                }
+            }
+            files = tmp.toArray(new File[tmp.size()]);
+            if (files.length == 0) {
+                files = new File[]{new File(System.getProperty("user.dir"))};
+            }
+            return files;
         }
     }
 
@@ -94,32 +110,7 @@ public class Program {
      */
     public Program(String[] args) {
         this.args = args;
-        List<File> tmp = new ArrayList<>();
-        boolean[] flags = new boolean[3];
-        for (String arg : args) {
-            switch (arg) {
-            case "-nw":
-                flags[0] = true;
-                break;
-            case "-j":
-                flags[1] = true;
-                break;
-            case "-nc":
-                flags[2] = true;
-                break;
-            case "-h":
-                System.out.println(USAGE);
-                System.exit(0);
-                break;
-            default:
-                tmp.add(new File(arg));
-            }
-        }
-        files = tmp.toArray(new File[tmp.size()]);
-        if (files.length == 0) {
-            files = new File[]{new File(System.getProperty("user.dir"))};
-        }
-        config = new Configuration(flags[0], flags[1], flags[2]);
+        files = config.fromArgs(args);
     }
 
     /**

@@ -4,30 +4,36 @@ import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.antlr.v4.runtime.Token;
+
 /**
  * A class representing a Java case block of a Java switch statement
+ * e.g. case 5:
+ *          System.out.println(5);
  */
-public class CaseBlock extends Block {
+public class CaseBlock extends Statement {
     private List<Expression> labels;
+    private List<Statement> statements;
+    private Token defaultKw;
 
     /**
      * Construct a new, empty case block with one label
      * @param label the label for this case block
      */
     public CaseBlock(Expression label) {
-        this(new ArrayList<>(Arrays.asList(label)), new NilBlock());
+        this(new ArrayList<>(Arrays.asList(label)), new ArrayList<Statement>());
     }
 
     /**
      * Construct a new, empty case block
      * @param labels the list of labels for this case block
-     * @param body the body of this case block
+     * @param statements the statements within this case block
      */
-    public CaseBlock(List<Expression> labels, Block body) {
+    public CaseBlock(List<Expression> labels, List<Statement> statements) {
         super(labels.get(0).getFirstToken(),
-              labels.get(labels.size()-1).getLastToken(),
-              body.getStatements());
+              labels.get(labels.size()-1).getLastToken());
         this.labels = labels;
+        this.statements = statements;
     }
 
     /**
@@ -56,12 +62,44 @@ public class CaseBlock extends Block {
     }
 
     /**
+     * Gets the statements within this case block
+     * @return the statements within this case block
+     */
+    public List<Statement> getStatements() {
+        return statements;
+    }
+
+    /**
      * Double dispatch this class on parameter
      * @param v the visitor to accept
      */
     @Override
     public void accept(ASTVisitor v) {
-        super.accept(v);
         v.visit(this);
     }
+
+    /**
+     * Visits the implementor's constituents and then the implementor
+     * @param visitor the visitor to visit with
+     * @param order the order to vist the implementor with respect to its constituents
+     */
+    public void acceptRec(ASTVisitor visitor, Visitable.Order order)
+     {
+         if (order == Visitable.Order.PRE)
+         {
+             visitor.visit(this);
+         }
+         for (Expression e : labels)
+         {
+             e.acceptRec(visitor, order);
+         }
+         for (Statement s : statements)
+         {
+             s.acceptRec(visitor, order);
+         }
+         if (order == Visitable.Order.POST)
+         {
+             visitor.visit(this);
+         }
+     }
 }

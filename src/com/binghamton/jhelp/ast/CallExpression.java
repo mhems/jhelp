@@ -5,10 +5,12 @@ import java.util.List;
 
 import org.antlr.v4.runtime.Token;
 
-import com.binghamton.jhelp.MethodSymbol;
+import com.binghamton.jhelp.symbols.MethodSymbol;
 
 /**
  * A class representing a Java method call, including explicit constructor calls
+ * e.g. a.foo()
+ *      new A()
  */
 public class CallExpression extends QualifiableExpression {
     private Expression methodExpr;
@@ -108,6 +110,14 @@ public class CallExpression extends QualifiableExpression {
     }
 
     /**
+     * Gets this call's name Expression
+     * @return this call's name Expression
+     */
+    public Expression getNameExpression() {
+        return nameExpr;
+    }
+
+    /**
      * Gets the expression that yields the method being called
      * @return the expression that yields the method being called
      */
@@ -186,9 +196,35 @@ public class CallExpression extends QualifiableExpression {
      */
     @Override
     public void accept(ASTVisitor v) {
-        super.accept(v);
         v.visit(this);
     }
+
+    /**
+     * Visits the implementor's constituents and then the implementor
+     * @param visitor the visitor to visit with
+     * @param order the order to vist the implementor with respect to its constituents
+     */
+    public void acceptRec(ASTVisitor visitor, Visitable.Order order)
+     {
+         if (order == Visitable.Order.PRE)
+         {
+             visitor.visit(this);
+         }
+         methodExpr.acceptRec(visitor, order);
+         nameExpr.acceptRec(visitor, order);
+         for (TypeArgument ta : typeArgs)
+         {
+             ta.acceptRec(visitor, order);
+         }
+         for (Expression e : args)
+         {
+             e.acceptRec(visitor, order);
+         }
+         if (order == Visitable.Order.POST)
+         {
+             visitor.visit(this);
+         }
+     }
 
     @Override
     public void qualifyWith(Expression expr) {

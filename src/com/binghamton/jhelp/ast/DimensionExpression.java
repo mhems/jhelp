@@ -6,6 +6,7 @@ import org.antlr.v4.runtime.Token;
 
 /**
  * Class representing a dimension expression
+ * [@Foo 6]
  */
 public class DimensionExpression extends Expression {
     private Annotation[] annotations = {};
@@ -49,7 +50,28 @@ public class DimensionExpression extends Expression {
      */
     @Override
     public void accept(ASTVisitor v) {
-        super.accept(v);
         v.visit(this);
     }
+
+    /**
+     * Visits the implementor's constituents and then the implementor
+     * @param visitor the visitor to visit with
+     * @param order the order to vist the implementor with respect to its constituents
+     */
+    public void acceptRec(ASTVisitor visitor, Visitable.Order order)
+     {
+         if (order == Visitable.Order.PRE)
+         {
+             visitor.visit(this);
+         }
+         expr.acceptRec(visitor, order);
+         for (Annotation a : annotations)
+         {
+             a.acceptRec(visitor, order);
+         }
+         if (order == Visitable.Order.POST)
+         {
+             visitor.visit(this);
+         }
+     }
 }

@@ -2,6 +2,7 @@ package com.binghamton.jhelp.ast;
 
 /**
  * A class representing the declaration of a local class
+ * e.g. void foo() { class NonLocal { class Local  { ... } } }
  */
 public class LocalClassDeclaration extends Statement {
 
@@ -30,7 +31,24 @@ public class LocalClassDeclaration extends Statement {
      */
     @Override
     public void accept(ASTVisitor v) {
-        super.accept(v);
         v.visit(this);
     }
+
+    /**
+     * Visits the implementor's constituents and then the implementor
+     * @param visitor the visitor to visit with
+     * @param order the order to vist the implementor with respect to its constituents
+     */
+    public void acceptRec(ASTVisitor visitor, Visitable.Order order)
+     {
+         if (order == Visitable.Order.PRE)
+         {
+             visitor.visit(this);
+         }
+         cls.acceptRec(visitor, order);
+         if (order == Visitable.Order.POST)
+         {
+             visitor.visit(this);
+         }
+     }
 }

@@ -2,6 +2,7 @@ package com.binghamton.jhelp.ast;
 
 /**
  * A class representing a Java ternary expression
+ * e.g. (a < 0 ? -a : a)
  */
 public class TernaryExpression extends Expression {
     private final Expression condition;
@@ -55,7 +56,26 @@ public class TernaryExpression extends Expression {
      */
     @Override
     public void accept(ASTVisitor v) {
-        super.accept(v);
         v.visit(this);
     }
+
+    /**
+     * Visits the implementor's constituents and then the implementor
+     * @param visitor the visitor to visit with
+     * @param order the order to vist the implementor with respect to its constituents
+     */
+    public void acceptRec(ASTVisitor visitor, Visitable.Order order)
+     {
+         if (order == Visitable.Order.PRE)
+         {
+             visitor.visit(this);
+         }
+         condition.acceptRec(visitor, order);
+         thenExpr.acceptRec(visitor, order);
+         elseExpr.acceptRec(visitor, order);
+         if (order == Visitable.Order.POST)
+         {
+             visitor.visit(this);
+         }
+     }
 }

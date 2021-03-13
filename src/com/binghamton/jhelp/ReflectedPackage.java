@@ -1,5 +1,8 @@
 package com.binghamton.jhelp;
 
+import com.binghamton.jhelp.symbols.ClassSymbol;
+import com.binghamton.jhelp.util.Logger;
+
 /**
  * A class to represent a pre-compiled Package
  */
@@ -24,7 +27,7 @@ public class ReflectedPackage extends Package {
         try {
             ret = ImportManager.getOrImport(this.name + "." + name);
         } catch(ClassNotFoundException e) {
-            // squelched
+            Logger.log(e);
         }
         return ret;
     }

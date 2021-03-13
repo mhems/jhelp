@@ -6,27 +6,13 @@ import org.antlr.v4.runtime.Token;
 
 /**
  * A class representing a Java for statement
+ * e.g. for (int i = 0; i < N; i++)
  */
-public class ForStatement extends Block {
+public class ForStatement extends Statement {
     private List<Statement> initializers;
     private Expression condition;
     private List<Statement> updates;
-
-    /**
-     * Construct a new for statement with a single statement body
-     * @param keyword the for keyword Token
-     * @param initializers the initializing statements of the for statement
-     * @param condition the iteration condition of the for statement
-     * @param updates the updating statements of the for statement
-     * @param statement the single statement of the for statement body
-     */
-    public ForStatement(Token keyword,
-                        List<Statement> initializers,
-                        Expression condition,
-                        List<Statement> updates,
-                        Statement statement) {
-        this(keyword, initializers, condition, updates, new Block(statement));
-    }
+    private Statement body;
 
     /**
      * Construct a new for statement
@@ -34,18 +20,19 @@ public class ForStatement extends Block {
      * @param initializers the initializing statements of the for statement
      * @param condition the iteration condition of the for statement
      * @param updates the updating statements of the for statement
-     * @param body the body of the for statement
+     * @param statement the body of the for statement
      */
     public ForStatement(Token keyword,
                         List<Statement> initializers,
                         Expression condition,
                         List<Statement> updates,
-                        Block body) {
-        super(body);
+                        Statement statement) {
+        super(keyword);
         setFirstToken(keyword);
         this.initializers = initializers;
         this.condition = condition;
         this.updates = updates;
+        this.body = statement;
     }
 
     /**
@@ -107,6 +94,17 @@ public class ForStatement extends Block {
     }
 
     /**
+     * Gets the body of this statement
+     * @return the body of this statement
+     */
+    public Statement getBody() {
+        return body;
+    }
+
+    public void acceptBody(ASTVisitor v) {
+    }
+
+    /**
      * Double dispatch this class on parameter
      * @param v the visitor to accept
      */
@@ -115,4 +113,31 @@ public class ForStatement extends Block {
         v.visit(this);
         // must visit block statements explicitly
     }
+
+    /**
+     * Visits the implementor's constituents and then the implementor
+     * @param visitor the visitor to visit with
+     * @param order the order to vist the implementor with respect to its constituents
+     */
+    public void acceptRec(ASTVisitor visitor, Visitable.Order order)
+     {
+         if (order == Visitable.Order.PRE)
+         {
+             visitor.visit(this);
+         }
+         for (Statement s : initializers)
+         {
+             s.acceptRec(visitor, order);
+         }
+         condition.acceptRec(visitor, order);
+         for (Statement s : updates)
+         {
+             s.acceptRec(visitor, order);
+         }
+         body.acceptRec(visitor, order);
+         if (order == Visitable.Order.POST)
+         {
+             visitor.visit(this);
+         }
+     }
 }

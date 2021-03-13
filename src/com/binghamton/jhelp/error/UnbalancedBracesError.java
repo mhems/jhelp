@@ -1,6 +1,6 @@
 package com.binghamton.jhelp.error;
 
-import com.binghamton.jhelp.BalancedValidator;
+import com.binghamton.jhelp.validators.BalancedValidator;
 import com.binghamton.jhelp.antlr.MyToken;
 
 /**

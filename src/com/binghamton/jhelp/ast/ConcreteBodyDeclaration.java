@@ -132,7 +132,55 @@ public abstract class ConcreteBodyDeclaration extends BodyDeclaration {
      */
     @Override
     public void accept(ASTVisitor v) {
-        super.accept(v);
         v.visit(this);
     }
+
+    /**
+     * Visits the implementor's constituents and then the implementor
+     * @param visitor the visitor to visit with
+     * @param order the order to vist the implementor with respect to its constituents
+     */
+    public void acceptRec(ASTVisitor visitor, Visitable.Order order)
+     {
+         if (order == Visitable.Order.PRE)
+         {
+             visitor.visit(this);
+         }
+         for (Annotation a : getAnnotations())
+         {
+             a.acceptRec(visitor, order);
+         }
+         for (Expression e : implementees)
+         {
+             e.acceptRec(visitor, order);
+         }
+         for (Block b : staticInitializers)
+         {
+             b.acceptRec(visitor, order);
+         }
+         for (Block b : instanceInitializers)
+         {
+             b.acceptRec(visitor, order);
+         }
+         for (MethodDeclaration md : ctors)
+         {
+             md.acceptRec(visitor, order);
+         }
+         for (VariableDeclaration vd : getFields())
+         {
+             vd.acceptRec(visitor, order);
+         }
+         for (MethodDeclaration md : getMethods())
+         {
+             md.acceptRec(visitor, order);
+         }
+         for (BodyDeclaration bd : getInnerBodies())
+         {
+             bd.acceptRec(visitor, order);
+         }
+         if (order == Visitable.Order.POST)
+         {
+             visitor.visit(this);
+         }
+     }
 }

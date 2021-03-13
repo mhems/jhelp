@@ -7,6 +7,7 @@ import org.antlr.v4.runtime.Token;
 
 /**
  * A class representing a Java catch block
+ * e.g. catch(Exception e) { e.printStackTrace(); }
  */
 public class CatchBlock extends Block {
     private VariableDeclaration var;
@@ -70,4 +71,30 @@ public class CatchBlock extends Block {
         v.visit(this);
         // must visit block statements explicitly
     }
+
+    /**
+     * Visits the implementor's constituents and then the implementor
+     * @param visitor the visitor to visit with
+     * @param order the order to vist the implementor with respect to its constituents
+     */
+    public void acceptRec(ASTVisitor visitor, Visitable.Order order)
+     {
+         if (order == Visitable.Order.PRE)
+         {
+             visitor.visit(this);
+         }
+         for (Expression e : types)
+         {
+             e.acceptRec(visitor, order);
+         }
+         var.acceptRec(visitor, order);
+         for (Statement s : getStatements())
+         {
+             s.acceptRec(visitor, order);
+         }
+         if (order == Visitable.Order.POST)
+         {
+             visitor.visit(this);
+         }
+     }
 }

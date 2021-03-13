@@ -6,7 +6,7 @@ import java.util.List;
 import org.antlr.v4.runtime.Token;
 
 import com.binghamton.jhelp.Modifier;
-import com.binghamton.jhelp.MyVariableSymbol;
+import com.binghamton.jhelp.symbols.MyVariableSymbol;
 
 /**
  * A class representing a Java variable declaration
@@ -155,7 +155,7 @@ public class VariableDeclaration extends Declaration {
      * @return the VariableSymbol this declaration declares
      */
     public MyVariableSymbol getSymbol() {
-        return (MyVariableSymbol)sym;
+        return (MyVariableSymbol)super.getSymbol();
     }
 
     /**
@@ -164,7 +164,33 @@ public class VariableDeclaration extends Declaration {
      */
     @Override
     public void accept(ASTVisitor v) {
-        super.accept(v);
         v.visit(this);
     }
+
+    /**
+     * Visits the implementor's constituents and then the implementor
+     * @param visitor the visitor to visit with
+     * @param order the order to vist the implementor with respect to its constituents
+     */
+    public void acceptRec(ASTVisitor visitor, Visitable.Order order)
+     {
+         if (order == Visitable.Order.PRE)
+         {
+             visitor.visit(this);
+         }
+         for (Annotation a : getAnnotations())
+         {
+             a.acceptRec(visitor, order);
+         }
+         for (Annotation a : ellipsisAnnotations)
+         {
+             a.acceptRec(visitor, order);
+         }
+         expr.acceptRec(visitor, order);
+         initializer.acceptRec(visitor, order);
+         if (order == Visitable.Order.POST)
+         {
+             visitor.visit(this);
+         }
+     }
 }
