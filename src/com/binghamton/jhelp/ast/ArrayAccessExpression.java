@@ -4,7 +4,7 @@ import org.antlr.v4.runtime.Token;
 
 /**
  * A class representing a Java array access
- * e.g. a[0]
+ * e.g. {@code a[0]}
  */
 public class ArrayAccessExpression extends QualifiableExpression {
     private Expression arrayExpr;

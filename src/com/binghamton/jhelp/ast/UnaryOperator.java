@@ -2,7 +2,7 @@ package com.binghamton.jhelp.ast;
 
 /**
  * Enum representing valid unary operators
- * e.g. ~
+ * e.g. {@code ~}
  */
 public enum UnaryOperator {
     BITWISE_NEGATION("~"),

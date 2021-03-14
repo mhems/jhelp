@@ -8,7 +8,7 @@ import com.binghamton.jhelp.Modifier;
 
 /**
  * A class representing a Java annotation type declaration
- * e.g. @interface MyAnnotation { String field(); }
+ * e.g. {@code @interface MyAnnotation { String field(); }}
  */
 public class AnnotationDeclaration extends AbstractBodyDeclaration {
 

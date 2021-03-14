@@ -4,7 +4,7 @@ import org.antlr.v4.runtime.Token;
 
 /**
  * A class representing a Java import statement
- * import java.util.Map;
+ * e.g. {@code import java.util.Map;}
  */
 public class ImportStatement extends Statement {
     private final NameExpression nameExpr;

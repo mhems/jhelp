@@ -7,9 +7,7 @@ import org.antlr.v4.runtime.Token;
 
 /**
  * A class representing a Java try/catch/finally block
- * e.g. try (Resurce r = new Resource()) { ... }
- *      catch (Exception e) {...}
- *      finally { ... }
+ * e.g. {@code try (Resurce r = new Resource()) { ... } catch (Exception e) {...} finally { ... }}
  */
 public class TryCatchBlock extends Statement {
     private Block tryBody;

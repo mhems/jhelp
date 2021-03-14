@@ -2,7 +2,7 @@ package com.binghamton.jhelp.ast;
 
 /**
  * A class representing the declaration of a local class
- * e.g. void foo() { class NonLocal { class Local  { ... } } }
+ * e.g. {@code void foo() { class NonLocal { class Local  { ... } } }}
  */
 public class LocalClassDeclaration extends Statement {
 

@@ -6,7 +6,7 @@ import org.antlr.v4.runtime.Token;
 
 /**
  * A class representing a Java for statement
- * e.g. for (int i = 0; i < N; i++)
+ * e.g. {@code for (int i = 0; i < N; i++)}
  */
 public class ForStatement extends Statement {
     private List<Statement> initializers;

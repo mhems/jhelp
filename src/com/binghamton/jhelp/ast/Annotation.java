@@ -9,7 +9,7 @@ import com.binghamton.jhelp.symbols.ClassSymbol;
 
 /**
  * A class representing the use of Java annotation
- * e.g. @Foo("example")
+ * e.g. {@code @Foo("example")}
  */
 public class Annotation extends Expression {
     private final Map<Token, Expression> nameValueMap = new HashMap<>();

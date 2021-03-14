@@ -4,7 +4,7 @@ import java.util.List;
 
 /**
  * A class representing a Java8 method reference
- * e.g. String::length
+ * e.g. {@code String::length}
  */
 public class MethodReferenceExpression extends QualifiableExpression {
     private Expression lhs;

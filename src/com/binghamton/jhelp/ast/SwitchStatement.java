@@ -6,7 +6,7 @@ import org.antlr.v4.runtime.Token;
 
 /**
  * A class representing a Java switch statement
- * e.g. switch { case 5: break; }
+ * e.g. {@code switch { case 5: break; }}
  */
 public class SwitchStatement extends Statement {
     private final Expression condition;

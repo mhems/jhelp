@@ -6,7 +6,7 @@ import org.antlr.v4.runtime.Token;
 
 /**
  * Class representing a dimension expression
- * [@Foo 6]
+ * e.g. {@code [@Foo 6]}
  */
 public class DimensionExpression extends Expression {
     private Annotation[] annotations = {};

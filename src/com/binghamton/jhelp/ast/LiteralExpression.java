@@ -6,7 +6,7 @@ import com.binghamton.jhelp.types.Type;
 
 /**
  * A class representing a Java literal
- * e.g. True
+ * e.g. {@code True}
  */
 public class LiteralExpression extends Expression {
     private final String value;

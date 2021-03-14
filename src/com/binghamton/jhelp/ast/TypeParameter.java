@@ -9,7 +9,7 @@ import com.binghamton.jhelp.types.TypeVariable;
 
 /**
  * A class representing a Java type parameter
- * e.g. <K extends V & L>
+ * e.g. {@code <K extends V & L>}
  */
 public class TypeParameter extends ASTNode {
     private Token name;

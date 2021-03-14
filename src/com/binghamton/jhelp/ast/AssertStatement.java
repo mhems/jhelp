@@ -4,8 +4,8 @@ import org.antlr.v4.runtime.Token;
 
 /**
  * A class representing a Java assert statement
- * e.g. assert False : "message";
- *      assert True;
+ * e.g. {@code assert False : "message";}
+ *      {@code assert True;}
  */
 public class AssertStatement extends Statement {
     private final Expression condition;

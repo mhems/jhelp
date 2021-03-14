@@ -7,7 +7,7 @@ import org.antlr.v4.runtime.Token;
 /**
  * A class representing an instantion (constructor call) with possible anonymous
  * inner class.
- * e.g. new Foo() { ... }
+ * e.g. {@code new Foo() { ... }}
  */
 public class InstantiationExpression extends CallExpression {
     private final ClassDeclaration classBody = new ClassDeclaration();

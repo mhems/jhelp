@@ -6,7 +6,7 @@ import org.antlr.v4.runtime.Token;
 
 /**
  * A class representing a Java lambda expression
- * e.g. (int i) -> { ... }
+ * e.g. {@code (int i) -> { ... }}
  */
 public class LambdaExpression extends Expression {
     private final List<VariableDeclaration> params;

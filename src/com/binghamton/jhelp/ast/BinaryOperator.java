@@ -2,7 +2,7 @@ package com.binghamton.jhelp.ast;
 
 /**
  * Enum representing valid binary operators
- * e.g. *
+ * e.g. {@code *}
  */
 public enum BinaryOperator {
     EMPTY(""),

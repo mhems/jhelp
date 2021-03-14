@@ -11,7 +11,7 @@ import com.binghamton.jhelp.Package;
  * A class representing Java identifiers over several categories.
  * These identifiers may be qualified by another NameExpression,
  * yet each NameExpression represents a logically atomic name
- * e.g. foo
+ * e.g. {@code foo}
  */
 public class NameExpression extends Expression {
 

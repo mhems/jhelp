@@ -8,8 +8,8 @@ import com.binghamton.jhelp.types.Type;
 
 /**
  * A class representing a Java type argument
- * e.g. <K>
- *      <? extends V>
+ * e.g. {@code <K>}
+ *      {@code <? extends V>}
  */
 public class TypeArgument extends ASTNode {
     // either expresses a reference type or wildcard bound

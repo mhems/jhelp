@@ -4,7 +4,7 @@ import org.antlr.v4.runtime.Token;
 
 /**
  * A class representing a Java for-each statement
- * e.g. for (Foo f : foos)
+ * e.g. {@code for (Foo f : foos)}
  */
 public class ForEachStatement extends Statement {
     private VariableDeclaration variable;

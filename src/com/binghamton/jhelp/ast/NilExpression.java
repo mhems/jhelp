@@ -7,6 +7,9 @@ import org.antlr.v4.runtime.Token;
  */
 public class NilExpression extends Expression {
 
+    /**
+     * Construct a NilExpression with no token
+     */
     public NilExpression()
     {
 
@@ -15,7 +18,7 @@ public class NilExpression extends Expression {
     /**
      * Constructs a new NilExpression with defaultKw keyword
      * To be used to construct default switch labels only
-     * @param the default keyword in the switch label
+     * @param defaultKw the {@code default} keyword in the switch label
      */
     public NilExpression(Token defaultKw)
     {

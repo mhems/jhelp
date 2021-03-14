@@ -6,7 +6,7 @@ import org.antlr.v4.runtime.Token;
 
 /**
  * Class representing a dimension
- * e.g. [@Foo]
+ * e.g. {@code [@Foo]}
  */
 public class Dimension extends ASTNode {
     private Annotation[] annotations = {};

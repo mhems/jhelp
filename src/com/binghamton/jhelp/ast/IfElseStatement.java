@@ -4,7 +4,7 @@ import org.antlr.v4.runtime.Token;
 
 /**
  * A class representing a Java if/else statement
- * if (True) { ... } else { ... }
+ * {@code if (True) { ... } else { ... }}
  */
 public class IfElseStatement extends Statement {
     private final Expression condition;

@@ -4,7 +4,7 @@ import java.util.List;
 
 /**
  * A class denoting an array type
- * e.g. int[][]
+ * e.g. {@code int[][]}
  */
 public class ArrayTypeExpression extends Expression {
     private final Expression expr;

@@ -9,8 +9,7 @@ import com.binghamton.jhelp.symbols.MethodSymbol;
 
 /**
  * A class representing a Java method call, including explicit constructor calls
- * e.g. a.foo()
- *      new A()
+ * e.g. {@code a.foo()}
  */
 public class CallExpression extends QualifiableExpression {
     private Expression methodExpr;
