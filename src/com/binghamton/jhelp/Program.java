@@ -144,7 +144,7 @@ public class Program {
      * @return the Package with the name `name`, if one exists, otherwise null.
      */
     public Package getPackage(String name) {
-        java.lang.Package existingPkg = java.lang.Package.getPackage(name);
+        java.lang.Package existingPkg = ClassLoader.getPlatformClassLoader().getDefinedPackage(name);
         if (existingPkg != null) {
             return new ReflectedPackage(existingPkg);
         }
